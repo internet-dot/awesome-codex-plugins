@@ -1,4 +1,47 @@
-<!DOCTYPE html>
+const fs = require('fs');
+
+const readme = fs.readFileSync('README.md', 'utf8');
+
+// Parse official plugins
+const officialMatch = readme.match(/## Official Plugins\n\n[\s\S]*?\n((?:- \S.*\n)+)/);
+// Parse community plugins - split by ### subcategories
+const communityMatch = readme.match(/## Community Plugins\n\n[\s\S]*?(?=\n## |\n---)/);
+
+function parseLine(line) {
+  // Match: - [Name](url) - Description (linked)
+  let m = line.match(/^- \[([^\]]+)\]\(([^)]+)\)\s*[-–]\s*(.+)/);
+  if (m) return { name: m[1], url: m[2], desc: m[3].trim() };
+  // Match: - Name - Description (unlinked, official)
+  m = line.match(/^- ([A-Z][A-Za-z0-9\s]+?)\s*[-–]\s*(.+)/);
+  if (m) return { name: m[1].trim(), url: 'https://developers.openai.com/codex/plugins', desc: m[2].trim() };
+  return null;
+}
+
+function parseSection(text) {
+  if (!text) return [];
+  const lines = text.split('\n').filter(l => l.startsWith('- '));
+  return lines.map(parseLine).filter(Boolean);
+}
+
+const official = parseSection(officialMatch?.[1] || '');
+
+// Parse community with subcategories
+const community = [];
+const catLines = (communityMatch?.[0] || '').split('\n');
+let currentCat = 'General';
+for (const line of catLines) {
+  const catMatch = line.match(/^### (.+)/);
+  if (catMatch) { currentCat = catMatch[1]; continue; }
+  const plugin = parseLine(line);
+  if (plugin) community.push({ ...plugin, cat: currentCat });
+}
+
+const total = official.length + community.length;
+
+// Count unique categories
+const cats = [...new Set(community.map(p => p.cat))];
+
+const siteHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -54,7 +97,6 @@
 </head>
 <body class="bg-white text-gray-900 antialiased">
 
-  <!-- Nav -->
   <nav class="border-b border-gray-200">
     <div class="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
       <a href="/" class="font-mono text-sm text-gray-500 hover:text-gray-900 transition-colors">
@@ -69,7 +111,6 @@
 
   <div class="max-w-5xl mx-auto px-6">
 
-    <!-- Hero -->
     <header class="pt-16 pb-12 border-b border-gray-200">
       <p class="font-mono text-xs uppercase tracking-widest text-hol-purple mb-4">curated directory</p>
       <h1 class="font-mono text-4xl font-bold leading-tight text-gray-900 max-w-lg">
@@ -84,27 +125,24 @@
       </div>
     </header>
 
-    <!-- Search -->
     <div class="py-5 border-b border-gray-200">
       <input type="text" id="q" placeholder="filter plugins..." autocomplete="off"
         class="w-full max-w-xs font-mono text-sm px-3 py-2 bg-surface-50 border border-gray-200 rounded-lg outline-none focus:border-hol-purple/50 transition-colors placeholder:text-gray-300">
     </div>
 
-    <!-- Official -->
     <section id="sec-official" class="pt-8 pb-4">
       <div class="flex items-center gap-3 mb-5">
         <h2 class="font-mono text-xs font-medium uppercase tracking-widest text-gray-400">Official</h2>
-        <span class="font-mono text-[10px] text-gray-300 bg-surface-100 px-1.5 py-0.5 rounded" id="official-count">12</span>
+        <span class="font-mono text-[10px] text-gray-300 bg-surface-100 px-1.5 py-0.5 rounded">${official.length}</span>
         <div class="flex-1 h-px bg-gray-200"></div>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="list-official"></div>
     </section>
 
-    <!-- Community -->
     <section id="sec-community" class="pt-8 pb-4">
       <div class="flex items-center gap-3 mb-5">
         <h2 class="font-mono text-xs font-medium uppercase tracking-widest text-gray-400">Community</h2>
-        <span class="font-mono text-[10px] text-gray-300 bg-surface-100 px-1.5 py-0.5 rounded" id="community-count">14</span>
+        <span class="font-mono text-[10px] text-gray-300 bg-surface-100 px-1.5 py-0.5 rounded">${community.length}</span>
         <div class="flex-1 h-px bg-gray-200"></div>
       </div>
       <div id="cats"></div>
@@ -112,56 +150,26 @@
 
     <div id="empty" class="hidden py-16 text-center font-mono text-sm text-gray-300">No results.</div>
 
-    <!-- Footer -->
     <footer class="py-10 mt-4 border-t border-gray-200">
       <p class="font-mono text-xs text-gray-300">
-        Apache 2.0 &middot; <a href="https://hol.org" target="_blank" rel="noopener" class="text-gray-400 hover:text-gray-900 transition-colors">HOL</a> &middot; <span id="total">26</span> plugins
+        Apache 2.0 &middot; <a href="https://hol.org" target="_blank" rel="noopener" class="text-gray-400 hover:text-gray-900 transition-colors">HOL</a> &middot; ${total} plugins
       </p>
     </footer>
   </div>
 
   <script>
-    const O = [
-      ["Box","Access and manage files","https://developers.openai.com/codex/plugins"],
-      ["Cloudflare","Manage Workers, Pages, DNS, and infrastructure","https://developers.openai.com/codex/plugins"],
-      ["Figma","Inspect designs, extract specs, document components","https://developers.openai.com/codex/plugins"],
-      ["GitHub","Review changes, manage issues, interact with repos","https://developers.openai.com/codex/plugins"],
-      ["Gmail","Read, search, compose emails","https://developers.openai.com/codex/plugins"],
-      ["Google Drive","Edit and manage files","https://developers.openai.com/codex/plugins"],
-      ["Hugging Face","Browse models, datasets, spaces","https://developers.openai.com/codex/plugins"],
-      ["Linear","Issues, projects, workflows","https://developers.openai.com/codex/plugins"],
-      ["Notion","Pages, databases, content","https://developers.openai.com/codex/plugins"],
-      ["Sentry","Error monitoring, triage, performance","https://developers.openai.com/codex/plugins"],
-      ["Slack","Messages, channels, conversations","https://developers.openai.com/codex/plugins"],
-      ["Vercel","Deploy, preview, manage projects","https://developers.openai.com/codex/plugins"]
-    ];
+    const O = ${JSON.stringify(official)};
+    const C = ${JSON.stringify(community.map(p => [p.name, p.desc, p.url, p.cat]))};
 
-    const C = [
-      ["Registry Broker","Delegate tasks to specialist agents via HOL Registry","https://github.com/hashgraph-online/registry-broker-codex-plugin","Development"],
-      ["Project Autopilot","Structured project workflow: planning, execution, handoff","https://github.com/AlexMi64/codex-project-autopilot","Development"],
-      ["Codex Reviewer","Second-pass review of Claude-driven plans","https://github.com/schuettc/codex-reviewer","Development"],
-      ["HOTL Plugin","Human-on-the-Loop coding workflow plugin for Codex, Claude Code, and Cline with structured planning, review, and verification guardrails","https://github.com/yimwoo/hotl-plugin","Development"],
-      ["AgentOps","DevOps for coding agents with persistent memory","https://github.com/boshu2/agentops","Development"],
-      ["Codex Be Serious","Enforce formal written register across output","https://github.com/lulucatdev/codex-be-serious","Development"],
-      ["Chrome DevTools","Wrapper for chrome-devtools-mcp","https://github.com/win4r/chrome-devtools-codex-plugin","Integrations"],
-      ["Launch Fast","Rapid SaaS deployment adapter","https://github.com/BlockchainHB/launchfast_codex_plugin","Integrations"],
-      ["PapersFlow","Paper discovery, citation verification, DeepScan","https://github.com/papersflow-ai/papersflow-codex-plugin","Integrations"],
-      ["Apple Productivity","Calendar and Reminders for macOS","https://github.com/matk0shub/apple-productivity-mcp","Integrations"],
-      ["Yandex Direct","Yandex Direct, Wordstat, Metrika, Roistat","https://github.com/nebelov/yandex-direct-for-all","Integrations"],
-      ["OpenProject","Team collaboration via OpenProject","https://github.com/varaprasadreddy9676/team-codex-plugins","Integrations"],
-      ["OrgX","MCP access and initiative-aware skills","https://github.com/useorgx/orgx-codex-plugin","Integrations"],
-      ["Codex Mem","Capture and inject session context","https://github.com/2kDarki/codex-mem","Integrations"]
-    ];
-
-    const card = ([name, desc, url], official) => `
-      <a href="${url}" target="_blank" rel="noopener"
+    const card = ([name, desc, url], official) => \`
+      <a href="\${url}" target="_blank" rel="noopener"
         class="group block p-4 rounded-xl border border-gray-200 bg-surface-50 hover:border-hol-purple/30 hover:bg-white hover:shadow-sm transition-all">
         <div class="flex items-start justify-between gap-2">
-          <h3 class="font-mono text-sm font-medium text-gray-900">${name}</h3>
-          <span class="font-mono text-[10px] font-medium uppercase tracking-wide px-2 py-0.5 rounded shrink-0 ${official ? 'bg-purple-50 text-hol-purple' : 'bg-emerald-50 text-emerald-600'}">${official ? 'Official' : 'Verified'}</span>
+          <h3 class="font-mono text-sm font-medium text-gray-900">\${name}</h3>
+          <span class="font-mono text-[10px] font-medium uppercase tracking-wide px-2 py-0.5 rounded shrink-0 \${official ? 'bg-purple-50 text-hol-purple' : 'bg-emerald-50 text-emerald-600'}">\${official ? 'Official' : 'Verified'}</span>
         </div>
-        <p class="mt-2 text-sm text-gray-400 leading-relaxed line-clamp-2">${desc}</p>
-      </a>`;
+        <p class="mt-2 text-sm text-gray-400 leading-relaxed line-clamp-2">\${desc}</p>
+      </a>\`;
 
     const q = document.getElementById('q');
     const lo = document.getElementById('list-official');
@@ -169,31 +177,27 @@
     const empty = document.getElementById('empty');
     const secO = document.getElementById('sec-official');
     const secC = document.getElementById('sec-community');
-    const oCount = document.getElementById('official-count');
-    const cCount = document.getElementById('community-count');
 
     function render() {
       const s = q.value.toLowerCase();
       const fo = s ? O.filter(([n,d]) => n.toLowerCase().includes(s) || d.toLowerCase().includes(s)) : O;
       const fc = s ? C.filter(([n,d]) => n.toLowerCase().includes(s) || d.toLowerCase().includes(s)) : C;
-
       secO.style.display = fo.length ? '' : 'none';
       secC.style.display = fc.length ? '' : 'none';
       empty.classList.toggle('hidden', fo.length || fc.length);
-      oCount.textContent = fo.length;
-      cCount.textContent = fc.length;
-
       lo.innerHTML = fo.map(p => card(p, true)).join('');
-
       const groups = {};
       fc.forEach(p => { (groups[p[3]] = groups[p[3]] || []).push(p); });
       catsEl.innerHTML = Object.entries(groups).map(([cat, items]) =>
-        `<p class="font-mono text-[10px] uppercase tracking-widest text-gray-300 font-medium mt-8 mb-3">${cat}</p><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">${items.map(p => card(p, false)).join('')}</div>`
+        \`<p class="font-mono text-[10px] uppercase tracking-widest text-gray-300 font-medium mt-8 mb-3">\${cat}</p><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">\${items.map(p => card(p, false)).join('')}</div>\`
       ).join('');
     }
-
     render();
     q.addEventListener('input', render);
   </script>
 </body>
-</html>
+</html>`;
+
+fs.mkdirSync('dist', { recursive: true });
+fs.writeFileSync('dist/index.html', siteHtml);
+console.log(`Built site: ${total} plugins (${official.length} official, ${community.length} community)`);
