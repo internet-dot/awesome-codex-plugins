@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Deploy to Pages
 
 on:
   push:
@@ -12,19 +12,13 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: cd web && npm ci
-      - run: cd web && npx next build
-      - run: rm -rf site && cp -r web/out site
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./site
