@@ -1,0 +1,33 @@
+name: Validate plugins.json
+
+on:
+  pull_request:
+    paths:
+      - README.md
+      - plugins.json
+  push:
+    branches: [main]
+    paths:
+      - README.md
+      - plugins.json
+
+jobs:
+  validate:
+    name: Check plugins.json matches README
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Regenerate and compare
+        run: |
+          python3 scripts/generate_plugins_json.py
+          if ! git diff --quiet plugins.json; then
+            echo "::error::plugins.json is out of sync with README.md. Run: python3 scripts/generate_plugins_json.py"
+            git diff plugins.json
+            exit 1
+          fi
+          echo "plugins.json is up to date"

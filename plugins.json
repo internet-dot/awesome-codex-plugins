@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "awesome-codex-plugins",
+  "version": "1.0.0",
+  "last_updated": "2026-03-30",
+  "total": 19,
+  "categories": [
+    "Development & Workflow",
+    "Tools & Integrations"
+  ],
+  "plugins": [
+    {
+      "name": "Registry Broker",
+      "url": "https://github.com/hashgraph-online/registry-broker-codex-plugin",
+      "owner": "hashgraph-online",
+      "repo": "registry-broker-codex-plugin",
+      "description": "Delegate tasks to specialist AI agents via the HOL Registry, plan, find, summon, and recover sessions.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/hashgraph-online/registry-broker-codex-plugin/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "AgentOps",
+      "url": "https://github.com/boshu2/agentops",
+      "owner": "boshu2",
+      "repo": "agentops",
+      "description": "DevOps layer for coding agents with flow, feedback, and memory that compounds between sessions.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/boshu2/agentops/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Claude Octopus",
+      "url": "https://github.com/nyldn/claude-octopus",
+      "owner": "nyldn",
+      "repo": "claude-octopus",
+      "description": "Multi-LLM orchestration dispatching to 8 providers (Codex, Gemini, Copilot, Qwen, Perplexity, OpenRouter, Ollama, OpenCode) with Double Diamond workflows, adversarial review, and safety gates.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/nyldn/claude-octopus/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Codex Multi Auth",
+      "url": "https://github.com/ndycode/codex-multi-auth",
+      "owner": "ndycode",
+      "repo": "codex-multi-auth",
+      "description": "Multi-account OAuth manager for the official Codex CLI with switching, health checks, and recovery tools.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/ndycode/codex-multi-auth/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Codex Reviewer",
+      "url": "https://github.com/schuettc/codex-reviewer",
+      "owner": "schuettc",
+      "repo": "codex-reviewer",
+      "description": "Second-pass review of Claude-driven plans and implementations.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/schuettc/codex-reviewer/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "HOTL Plugin",
+      "url": "https://github.com/yimwoo/hotl-plugin",
+      "owner": "yimwoo",
+      "repo": "hotl-plugin",
+      "description": "Human-on-the-Loop AI coding workflow plugin for Codex, Claude Code, and Cline with structured planning, review, and verification guardrails.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/yimwoo/hotl-plugin/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Project Autopilot",
+      "url": "https://github.com/AlexMi64/codex-project-autopilot",
+      "owner": "AlexMi64",
+      "repo": "codex-project-autopilot",
+      "description": "Turn an idea into a structured project workflow with planning, execution, verification, and handoff.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/AlexMi64/codex-project-autopilot/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Apple Productivity",
+      "url": "https://github.com/matk0shub/apple-productivity-mcp",
+      "owner": "matk0shub",
+      "repo": "apple-productivity-mcp",
+      "description": "Local Apple Calendar and Reminders tooling for macOS with Codex plugin adapters.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/matk0shub/apple-productivity-mcp/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Chrome DevTools",
+      "url": "https://github.com/win4r/chrome-devtools-codex-plugin",
+      "owner": "win4r",
+      "repo": "chrome-devtools-codex-plugin",
+      "description": "One-click Codex plugin wrapper for chrome-devtools-mcp.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/win4r/chrome-devtools-codex-plugin/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Codex Be Serious",
+      "url": "https://github.com/lulucatdev/codex-be-serious",
+      "owner": "lulucatdev",
+      "repo": "codex-be-serious",
+      "description": "Enforce formal, textbook-grade written register across all agent output.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/lulucatdev/codex-be-serious/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Codex Mem",
+      "url": "https://github.com/2kDarki/codex-mem",
+      "owner": "2kDarki",
+      "repo": "codex-mem",
+      "description": "Automatically capture, compress, and inject session context back into future Codex sessions.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/2kDarki/codex-mem/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Context Pack",
+      "url": "https://github.com/Rothschildiuk/context-pack",
+      "owner": "Rothschildiuk",
+      "repo": "context-pack",
+      "description": "Generate compact first-pass repository briefings for coding agents before deeper exploration.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/Rothschildiuk/context-pack/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Langfuse Observability",
+      "url": "https://github.com/avivsinai/langfuse-mcp",
+      "owner": "avivsinai",
+      "repo": "langfuse-mcp",
+      "description": "Query traces, debug exceptions, analyze sessions, and manage prompts via MCP tools.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/avivsinai/langfuse-mcp/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Launch Fast",
+      "url": "https://github.com/BlockchainHB/launchfast_codex_plugin",
+      "owner": "BlockchainHB",
+      "repo": "launchfast_codex_plugin",
+      "description": "Official Launch Fast plugin adapter for rapid SaaS deployment.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/BlockchainHB/launchfast_codex_plugin/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "OC ChatGPT Multi Auth",
+      "url": "https://github.com/ndycode/oc-chatgpt-multi-auth",
+      "owner": "ndycode",
+      "repo": "oc-chatgpt-multi-auth",
+      "description": "Codex setup skill and OpenCode plugin for ChatGPT Plus/Pro OAuth, GPT-5/Codex presets, and multi-account failover.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/ndycode/oc-chatgpt-multi-auth/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "OpenProject",
+      "url": "https://github.com/varaprasadreddy9676/team-codex-plugins",
+      "owner": "varaprasadreddy9676",
+      "repo": "team-codex-plugins",
+      "description": "Team collaboration via OpenProject integration.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/varaprasadreddy9676/team-codex-plugins/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "OrgX",
+      "url": "https://github.com/useorgx/orgx-codex-plugin",
+      "owner": "useorgx",
+      "repo": "orgx-codex-plugin",
+      "description": "MCP access and initiative-aware skills for organizational workflows.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/useorgx/orgx-codex-plugin/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "PapersFlow",
+      "url": "https://github.com/papersflow-ai/papersflow-codex-plugin",
+      "owner": "papersflow-ai",
+      "repo": "papersflow-codex-plugin",
+      "description": "Paper discovery, citation verification, graph exploration, and DeepScan analysis.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/papersflow-ai/papersflow-codex-plugin/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Yandex Direct",
+      "url": "https://github.com/nebelov/yandex-direct-for-all",
+      "owner": "nebelov",
+      "repo": "yandex-direct-for-all",
+      "description": "GitHub-ready Codex plugin bundle for Yandex Direct, Wordstat, Metrika, and Roistat.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/nebelov/yandex-direct-for-all/main/.codex-plugin/plugin.json"
+    }
+  ]
+}
