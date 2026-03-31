@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
-  "last_updated": "2026-03-31",
-  "total": 25,
+  "last_updated": "2026-04-01",
+  "total": 26,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -228,6 +228,16 @@
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/useorgx/orgx-codex-plugin/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "PANews Agent Toolkit",
+      "url": "https://github.com/panewslab/skills",
+      "owner": "panewslab",
+      "repo": "skills",
+      "description": "Crypto and blockchain news discovery, authenticated PANews creator publishing workflows, and PANews page-to-Markdown reading.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/panewslab/skills/main/.codex-plugin/plugin.json"
     },
     {
       "name": "PapersFlow",
