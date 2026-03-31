@@ -3,7 +3,7 @@
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
   "last_updated": "2026-03-31",
-  "total": 25,
+  "total": 26,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -30,16 +30,6 @@
       "install_url": "https://raw.githubusercontent.com/boshu2/agentops/main/.codex-plugin/plugin.json"
     },
     {
-      "name": "Claude Octopus",
-      "url": "https://github.com/nyldn/claude-octopus",
-      "owner": "nyldn",
-      "repo": "claude-octopus",
-      "description": "Multi-LLM orchestration dispatching to 8 providers (Codex, Gemini, Copilot, Qwen, Perplexity, OpenRouter, Ollama, OpenCode) with Double Diamond workflows, adversarial review, and safety gates.",
-      "category": "Development & Workflow",
-      "source": "awesome-codex-plugins",
-      "install_url": "https://raw.githubusercontent.com/nyldn/claude-octopus/main/.codex-plugin/plugin.json"
-    },
-    {
       "name": "Claude Code Skills",
       "url": "https://github.com/alirezarezvani/claude-skills",
       "owner": "alirezarezvani",
@@ -48,6 +38,16 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/alirezarezvani/claude-skills/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Claude Octopus",
+      "url": "https://github.com/nyldn/claude-octopus",
+      "owner": "nyldn",
+      "repo": "claude-octopus",
+      "description": "Multi-LLM orchestration dispatching to 8 providers (Codex, Gemini, Copilot, Qwen, Perplexity, OpenRouter, Ollama, OpenCode) with Double Diamond workflows, adversarial review, and safety gates.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/nyldn/claude-octopus/main/.codex-plugin/plugin.json"
     },
     {
       "name": "Codex Agenteam",
@@ -98,6 +98,16 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/AlexMi64/codex-project-autopilot/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Agent Message Queue",
+      "url": "https://github.com/avivsinai/agent-message-queue",
+      "owner": "avivsinai",
+      "repo": "agent-message-queue",
+      "description": "File-based inter-agent messaging with co-op mode, cross-project federation, and orchestrator integrations.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/avivsinai/agent-message-queue/main/.codex-plugin/plugin.json"
     },
     {
       "name": "Apple Productivity",
