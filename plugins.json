@@ -10,16 +10,6 @@
   ],
   "plugins": [
     {
-      "name": "Brooks Lint",
-      "url": "https://github.com/hyhmrright/brooks-lint",
-      "owner": "hyhmrright",
-      "repo": "brooks-lint",
-      "description": "AI code reviews grounded in six classic engineering books — decay risk diagnostics with book citations, severity labels, and four analysis modes (PR review, architecture audit, tech debt, test quality).",
-      "category": "Development & Workflow",
-      "source": "awesome-codex-plugins",
-      "install_url": "https://raw.githubusercontent.com/hyhmrright/brooks-lint/main/.codex-plugin/plugin.json"
-    },
-    {
       "name": "Registry Broker",
       "url": "https://github.com/hashgraph-online/registry-broker-codex-plugin",
       "owner": "hashgraph-online",
@@ -38,6 +28,16 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/boshu2/agentops/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Brooks Lint",
+      "url": "https://github.com/hyhmrright/brooks-lint",
+      "owner": "hyhmrright",
+      "repo": "brooks-lint",
+      "description": "AI code reviews grounded in six classic engineering books — decay risk diagnostics with book citations, severity labels, and four analysis modes (PR review, architecture audit, tech debt, test quality).",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/hyhmrright/brooks-lint/main/.codex-plugin/plugin.json"
     },
     {
       "name": "Claude Code Skills",
