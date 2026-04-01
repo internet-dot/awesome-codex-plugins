@@ -43,7 +43,7 @@ Quick preflight:
 
 ```bash
 pipx run codex-plugin-scanner lint .
-codex-plugin-scanner verify .
+pipx run codex-plugin-scanner verify .
 ```
 
 ## Official Plugins
@@ -148,7 +148,7 @@ After scaffolding with `$plugin-creator`, use [codex-plugin-scanner](https://git
 
 ```bash
 pipx run codex-plugin-scanner lint .
-codex-plugin-scanner verify .
+pipx run codex-plugin-scanner verify .
 ```
 
 ### PR Gate (GitHub Actions)
@@ -164,8 +164,8 @@ codex-plugin-scanner verify .
 
 Use scanner outputs as evidence for maintainers/reviewers:
 
-- structural lint results
-- publish-readiness verification output
+- Structural lint results
+- Publish-readiness verification output
 - SARIF/findings for CI and code scanning
 
 The score is best used as a quick trust signal and triage summary (not the only readiness signal).
