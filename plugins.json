@@ -3,7 +3,7 @@
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
   "last_updated": "2026-04-03",
-  "total": 31,
+  "total": 32,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -308,6 +308,16 @@
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/henu-wang/tokrepo-codex-plugin/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Upwork Autopilot",
+      "url": "https://github.com/klajdikkolaj/upwork-autopilot",
+      "owner": "klajdikkolaj",
+      "repo": "upwork-autopilot",
+      "description": "Controlled Upwork job search, qualification, and proposal submission sessions through a dedicated Chrome profile.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/klajdikkolaj/upwork-autopilot/main/.codex-plugin/plugin.json"
     },
     {
       "name": "Yandex Direct",
