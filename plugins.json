@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
-  "last_updated": "2026-04-02",
-  "total": 30,
+  "last_updated": "2026-04-03",
+  "total": 31,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -288,6 +288,16 @@
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/talkstream/ru-text/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Task Scheduler",
+      "url": "https://github.com/6Delta9/task-scheduler-codex-plugin",
+      "owner": "6Delta9",
+      "repo": "task-scheduler-codex-plugin",
+      "description": "OpenAI Codex plugin and local MCP server for turning task lists into realistic schedules with blocked dates, capacity overrides, overflow tracking, and markdown planning output.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/6Delta9/task-scheduler-codex-plugin/main/.codex-plugin/plugin.json"
     },
     {
       "name": "TokRepo Search",
