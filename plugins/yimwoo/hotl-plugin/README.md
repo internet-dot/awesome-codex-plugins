@@ -47,9 +47,9 @@ After install, restart Codex, switch the plugin directory to **Local Plugins**, 
 
 For native skills install (local dev, older Codex): clone to `~/.codex/hotl` + symlink to `~/.agents/skills/hotl`.
 
-Plugin install does not automatically remove an older native-skills install. If both are present, Codex may discover duplicate HOTL sources. See [`docs/README.codex.md`](docs/README.codex.md) for the recommended migration path.
+Plugin install does not automatically remove an older native-skills install. If both are present, Codex may discover duplicate HOTL sources. See [`docs/README.codex.md`](https://github.com/yimwoo/hotl-plugin/blob/main/docs/README.codex.md) for the recommended migration path.
 
-For native skills installs, `~/.codex/hotl` is the stable channel and should track `origin/main`. Restart Codex after install. Full guide: [`docs/README.codex.md`](docs/README.codex.md)
+For native skills installs, `~/.codex/hotl` is the stable channel and should track `origin/main`. Restart Codex after install. Full guide: [`docs/README.codex.md`](https://github.com/yimwoo/hotl-plugin/blob/main/docs/README.codex.md)
 
 ### Cline
 
@@ -57,7 +57,7 @@ For native skills installs, `~/.codex/hotl` is the stable channel and should tra
 curl -fsSL https://raw.githubusercontent.com/yimwoo/hotl-plugin/main/install-cline.sh | bash
 ```
 
-Full guide: [`docs/README.cline.md`](docs/README.cline.md)
+Full guide: [`docs/README.cline.md`](https://github.com/yimwoo/hotl-plugin/blob/main/docs/README.cline.md)
 
 ## How It Works
 
@@ -98,7 +98,7 @@ Execution Summary
 
 Every step has a verify command. If verification fails, execution stops and reports instead of silently claiming success.
 
-**Resumable execution:** HOTL persists state in `.hotl/state/` so interrupted runs can pick up where they stopped. Resume is verify-first: HOTL re-checks the last step before advancing. State persistence and resumable execution require [`jq`](https://jqlang.github.io/jq/) — install it with `brew install jq` (macOS), `apt-get install jq` (Linux), or `scoop install jq` (Windows). Without `jq`, HOTL still works but runs without state files or durable reports. For the deeper execution model, see [`docs/how-it-works.md`](docs/how-it-works.md) and [`docs/workflow-format.md`](docs/workflow-format.md).
+**Resumable execution:** HOTL persists state in `.hotl/state/` so interrupted runs can pick up where they stopped. Resume is verify-first: HOTL re-checks the last step before advancing. State persistence and resumable execution require [`jq`](https://jqlang.github.io/jq/) — install it with `brew install jq` (macOS), `apt-get install jq` (Linux), or `scoop install jq` (Windows). Without `jq`, HOTL still works but runs without state files or durable reports. For the deeper execution model, see [`docs/how-it-works.md`](https://github.com/yimwoo/hotl-plugin/blob/main/docs/how-it-works.md) and [`docs/workflow-format.md`](https://github.com/yimwoo/hotl-plugin/blob/main/docs/workflow-format.md).
 
 ## Smart Task Routing
 
@@ -129,7 +129,7 @@ HOTL does not force ceremony on every task. It routes by intent:
 
 ### Codex
 
-There is no `/hotl:*` command syntax in Codex. Instead, describe the task in natural language with `@hotl`, or force a specific skill with `$hotl:brainstorming`, `$hotl:writing-plans`, or `$hotl:pr-reviewing`. Plain text like `hotl:brainstorming` is not a reliable user-facing invocation form in Codex. In the picker, Codex may display these skills as `Hotl:brainstorming`-style labels. For setup and prompt examples, see [`.codex/INSTALL.md`](.codex/INSTALL.md) and [`docs/README.codex.md`](docs/README.codex.md).
+There is no `/hotl:*` command syntax in Codex. Instead, describe the task in natural language with `@hotl`, or force a specific skill with `$hotl:brainstorming`, `$hotl:writing-plans`, or `$hotl:pr-reviewing`. Plain text like `hotl:brainstorming` is not a reliable user-facing invocation form in Codex. In the picker, Codex may display these skills as `Hotl:brainstorming`-style labels. For setup and prompt examples, see [`.codex/INSTALL.md`](.codex/INSTALL.md) and [`docs/README.codex.md`](https://github.com/yimwoo/hotl-plugin/blob/main/docs/README.codex.md).
 
 ## Skills Overview
 
@@ -137,13 +137,13 @@ There is no `/hotl:*` command syntax in Codex. Instead, describe the task in nat
 | --- | --- | --- |
 | Design & Planning | `brainstorming`, `writing-plans`, `document-review` | Clarify requirements, define contracts, and create executable workflow plans |
 | Execution | `loop-execution`, `executing-plans`, `subagent-execution`, `resuming`, `dispatch-agents` | Run workflows with verification, retries, persistence, and delegation |
-| Quality & Review | `pr-reviewing`, `code-review`, `requesting-code-review`, `receiving-code-review`, `verification-before-completion` | Review changes and require evidence before completion. Both `code-review` and `pr-reviewing` reference shared [review checklists](docs/checklists/) for SOLID/architecture, security, performance/boundary conditions, and removal/simplification heuristics. |
+| Quality & Review | `pr-reviewing`, `code-review`, `requesting-code-review`, `receiving-code-review`, `verification-before-completion` | Review changes and require evidence before completion. Both `code-review` and `pr-reviewing` reference shared [review checklists](https://github.com/yimwoo/hotl-plugin/blob/main/docs/checklists/) for SOLID/architecture, security, performance/boundary conditions, and removal/simplification heuristics. |
 | Dev Practices | `tdd`, `systematic-debugging` | Apply test-first development and structured debugging workflows |
 | Setup | `setup-project`, `using-hotl` | Generate adapter files and establish HOTL operating context |
 
-For detailed descriptions and phase mappings, see the [full skills reference](docs/skills.md).
+For detailed descriptions and phase mappings, see the [full skills reference](https://github.com/yimwoo/hotl-plugin/blob/main/docs/skills.md).
 
-Want to create or modify HOTL skills? See [Authoring Skills vs Agents](docs/authoring-skills-vs-agents.md).
+Want to create or modify HOTL skills? See [Authoring Skills vs Agents](https://github.com/yimwoo/hotl-plugin/blob/main/docs/authoring-skills-vs-agents.md).
 
 ## Updating
 
@@ -151,7 +151,7 @@ Want to create or modify HOTL skills? See [Authoring Skills vs Agents](docs/auth
 curl -fsSL https://raw.githubusercontent.com/yimwoo/hotl-plugin/main/update.sh | bash
 ```
 
-Covers Claude Code, Codex (both native-skills and plugin source checkout), and Cline. Skips tools that are not installed. In Claude Code, you can also run `/hotl:check-update`. For backup behavior, manual checks, and `--force-codex`, see [Updating HOTL](docs/updating.md).
+Covers Claude Code, Codex (both native-skills and plugin source checkout), and Cline. Skips tools that are not installed. In Claude Code, you can also run `/hotl:check-update`. For backup behavior, manual checks, and `--force-codex`, see [Updating HOTL](https://github.com/yimwoo/hotl-plugin/blob/main/docs/updating.md).
 
 ## Supported Tools
 

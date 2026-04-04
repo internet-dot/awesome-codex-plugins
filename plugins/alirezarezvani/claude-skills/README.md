@@ -339,7 +339,7 @@ Add the marketplace with `/plugin marketplace add alirezarezvani/claude-skills`,
 Yes. Skills work natively with 11 tools: Claude Code, OpenAI Codex, Gemini CLI, OpenClaw, Cursor, Aider, Windsurf, Kilo Code, OpenCode, Augment, and Antigravity. Run `./scripts/convert.sh --tool all` to convert for all tools, then install with `./scripts/install.sh --tool <name>`. See [Multi-Tool Integrations](https://alirezarezvani.github.io/claude-skills/integrations/) for details.
 
 **Will updating break my installation?**
-No. We follow semantic versioning and maintain backward compatibility within patch releases. Existing script arguments, plugin source paths, and SKILL.md structures are never changed in patch versions. See the [CHANGELOG](CHANGELOG.md) for details on each release.
+No. We follow semantic versioning and maintain backward compatibility within patch releases. Existing script arguments, plugin source paths, and SKILL.md structures are never changed in patch versions. See the [CHANGELOG](https://github.com/alirezarezvani/claude-skills/blob/main/CHANGELOG.md) for details on each release.
 
 **Are the Python tools dependency-free?**
 Yes. All 332 Python CLI tools use the standard library only — zero pip installs required. Every script is verified to run with `--help`.

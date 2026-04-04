@@ -94,11 +94,11 @@ The plugin sits between OpenCode and the ChatGPT-backed Codex workflow:
 3. Requests are normalized for the Codex backend and sent with `store: false`.
 4. The plugin chooses the best account/workspace candidate, retries intelligently, and preserves conversation continuity through encrypted reasoning state.
 
-See [Architecture](docs/development/ARCHITECTURE.md) for implementation details.
+See [Architecture](https://github.com/ndycode/oc-chatgpt-multi-auth/blob/main/docs/development/ARCHITECTURE.md) for implementation details.
 
 ## Installation
 
-Use the quick-start path above for the fastest setup. For full setup, local development installs, legacy OpenCode support, and verification steps, see [Getting Started](docs/getting-started.md).
+Use the quick-start path above for the fastest setup. For full setup, local development installs, legacy OpenCode support, and verification steps, see [Getting Started](https://github.com/ndycode/oc-chatgpt-multi-auth/blob/main/docs/getting-started.md).
 
 If you prefer the compact variant-only config on OpenCode `v1.0.210+`, use:
 
@@ -110,17 +110,17 @@ npx -y oc-chatgpt-multi-auth@latest --modern
 
 Detailed configuration lives outside this README:
 
-- [Getting Started](docs/getting-started.md) for install and first-run setup
-- [Configuration Reference](docs/configuration.md) for config keys, env vars, and fallback behavior
+- [Getting Started](https://github.com/ndycode/oc-chatgpt-multi-auth/blob/main/docs/getting-started.md) for install and first-run setup
+- [Configuration Reference](https://github.com/ndycode/oc-chatgpt-multi-auth/blob/main/docs/configuration.md) for config keys, env vars, and fallback behavior
 - [Config Templates](config/README.md) for modern vs legacy OpenCode examples
 
 ## Troubleshooting
 
 Start here if the plugin does not load or authenticate correctly:
 
-- [Troubleshooting](docs/troubleshooting.md)
-- [Privacy & Data Handling](docs/privacy.md)
-- [FAQ](docs/faq.md)
+- [Troubleshooting](https://github.com/ndycode/oc-chatgpt-multi-auth/blob/main/docs/troubleshooting.md)
+- [Privacy & Data Handling](https://github.com/ndycode/oc-chatgpt-multi-auth/blob/main/docs/privacy.md)
+- [FAQ](https://github.com/ndycode/oc-chatgpt-multi-auth/blob/main/docs/faq.md)
 - [Security Policy](SECURITY.md)
 
 Common first checks:
@@ -131,7 +131,7 @@ Common first checks:
 
 ## FAQ
 
-Short answers for the most common questions live in [docs/faq.md](docs/faq.md), including:
+Short answers for the most common questions live in [docs/faq.md](https://github.com/ndycode/oc-chatgpt-multi-auth/blob/main/docs/faq.md), including:
 
 - who this plugin is for
 - which OpenCode versions it supports

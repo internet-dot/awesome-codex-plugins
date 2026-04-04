@@ -9,7 +9,7 @@
 
 Validation, memory, lifecycle gates, and briefing-first control for coding agents. AgentOps acts as a software-factory control plane: bounded context goes in, validated code and durable learning come out.
 
-[Start Here](#start-here) · [Install](#install) · [See It Work](#see-it-work) · [Skills](#skills) · [CLI](#the-ao-cli) · [FAQ](#faq) · [Newcomer Guide](docs/newcomer-guide.md)
+[Start Here](#start-here) · [Install](#install) · [See It Work](#see-it-work) · [Skills](#skills) · [CLI](#the-ao-cli) · [FAQ](#faq) · [Newcomer Guide](https://github.com/boshu2/agentops/blob/main/docs/newcomer-guide.md)
 
 </div>
 
@@ -27,7 +27,7 @@ Session 1, your agent spends 2 hours debugging a timeout bug. Session 15, a new 
 2. **Durable learning** — solved problems stay solved. Your repo accumulates institutional knowledge across sessions, agents, and runtimes.
 3. **Loop closure** — completed work produces better next work, stronger rules, and richer future context.
 
-Every skill, hook, and CLI command exists to deliver one of these three. They form a single [lifecycle contract](docs/context-lifecycle.md), not separate features.
+Every skill, hook, and CLI command exists to deliver one of these three. They form a single [lifecycle contract](https://github.com/boshu2/agentops/blob/main/docs/context-lifecycle.md), not separate features.
 
 Operationally, that means AgentOps behaves like a software factory:
 
@@ -36,7 +36,7 @@ Operationally, that means AgentOps behaves like a software factory:
 - validation gates accept or reject output
 - the flywheel turns completed work into future advantage
 
-See [Software Factory Surface](docs/software-factory.md) for the explicit operator lane.
+See [Software Factory Surface](https://github.com/boshu2/agentops/blob/main/docs/software-factory.md) for the explicit operator lane.
 
 | Capability | What you get |
 |-----|---------------|
@@ -122,7 +122,7 @@ ao factory start --goal "fix auth startup"
 ao codex stop
 ```
 
-That path keeps briefing, runtime startup, delivery, and loop closure on one surface. See [Software Factory Surface](docs/software-factory.md).
+That path keeps briefing, runtime startup, delivery, and loop closure on one surface. See [Software Factory Surface](https://github.com/boshu2/agentops/blob/main/docs/software-factory.md).
 
 ---
 
@@ -163,7 +163,7 @@ The explicit CLI operator surface around that line is:
 - **Compiled prevention chain**: findings registry -> planning rules / pre-mortem checks / constraints -> later planning and validation
 - **Continuity chain**: session hooks + phased manifests + `/handoff` + `/recover`
 
-Each cycle adds new rules, learnings, and constraints — without anyone shipping new code. See [Primitive Chains](docs/architecture/primitive-chains.md) for the audited map.
+Each cycle adds new rules, learnings, and constraints — without anyone shipping new code. See [Primitive Chains](https://github.com/boshu2/agentops/blob/main/docs/architecture/primitive-chains.md) for the audited map.
 
 ### How Agent Memory Works
 
@@ -218,7 +218,7 @@ Measure it with `ao flywheel status`.
 | `grep` | Contextual retrieval with relevance scoring and phase-aware injection |
 | Git commits | Provenance tracking, audit trail, diffable knowledge evolution |
 
-Deep dive: [The Knowledge Flywheel](docs/knowledge-flywheel.md)
+Deep dive: [The Knowledge Flywheel](https://github.com/boshu2/agentops/blob/main/docs/knowledge-flywheel.md)
 
 ### Why engineers choose it
 
@@ -248,7 +248,7 @@ The git history tells its own story. Early commits are skill scaffolding — bui
 
 Compressed into one sentence: good agent work comes from boundaries, validation, reusable lessons, and the right context.
 
-Deep dive: [Philosophy](docs/philosophy.md)
+Deep dive: [Philosophy](https://github.com/boshu2/agentops/blob/main/docs/philosophy.md)
 
 ---
 
@@ -262,7 +262,7 @@ Installs 7 hooks (tool enrichment, audit logging, compaction resilience) and sym
 <details>
 <summary><b>Configuration</b> — environment variables</summary>
 
-All optional. AgentOps works out of the box with no configuration. Full reference: [docs/ENV-VARS.md](docs/ENV-VARS.md)
+All optional. AgentOps works out of the box with no configuration. Full reference: [docs/ENV-VARS.md](https://github.com/boshu2/agentops/blob/main/docs/ENV-VARS.md)
 
 </details>
 
@@ -276,7 +276,7 @@ All optional. AgentOps works out of the box with no configuration. Full referenc
 
 Nothing modifies your source code.
 
-Troubleshooting: [docs/troubleshooting.md](docs/troubleshooting.md)
+Troubleshooting: [docs/troubleshooting.md](https://github.com/boshu2/agentops/blob/main/docs/troubleshooting.md)
 
 ---
 
@@ -378,7 +378,7 @@ That ran overnight — ~7 hours, unattended. Regression gates auto-reverted anyt
 
 </details>
 
-Unsure which skill to run? See the [Skill Router](docs/SKILL-ROUTER.md).
+Unsure which skill to run? See the [Skill Router](https://github.com/boshu2/agentops/blob/main/docs/SKILL-ROUTER.md).
 
 ---
 
@@ -449,7 +449,7 @@ Every skill works alone. Compose them however you want.
 
 </details>
 
-Full reference: [docs/SKILLS.md](docs/SKILLS.md)
+Full reference: [docs/SKILLS.md](https://github.com/boshu2/agentops/blob/main/docs/SKILLS.md)
 
 <details>
 <summary><b>Cross-runtime orchestration</b> — mix Claude, Codex, OpenCode</summary>
@@ -482,7 +482,7 @@ Skills spawn these automatically — `/research` uses the researcher, `/vibe` us
 
 ## Deep Dive
 
-`.agents/` is an append-only ledger — every learning, verdict, pattern, and decision is a dated file. Write once, score by freshness, inject the best, prune the rest. The [formal model](docs/the-science.md) is cache eviction with freshness decay. Full lifecycle: [Context Lifecycle](docs/context-lifecycle.md).
+`.agents/` is an append-only ledger — every learning, verdict, pattern, and decision is a dated file. Write once, score by freshness, inject the best, prune the rest. The [formal model](https://github.com/boshu2/agentops/blob/main/docs/the-science.md) is cache eviction with freshness decay. Full lifecycle: [Context Lifecycle](https://github.com/boshu2/agentops/blob/main/docs/context-lifecycle.md).
 
 <details>
 <summary><b>Phase details</b> — what each step does</summary>
@@ -505,10 +505,10 @@ Skills spawn these automatically — `/research` uses the researcher, `/vibe` us
 
 | Topic | Where |
 |-------|-------|
-| Phased RPI (fresh context per phase) | [How It Works](docs/how-it-works.md) |
-| Parallel RPI (N epics in isolated worktrees) | [How It Works](docs/how-it-works.md) |
-| Setting up `/evolve` (GOALS.md, fitness loop) | [Evolve Setup](docs/evolve-setup.md) |
-| Science, systems theory, prior art | [The Science](docs/the-science.md) |
+| Phased RPI (fresh context per phase) | [How It Works](https://github.com/boshu2/agentops/blob/main/docs/how-it-works.md) |
+| Parallel RPI (N epics in isolated worktrees) | [How It Works](https://github.com/boshu2/agentops/blob/main/docs/how-it-works.md) |
+| Setting up `/evolve` (GOALS.md, fitness loop) | [Evolve Setup](https://github.com/boshu2/agentops/blob/main/docs/evolve-setup.md) |
+| Science, systems theory, prior art | [The Science](https://github.com/boshu2/agentops/blob/main/docs/the-science.md) |
 
 <details>
 <summary><b>Built on</b> — Ralph Wiggum, Multiclaude, beads, CASS, MemRL</summary>
@@ -575,12 +575,12 @@ Each level treats the one below as a black box: spec in, validated result out. W
 
 | Topic | Where |
 |-------|-------|
-| Five pillars, operational invariants | [Architecture](docs/ARCHITECTURE.md) |
-| Brownian Ratchet, Ralph Wiggum, context windowing | [How It Works](docs/how-it-works.md) |
+| Five pillars, operational invariants | [Architecture](https://github.com/boshu2/agentops/blob/main/docs/ARCHITECTURE.md) |
+| Brownian Ratchet, Ralph Wiggum, context windowing | [How It Works](https://github.com/boshu2/agentops/blob/main/docs/how-it-works.md) |
 | Orchestrator vs worker fork rules | [Skill Tiers](skills/SKILL-TIERS.md) |
-| Injection philosophy, freshness decay, MemRL | [The Science](docs/the-science.md) |
-| Primitive chains (audited map) | [Primitive Chains](docs/architecture/primitive-chains.md) |
-| Context lifecycle, three-tier injection | [Context Lifecycle](docs/context-lifecycle.md) |
+| Injection philosophy, freshness decay, MemRL | [The Science](https://github.com/boshu2/agentops/blob/main/docs/the-science.md) |
+| Primitive chains (audited map) | [Primitive Chains](https://github.com/boshu2/agentops/blob/main/docs/architecture/primitive-chains.md) |
+| Context lifecycle, three-tier injection | [Context Lifecycle](https://github.com/boshu2/agentops/blob/main/docs/context-lifecycle.md) |
 
 ---
 
@@ -591,13 +591,13 @@ Each level treats the one below as a black box: spec in, validated result out. W
 | **[GSD](https://github.com/glittercowboy/get-shit-done)** | Clean subagent spawning, fights context rot | Cross-session memory — GSD keeps context fresh *within* a session; AgentOps carries knowledge *between* sessions |
 | **[Compound Engineer](https://github.com/EveryInc/compound-engineering-plugin)** | Knowledge compounding, structured loop | Multi-model councils and validation gates — independent judges debating before and after code ships |
 
-[Detailed comparisons →](docs/comparisons/)
+[Detailed comparisons →](https://github.com/boshu2/agentops/blob/main/docs/comparisons/)
 
 ---
 
 ## FAQ
 
-[docs/FAQ.md](docs/FAQ.md) — comparisons, limitations, subagent nesting, PRODUCT.md, uninstall.
+[docs/FAQ.md](https://github.com/boshu2/agentops/blob/main/docs/FAQ.md) — comparisons, limitations, subagent nesting, PRODUCT.md, uninstall.
 
 ---
 
@@ -610,8 +610,8 @@ Git-native issues in `.beads/`. `bd onboard` (setup) · `bd ready` (find work) �
 
 </details>
 
-See [CONTRIBUTING.md](docs/CONTRIBUTING.md). If AgentOps helped you ship something, post in [Discussions](https://github.com/boshu2/agentops?tab=discussions).
+See [CONTRIBUTING.md](https://github.com/boshu2/agentops/blob/main/docs/CONTRIBUTING.md). If AgentOps helped you ship something, post in [Discussions](https://github.com/boshu2/agentops?tab=discussions).
 
 ## License
 
-Apache-2.0 · [Docs](docs/INDEX.md) · [Philosophy](docs/philosophy.md) · [How It Works](docs/how-it-works.md) · [FAQ](docs/FAQ.md) · [Glossary](docs/GLOSSARY.md) · [Architecture](docs/ARCHITECTURE.md) · [Configuration](docs/ENV-VARS.md) · [CLI Reference](cli/docs/COMMANDS.md) · [Changelog](docs/CHANGELOG.md)
+Apache-2.0 · [Docs](https://github.com/boshu2/agentops/blob/main/docs/INDEX.md) · [Philosophy](https://github.com/boshu2/agentops/blob/main/docs/philosophy.md) · [How It Works](https://github.com/boshu2/agentops/blob/main/docs/how-it-works.md) · [FAQ](https://github.com/boshu2/agentops/blob/main/docs/FAQ.md) · [Glossary](https://github.com/boshu2/agentops/blob/main/docs/GLOSSARY.md) · [Architecture](https://github.com/boshu2/agentops/blob/main/docs/ARCHITECTURE.md) · [Configuration](https://github.com/boshu2/agentops/blob/main/docs/ENV-VARS.md) · [CLI Reference](cli/docs/COMMANDS.md) · [Changelog](https://github.com/boshu2/agentops/blob/main/docs/CHANGELOG.md)

@@ -72,11 +72,11 @@ AgenTeam remembers what happened in previous runs. Each completed run's summary 
 
 ## Documentation
 
-- [**Setup & Installation**](docs/setup.md) -- prerequisites, install, update
-- [**Configuration**](docs/configuration.md) -- roles, isolation, profiles, migration
-- [**Pipeline & Profiles**](docs/pipeline.md) -- stages, gates, verification, resume
-- [**CLI Reference**](docs/cli.md) -- all commands and skills
-- [**HOTL Integration**](docs/hotl.md) -- structured execution with the HOTL plugin
+- [**Setup & Installation**](https://github.com/yimwoo/codex-agenteam/blob/main/docs/setup.md) -- prerequisites, install, update
+- [**Configuration**](https://github.com/yimwoo/codex-agenteam/blob/main/docs/configuration.md) -- roles, isolation, profiles, migration
+- [**Pipeline & Profiles**](https://github.com/yimwoo/codex-agenteam/blob/main/docs/pipeline.md) -- stages, gates, verification, resume
+- [**CLI Reference**](https://github.com/yimwoo/codex-agenteam/blob/main/docs/cli.md) -- all commands and skills
+- [**HOTL Integration**](https://github.com/yimwoo/codex-agenteam/blob/main/docs/hotl.md) -- structured execution with the HOTL plugin
 
 ---
 

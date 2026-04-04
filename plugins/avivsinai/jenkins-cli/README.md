@@ -136,10 +136,10 @@ jk run view team/app/pipeline 128 --format json --template 'Result={{.result}}'
 
 ## Documentation
 
-- [Specification](docs/spec.md) - Architecture and design decisions
-- [API Contracts](docs/api.md) - JSON/YAML schemas for structured output
-- [Agent Cookbook](docs/agent-cookbook.md) - Automation recipes and examples
-- [Changelog](CHANGELOG.md) - Release notes and migration guidance
+- [Specification](https://github.com/avivsinai/jenkins-cli/blob/main/docs/spec.md) - Architecture and design decisions
+- [API Contracts](https://github.com/avivsinai/jenkins-cli/blob/main/docs/api.md) - JSON/YAML schemas for structured output
+- [Agent Cookbook](https://github.com/avivsinai/jenkins-cli/blob/main/docs/agent-cookbook.md) - Automation recipes and examples
+- [Changelog](https://github.com/avivsinai/jenkins-cli/blob/main/CHANGELOG.md) - Release notes and migration guidance
 
 ## Security
 

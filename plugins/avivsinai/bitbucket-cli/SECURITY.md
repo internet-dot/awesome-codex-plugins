@@ -36,4 +36,4 @@ email.
 
 We rely on GitHub Dependabot, the OpenSSF Scorecard workflow, and the CI
 workflows under `.github/workflows/` to keep dependencies fresh. See
-[`docs/SECURITY.md`](docs/SECURITY.md) for deeper operational guidance.
+[`docs/SECURITY.md`](https://github.com/avivsinai/bitbucket-cli/blob/main/docs/SECURITY.md) for deeper operational guidance.

@@ -39,7 +39,7 @@ Every AI model has blind spots. Claude Octopus puts up to eight of them on every
 | **v8** | Multi-LLM code review with inline PR comments. Parallel workstreams in isolated git worktrees. Reaction engine — auto-responds to CI failures. 32 specialized personas. Dark Factory autonomous pipeline. |
 | **v7** | Double Diamond workflow. Multi-provider dispatch. Quality gates and consensus scoring. Configurable sandbox modes. |
 
-[Full changelog →](CHANGELOG.md)
+[Full changelog →](https://github.com/nyldn/claude-octopus/blob/main/CHANGELOG.md)
 
 ## Quickstart
 
@@ -122,7 +122,7 @@ If you're running Cursor on Windows with WSL, clone the repo inside WSL and poin
 Replace `<user>` with your WSL username. Make sure `node` and `npm` are installed inside WSL.
 </details>
 
-See [docs/IDE-INTEGRATION.md](docs/IDE-INTEGRATION.md) for the full guide including `ide-attach.sh` auto-setup.
+See [docs/IDE-INTEGRATION.md](https://github.com/nyldn/claude-octopus/blob/main/docs/IDE-INTEGRATION.md) for the full guide including `ide-attach.sh` auto-setup.
 </details>
 
 <details>
@@ -180,7 +180,7 @@ claude plugin install octo@nyldn-plugins
 /octo:prd mobile checkout redesign          # AI-optimized PRD with 100-point scoring
 ```
 
-Plus 30+ more: review, debug, extract, deck, docs, schedule, parallel, sentinel, optimize, brainstorm, claw, doctor, and [the full set](docs/COMMAND-REFERENCE.md).
+Plus 30+ more: review, debug, extract, deck, docs, schedule, parallel, sentinel, optimize, brainstorm, claw, doctor, and [the full set](https://github.com/nyldn/claude-octopus/blob/main/docs/COMMAND-REFERENCE.md).
 
 Don't remember the command name? Just describe what you need:
 
@@ -272,7 +272,7 @@ Specialized agents that activate automatically based on your request. When you s
 
 Categories: Software Engineering (11), Specialized Development (6), Documentation & Communication (5), Research & Strategy (3), Business & Compliance (3), Creative & Design (4).
 
-[Full persona reference](docs/AGENTS.md) | [All 51 skills](docs/COMMAND-REFERENCE.md)
+[Full persona reference](https://github.com/nyldn/claude-octopus/blob/main/docs/AGENTS.md) | [All 51 skills](https://github.com/nyldn/claude-octopus/blob/main/docs/COMMAND-REFERENCE.md)
 
 ### Built-in Reaction Engine
 
@@ -444,20 +444,20 @@ Join [r/ClaudeOctopus](https://www.reddit.com/r/ClaudeOctopus/) for help, workfl
 2. Submit PRs following existing code style
 3. `git clone https://github.com/nyldn/claude-octopus.git && make test`
 
-See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for details.
+See [CONTRIBUTING.md](https://github.com/nyldn/claude-octopus/blob/main/docs/CONTRIBUTING.md) for details.
 
 ---
 
 ## Documentation
 
-- [Documentation Guide](docs/README.md) — Start here
-- [Command Reference](docs/COMMAND-REFERENCE.md) — Commands, triggers, and provider indicators
-- [Feature Gap Analysis](docs/FEATURE-GAP.md) — CC feature adoption tracker
-- [Architecture](docs/ARCHITECTURE.md) — Provider flow and execution model
-- [Plugin Architecture](docs/PLUGIN-ARCHITECTURE.md) — Internal plugin structure
-- [Agents & Personas](docs/AGENTS.md) — All 32 personas
-- [CLI Reference](docs/CLI-REFERENCE.md) — Direct CLI usage, debug mode, async, and tmux
-- [Changelog](CHANGELOG.md)
+- [Documentation Guide](https://github.com/nyldn/claude-octopus/blob/main/docs/README.md) — Start here
+- [Command Reference](https://github.com/nyldn/claude-octopus/blob/main/docs/COMMAND-REFERENCE.md) — Commands, triggers, and provider indicators
+- [Feature Gap Analysis](https://github.com/nyldn/claude-octopus/blob/main/docs/FEATURE-GAP.md) — CC feature adoption tracker
+- [Architecture](https://github.com/nyldn/claude-octopus/blob/main/docs/ARCHITECTURE.md) — Provider flow and execution model
+- [Plugin Architecture](https://github.com/nyldn/claude-octopus/blob/main/docs/PLUGIN-ARCHITECTURE.md) — Internal plugin structure
+- [Agents & Personas](https://github.com/nyldn/claude-octopus/blob/main/docs/AGENTS.md) — All 32 personas
+- [CLI Reference](https://github.com/nyldn/claude-octopus/blob/main/docs/CLI-REFERENCE.md) — Direct CLI usage, debug mode, async, and tmux
+- [Changelog](https://github.com/nyldn/claude-octopus/blob/main/CHANGELOG.md)
 
 ---
 

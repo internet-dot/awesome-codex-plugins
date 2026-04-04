@@ -29,7 +29,7 @@ AMQ gives agents a **local interoperability bus**: they can send messages, reply
 - **Optional adapters** — Lightweight Symphony hooks and an experimental Kanban bridge can emit normal AMQ messages with structured metadata.
 - **Operational diagnostics** — `amq doctor --ops` shows queue depth, DLQ state, presence freshness, pending acks, and integration hints.
 
-![AMQ Demo — Claude and Codex collaborating via split-pane terminal](docs/assets/demo.gif)
+![AMQ Demo — Claude and Codex collaborating via split-pane terminal](https://github.com/avivsinai/agent-message-queue/raw/main/docs/assets/demo.gif)
 
 ## Installation
 
@@ -232,7 +232,7 @@ The bridge connects to `ws://127.0.0.1:3484/api/runtime/ws` by default, bootstra
 
 ### Integration Metadata
 
-The built-in adapters share a versioned contract under `context.orchestrator`. See [docs/adapter-contract.md](docs/adapter-contract.md) for the formal v1 envelope and stability expectations.
+The built-in adapters share a versioned contract under `context.orchestrator`. See [docs/adapter-contract.md](https://github.com/avivsinai/agent-message-queue/blob/main/docs/adapter-contract.md) for the formal v1 envelope and stability expectations.
 
 Integration messages also carry standard labels such as:
 
@@ -271,7 +271,7 @@ This guarantees crash-safety: if the process dies mid-write, no corrupt message 
 ## Documentation
 
 - [INSTALL.md](INSTALL.md) — Alternative installation methods
-- [docs/adapter-contract.md](docs/adapter-contract.md) — Formal v1 adapter contract for integration messages
+- [docs/adapter-contract.md](https://github.com/avivsinai/agent-message-queue/blob/main/docs/adapter-contract.md) — Formal v1 adapter contract for integration messages
 - [COOP.md](COOP.md) — Co-op mode protocol & best practices
 - [CLAUDE.md](CLAUDE.md) — Agent instructions, CLI reference, architecture
 

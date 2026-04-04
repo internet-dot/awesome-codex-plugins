@@ -119,7 +119,7 @@ codex auth switch 2
 codex auth forecast --live
 ```
 
-If browser launch is blocked, use the alternate login paths in [docs/getting-started.md](docs/getting-started.md#alternate-login-paths).
+If browser launch is blocked, use the alternate login paths in [docs/getting-started.md](https://github.com/ndycode/codex-multi-auth/blob/main/docs/getting-started.md#alternate-login-paths).
 
 ---
 
@@ -225,7 +225,7 @@ codex auth check
 codex auth forecast --live
 ```
 
-Responses background mode stays opt-in. Enable `backgroundResponses` in settings or `CODEX_AUTH_BACKGROUND_RESPONSES=1` only for callers that intentionally send `background: true`, because those requests switch from stateless `store=false` routing to stateful `store=true`. See [docs/upgrade.md](docs/upgrade.md) for rollout guidance.
+Responses background mode stays opt-in. Enable `backgroundResponses` in settings or `CODEX_AUTH_BACKGROUND_RESPONSES=1` only for callers that intentionally send `background: true`, because those requests switch from stateless `store=false` routing to stateful `store=true`. See [docs/upgrade.md](https://github.com/ndycode/codex-multi-auth/blob/main/docs/upgrade.md) for rollout guidance.
 
 ---
 
@@ -291,27 +291,27 @@ codex auth doctor --json
 
 ## Documentation
 
-- Docs portal: [docs/README.md](docs/README.md)
-- Getting started: [docs/getting-started.md](docs/getting-started.md)
-- Features: [docs/features.md](docs/features.md)
-- Configuration: [docs/configuration.md](docs/configuration.md)
-- Troubleshooting: [docs/troubleshooting.md](docs/troubleshooting.md)
-- Commands reference: [docs/reference/commands.md](docs/reference/commands.md)
-- Public API contract: [docs/reference/public-api.md](docs/reference/public-api.md)
-- Error contracts: [docs/reference/error-contracts.md](docs/reference/error-contracts.md)
-- Settings reference: [docs/reference/settings.md](docs/reference/settings.md)
-- Storage paths: [docs/reference/storage-paths.md](docs/reference/storage-paths.md)
-- Upgrade guide: [docs/upgrade.md](docs/upgrade.md)
-- Privacy: [docs/privacy.md](docs/privacy.md)
+- Docs portal: [docs/README.md](https://github.com/ndycode/codex-multi-auth/blob/main/docs/README.md)
+- Getting started: [docs/getting-started.md](https://github.com/ndycode/codex-multi-auth/blob/main/docs/getting-started.md)
+- Features: [docs/features.md](https://github.com/ndycode/codex-multi-auth/blob/main/docs/features.md)
+- Configuration: [docs/configuration.md](https://github.com/ndycode/codex-multi-auth/blob/main/docs/configuration.md)
+- Troubleshooting: [docs/troubleshooting.md](https://github.com/ndycode/codex-multi-auth/blob/main/docs/troubleshooting.md)
+- Commands reference: [docs/reference/commands.md](https://github.com/ndycode/codex-multi-auth/blob/main/docs/reference/commands.md)
+- Public API contract: [docs/reference/public-api.md](https://github.com/ndycode/codex-multi-auth/blob/main/docs/reference/public-api.md)
+- Error contracts: [docs/reference/error-contracts.md](https://github.com/ndycode/codex-multi-auth/blob/main/docs/reference/error-contracts.md)
+- Settings reference: [docs/reference/settings.md](https://github.com/ndycode/codex-multi-auth/blob/main/docs/reference/settings.md)
+- Storage paths: [docs/reference/storage-paths.md](https://github.com/ndycode/codex-multi-auth/blob/main/docs/reference/storage-paths.md)
+- Upgrade guide: [docs/upgrade.md](https://github.com/ndycode/codex-multi-auth/blob/main/docs/upgrade.md)
+- Privacy: [docs/privacy.md](https://github.com/ndycode/codex-multi-auth/blob/main/docs/privacy.md)
 
 ---
 
 ## Release Notes
 
-- Current stable: [docs/releases/v1.2.2.md](docs/releases/v1.2.2.md)
-- Previous stable: [docs/releases/v1.2.1.md](docs/releases/v1.2.1.md)
-- Earlier stable: [docs/releases/v1.2.0.md](docs/releases/v1.2.0.md)
-- Archived prerelease: [docs/releases/v0.1.0-beta.0.md](docs/releases/v0.1.0-beta.0.md)
+- Current stable: [docs/releases/v1.2.2.md](https://github.com/ndycode/codex-multi-auth/blob/main/docs/releases/v1.2.2.md)
+- Previous stable: [docs/releases/v1.2.1.md](https://github.com/ndycode/codex-multi-auth/blob/main/docs/releases/v1.2.1.md)
+- Earlier stable: [docs/releases/v1.2.0.md](https://github.com/ndycode/codex-multi-auth/blob/main/docs/releases/v1.2.0.md)
+- Archived prerelease: [docs/releases/v0.1.0-beta.0.md](https://github.com/ndycode/codex-multi-auth/blob/main/docs/releases/v0.1.0-beta.0.md)
 
 ## License
 
