@@ -567,7 +567,8 @@ jq -s \
       evidence_modes: {
         commit: ([.[] | select(.status == "pass" and .evidence_mode == "commit") | .child_id] | sort),
         staged: ([.[] | select(.status == "pass" and .evidence_mode == "staged") | .child_id] | sort),
-        worktree: ([.[] | select(.status == "pass" and .evidence_mode == "worktree") | .child_id] | sort)
+        worktree: ([.[] | select(.status == "pass" and .evidence_mode == "worktree") | .child_id] | sort),
+        packet: ([.[] | select(.status == "pass" and (.evidence_mode | IN("commit","staged","worktree") | not)) | .child_id] | sort)
       }
     },
     children: .,

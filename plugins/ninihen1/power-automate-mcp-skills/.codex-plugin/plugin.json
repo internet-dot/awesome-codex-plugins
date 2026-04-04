@@ -1,0 +1,39 @@
+{
+  "name": "flowstudio-power-automate",
+  "version": "1.0.0",
+  "description": "Power Automate build, debug, and operations toolkit via FlowStudio MCP.",
+  "author": {
+    "name": "Flow Studio",
+    "url": "https://flowstudio.app"
+  },
+  "homepage": "https://mcp.flowstudio.app",
+  "repository": "https://github.com/ninihen1/power-automate-mcp-skills",
+  "license": "MIT",
+  "keywords": [
+    "power-automate",
+    "mcp",
+    "power-platform",
+    "debugging",
+    "flow-studio"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Flow Studio Power Automate",
+    "shortDescription": "Give your AI agent portal-level visibility into Power Automate flows",
+    "longDescription": "The Graph API only returns top-level run status. Flow Studio MCP exposes action-level inputs, outputs, loop iterations, and nested child flow failures so your agent can diagnose issues, compare runs, and deploy fixes. Three bundled skills: power-automate-mcp (operations), power-automate-debug (diagnostics), power-automate-build (deploy flows from scratch).",
+    "developerName": "Flow Studio",
+    "category": "cloud-services",
+    "capabilities": [
+      "Power Automate flow management",
+      "Run debugging with action-level detail",
+      "Flow definition deployment"
+    ],
+    "defaultPrompt": [
+      "List my Power Automate flows",
+      "Debug why this flow failed",
+      "Build a new flow that sends form data via email"
+    ],
+    "websiteURL": "https://mcp.flowstudio.app",
+    "brandColor": "#0078D4"
+  }
+}

@@ -147,7 +147,7 @@ Blueprint follows four phases — **Draft, Architect, Build, Inspect** — each 
 ### 0. Research — ground the design (optional)
 
 ```
-/bp:research "build a Verse compiler targeting WASM"
+/bp:research "build a C+ compiler"
 ```
 
 Dispatches 2–8 parallel subagents to explore the codebase and search the web for current best practices, library landscape, reference implementations, and common pitfalls. A synthesizer agent cross-validates findings and produces a research brief in `context/refs/`. Research is also offered inline during `/bp:draft` when the project involves unfamiliar technology or architectural decisions with multiple viable approaches.
