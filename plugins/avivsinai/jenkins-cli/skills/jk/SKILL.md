@@ -1,9 +1,9 @@
 ---
 name: jk
 version: 0.0.29
-description: Jenkins CLI for controllers. Use when users need to manage jobs, pipelines, runs, logs, artifacts, credentials, nodes, or queues in Jenkins. Triggers include "jenkins", "jk", "pipeline", "build", "run logs", "job list", "jenkins credentials", "jenkins node".
+description: Jenkins CLI for controllers. Use when users need to manage jobs, pipelines, config.xml, runs, logs, artifacts, credentials, nodes, or queues in Jenkins. Triggers include "jenkins", "jk", "pipeline", "build", "job create", "job config", "config.xml", "run logs", "jenkins credentials", "jenkins node".
 metadata:
-  short-description: Jenkins CLI for jobs, pipelines, runs
+  short-description: Jenkins CLI for jobs, config, pipelines, runs
   compatibility: claude-code, codex-cli
 ---
 
@@ -18,6 +18,8 @@ metadata:
 ```bash
 jk --version
 ```
+
+For `jk job create`, `jk job config`, `jk job configure`, and `jk job scan`, use `jk` `0.0.29` or newer.
 
 If the command fails or `jk` is not found, install it using one of these methods:
 
@@ -85,6 +87,10 @@ Environment: `JK_CONTEXT` overrides active context.
 | Search jobs | `jk search --job-glob '*deploy*'` |
 | List jobs | `jk job ls` |
 | View job | `jk job view team/app` |
+| Create multibranch job | `jk job create auth-relay --folder platform/services --repo-owner playg --repository repo` |
+| Fetch job config | `jk job config platform/services/auth-relay` |
+| Patch Jenkinsfile path | `jk job configure platform/services/auth-relay --script-path services/auth-relay/Jenkinsfile` |
+| Rescan multibranch job | `jk job scan platform/services/auth-relay` |
 | List runs | `jk run ls team/app` |
 | Start run | `jk run start team/app -p KEY=value` |
 | View run | `jk run view team/app 128` |
@@ -125,6 +131,28 @@ jk job ls --folder team/app
 
 # View job details
 jk job view team/app/pipeline
+
+# Create a Bitbucket-backed Multibranch Pipeline job
+jk job create auth-relay \
+  --folder platform/services \
+  --repo-owner playg \
+  --repository taboola-sales-skills \
+  --script-path services/auth-relay/Jenkinsfile \
+  --credentials bitbucket-ro \
+  --branch-strategy all
+
+# Fetch raw config.xml for a job
+jk job config platform/services/auth-relay
+
+# Replace config.xml from a file or stdin
+jk job configure platform/services/auth-relay --file auth-relay.config.xml
+cat auth-relay.config.xml | jk job configure platform/services/auth-relay --stdin
+
+# Patch only the Jenkinsfile path in a multibranch config
+jk job configure platform/services/auth-relay --script-path services/auth-relay/Jenkinsfile
+
+# Trigger a multibranch rescan
+jk job scan platform/services/auth-relay
 ```
 
 ## Run Management

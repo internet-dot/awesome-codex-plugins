@@ -16,6 +16,7 @@
 
 - **Context-aware auth** – store multiple controllers, switch with `jk context use`, or pin a context via `JK_CONTEXT`.
 - **Friendly pipelines** – trigger, rerun, follow, and summarize jobs with human or JSON/YAML output.
+- **Job provisioning & config** – create Bitbucket-backed Multibranch Pipeline jobs, inspect raw `config.xml`, patch Jenkinsfile paths, and rescan multibranch jobs.
 - **Scriptable output** – `--format json|yaml`, `--jq`, and `--template` for machine-friendly pipelines; `--quiet` for scripting.
 - **Discovery-first runs** – filter with `--filter`, bound history with `--since`, group by parameters, and attach machine-readable metadata for agents.
 - **Artifacts & tests** – browse artifacts, download filtered sets, and surface aggregated test reports.
@@ -44,7 +45,7 @@ scoop install jk
 go install github.com/avivsinai/jenkins-cli/cmd/jk@latest
 
 # Or install specific version
-go install github.com/avivsinai/jenkins-cli/cmd/jk@v0.1.0
+go install github.com/avivsinai/jenkins-cli/cmd/jk@v0.0.29
 ```
 
 Binary will be installed to `$GOPATH/bin` (or `$HOME/go/bin` by default).
@@ -137,6 +138,34 @@ jk run view team/app/pipeline 128 --format json --jq '.result'
 
 # Custom formatting with Go templates
 jk run view team/app/pipeline 128 --format json --template 'Result={{.result}}'
+```
+
+## Job Commands
+
+Current job provisioning and config management is focused on Multibranch Pipeline workflows:
+
+```bash
+# Create a Bitbucket-backed Multibranch Pipeline job
+jk job create auth-relay \
+  --folder platform/services \
+  --repo-owner playg \
+  --repository taboola-sales-skills \
+  --script-path services/auth-relay/Jenkinsfile \
+  --credentials bitbucket-ro \
+  --branch-strategy all
+
+# Fetch raw config.xml (stdout is always XML)
+jk job config platform/services/auth-relay > auth-relay.config.xml
+
+# Replace config.xml from a file or stdin
+jk job configure platform/services/auth-relay --file auth-relay.config.xml
+cat auth-relay.config.xml | jk job configure platform/services/auth-relay --stdin
+
+# Patch only the Jenkinsfile path inside a Multibranch Pipeline config
+jk job configure platform/services/auth-relay --script-path services/auth-relay/Jenkinsfile
+
+# Trigger a multibranch rescan
+jk job scan platform/services/auth-relay
 ```
 
 ## Documentation

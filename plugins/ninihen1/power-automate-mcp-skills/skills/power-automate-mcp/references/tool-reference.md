@@ -138,7 +138,7 @@ Response: **direct array** (no wrapper).
 ]
 ```
 
-> **`id` format**: `envId.flowId` --- split on the first `.` to extract the flow UUID:
+> **`id` format**: `<environmentId>.<flowId>` --- split on the first `.` to extract the flow UUID:
 > `flow_id = item["id"].split(".", 1)[1]`
 
 ### `get_store_flow`
@@ -146,7 +146,7 @@ Response: **direct array** (no wrapper).
 Response: single flow metadata from cache (selected fields).
 ```json
 {
-  "id": "envId.flowId",
+  "id": "<environmentId>.<flowId>",
   "displayName": "My Flow",
   "state": "Started",
   "triggerType": "Recurrence",
@@ -204,7 +204,7 @@ Response:
 ```json
 {
   "created": false,
-  "flowKey": "envId.flowId",
+  "flowKey": "<environmentId>.<flowId>",
   "updated": ["definition", "connectionReferences"],
   "displayName": "My Flow",
   "state": "Started",

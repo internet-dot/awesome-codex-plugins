@@ -150,6 +150,16 @@ bkt pr edit <id> --body "Updated description"
 bkt pr edit <id> -t "Fix login bug" -b "Resolves session timeout issue"
 ```
 
+### Publish (Draft Status)
+```bash
+bkt pr publish <id>                       # Mark draft PR as ready for review
+bkt pr publish --undo <id>                # Convert PR back to draft
+bkt pr ready <id>                         # Alias for publish
+```
+
+Options:
+- `--undo` — Convert a published pull request back to draft
+
 ### Review and Merge
 ```bash
 bkt pr approve <id>                       # Approve PR

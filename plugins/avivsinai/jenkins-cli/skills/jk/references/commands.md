@@ -111,6 +111,80 @@ jk job ls --folder team/app              # List jobs in folder (flag)
 jk job view team/app/pipeline            # View job details
 ```
 
+### Create
+
+```bash
+jk job create auth-relay \
+  --folder platform/services \
+  --repo-owner playg \
+  --repository taboola-sales-skills \
+  --script-path services/auth-relay/Jenkinsfile \
+  --credentials bitbucket-ro
+
+# Optional discovery behavior
+jk job create auth-relay \
+  --repo-owner playg \
+  --repository taboola-sales-skills \
+  --branch-strategy only-prs \
+  --discover-origin-prs \
+  --discover-fork-prs
+```
+
+Options:
+- `--folder` — Folder path where the job should be created
+- `--description` — Job description
+- `--repo-owner` — Bitbucket repository owner/workspace
+- `--repository` — Bitbucket repository name
+- `--script-path` — Jenkinsfile path inside the repository (default: `Jenkinsfile`)
+- `--credentials` — Jenkins credentials ID for the Bitbucket source
+- `--bitbucket-url` — Bitbucket server URL (default: `https://bitbucket.org`)
+- `--branch-strategy all|exclude-prs|only-prs` — Branch discovery mode
+- `--discover-origin-prs` — Discover PRs from the origin repository
+- `--discover-fork-prs` — Discover PRs from forks using `TrustTeamForks`
+
+### Config
+
+```bash
+# Fetch raw config.xml to stdout
+jk job config platform/services/auth-relay
+
+# Save config.xml for review or editing
+jk job config platform/services/auth-relay > auth-relay.config.xml
+```
+
+Notes:
+- Output is always raw XML.
+- `--json`, `--yaml`, and `--format json|yaml` are rejected for this command.
+
+### Configure
+
+```bash
+# Replace config.xml from a file
+jk job configure platform/services/auth-relay --file auth-relay.config.xml
+
+# Replace config.xml from stdin
+cat auth-relay.config.xml | jk job configure platform/services/auth-relay --stdin
+
+# Patch only the Jenkinsfile path for a multibranch job
+jk job configure platform/services/auth-relay --script-path services/auth-relay/Jenkinsfile
+```
+
+Options:
+- `--file <path>` — Read a full `config.xml` replacement from a file
+- `--stdin` — Read a full `config.xml` replacement from standard input
+- `--script-path <path>` — Patch the Multibranch Pipeline Jenkinsfile path
+
+### Scan
+
+```bash
+# Trigger a multibranch rescan
+jk job scan platform/services/auth-relay
+```
+
+Notes:
+- `jk job scan` is only valid for Multibranch Pipeline jobs.
+- The command validates the target job type before triggering the Jenkins `/build?delay=0` endpoint.
+
 ## Run Commands
 
 ### List

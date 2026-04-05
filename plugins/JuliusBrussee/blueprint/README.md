@@ -578,3 +578,10 @@ With Codex adversarial review, Blueprint goes further: a second model with diffe
 ## License
 
 MIT
+
+---
+
+## Also by Julius Brussee
+
+- **[Caveman](https://github.com/JuliusBrussee/caveman)** — Claude Code skill that cuts ~75% of output tokens by talking like caveman. Same accuracy, way less fluff. `npx skills add JuliusBrussee/caveman`
+- **[Revu](https://github.com/JuliusBrussee/revu-swift)** — local-first macOS study app with FSRS spaced repetition, decks, exams, and study guides. [revu.cards](https://revu.cards)

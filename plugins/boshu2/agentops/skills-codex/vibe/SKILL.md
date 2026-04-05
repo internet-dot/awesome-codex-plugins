@@ -415,9 +415,15 @@ Read `skills/vibe/references/test-pyramid-weighting.md` for test pyramid weighti
      "weighted_score": 0.20,
      "score_breakdown": {"L0": 2, "L1": 8, "L2": 0, "L3": 0, "L4": 0},
      "max_possible": 50,
-     "warn_unit_only": true
+     "warn_unit_only": true,
+     "satisfaction_score": 0.20,
+     "satisfaction_source": "test-pyramid-weighted"
    }
    ```
+
+**Satisfaction exposure:** The `weighted_score` is also exposed as `satisfaction_score`
+for downstream consumers (STEP 1.8 behavioral validation, verdict schema v4).
+This is the same value — just labeled for the satisfaction scoring pipeline.
 
 **Verdict rules:**
 - `weighted_score < 0.3` AND all tests L0-L1 only — **WARN: unit-only coverage**

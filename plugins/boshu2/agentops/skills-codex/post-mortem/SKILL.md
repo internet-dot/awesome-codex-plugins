@@ -454,6 +454,9 @@ Follow the claim/finalize lifecycle documented in `references/harvest-next-work.
 mkdir -p .agents/rpi
 # Build VALID_ITEMS via the schema-validation flow in references/harvest-next-work.md
 # Then append one entry per post-mortem / epic.
+# If a harvested item already maps to a known proof surface, preserve it on the
+# item as "proof_ref" instead of burying target IDs in free text. Example item:
+# [{"title":"Verify the parity gate after proof propagation lands","type":"task","severity":"medium","source":"council-finding","description":"Re-run the targeted validator after the follow-up lands.","target_repo":"agentops","proof_ref":{"kind":"execution_packet","run_id":"6f36a5640805","path":".agents/rpi/runs/6f36a5640805/execution-packet.json"}}]
 ENTRY_TIMESTAMP="$(date -Iseconds)"
 SOURCE_EPIC="${EPIC_ID:-recent}"
 VALID_ITEMS_JSON="${VALID_ITEMS_JSON:-[]}"

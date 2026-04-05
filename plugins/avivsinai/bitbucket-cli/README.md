@@ -41,6 +41,21 @@ This installs `bkt` to `$GOPATH/bin` (or `$HOME/go/bin` by default). Ensure the 
 
 Download pre-built binaries for your platform from the [releases page](https://github.com/avivsinai/bitbucket-cli/releases/latest).
 
+### Bitbucket Pipelines
+
+Add `bkt` to any pipeline step. Set `BKT_TOKEN` as a secured [repository variable](https://support.atlassian.com/bitbucket-cloud/docs/variables-and-secrets/).
+
+```yaml
+pipelines:
+  default:
+    - step:
+        name: Open PR
+        script:
+          - export BKT_VERSION="0.16.4"  # pin to a specific release
+          - curl -sL "https://github.com/avivsinai/bitbucket-cli/releases/download/v${BKT_VERSION}/bkt_${BKT_VERSION}_linux_x86_64.tar.gz" | tar xz -C /tmp && install /tmp/bkt /usr/local/bin/
+          - bkt pr create --title "Auto PR" --source "$BITBUCKET_BRANCH"
+```
+
 ### From Source
 
 ```bash

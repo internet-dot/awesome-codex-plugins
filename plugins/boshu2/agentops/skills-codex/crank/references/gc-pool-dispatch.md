@@ -28,7 +28,7 @@ if [[ "$GC_POOL_AVAILABLE" == "true" ]]; then
     done
 else
     # Standard /swarm invocation (existing behavior)
-    # Invoke /swarm with TaskCreate for each issue in the wave
+    # Invoke /swarm with task creation for each issue in the wave
 fi
 ```
 

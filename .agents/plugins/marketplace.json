@@ -149,6 +149,18 @@
       "category": "Development & Workflow"
     },
     {
+      "name": "vibe-portrait",
+      "source": {
+        "source": "local",
+        "path": "./plugins/dadwadw233/VibePortrait"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
+    },
+    {
       "name": "amq-cli",
       "source": {
         "source": "local",

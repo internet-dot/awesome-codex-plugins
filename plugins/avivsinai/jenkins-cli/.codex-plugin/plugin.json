@@ -1,7 +1,7 @@
 {
   "name": "jk",
   "version": "0.0.29",
-  "description": "GitHub CLI-style interface for Jenkins controllers - manage jobs, pipelines, runs, logs, artifacts, credentials, and nodes",
+  "description": "GitHub CLI-style interface for Jenkins controllers - create multibranch jobs, inspect config.xml, and manage runs, logs, artifacts, credentials, nodes, and queues",
   "author": {
     "name": "Aviv Sinai",
     "url": "https://github.com/avivsinai"
@@ -14,6 +14,7 @@
     "ci",
     "cd",
     "pipeline",
+    "multibranch",
     "builds",
     "devops",
     "cli",
@@ -21,7 +22,7 @@
   ],
   "interface": {
     "displayName": "Jenkins CLI",
-    "shortDescription": "Manage Jenkins jobs, pipelines, runs, logs, artifacts, credentials, and nodes",
+    "shortDescription": "Create multibranch jobs, inspect config.xml, and manage Jenkins runs and operations",
     "category": "Developer Tools"
   }
 }

@@ -79,7 +79,7 @@ results = mcp("list_store_flows",
 # list_store_flows returns a direct array (no wrapper object)
 if len(results) > 0:
     # Flow exists — modify rather than create
-    # id format is "envId.flowId" — split to get the flow UUID
+    # id format is "<environmentId>.<flowId>" — split to get the flow UUID
     FLOW_ID = results[0]["id"].split(".", 1)[1]
     print(f"Existing flow: {FLOW_ID}")
     defn = mcp("get_live_flow", environmentName=ENV, flowName=FLOW_ID)

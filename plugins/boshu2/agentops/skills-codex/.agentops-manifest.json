@@ -574,7 +574,7 @@
       "name": "crank",
       "source_skill": "skills/crank",
       "source_hash": "928d1301b7f3bf12607e779cdec279924b5b29d681faffd01e6819651def92e7",
-      "generated_hash": "e9c903dca4e64b554f288a1fb491d0bb983b55ebaa49e5cc68f079f099a7f136"
+      "generated_hash": "b3aa1911ad41c0b92fffda8c1d709be6eabc0cb73204872d49f6827ad1c3066e"
     },
     {
       "name": "deps",
@@ -652,7 +652,7 @@
       "name": "implement",
       "source_skill": "skills/implement",
       "source_hash": "2ab197d1810fd3eb56f73aac4645c02edc01aa41e524064b12b993c6861ebc32",
-      "generated_hash": "e6730f9bd9606c87eb17bdbbe4446a59d9cbaf7c04976b38d9936117378d9a6a"
+      "generated_hash": "2ed1918f55180687c573f54bbc052dc31d87387570f342f0fe7189824ab5b99c"
     },
     {
       "name": "inject",
@@ -694,7 +694,7 @@
       "name": "post-mortem",
       "source_skill": "skills/post-mortem",
       "source_hash": "afce1fac76a1e506e9405b76886ecdf390c3eead5d863d82b8311286ad00d6a4",
-      "generated_hash": "3713e3e77b86eb040ef77f41d6ad5fb8cc2fdd4db299c6d786ea50a55171cbed"
+      "generated_hash": "4024a9449735ede7a9cab65ca26d90c6a00014942f80af908ddf4fadace45d60"
     },
     {
       "name": "pr-implement",
@@ -835,6 +835,12 @@
       "generated_hash": "a7d589b01a63727549fb180c587460e9301beff7086aca144371ad22a92a0e3c"
     },
     {
+      "name": "scenario",
+      "source_skill": "skills/scenario",
+      "source_hash": "5795f67b06b9240dfeb017a4621180f119583878fcb80946863c32209ae885b6",
+      "generated_hash": "17185b80153a77f8bb88a93b57546f6fa801da6b46d01231d83d5a915d75633b"
+    },
+    {
       "name": "security",
       "source_skill": "skills/security",
       "source_hash": "417bf5eede34edc7c78d736d72268e96fb0f0a27fb6064977c8f89398ce76f95",
@@ -898,13 +904,13 @@
       "name": "validation",
       "source_skill": "skills/validation",
       "source_hash": "2e71f8dbe94c65971f0dff7f82ac83396649ff036bbea388060174945f660c5c",
-      "generated_hash": "b2c7f16444d5bd53643341fd3ae34fe6158223fd4f588cc9d3efa4a70d691235"
+      "generated_hash": "a1f447b13b69f8f5e017d1c52390e4b1a4ee1d1a7e6f67943727d524ffbb9f58"
     },
     {
       "name": "vibe",
       "source_skill": "skills/vibe",
       "source_hash": "16b6b0f61dc91dfb1c90627594728a6ec345a876d7895b9a8e0dbe9010575af3",
-      "generated_hash": "8ca96cdbdb527fbd4f66d729dbb47c8d31901743bbb961d2cf245be14502f6d0"
+      "generated_hash": "77996cb1989eb3bcc5bccad546d69de34eda4474dccb423b7be271af57fdadcf"
     }
   ]
 }
