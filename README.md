@@ -202,7 +202,8 @@ The score is best used as a quick trust signal and triage summary (not the only 
 - [awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code#readme) - Claude Code resources.
 - [awesome-coding-agents](https://github.com/e2b-dev/awesome-ai-agents#readme) - Curated list of AI coding agents.
 - [awesome-mcp-servers](https://github.com/wong2/awesome-mcp-servers#readme) - MCP server directory.
-- [HOL Plugin Registry](https://hol.org/registry/plugins) - Browse plugins with scanner-backed security analysis and trust scores. Auto-ingests this list and augments each plugin with detailed trust breakdowns, security labels, embeddable badges, and install guidance.
+- [HOL Plugin Registry](https://hol.org/registry/plugins) - Browse plugins with scanner-backed security analysis and trust scores.
+- [awesome-ai-assistant-extensions](https://github.com/hashgraph-online/awesome-ai-assistant-extensions) - Umbrella list covering Codex, Claude Code, Gemini CLI, and MCP servers.
 
 ## Plugin Trust Scores
 
