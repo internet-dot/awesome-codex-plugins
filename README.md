@@ -203,7 +203,7 @@ The score is best used as a quick trust signal and triage summary (not the only 
 - [awesome-coding-agents](https://github.com/e2b-dev/awesome-ai-agents#readme) - Curated list of AI coding agents.
 - [awesome-mcp-servers](https://github.com/wong2/awesome-mcp-servers#readme) - MCP server directory.
 - [HOL Plugin Registry](https://hol.org/registry/plugins) - Browse plugins with scanner-backed security analysis and trust scores.
-- [awesome-ai-assistant-extensions](https://github.com/hashgraph-online/awesome-ai-assistant-extensions) - Umbrella list covering Codex, Claude Code, Gemini CLI, and MCP servers.
+- [awesome-ai-plugins](https://github.com/hashgraph-online/awesome-ai-plugins) - Umbrella list covering Codex, Claude Code, Gemini CLI, and MCP servers.
 
 ## Plugin Trust Scores
 
