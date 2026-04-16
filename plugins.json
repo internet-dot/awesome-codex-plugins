@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
-  "last_updated": "2026-04-07",
-  "total": 40,
+  "last_updated": "2026-04-16",
+  "total": 41,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -138,6 +138,16 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/AlexMi64/codex-project-autopilot/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Session Orchestrator",
+      "url": "https://github.com/Kanevry/session-orchestrator",
+      "owner": "Kanevry",
+      "repo": "session-orchestrator",
+      "description": "Session orchestration for Claude Code, Codex, and Cursor IDE — structured planning, wave-based execution, VCS integration (GitLab + GitHub), quality gates, and clean session close-out with issue tracking.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/Kanevry/session-orchestrator/main/.codex-plugin/plugin.json"
     },
     {
       "name": "VibePortrait",
