@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "session-orchestrator": {
+      "command": "bash",
+      "args": ["-c", "exec bash \"${CLAUDE_PLUGIN_ROOT:-${CODEX_PLUGIN_ROOT:-$(git rev-parse --show-toplevel)}}/scripts/mcp-server.sh\""]
+    }
+  }
+}

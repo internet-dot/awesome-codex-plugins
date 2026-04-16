@@ -1,0 +1,44 @@
+{
+  "name": "session-orchestrator",
+  "version": "2.0.0-beta.5",
+  "description": "Session-level orchestration for structured planning, wave execution, quality gates, and clean session close-out",
+  "author": {
+    "name": "Bernhard Goetzendorfer",
+    "email": "office@gotzendorfer.at",
+    "url": "https://gotzendorfer.at"
+  },
+  "homepage": "https://gotzendorfer.at/en/session-orchestrator",
+  "repository": "https://github.com/Kanevry/session-orchestrator",
+  "license": "MIT",
+  "keywords": [
+    "session",
+    "orchestration",
+    "waves",
+    "gitlab",
+    "github",
+    "quality-gates",
+    "codex"
+  ],
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks-codex.json",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Session Orchestrator",
+    "shortDescription": "Structured engineering sessions for Codex",
+    "longDescription": "Adds reusable session workflows to Codex: project analysis, wave planning, guided execution, quality gates, persistence, and clean session close-out.",
+    "developerName": "Bernhard Goetzendorfer",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://gotzendorfer.at/en/session-orchestrator",
+    "privacyPolicyURL": "https://gotzendorfer.at/en/session-orchestrator/privacy",
+    "termsOfServiceURL": "https://gotzendorfer.at/en/session-orchestrator/terms",
+    "defaultPrompt": [
+      "Start a structured feature session for this repo",
+      "Plan a feature PRD and turn it into waves",
+      "Close the current session with verification"
+    ]
+  }
+}
