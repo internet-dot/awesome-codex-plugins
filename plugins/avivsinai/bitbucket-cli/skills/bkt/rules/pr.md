@@ -37,7 +37,7 @@ bkt pr <command> [flags]
 | [checks](#bkt-pr-checks) | Show build/CI status for a pull request | `--fail-fast`, `--interval`, `--max-interval`, `--project` |
 | [comment](#bkt-pr-comment) | Comment on a pull request | `--file`, `--from-line`, `--parent`, `--pending` |
 | [comments](#bkt-pr-comments) | List comments on a pull request | `--details`, `--project`, `--repo`, `--state` |
-| [create](#bkt-pr-create) | Create a new pull request | `--body`, `--close-source`, `--description`, `--draft` |
+| [create](#bkt-pr-create) | Create a new pull request | `--body`, `--close-source`, `--description`, `--destination` |
 | [decline](#bkt-pr-decline) | Decline a pull request | `--body`, `--comment`, `--delete-source`, `--project` |
 | [diff](#bkt-pr-diff) | Show the diff for a pull request | `--project`, `--repo`, `--stat`, `--workspace` |
 | [edit](#bkt-pr-edit) | Edit a pull request | `--body`, `--description`, `--project`, `--remove-reviewer` |
@@ -78,7 +78,8 @@ bkt pr approve <id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -146,7 +147,8 @@ bkt pr auto-merge disable <id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -186,7 +188,8 @@ bkt pr auto-merge enable <id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -226,7 +229,8 @@ bkt pr auto-merge status <id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -269,7 +273,8 @@ bkt pr checkout <id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -328,7 +333,8 @@ bkt pr checks <id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -383,7 +389,8 @@ bkt pr comment <id> --text <message> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -433,7 +440,8 @@ bkt pr comments <id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -477,6 +485,7 @@ bkt pr create [flags]
 | `--body` | `-b` | Pull request description (alias for --description) |
 | `--close-source` |  | Close source branch on merge |
 | `--description` |  | Pull request description |
+| `--destination` |  | Target branch (alias for --target) |
 | `--draft` | `-d` | Create pull request as a draft (DC 8.18+, Cloud always supported) |
 | `--project` |  | Bitbucket project key override |
 | `--repo` |  | Repository slug override |
@@ -492,7 +501,8 @@ bkt pr create [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -521,6 +531,8 @@ is not supported on Cloud.
 
 Works on both Data Center and Cloud.
 
+**Alias:** `close`
+
 ### Usage
 
 ```
@@ -544,7 +556,8 @@ bkt pr decline <id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -557,6 +570,9 @@ bkt pr decline <id> [flags]
 
   # Decline with a comment explaining the reason
   bkt pr decline 42 --comment "Needs more work before we can merge"
+
+  # Same using the close alias
+  bkt pr close 42
 
   # Decline and delete the source branch (Data Center only)
   bkt pr decline 42 --delete-source
@@ -591,7 +607,8 @@ bkt pr diff <id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -637,7 +654,8 @@ bkt pr edit <id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -701,7 +719,8 @@ bkt pr list [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -753,7 +772,8 @@ bkt pr merge <id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -802,7 +822,8 @@ bkt pr publish <id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -869,7 +890,8 @@ bkt pr reaction add <id> <comment-id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -903,7 +925,8 @@ bkt pr reaction list <id> <comment-id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -938,7 +961,8 @@ bkt pr reaction remove <id> <comment-id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -976,7 +1000,8 @@ bkt pr reopen <id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -1039,7 +1064,8 @@ bkt pr reviewer-group add <group> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -1073,7 +1099,8 @@ bkt pr reviewer-group list [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -1107,7 +1134,8 @@ bkt pr reviewer-group remove <group> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -1146,7 +1174,8 @@ bkt pr suggestion <id> <comment-id> <suggestion-id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -1217,7 +1246,8 @@ bkt pr task complete <id> <task-id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -1252,7 +1282,8 @@ bkt pr task create <id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -1286,7 +1317,8 @@ bkt pr task list <id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -1320,7 +1352,8 @@ bkt pr task reopen <id> <task-id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -1360,7 +1393,8 @@ bkt pr view <id> [flags]
 | Flag | Short | Description |
 |---|---|---|
 | `--context` | `-c` | Active Bitbucket context name |
-| `--jq` |  | Apply a jq expression to JSON output (requires --json) |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
 | `--json` |  | Output in JSON format when supported |
 | `--template` |  | Render output using Go templates |
 | `--yaml` |  | Output in YAML format when supported |
@@ -1377,3 +1411,4 @@ bkt pr view <id> [flags]
   # View a pull request in a different repository
   bkt pr view 10 --repo my-other-repo
 ```
+

@@ -13,6 +13,75 @@ from __future__ import annotations
 import math
 
 
+def _node_probe_points(x: float,
+                       y: float,
+                       copper_radius: float) -> list[tuple[float, float]]:
+    """Probe center plus perimeter points around a copper feature.
+
+    Uses 8 perimeter points (not 16) at one radius to keep zone lookups
+    bounded.  Total: 9 probes per node (center + 8 perimeter).
+    """
+    points = [(x, y)]
+    radius = max(0.05, copper_radius * 0.85) if copper_radius > 0 else 0.10
+    for i in range(8):
+        ang = i * math.pi / 4.0
+        points.append((x + radius * math.cos(ang), y + radius * math.sin(ang)))
+    return points
+
+
+def _node_fill_regions(node: dict,
+                       zone_fills,
+                       zones: list[dict],
+                       net_name: str) -> set[int]:
+    """Return same-net fill-region ids touching a pad or via."""
+    if zone_fills is None or not zone_fills.has_data:
+        return set()
+    x = node.get('x')
+    y = node.get('y')
+    layer = node.get('layer', '')
+    if x is None or y is None or not layer:
+        return set()
+    regions: set[int] = set()
+    for px, py in _node_probe_points(x, y, node.get('copper_radius', 0.0)):
+        for fill_id, _zone_idx in zone_fills.fill_regions_at_point(
+                px, py, layer, zones, net_name=net_name):
+            regions.add(fill_id)
+    return regions
+
+
+def _bucket_coord(value: float, tolerance: float) -> int:
+    """Bucket a coordinate for endpoint clustering."""
+    if tolerance <= 0:
+        tolerance = 0.05
+    return int(round(value / tolerance))
+
+
+def _dist_point_to_segment(px: float, py: float,
+                           x1: float, y1: float,
+                           x2: float, y2: float) -> float:
+    """Euclidean distance from a point to a segment."""
+    dx, dy = x2 - x1, y2 - y1
+    if dx == 0 and dy == 0:
+        return math.sqrt((px - x1) ** 2 + (py - y1) ** 2)
+    t = max(0.0, min(1.0, ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy)))
+    proj_x = x1 + t * dx
+    proj_y = y1 + t * dy
+    return math.sqrt((px - proj_x) ** 2 + (py - proj_y) ** 2)
+
+
+def _expand_copper_layers(layers: list[str],
+                          copper_layers: list[str]) -> list[str]:
+    """Expand wildcard copper layer specs like ``*.Cu``."""
+    expanded: list[str] = []
+    for layer in layers or []:
+        if layer == '*.Cu':
+            expanded.extend(copper_layers)
+        elif '.Cu' in layer:
+            expanded.append(layer)
+    # Preserve order while de-duplicating
+    return list(dict.fromkeys(expanded))
+
+
 class UnionFind:
     """Weighted union-find with path compression."""
 
@@ -99,12 +168,28 @@ def build_connectivity_graph(
     """
     segments = tracks.get('segments', [])
     via_list = vias.get('vias', [])
+    copper_layer_set: set[str] = set()
+    for seg in segments:
+        layer = seg.get('layer', '')
+        if '.Cu' in layer:
+            copper_layer_set.add(layer)
+    for via in via_list:
+        for layer in via.get('layers', []) or []:
+            if '.Cu' in layer:
+                copper_layer_set.add(layer)
+    for zone in zones:
+        for layer in zone.get('layers', []) or []:
+            if '.Cu' in layer:
+                copper_layer_set.add(layer)
+    copper_layers = sorted(copper_layer_set) or ['F.Cu', 'B.Cu']
 
     # Collect all nodes per net
-    net_nodes: dict[str, list[tuple[str, float, float, str]]] = {}
+    net_nodes: dict[str, list[dict]] = {}
+    net_track_segments: dict[str, list[dict]] = {}
 
     for fp in footprints:
         ref = fp.get('reference', '')
+        pad_instance_counts: dict[str, int] = {}
         for pad in fp.get('pads', []):
             net_name = pad.get('net_name', '')
             if not net_name:
@@ -113,11 +198,24 @@ def build_connectivity_graph(
             y = pad.get('abs_y')
             if x is None or y is None:
                 continue
-            pad_key = f"{ref}:{pad.get('number', '?')}"
-            layers = pad.get('layers', [])
+            report_key = f"{ref}:{pad.get('number', '?')}"
+            instance_idx = pad_instance_counts.get(report_key, 0)
+            pad_instance_counts[report_key] = instance_idx + 1
+            pad_key = report_key if instance_idx == 0 else f"{report_key}#{instance_idx}"
+            layers = _expand_copper_layers(pad.get('layers', []), copper_layers)
+            width = pad.get('width', 0) or 0
+            height = pad.get('height', 0) or 0
+            copper_radius = max(width, height) / 2.0 if (width or height) else 0.0
             for layer in layers:
-                if '.Cu' in layer:
-                    net_nodes.setdefault(net_name, []).append((pad_key, x, y, layer))
+                net_nodes.setdefault(net_name, []).append({
+                    'key': pad_key,
+                    'report_key': report_key,
+                    'x': x,
+                    'y': y,
+                    'layer': layer,
+                    'copper_radius': copper_radius,
+                    'kind': 'pad',
+                })
 
     for i, via in enumerate(via_list):
         net_id = via.get('net', 0)
@@ -129,19 +227,75 @@ def build_connectivity_graph(
         if x is None or y is None:
             continue
         via_key = f"via_{i}"
-        layers = via.get('layers', [])
+        layers = _expand_copper_layers(via.get('layers', []), copper_layers)
+        size = via.get('size', 0) or 0
+        copper_radius = size / 2.0 if size else 0.0
         for layer in layers:
-            if '.Cu' in layer:
-                net_nodes.setdefault(net_name, []).append((via_key, x, y, layer))
+            net_nodes.setdefault(net_name, []).append({
+                'key': via_key,
+                'report_key': via_key,
+                'x': x,
+                'y': y,
+                'layer': layer,
+                'copper_radius': copper_radius,
+                'kind': 'via',
+            })
+
+    for seg_idx, seg in enumerate(segments):
+        seg_net_id = seg.get('net', 0)
+        net_name = net_id_map.get(seg_net_id, '') if isinstance(seg_net_id, int) else str(seg_net_id)
+        if not net_name:
+            continue
+        layer = seg.get('layer', '')
+        if not layer or '.Cu' not in layer:
+            continue
+        x1 = seg.get('x1')
+        y1 = seg.get('y1')
+        x2 = seg.get('x2')
+        y2 = seg.get('y2')
+        if None in (x1, y1, x2, y2):
+            continue
+        a_key = f"seg_{seg_idx}:a"
+        b_key = f"seg_{seg_idx}:b"
+        width = seg.get('width', 0) or 0
+        copper_radius = width / 2.0 if width else 0.0
+        node_a = {
+            'key': a_key,
+            'x': x1,
+            'y': y1,
+            'layer': layer,
+            'copper_radius': copper_radius,
+            'kind': 'track',
+        }
+        node_b = {
+            'key': b_key,
+            'x': x2,
+            'y': y2,
+            'layer': layer,
+            'copper_radius': copper_radius,
+            'kind': 'track',
+        }
+        net_nodes.setdefault(net_name, []).extend([node_a, node_b])
+        net_track_segments.setdefault(net_name, []).append({
+            'a': a_key,
+            'b': b_key,
+            'layer': layer,
+            'x1': x1,
+            'y1': y1,
+            'x2': x2,
+            'y2': y2,
+            'width': width,
+        })
 
     result: dict[str, dict] = {}
 
     for net_name, nodes in net_nodes.items():
         if len(nodes) < 2:
             if nodes:
+                first_key = nodes[0]['key']
                 result[net_name] = {
                     'islands': 1,
-                    'components': {nodes[0][0]: 0},
+                    'components': {first_key: 0},
                     'gaps': [],
                     'disconnected_pads': [],
                 }
@@ -149,56 +303,102 @@ def build_connectivity_graph(
 
         uf = UnionFind()
         all_keys: set[str] = set()
-        for key, x, y, layer in nodes:
+        report_keys: set[str] = set()
+        logical_groups: dict[str, list[str]] = {}
+        for node in nodes:
+            key = node['key']
             uf.make_set(key)
             all_keys.add(key)
+            if node.get('kind') in ('pad', 'via'):
+                report_key = node.get('report_key', key)
+                report_keys.add(report_key)
+                logical_groups.setdefault(report_key, []).append(key)
+
+        # Compound pads can be represented by multiple copper primitives with
+        # the same reference/pad number. They are a single electrical node.
+        for members in logical_groups.values():
+            for i in range(1, len(members)):
+                uf.union(members[0], members[i])
 
         # Spatial index per layer
         layer_grids: dict[str, _SpatialGrid] = {}
+        track_layer_grids: dict[str, _SpatialGrid] = {}
         key_positions: dict[str, tuple[float, float]] = {}
-        for key, x, y, layer in nodes:
+        for node in nodes:
+            key = node['key']
+            x = node['x']
+            y = node['y']
+            layer = node['layer']
             grid = layer_grids.setdefault(layer, _SpatialGrid(0.5))
             grid.add(key, x, y)
+            if node.get('kind') == 'track':
+                track_grid = track_layer_grids.setdefault(layer, _SpatialGrid(0.5))
+                track_grid.add(key, x, y)
             key_positions[key] = (x, y)
 
-        # Phase 1: Track segments
-        for seg in segments:
-            seg_net_id = seg.get('net', 0)
-            seg_net = net_id_map.get(seg_net_id, '') if isinstance(seg_net_id, int) else str(seg_net_id)
-            if seg_net != net_name:
+        # Phase 1: Route graph from explicit segment endpoints
+        endpoint_buckets: dict[tuple[str, int, int], list[str]] = {}
+        for node in nodes:
+            if node.get('kind') != 'track':
                 continue
-            layer = seg.get('layer', '')
-            grid = layer_grids.get(layer)
+            bucket = (
+                node['layer'],
+                _bucket_coord(node['x'], 0.05),
+                _bucket_coord(node['y'], 0.05),
+            )
+            endpoint_buckets.setdefault(bucket, []).append(node['key'])
+        for members in endpoint_buckets.values():
+            for i in range(1, len(members)):
+                uf.union(members[0], members[i])
+        for seg in net_track_segments.get(net_name, []):
+            uf.union(seg['a'], seg['b'])
+
+        # Phase 2: Attach pads and vias to routed copper nearby.
+        # Use the spatial grid to find candidate track endpoints instead of
+        # iterating all segments — keeps this O(pads × nearby) not O(pads × all).
+        # Build a reverse index from track endpoint key → segment dict so we
+        # can do distance-to-segment verification on grid hits.
+        seg_by_endpoint: dict[str, dict] = {}
+        for seg in net_track_segments.get(net_name, []):
+            seg_by_endpoint.setdefault(seg['a'], seg)
+            seg_by_endpoint.setdefault(seg['b'], seg)
+
+        for node in nodes:
+            if node.get('kind') not in ('pad', 'via'):
+                continue
+            grid = track_layer_grids.get(node['layer'])
             if not grid:
                 continue
-            x1, y1 = seg.get('x1', 0), seg.get('y1', 0)
-            x2, y2 = seg.get('x2', 0), seg.get('y2', 0)
-            k1 = grid.nearest(x1, y1, 0.15)
-            k2 = grid.nearest(x2, y2, 0.15)
-            if k1 and k2 and k1 != k2:
-                uf.union(k1, k2)
-            elif k1 and not k2:
-                k2 = grid.nearest(x2, y2, 0.5)
-                if k2 and k1 != k2:
-                    uf.union(k1, k2)
-            elif k2 and not k1:
-                k1 = grid.nearest(x1, y1, 0.5)
-                if k1 and k1 != k2:
-                    uf.union(k1, k2)
+            tolerance = max(0.5, node.get('copper_radius', 0.0) + 0.25)
+            nearby = grid.nearest(node['x'], node['y'], tolerance)
+            if nearby and nearby != node['key']:
+                # Verify via distance-to-segment if we have the segment data
+                seg = seg_by_endpoint.get(nearby)
+                if seg and seg['layer'] == node['layer']:
+                    clearance = (node.get('copper_radius', 0.0)
+                                 + (seg.get('width', 0.0) / 2.0) + 0.12)
+                    if _dist_point_to_segment(
+                            node['x'], node['y'],
+                            seg['x1'], seg['y1'],
+                            seg['x2'], seg['y2']) <= clearance:
+                        uf.union(node['key'], nearby)
+                else:
+                    uf.union(node['key'], nearby)
 
-        # Phase 2: Zone fills
+        # Phase 3: Zone fills — only probe pads and vias (track endpoints
+        # are already connected via Phase 1).
         if zone_fills is not None and zone_fills.has_data:
             for layer, grid in layer_grids.items():
-                layer_keys = [(key, x, y) for key, x, y, l in nodes if l == layer]
-                if len(layer_keys) < 2:
+                layer_pv = [node for node in nodes
+                            if node['layer'] == layer
+                            and node.get('kind') in ('pad', 'via')]
+                if len(layer_pv) < 2:
                     continue
-                zone_groups: dict[int, list[str]] = {}
-                for key, x, y in layer_keys:
-                    matching_zones = zone_fills.zones_at_point(x, y, layer, zones)
-                    for z in matching_zones:
-                        if z.get('net_name', '') == net_name:
-                            zone_groups.setdefault(id(z), []).append(key)
-                for z_idx, members in zone_groups.items():
+                fill_groups: dict[int, list[str]] = {}
+                for node in layer_pv:
+                    for fill_id in _node_fill_regions(node, zone_fills, zones, net_name):
+                        fill_groups.setdefault(fill_id, []).append(node['key'])
+                for _fill_id, members in fill_groups.items():
                     for i in range(1, len(members)):
                         uf.union(members[0], members[i])
 
@@ -238,9 +438,10 @@ def build_connectivity_graph(
                     if gy1 > gy2:
                         gy1, gy2 = gy2, gy1
                     layer_guess = ''
-                    for key, x, y, l in nodes:
+                    for node in nodes:
+                        key = node['key']
                         if key in island_keys.get(id_a, []) or key in island_keys.get(id_b, []):
-                            layer_guess = l
+                            layer_guess = node['layer']
                             break
                     gaps.append({
                         'layer': layer_guess,
@@ -250,11 +451,17 @@ def build_connectivity_graph(
 
         # Find disconnected pad pairs
         disconnected = []
-        pad_keys = [k for k in all_keys if not k.startswith('via_')]
+        pad_keys = [k for k in report_keys if not k.startswith('via_')]
         if num_islands > 1 and len(pad_keys) > 1:
             island_rep_pads: dict[int, str] = {}
             for pk in pad_keys:
-                isl = island_id_map.get(pk)
+                members = logical_groups.get(pk, [pk])
+                island_candidates = [
+                    island_id_map[m] for m in members if m in island_id_map
+                ]
+                if not island_candidates:
+                    continue
+                isl = max(set(island_candidates), key=island_candidates.count)
                 if isl is not None and isl not in island_rep_pads:
                     island_rep_pads[isl] = pk
             rep_list = list(island_rep_pads.values())
@@ -262,9 +469,17 @@ def build_connectivity_graph(
                 for j in range(i + 1, len(rep_list)):
                     disconnected.append([rep_list[i], rep_list[j]])
 
+        report_components = {}
+        for report_key in sorted(report_keys):
+            members = logical_groups.get(report_key, [report_key])
+            island_candidates = [island_id_map[m] for m in members if m in island_id_map]
+            if island_candidates:
+                report_components[report_key] = max(
+                    set(island_candidates), key=island_candidates.count)
+
         result[net_name] = {
             'islands': num_islands,
-            'components': {k: island_id_map[k] for k in sorted(all_keys)},
+            'components': report_components,
             'gaps': gaps,
             'disconnected_pads': disconnected,
         }

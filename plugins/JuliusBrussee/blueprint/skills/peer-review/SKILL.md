@@ -4,10 +4,12 @@ description: >
   Patterns for using a second AI agent or model to challenge the primary builder agent's work.
   Covers six review modes (Diff Critique, Design Challenge, Threaded Debate, Delegated Scrutiny,
   Deciding Vote, Coverage Audit), how to set up peer review with any model via MCP server,
-  peer review iteration loops that alternate builder and reviewer prompts, and prompt templates for
+  peer review iteration loops that alternate builder and reviewer prompts, the Codex Loop Mode
+  (Cavekit + Ralph Loop + Codex as reviewer via CLI or MCP fallback), and prompt templates for
   each strategy. The peer reviewer's job is to find what the builder missed, not to agree.
   Triggers: "peer review", "peer review agent", "use another model to review",
-  "second opinion on code", "cross-model review".
+  "second opinion on code", "cross-model review", "peer review loop", "ralph loop with codex",
+  "cavekit ralph", "cross-model loop", "codex peer reviewer".
 ---
 
 # Peer Review
@@ -431,3 +433,166 @@ that neither automated tests nor single-agent convergence loops find.
 - **prompt-pipeline** -- How to structure builder and reviewer prompts in the Hunt pipeline
 - **revision** -- When the peer reviewer finds a cavekit gap, revise the fix into kits
 - **impl-tracking** -- Record peer review findings in implementation tracking documents
+
+---
+
+## Codex Loop Mode — Cavekit + Ralph Loop + Codex Peer Reviewer
+
+The most rigorous automated quality process available: run a Cavekit cavekit through a Ralph Loop where Claude builds and Codex adversarially reviews every few iterations. A completely different model (different training data, different biases, different blind spots) challenges your implementation.
+
+### Why This Works
+
+| Factor | Single-Model Loop | Codex Loop Mode |
+|--------|-------------------|-----------------|
+| Blind spots | Same model, same blind spots every iteration | Two models catch different classes of issues |
+| Cavekit drift | Builder may silently deviate from cavekit | Peer reviewer checks cavekit compliance explicitly |
+| Quality floor | Converges to "good enough for one model" | Converges to "survives cross-examination" |
+| Dead ends | May retry failed approaches | Peer reviewer flags repeated patterns |
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────┐
+│                   Ralph Loop                         │
+│  (Stop hook feeds same prompt each iteration)        │
+│                                                      │
+│  ┌──────────┐    ┌──────────────┐    ┌────────────┐ │
+│  │  Claude   │───▶│ Build from   │───▶│  Commit    │ │
+│  │  (Build)  │    │ cavekit      │    │  changes   │ │
+│  └──────────┘    └──────────────┘    └──────┬─────┘ │
+│       ▲                                      │       │
+│       │                                      ▼       │
+│  ┌──────────┐    ┌──────────────┐    ┌────────────┐ │
+│  │  Fix      │◀──│ Parse        │◀──│  Codex CLI │ │
+│  │  findings │    │ findings     │    │  (Review)  │ │
+│  └──────────┘    └──────────────┘    └────────────┘ │
+│                                                      │
+│  Completion: all cavekit requirements met +         │
+│              no CRITICAL/HIGH findings               │
+└─────────────────────────────────────────────────────┘
+```
+
+### Review Invocation: Codex CLI (primary) vs MCP (legacy)
+
+1. **Codex CLI delegation (primary)** — `scripts/codex-review.sh` calls `codex` directly in `--approval-mode full-auto` with a structured review prompt. Faster, no MCP server overhead. Findings parsed and appended to `context/impl/impl-review-findings.md`.
+2. **MCP server (legacy fallback)** — Codex configured as an MCP server in `.mcp.json`. Claude calls the MCP tool on review iterations. Used only when Codex CLI delegation is unavailable.
+
+`setup-build.sh` auto-detects: if `codex-review.sh` is present and `codex` CLI is available, CLI delegation is used. Otherwise, falls back to MCP configuration.
+
+### Activation
+
+```bash
+/ck:make --peer-review                       # activates Codex Loop Mode (default interval: every 2nd iteration)
+/ck:make --peer-review --review-interval 1   # review every iteration (maximum rigor)
+/ck:make --peer-review --codex-model gpt-5.4-mini   # faster, cheaper reviewer
+```
+
+### What `--peer-review` Does
+
+1. **Validates** Codex CLI is installed (or MCP fallback is configured).
+2. **Configures** Codex as an MCP server in `.mcp.json` if CLI delegation is unavailable.
+3. **Builds** a Ralph Loop prompt that embeds:
+   - The cavekit path and related plan/impl files.
+   - Instructions to alternate between build and review iterations.
+   - The peer review prompt template for Codex.
+   - Completion criteria tied to cavekit acceptance criteria.
+4. **Starts** the Ralph Loop via the stop hook mechanism.
+
+### Codex CLI Invocation (what runs on review iterations)
+
+```bash
+source scripts/codex-review.sh
+bp_codex_review --base main
+```
+
+The CLI path produces structured findings with severity levels (P0–P3) and handles fallback gracefully if Codex is unavailable.
+
+### MCP Fallback Configuration
+
+```json
+{
+  "mcpServers": {
+    "codex-reviewer": {
+      "command": "codex",
+      "args": ["mcp-server", "-c", "model=\"gpt-5.4\""]
+    }
+  }
+}
+```
+
+### Iteration Pattern
+
+```
+Iteration 1: BUILD  — Read cavekit, implement first requirement
+Iteration 2: REVIEW — Call Codex CLI (or MCP fallback), get findings, fix CRITICAL/HIGH
+Iteration 3: BUILD  — Continue implementing, address remaining findings
+Iteration 4: REVIEW — Call Codex CLI again, new findings on new code
+...
+Iteration N: BUILD  — All requirements met, all findings fixed
+             → outputs <promise>CAVEKIT COMPLETE</promise>
+```
+
+Default review interval: every 2nd iteration. `--review-interval 1` = review every iteration.
+
+### Peer Review Findings File
+
+Review findings tracked in `context/impl/impl-review-findings.md`:
+
+```markdown
+# Peer Review Findings
+
+## Latest Review: Iteration 4 — 2026-03-14T10:30:00Z
+### Reviewer: Codex (gpt-5.4)
+
+| # | Severity | File | Issue | Status |
+|---|----------|------|-------|--------|
+| 1 | CRITICAL | src/auth.ts:L42 | Missing input validation on token | FIXED |
+| 2 | HIGH | src/auth.ts:L67 | Race condition in session refresh | FIXED |
+| 3 | MEDIUM | src/auth.ts:L15 | Unused import | NEW |
+| 4 | LOW | src/auth.ts:L3 | Comment typo | WONTFIX |
+
+## History
+### Iteration 2
+| # | Severity | File | Issue | Status |
+|---|----------|------|-------|--------|
+| 1 | CRITICAL | src/auth.ts:L20 | SQL injection in login query | FIXED |
+```
+
+### Completion Criteria (Codex Loop Mode)
+
+The loop exits when the completion promise is output. The prompt instructs Claude to ONLY output it when ALL of these are true:
+
+- All cavekit requirements (R-numbers) have been implemented.
+- All acceptance criteria pass.
+- No CRITICAL or HIGH peer review findings remain unfixed.
+- Build passes.
+- Tests pass.
+- At least one review iteration completed with no new CRITICAL/HIGH findings.
+
+### Review-Only Mode
+
+For reviewing existing code against a cavekit without building:
+
+```bash
+/ck:review --codex     # single Codex-only review (see /ck:review command)
+```
+
+Each iteration calls Codex to review existing code against the cavekit, then fixes issues found.
+
+### Prerequisites (Codex Loop Mode)
+
+1. **Codex CLI installed:** `npm install -g @openai/codex`
+2. **OpenAI API key configured:** Codex needs authentication (via `codex login` or env var).
+3. **Cavekit context directory:** Cavekit file must exist at the given path.
+
+### Convergence Signals (Codex Loop Mode)
+
+The peer review loop has converged when:
+- Codex's findings drop to zero or only LOW/MEDIUM severity.
+- Code diffs between iterations are minimal.
+- All cavekit requirements confirmed as met by both Claude and Codex.
+
+If the loop hits max iterations without converging:
+- Check `context/impl/impl-review-findings.md` for persistent issues.
+- Consider whether the cavekit needs clarification.
+- Run `/ck:revise --trace` to trace issues back to kits.

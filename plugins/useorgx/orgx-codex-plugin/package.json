@@ -1,11 +1,23 @@
 {
   "name": "@useorgx/codex-plugin",
   "version": "0.1.0",
-  "description": "OrgX Codex plugin with MCP access and initiative-aware skills",
+  "description": "OrgX Codex plugin with MCP access, initiative-aware skills, and a Sovereign Execution peer sidecar.",
   "type": "module",
   "private": true,
+  "bin": {
+    "orgx-codex-peer": "lib/peer/cli.mjs"
+  },
+  "exports": {
+    ".": "./lib/peer/peer.mjs",
+    "./peer": "./lib/peer/peer.mjs"
+  },
   "scripts": {
-    "check": "node scripts/verify-plugin.mjs"
+    "check": "node scripts/verify-plugin.mjs",
+    "test": "node --test lib/peer/peer.test.mjs",
+    "peer:start": "node lib/peer/cli.mjs"
+  },
+  "dependencies": {
+    "@useorgx/orgx-gateway-sdk": "github:useorgx/orgx-gateway-sdk"
   },
   "engines": {
     "node": ">=18.0.0"

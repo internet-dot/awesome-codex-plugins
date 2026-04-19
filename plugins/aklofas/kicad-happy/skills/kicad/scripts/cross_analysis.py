@@ -64,6 +64,26 @@ def _parse_voltage_from_name(name: str) -> float | None:
     return None
 
 
+def _flagged_return_path_entries(pcb: dict, threshold_pct: float = 95.0) -> dict[str, dict]:
+    """Return nets with measured return-plane coverage below threshold."""
+    flagged: dict[str, dict] = {}
+    for entry in pcb.get('return_path_continuity', []) or []:
+        net_name = entry.get('net', '')
+        coverage = entry.get('reference_plane_coverage_pct', 100)
+        if net_name and isinstance(coverage, (int, float)) and coverage < threshold_pct:
+            flagged[net_name] = entry
+    return flagged
+
+
+def _island_size_map(graph: dict) -> dict[int, int]:
+    """Return {island_id: member_count} for a connectivity graph."""
+    sizes: dict[int, int] = {}
+    for island_id in (graph.get('components', {}) or {}).values():
+        if isinstance(island_id, int):
+            sizes[island_id] = sizes.get(island_id, 0) + 1
+    return sizes
+
+
 # ---------------------------------------------------------------------------
 # CC-001: Connector current capacity
 # ---------------------------------------------------------------------------
@@ -473,6 +493,8 @@ def check_return_path_enhanced(schematic, pcb):
         return findings
     conn_graph = pcb.get('connectivity_graph', {})
     net_id_map = _build_net_id_map(pcb)
+    rpc_flagged = _flagged_return_path_entries(pcb, threshold_pct=95.0)
+    has_rpc_data = len(pcb.get('return_path_continuity', []) or []) > 0
     plane_gaps = []
     for net_name, graph in conn_graph.items():
         if not (_is_ground_net(net_name) or _is_power_net(net_name)):
@@ -505,6 +527,8 @@ def check_return_path_enhanced(schematic, pcb):
         if not net_name or _is_power_net(net_name) or _is_ground_net(net_name):
             continue
         if net_name in flagged:
+            continue
+        if has_rpc_data and net_name not in rpc_flagged:
             continue
         classification = _get_net_classification(net_name, schematic)
         if not classification:
@@ -602,11 +626,14 @@ def check_plane_splits(schematic, pcb):
         return findings
     segments = pcb.get('tracks', {}).get('segments', [])
     net_id_map = _build_net_id_map(pcb)
+    rpc_flagged = _flagged_return_path_entries(pcb, threshold_pct=95.0)
     for plane_net, graph in conn_graph.items():
         if not (_is_ground_net(plane_net) or _is_power_net(plane_net)):
             continue
         if graph.get('islands', 1) <= 1:
             continue
+        island_sizes = _island_size_map(graph)
+        significant_islands = [size for size in island_sizes.values() if size >= 2]
         is_intentional = any(plane_net.upper().startswith(p) for p in ('AGND', 'DGND', 'PGND', 'GNDA', 'GNDD'))
         gaps = graph.get('gaps', [])
         if not gaps:
@@ -626,23 +653,26 @@ def check_plane_splits(schematic, pcb):
                     if seg_net not in crossing_signals:
                         crossing_signals.append(seg_net)
                     break
+        crossing_signals_rpc = [s for s in crossing_signals if s in rpc_flagged]
+        if len(significant_islands) <= 1 and not crossing_signals_rpc:
+            continue
         if is_intentional:
             severity = 'info'
-        elif crossing_signals:
+        elif crossing_signals_rpc:
             has_hs = any(_get_net_classification(s, schematic) and
                          _get_net_classification(s, schematic).get('type') in _HIGH_SPEED_TYPES
-                         for s in crossing_signals)
+                         for s in crossing_signals_rpc)
             severity = 'error' if has_hs else 'warning'
         else:
             severity = 'info'
-        desc_signals = f' Signals crossing: {", ".join(crossing_signals[:5])}.' if crossing_signals else ''
+        desc_signals = f' Signals crossing: {", ".join(crossing_signals_rpc[:5])}.' if crossing_signals_rpc else ''
         findings.append(make_finding(
             detector='check_plane_splits', rule_id='PS-002',
             category='plane_integrity',
-            summary=f'{plane_net} plane split: {graph["islands"]} islands{", " + str(len(crossing_signals)) + " signals crossing" if crossing_signals else ""}',
+            summary=f'{plane_net} plane split: {graph["islands"]} islands{", " + str(len(crossing_signals_rpc)) + " signals crossing" if crossing_signals_rpc else ""}',
             description=f'{plane_net} plane has {graph["islands"]} disconnected islands.{desc_signals}',
             severity=severity, confidence='deterministic', evidence_source='topology',
-            nets=[plane_net] + crossing_signals[:5],
+            nets=[plane_net] + crossing_signals_rpc[:5],
             recommendation='Bridge the plane gap with copper pour or stitching vias.',
             impact='Return path discontinuity increases EMI',
         ))

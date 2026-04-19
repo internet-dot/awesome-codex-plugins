@@ -22,6 +22,23 @@ This plugin handles sensitive OAuth tokens. To protect your security:
 - Implement automatic token refresh
 - Use industry-standard authentication practices
 
+### Credential Storage Backends
+
+Two backends are supported. The default has not changed in this release.
+
+| Backend | Enabled by | Where tokens live | Threat model |
+|---------|-----------|-------------------|--------------|
+| JSON (default) | always on | `~/.opencode/projects/<project-key>/oc-codex-multi-auth-accounts.json`, file mode `0o600`, directory mode `0o700` on POSIX. A `.gitignore` entry is auto-written when the storage path sits inside a git repo. | Plaintext on the local filesystem. Any local user or process that can read the file can read the refresh token. Protect the home directory like you would protect `~/.ssh`. |
+| OS keychain (opt-in) | `CODEX_KEYCHAIN=1` | macOS Keychain / Windows Credential Manager / Linux libsecret, stored under service name `oc-codex-multi-auth` and account key `accounts:<project-storage-key>` (or `accounts:global`). | Token ciphertext is managed by the OS keychain. Unlocked session required to read. Credentials survive loss of the JSON file. Still only as strong as the user's OS login password / keychain unlock. |
+
+Migration and fallback rules:
+
+- Switching the env var ON migrates the on-disk JSON into the keychain on the next save and renames the JSON file as `<path>.migrated-to-keychain.<timestamp>` for rollback. The original is never deleted automatically.
+- If a keychain call fails (native module missing, keychain locked, permission denied, unsupported Linux without a secret service), the plugin logs a warning and falls back to the JSON backend for that operation. Credentials are never silently lost.
+- Turn the opt-in OFF by unsetting `CODEX_KEYCHAIN` and running `codex-keychain rollback` to restore the JSON file from the most recent `.migrated-to-keychain.<ts>` backup.
+
+Log redaction applies uniformly to both backends. Refresh tokens, access tokens, and id tokens are replaced before any log line is written.
+
 ⚠️ **What you should do:**
 - Never share your `~/.opencode/` directory
 - Do not commit OAuth tokens to version control

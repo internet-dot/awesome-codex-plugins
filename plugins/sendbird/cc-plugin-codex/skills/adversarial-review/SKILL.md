@@ -52,15 +52,20 @@ Argument handling:
 - It does not support `--scope staged` or `--scope unstaged`.
 - Unlike `$cc:review`, it can still take extra focus text after the flags.
 - The companion review process itself always runs in the foreground. Background mode only changes how Codex launches that command.
+- For the detailed execution contract, treat the internal runtime reference at `../../internal-skills/review-runtime/runtime.md` as supporting guidance only. It is an internal reference document, not a public skill to invoke.
 
 Foreground flow:
 - Run:
   `node "<installed-plugin-root>/scripts/claude-companion.mjs" adversarial-review --view-state on-success <arguments with --wait/--background removed>`
+- Foreground adversarial review belongs to the main Codex thread. Do not spawn a review subagent, do not invoke a generic review-runner role, and do not proxy this foreground path through any background worker abstraction.
+- Do not fall back to raw `claude`, `claude-code`, `claude review`, `bash -lc ...claude...`, or any other direct Claude CLI syntax when the companion path is available. The foreground syntax contract here is the installed companion command above, not a hand-rolled Claude invocation.
+- If the installed companion command fails, surface that failure. Do not silently retry foreground adversarial review through a different CLI shape, a generic review runner, or a custom shell wrapper.
 - Present the companion stdout faithfully.
 - Do not fix anything mentioned in the review output.
 
 Background flow:
 - For background adversarial review, use Codex's built-in `default` subagent instead of a detached background shell command.
+- Do not satisfy background adversarial review by using a generic `claude_review_runner`-style helper role, raw Claude CLI, or any other review executor that bypasses the installed companion command.
 - Never satisfy background adversarial review by running the companion command itself with shell backgrounding such as `&`, `nohup`, detached `spawn`, or any equivalent direct background process launch.
 - Background here means "spawn the forwarding child via `spawn_agent` and do not wait in the parent turn." The companion adversarial-review command inside that child still runs once, in the foreground, inside the child thread.
 - Before spawning the built-in child, capture the review job id plus routing context in one call:
@@ -85,6 +90,9 @@ Background flow:
   - run exactly one shell command
   - execute:
     `node "<installed-plugin-root>/scripts/claude-companion.mjs" adversarial-review --view-state defer <arguments with --wait/--background removed>`
+  - run that command as one blocking foreground shell-tool call, not as a background terminal/session
+  - do not request a shell session id, poll a shell session later, or return before the companion command exits
+  - if the available shell tool is `exec_command`, call it once in non-interactive mode and wait for command exit in that same call
   - include `--owner-session-id <owner-session-id>` only when the parent resolved a non-empty owner session id
   - include `--job-id <reserved-job-id>` when the parent reserved one
   - never leave an empty routing placeholder such as `--owner-session-id  --job-id`

@@ -9264,13 +9264,11 @@ def main():
         import tempfile
         from analysis_cache import (ensure_analysis_dir, hash_source_file,
                                      should_create_new_run, create_run,
-                                     overwrite_current, CANONICAL_OUTPUTS)
+                                     overwrite_current, CANONICAL_OUTPUTS,
+                                     resolve_analysis_dir)
 
         project_dir = str(Path(args.schematic).parent)
-        if not os.path.isabs(args.analysis_dir):
-            analysis_dir = os.path.join(project_dir, args.analysis_dir)
-        else:
-            analysis_dir = args.analysis_dir
+        analysis_dir = resolve_analysis_dir(args.analysis_dir)
 
         # Find .kicad_pro for manifest
         pro_file = ""

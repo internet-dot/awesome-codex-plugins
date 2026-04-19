@@ -23,6 +23,8 @@ Methodology for validating KiCad schematics against datasheets, common design pa
 
 **Fallback methodology**: If `analyze_schematic.py` fails, see [`manual-schematic-parsing.md`](manual-schematic-parsing.md) for direct file parsing instructions.
 
+**For full design reviews:** read `report-generation.md` before writing conclusions. The report format, evidence-basis labeling, skipped-analysis disclosure, and false-positive triage expectations are part of the review method, not post-processing.
+
 ---
 
 ## Analysis Workflow
@@ -68,6 +70,15 @@ Perform thorough verification of the analyzer output against the raw schematic. 
 5. **Connector pinout verification**: For every connector, verify pin-to-net mapping against the relevant standard or mating connector. Connector pinout errors are among the most common mistakes (see Connector Pinout Verification section below).
 
 This thorough verification catches the cases where the analyzer silently drops components, misidentifies subcircuits, or — most dangerously — reports wrong pin-to-net mappings.
+
+**Evidence classification during Step 2:** as you verify items, keep track of which bucket each conclusion belongs to:
+- datasheet-verified
+- extraction-verified
+- raw-file verified
+- analyzer-derived
+- inference-only
+
+Do not collapse these into a generic "verified" label in the final report.
 
 ### Step 3: Review and augment subcircuit identification
 
@@ -121,6 +132,8 @@ Compare the actual schematic against the datasheet's reference design. Check:
 - Are optional features (enable, power-good, soft-start) handled appropriately?
 - Are absolute maximum ratings respected with margin?
 
+When a datasheet recommendation is absent or ambiguous, say so. Do not overstate confidence just because the topology looks conventional.
+
 ### Step 6: Verify computed values
 
 For every value that derives from a formula (resistor dividers, RC filters, current limits, etc.), compute the expected result and compare to the design intent. Flag discrepancies.
@@ -152,6 +165,23 @@ After subcircuit validation, check system-level issues:
 
 If your coordinate-based analysis finds "critical" issues (floating pins, wrong connections) but the user says the schematic is correct, **assume your coordinate math is wrong** and re-derive from scratch with the Y-axis formula from `net-tracing.md`.
 
+### Step 8b: Triage analyzer false positives before ranking severity
+
+Before turning analyzer output into blockers, explicitly classify each notable finding as one of:
+- real issue
+- likely false positive
+- expected-by-design tradeoff
+- unresolved / needs more evidence
+
+Common sources of false positives:
+- RF module courtyard / antenna keepout overlaps
+- intentional copper under bypass caps or local power islands
+- general USB resistor heuristics that do not apply to the specific PHY
+- board-edge warnings triggered by intentional antenna placement
+- inferred lifecycle or sourcing warnings based on partial distributor coverage
+
+A strong review explains why a finding was accepted, downgraded, or dismissed.
+
 ### Step 9: Produce the report
 
 Organize findings by severity (Critical / Warning / Suggestion / Info) and by subcircuit. For each finding, show the reasoning — not just the conclusion:
@@ -160,6 +190,8 @@ Organize findings by severity (Critical / Warning / Suggestion / Info) and by su
 - **Show formulas**: When validating computed values (feedback dividers, RC filters, current limits), write out the equation with the actual component values substituted in (e.g., "VOUT = VREF × (1 + R_top/R_bottom) = 0.595V × (1 + 732k/100k) = 4.95V").
 - **Compare against spec**: Show the design's value alongside the datasheet's recommended range so the reader can see the margin (e.g., "L = 1µH, datasheet recommends 0.37-2.9µH ✓").
 - **Explain the chain of reasoning** for non-obvious issues: if something looks wrong, explain how you traced the net, what you expected to find, and what you found instead.
+- **Disclose review limits**: If thermal, lifecycle, gerber, prior-review delta, or datasheet extraction work was not performed, state that explicitly in the report.
+- **Separate evidence from judgment**: A finding can be well-supported and still not be a blocker. Distinguish the factual observation from the severity judgment.
 
 ---
 

@@ -72,7 +72,7 @@ If the script is not available (missing file, `$PLUGIN_ROOT` unresolvable), fall
 
 ## Learning Expiry Semantics
 
-Learnings live exclusively in `.orchestrator/metrics/learnings.jsonl`. The pre-`2.0.0-beta.4` location `<state-dir>/metrics/learnings.jsonl` is no longer read; consumers with leftover entries should run `scripts/migrate-legacy-learnings.sh` once.
+Learnings live exclusively in `.orchestrator/metrics/learnings.jsonl`. The pre-`2.0.0` location `<state-dir>/metrics/learnings.jsonl` is no longer read; consumers with leftover entries should run `scripts/migrate-legacy-learnings.sh` once.
 
 The learning lifecycle states are:
 

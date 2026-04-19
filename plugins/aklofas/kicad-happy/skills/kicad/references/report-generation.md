@@ -2,6 +2,76 @@
 
 Guide for producing comprehensive design review reports from analyzer output + raw file cross-referencing. These reports help EE designers validate their designs before committing to fabrication.
 
+## Minimum Review Contract
+
+This reference is not optional reading for full design reviews. If the user asks for a complete review, ready-to-fab assessment, or comprehensive report, the resulting report must satisfy this minimum contract:
+
+1. Name the analyzers that were actually run.
+2. Name the applicable analyzers that were not run, and why.
+3. Separate verified findings from inference-only findings.
+4. Put blockers and warnings near the top.
+5. Triage obvious false positives instead of repeating analyzer output unfiltered.
+6. State verification gaps explicitly when datasheets, thermal, lifecycle, gerbers, or prior-review delta were not available.
+
+If the review does not meet this contract, it is an incomplete review, not a full one.
+
+## Required Sections for Full Reviews
+
+These sections are expected in a complete design review unless genuinely not applicable:
+
+- Overview
+- Previous Review Delta, when a prior review or prior runs exist
+- Critical Findings
+- Component Summary
+- Power Tree
+- Analyzer Verification
+- Signal Analysis Review
+- Power Analysis
+- PCB Layout Analysis, when a PCB exists
+- Thermal Analysis or an explicit note that thermal analysis was not performed
+- EMC / Cross-Domain Analysis when schematic and PCB both exist
+- Component Lifecycle or an explicit note that lifecycle audit was not performed
+- Manufacturing / DFM / testability
+- False Positives / reviewer overrides
+- Not Performed / Review Limits
+- Final verdict / readiness statement
+
+## Evidence Basis Rules
+
+Every substantive finding should make its evidence basis clear. Use these categories consistently:
+
+- **Datasheet-verified** — checked against the manufacturer PDF, with page / figure / table / equation citation
+- **Extraction-verified** — checked against structured datasheet extraction in `datasheets/extracted/`
+- **Raw-file verified** — checked against the raw `.kicad_sch`, `.kicad_pcb`, or fabrication files
+- **Analyzer-derived** — came from analyzer output and was accepted after review
+- **Inference-only** — plausible engineering reasoning, but not directly verified against datasheet or raw file
+
+Do not use the word "verified" for analyzer-only or inference-only claims.
+
+## Skipped Analysis Disclosure
+
+If any applicable analysis was not run, include a short section in the report that says so explicitly. Do not bury omissions in prose or leave them unstated.
+
+Recommended format:
+
+```markdown
+## Not Performed / Review Limits
+
+- Thermal analysis not performed — reason.
+- Lifecycle audit not performed — reason.
+- Gerber analysis not performed — no fabrication outputs present.
+- Datasheet extraction not available — pin-level checks are datasheet-manual or inference-only.
+```
+
+## False-Positive Triage
+
+A good design review is not a transcript of analyzer output. For findings likely to be layout artifacts, intentional keepouts, expected RF-module courtyard behavior, or known heuristic overreach:
+
+- either dismiss them explicitly with reasoning
+- or downgrade them and explain the residual risk
+
+If a finding was reviewed and judged benign, keep it in a "False Positives / Reviewer Overrides" section so the reader can see that it was considered rather than missed.
+
 ## Contents
 
 | Section | Line | Purpose |

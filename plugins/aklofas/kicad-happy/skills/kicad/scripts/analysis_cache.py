@@ -19,6 +19,7 @@ import json
 import os
 import shutil
 import sys
+import tempfile
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -109,6 +110,23 @@ def ensure_analysis_dir(project_dir: str,
     return analysis_dir
 
 
+def resolve_analysis_dir(path: str) -> str:
+    """Return a canonical analysis-dir path.
+
+    Command-line ``--analysis-dir`` paths should be interpreted the same way
+    across all analyzers:
+    - absolute paths stay absolute
+    - relative paths are resolved from the current working directory
+
+    Do not anchor ``path`` to the input schematic/PCB file's directory. When
+    callers already pass a project-relative path like ``hardware/foo/analysis``
+    alongside a project-relative input file like ``hardware/foo/design.kicad_*``,
+    joining them would incorrectly duplicate the prefix as
+    ``hardware/foo/hardware/foo/analysis``.
+    """
+    return os.path.abspath(path)
+
+
 # ---------------------------------------------------------------------------
 # Manifest I/O
 # ---------------------------------------------------------------------------
@@ -138,11 +156,19 @@ def load_manifest(analysis_dir: str) -> Dict[str, Any]:
 
 def save_manifest(analysis_dir: str, manifest: Dict[str, Any]) -> None:
     """Write manifest.json atomically (write-to-temp then rename)."""
+    os.makedirs(analysis_dir, exist_ok=True)
     manifest_path = os.path.join(analysis_dir, MANIFEST_FILENAME)
-    tmp_path = manifest_path + '.tmp'
-    with open(tmp_path, 'w', encoding='utf-8') as f:
+    with tempfile.NamedTemporaryFile(
+        mode='w',
+        encoding='utf-8',
+        dir=analysis_dir,
+        prefix=MANIFEST_FILENAME + '.',
+        suffix='.tmp',
+        delete=False,
+    ) as f:
         json.dump(manifest, f, indent=2)
         f.write('\n')
+        tmp_path = f.name
     os.replace(tmp_path, manifest_path)
 
 

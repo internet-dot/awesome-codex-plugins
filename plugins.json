@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
-  "last_updated": "2026-04-17",
-  "total": 42,
+  "last_updated": "2026-04-19",
+  "total": 43,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -368,6 +368,16 @@
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/talkstream/ru-text/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Rust Reverse Engineering",
+      "url": "https://github.com/jingjing2222/rust-reverse-engineering-skill",
+      "owner": "jingjing2222",
+      "repo": "rust-reverse-engineering-skill",
+      "description": "Reverse engineer Rust binaries and libraries: triage targets, demangle symbols, recover crate namespaces, and map panic, unwind, async, and FFI paths.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/jingjing2222/rust-reverse-engineering-skill/main/.codex-plugin/plugin.json"
     },
     {
       "name": "sitemd",

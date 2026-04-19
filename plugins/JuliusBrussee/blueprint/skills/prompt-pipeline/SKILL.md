@@ -169,16 +169,16 @@ Agent Team Structure:
   Lead (delegate mode -- never writes code directly)
   +-- Teammate A: domain-auth
   |   Owns: src/auth/*, context/impl/impl-auth.md
-  |   Dispatch: Agent tool with isolation: "worktree"
+  |   Dispatch: Agent tool
   +-- Teammate B: domain-data
   |   Owns: src/data/*, context/impl/impl-data.md
-  |   Dispatch: Agent tool with isolation: "worktree"
+  |   Dispatch: Agent tool
   +-- Teammate C: domain-ui
       Owns: src/ui/*, context/impl/impl-ui.md
-      Dispatch: Agent tool with isolation: "worktree"
+      Dispatch: Agent tool
 ```
 
-**Why:** Agents need to understand their role and what they own. Dispatch subagents with `isolation: "worktree"` via the Agent tool for filesystem isolation. After merging a subagent's branch, the caller must clean up: `git worktree remove <path>` then `git branch -D <branch>`. Claude Code only auto-cleans worktrees when agents make no changes.
+**Why:** Agents need to understand their role and what they own. Dispatch subagents via the Agent tool. After merging a subagent's branch, the caller must clean up: `git branch -D <branch>`.
 
 ### 4.3 Batching Rules
 
@@ -241,7 +241,7 @@ You are implementing {DOMAIN} for the {PROJECT_NAME} project.
 
 ### Your Role
 - You own: {FILE_PATTERNS}
-- Isolation: dispatched via Agent tool with `isolation: "worktree"`
+- Dispatched via the Agent tool
 - Your impl tracking: context/impl/impl-{DOMAIN}.md
 
 ### Context to Read First

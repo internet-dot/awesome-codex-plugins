@@ -1,13 +1,13 @@
 # ⚡ kicad-happy
 
 [![CI](https://github.com/aklofas/kicad-happy/actions/workflows/ci.yml/badge.svg)](https://github.com/aklofas/kicad-happy/actions/workflows/ci.yml)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Mentioned in Awesome KiCad](https://awesome.re/mentioned-badge.svg)](https://github.com/joanbono/awesome-kicad)
 
 AI-powered design review for KiCad. Analyzes schematics, PCB layouts, and Gerbers. Catches real bugs before you order boards.
 
-Works with **[Claude Code](https://docs.anthropic.com/en/docs/claude-code)** and **[OpenAI Codex](https://github.com/openai/codex)**, as a **GitHub Action** for automated PR reviews, or as standalone Python scripts you can run anywhere.
+Works with **[Claude Code](https://docs.anthropic.com/en/docs/claude-code)**, **[OpenAI Codex](https://github.com/openai/codex)**, **[GitHub Copilot CLI](https://docs.github.com/en/copilot)**, and **[Gemini CLI](https://github.com/google-gemini/gemini-cli)**, as a **GitHub Action** for automated PR reviews, or as standalone Python scripts you can run anywhere.
 
 These skills turn your AI coding agent into a full-fledged electronics design assistant that understands your KiCad projects at a deep level: parses schematics and PCB layouts into structured data, cross-references component values against datasheets, detects common design errors, and walks you through the full prototype-to-production workflow.
 
@@ -90,6 +90,9 @@ For the end-to-end walkthrough from S-expression parsing through signal detectio
 
 ## 🚀 Install
 
+> [!TIP]
+> For detailed installation, upgrade, and troubleshooting guidance across all platforms, have your AI agent read [`install-guidance.md`](install-guidance.md). It covers platform-specific quirks, known bugs, workarounds, and OS-specific issues.
+
 **Claude Code:**
 
 ```
@@ -108,17 +111,19 @@ For the end-to-end walkthrough from S-expression parsing through signal detectio
 
 **OpenAI Codex:**
 
-Clone and open the repo in Codex — skills are auto-discovered from `.agents/skills/`:
+Use Codex's built-in skill installer first:
+
+> "Use $skill-installer to install the kicad-happy skills from https://github.com/aklofas/kicad-happy"
+
+If you prefer a manual install, install the skills into `~/.codex/skills/`.
+
+Clone the repo:
 
 ```bash
 git clone https://github.com/aklofas/kicad-happy.git
 ```
 
-Run `/plugins` to browse the repo-local plugin marketplace, or just start using the skills directly — Codex scans `.agents/skills/` automatically.
-
-To use the skills in your own hardware projects instead, ask your agent:
-
-> "Clone https://github.com/aklofas/kicad-happy and install all the skills"
+After installing new skills, restart Codex if they do not appear immediately.
 
 <details>
 <summary><strong>Manual install & other platforms</strong></summary>
@@ -129,7 +134,7 @@ To use the skills in your own hardware projects instead, ask your agent:
 git clone https://github.com/aklofas/kicad-happy.git
 cd kicad-happy
 mkdir -p ~/.claude/skills
-for skill in kicad spice emc bom digikey mouser lcsc element14 jlcpcb pcbway kidoc; do
+for skill in kicad spice emc datasheets bom digikey mouser lcsc element14 jlcpcb pcbway kidoc; do
   ln -sf "$(pwd)/skills/$skill" ~/.claude/skills/$skill
 done
 ```
@@ -139,9 +144,9 @@ done
 ```bash
 git clone https://github.com/aklofas/kicad-happy.git
 cd kicad-happy
-mkdir -p ~/.agents/skills
-for skill in kicad spice emc bom digikey mouser lcsc element14 jlcpcb pcbway kidoc; do
-  ln -sf "$(pwd)/skills/$skill" ~/.agents/skills/$skill
+mkdir -p ~/.codex/skills
+for skill in kicad spice emc datasheets bom digikey mouser lcsc element14 jlcpcb pcbway kidoc; do
+  ln -sf "$(pwd)/skills/$skill" ~/.codex/skills/$skill
 done
 ```
 
@@ -150,9 +155,9 @@ done
 ```powershell
 git clone https://github.com/aklofas/kicad-happy.git
 cd kicad-happy
-New-Item -ItemType Directory -Force "$HOME\.agents\skills" | Out-Null
-"kicad","spice","emc","bom","digikey","mouser","lcsc","element14","jlcpcb","pcbway","kidoc" | ForEach-Object {
-  New-Item -ItemType SymbolicLink -Path "$HOME\.agents\skills\$_" -Target "$(Get-Location)\skills\$_" -Force | Out-Null
+New-Item -ItemType Directory -Force "$HOME\.codex\skills" | Out-Null
+"kicad","spice","emc","datasheets","bom","digikey","mouser","lcsc","element14","jlcpcb","pcbway","kidoc" | ForEach-Object {
+  New-Item -ItemType SymbolicLink -Path "$HOME\.codex\skills\$_" -Target "$(Get-Location)\skills\$_" -Force | Out-Null
 }
 ```
 
@@ -160,7 +165,7 @@ Note: Windows symlinks may require Developer Mode or elevated privileges.
 
 </details>
 
-The analysis scripts are **pure Python 3.8+** with zero required dependencies. No pip install, no Docker, no KiCad installation needed.
+The analysis scripts are **pure Python 3.10+** with zero required dependencies. No pip install, no Docker, no KiCad installation needed.
 
 ## ⚙️ GitHub Action
 
@@ -471,7 +476,7 @@ v1.1 shipped the analysis engine. v1.2 makes it something you'd actually hand to
 
 | Category | Capabilities |
 | --- | --- |
-| **Codex support** | First-class OpenAI Codex — 11 skills auto-discovered from `.agents/skills/`, repo-local marketplace, agent-neutral docs. |
+| **Codex support** | First-class OpenAI Codex support with agent-neutral docs, skill-installer compatibility, and global installs via `~/.codex/skills/`. |
 | **KiDoc (beta)** | 8 document types, 12 figure generators, PDF/DOCX/ODT/HTML output. Scaffolds with auto-updating data + narrative placeholders. |
 | **Datasheet verification** | Pin voltage enforcement, required external component checks, per-IC decoupling validation against manufacturer specs. |
 | **What-if tools** | Sweep tables, tolerance analysis, fix suggestions with E-series snapping, EMC impact preview, PCB parasitic awareness. |

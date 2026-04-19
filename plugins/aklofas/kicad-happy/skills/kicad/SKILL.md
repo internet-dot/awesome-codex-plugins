@@ -38,6 +38,49 @@ description: >-
 
 **If you see a `DS-001` finding in the analyzer output** (severity `high`, detector `audit_datasheet_coverage`), the review cannot make any verified claim. Stop and either (a) run the datasheet sync via `digikey` / `mouser` / `lcsc` / `element14` (whichever has credentials/stock), (b) populate MPNs on the BOM parts, or (c) state explicitly in the report that every pin-level, electrical, and regulator finding is *consistency only* — do not use the words "verified", "confirmed", or "per datasheet" anywhere. `DS-002` (datasheets missing but MPNs set) and `DS-003` (partial MPN coverage) are softer variants with the same implication for the parts they cite.
 
+## Design Review Contract
+
+When the user asks for a **design review**, **complete report**, **ready-to-fab assessment**, or anything equivalent, do not stop at running one or two analyzers and summarizing their findings. A design review in this skill has a stricter contract:
+
+1. Read the full workflow in this `SKILL.md`, not just the analyzer command sections.
+2. Read `references/report-generation.md` before writing the report.
+3. Run every applicable analyzer for the files present in the project, then say explicitly which ones were and were not run.
+4. Perform raw-file and datasheet cross-verification before claiming anything is "verified".
+5. Triage likely analyzer false positives before elevating them into blockers.
+6. If a required step could not be done, state it as a review gap, not as silent omission.
+
+Treat this as the minimum bar. Analyzer JSON alone is not the final review.
+
+### Minimum Review Checklist
+
+For a full design review, explicitly account for each item below in the report:
+
+- `datasheets/` present, synced, or verification gap stated
+- `analyze_schematic.py`
+- `analyze_pcb.py --full`
+- `cross_analysis.py`
+- `analyze_emc.py`
+- SPICE simulation when any simulator is installed
+- `analyze_thermal.py` when both schematic and PCB JSON exist
+- `analyze_gerbers.py` when fabrication outputs exist
+- lifecycle audit when network access and MPN coverage allow it
+- prior review / prior run delta check
+- raw schematic/PCB spot-verification elevated to full verification for critical parts
+- explicit report sections for blockers, verification basis, false positives, and skipped analyses
+
+If an item is not applicable, say why. If it was skipped, say why. If it failed, say how that limits confidence.
+
+### Common Review Failure Modes
+
+These are the failure modes this contract is meant to prevent:
+
+- Stopping after schematic + PCB + EMC output and calling it a complete review
+- Reporting analyzer findings without checking whether they are expected layout artifacts
+- Claiming "verified" without direct datasheet evidence or structured extraction evidence
+- Omitting thermal, lifecycle, prior-review delta, or gerber checks without disclosure
+- Writing a report that lacks a verdict, blockers table, verification basis, or skipped-analysis notes
+- Reading only the first part of this skill and missing the design-review workflow later in the file
+
 ## PDF Schematic Analysis
 
 This skill also handles **PDF schematics** — reference designs, dev board schematics, eval board docs, application notes, and datasheet typical-application circuits. Common use cases:
@@ -358,6 +401,8 @@ drill_classification, pad_summary, board_dimensions, gerbers, drills
 
 **Workflow:** When analyzing a KiCad project, scan the project directory for all available file types and run **every applicable analyzer** — not just the one the user mentioned. A complete analysis uses all the data available. Use `--analysis-dir analysis/` on all analyzers to share a single run folder tracked by the manifest. For one-off runs without cache tracking, use `--output file.json` instead.
 
+**Before starting the workflow below for a design review:** read `references/report-generation.md`. The report structure, verification basis rules, skipped-analysis disclosure, and false-positive triage expectations there are part of the review workflow, not optional polish added at the end.
+
 1. **Scan the project directory** for `.kicad_sch`, `.kicad_pcb`, `.kicad_pro`, gerber directories, and `.net`/`.xml` netlist files.
 2. **Sync datasheets** (see Datasheet Acquisition below) — this is a prerequisite for verification, not optional. Without datasheets, all subsequent verification is reduced to internal consistency checks — confirming the design agrees with itself, not that it's correct. Run the sync before reading any analyzer output. If sync fails or no API keys are available, use fallback methods (Datasheet property URLs, individual downloads via `digikey` skill, ask the user). If critical IC datasheets can't be obtained, note this prominently in the report as a verification gap.
 3. **Run the core analyzers.** If the schematic exists, run `analyze_schematic.py`. If the PCB exists, run `analyze_pcb.py --full`. If gerbers exist, run `analyze_gerbers.py`. Run them in parallel when possible.
@@ -370,6 +415,7 @@ drill_classification, pad_summary, board_dimensions, gerbers, drills
 10. **Check for prior design reviews** — scan the project directory for existing review files (`*review*.md`, `*design-review*.md`). If found, read the most recent one. If `auto_diff` is enabled and prior runs exist, run `diff_analysis.py` on current vs previous run and include the delta in the "Previous Review Delta" section.
 11. **Verify each output** against the raw files and datasheets before using the data in your report.
 12. **Produce a unified report** covering schematic analysis, PCB layout analysis, cross-domain findings, EMC risk assessment, simulation verification, thermal hotspots, and cross-reference findings. See `references/report-generation.md` for the report template.
+13. **Disclose all review gaps explicitly** — if thermal, lifecycle, gerber, datasheet extraction, or prior-review delta were not performed, add a short "Not performed / limits" section to the report instead of omitting them silently.
 
 The more data sources you combine, the more confident the analysis. A schematic-only review misses layout issues; a PCB-only review misses design intent. Always use everything available.
 

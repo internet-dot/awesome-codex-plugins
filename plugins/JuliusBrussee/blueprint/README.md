@@ -16,106 +16,46 @@
 </p>
 
 <p align="center">
+  <a href="#the-loop">The loop</a> •
   <a href="#install">Install</a> •
-  <a href="#before--after">Before/After</a> •
-  <a href="#how-it-works">How It Works</a> •
-  <a href="#quick-start">Quick Start</a> •
-  <a href="#parallel-execution">Parallel Execution</a> •
-  <a href="#codex-adversarial-review">Codex Review</a> •
+  <a href="#your-first-run">Your first run</a> •
+  <a href="#adding-to-an-existing-repo">Existing repo</a> •
   <a href="#commands">Commands</a> •
+  <a href="#how-it-works">How it works</a> •
   <a href="example.md">Examples</a>
 </p>
 
 <p align="center">
-  Part of the <a href="https://github.com/JuliusBrussee/caveman">Caveman</a> ecosystem
+  <strong>🪨 Caveman Ecosystem</strong> &nbsp;·&nbsp;
+  <a href="https://github.com/JuliusBrussee/caveman">caveman</a> <em>talk less</em> &nbsp;·&nbsp;
+  <a href="https://github.com/JuliusBrussee/cavemem">cavemem</a> <em>remember more</em> &nbsp;·&nbsp;
+  <strong>cavekit</strong> <em>build better</em> <sub>(you are here)</sub>
 </p>
 
 ---
 
-A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin that turns natural language into **specs**, specs into **parallel build plans**, and build plans into **working software** — with automated iteration, validation, and dual-model adversarial review.
+A Cavekit bundle for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and [Codex](https://developers.openai.com/codex/skills) that turns natural language into **specs**, specs into **parallel build plans**, and build plans into **working software** — with an autonomous loop, validation gates, and optional cross-model review.
 
-You describe what you want. Cavekit writes the contract. Agents build from the contract. Every line of code traces to a requirement. Every requirement has acceptance criteria. Nothing gets lost, nothing gets guessed.
-
-## Before / After
-
-<table>
-<tr>
-<td width="50%">
-
-### Without Cavekit
-
-```
-> Build me a task management API
-
-  (agent writes 2000 lines)
-  (no tests)
-  (forgot the auth middleware)
-  (wrong database schema)
-  (you spend 3 hours fixing it)
-```
-
-One shot. No validation. No traceability.
-The agent guessed what you wanted.
-
-</td>
-<td width="50%">
-
-### With Cavekit
-
-```
-> /ck:sketch
-  4 kits, 22 requirements, 69 criteria
-
-> /ck:map
-  34 tasks across 5 dependency tiers
-
-> /ck:make
-  18 iterations — each validated against
-  the spec before committing
-
-  CAVEKIT COMPLETE
-```
-
-Every requirement traced. Every criterion checked.
-
-</td>
-</tr>
-</table>
-
-**Same feature. Zero guesswork. Full traceability.**
+You describe what you want. Cavekit writes the contract. Agents build from the contract. Every line of code traces to a requirement. Every requirement has acceptance criteria.
 
 ---
 
-## The Problem
-
-AI coding agents are powerful, but they fail the same way every time:
-
-| Failure | What Happens |
-|---------|-------------|
-| **Context loss** | Agent forgets what it said three steps ago |
-| **No validation** | Code written, never verified against intent |
-| **No parallelism** | One agent, one task, one branch — even when work is independent |
-| **No iteration** | Single pass produces a rough draft, not production code |
-
-Cavekit fixes all four.
-
----
-
-## The Idea
-
-Instead of "prompt and pray," Cavekit puts a **specification layer** between your intent and the code.
+## The Loop
 
 ```
-                        ┌─── Task 1 ─── Agent A ───┐
-                        │                           │
-You ── /ck:sketch ──► Kits ── /ck:map ──► Build Site ──┤─── Task 2 ─── Agent B ───┤──► done
-                        │                           │
-                        └─── Task 3 ─── Agent C ───┘
+/ck:sketch   →   /ck:map   →   /ck:make   →   /ck:check
+ what to         how to        build it       verify
+  build          build it                       it
 ```
 
-Kits are the source of truth. Agents read them, build from them, validate against them. When something breaks, the system traces the failure back to the kit — not the code.
+Four commands. In that order. That is the whole main cycle.
 
-Spec is the product. Code is the derivative.
+- **`/ck:sketch`** — decompose your project into domains, write kits with R-numbered requirements and testable acceptance criteria.
+- **`/ck:map`** — read kits, generate a tiered build site with a task dependency graph.
+- **`/ck:make`** — autonomous parallel build loop. Ready tasks grouped into packets, validated, merged wave by wave. Runs until all tasks are done or a budget trips.
+- **`/ck:check`** — gap analysis against kits + peer review of the code. Produces an APPROVE / REVISE / REJECT verdict and auto-amends kits when gaps appear.
+
+One shortcut: **`/ck:ship "<description>"`** runs all four end-to-end with no user gates. For tiny features and throwaways — the guided path is better for anything non-trivial, because the design conversation is where the value is.
 
 ---
 
@@ -126,11 +66,123 @@ git clone https://github.com/JuliusBrussee/cavekit.git ~/.cavekit
 cd ~/.cavekit && ./install.sh
 ```
 
-Registers the plugin with Claude Code, syncs into Codex marketplace, installs the `cavekit` CLI. Restart Claude Code after installing.
+Configures Cavekit for Claude Code, links the Codex bundle, and installs the `cavekit` CLI. Restart Claude Code and Codex after installing.
+
+### Agent Surfaces
+
+- **Claude Code**: Cavekit is consumed primarily as slash commands and subagents. Anthropic's public docs describe project and user commands under `.claude/commands/` and subagents under `.claude/agents/`.
+- **Codex**: Cavekit is consumed as Codex skills and plugin-bundled assets. OpenAI's docs describe skills as `SKILL.md`-based workflows, with plugins as the installable distribution unit.
+- Cavekit ships both surfaces so the same methodology can be used from Claude Code and Codex, but they are **not** the same extension mechanism under the hood.
 
 **Requires:** [Claude Code](https://docs.anthropic.com/en/docs/claude-code), git, macOS/Linux.
 
-**Optional:** [Codex](https://github.com/openai/codex) (`npm install -g @openai/codex`) — adds adversarial review. Cavekit works without it. Codex makes it significantly harder to ship flawed specs and broken code.
+**Optional:** [Codex](https://github.com/openai/codex) (`npm install -g @openai/codex`) — adds adversarial review. Cavekit works without it.
+
+---
+
+## Your First Run
+
+Greenfield. New repo. You want a task-management API.
+
+```
+> /ck:init
+  Context hierarchy created. Capabilities detected.
+  Next: /ck:sketch
+
+> /ck:sketch
+  What are you building?
+
+> A REST API for task management. Users, projects, tasks with
+  priorities and due dates. PostgreSQL.
+
+  (design conversation — research if warranted, domain decomposition,
+   acceptance criteria refinement)
+
+  4 kits, 22 requirements, 69 acceptance criteria.
+  Next: /ck:map
+
+> /ck:map
+  34 tasks across 5 tiers. Coverage: 69/69 criteria mapped.
+  Next: /ck:make
+
+> /ck:make
+  Loop active — 34 tasks, 20 max iterations.
+  Wave 1 (3 tasks), Wave 2 (4 tasks), …
+  ALL TASKS DONE. Build passes. Tests pass.
+  Next: /ck:check
+
+> /ck:check
+  Coverage: 100%. Verdict: APPROVE.
+  CAVEKIT COMPLETE
+```
+
+That is the experience.
+
+## Adding to an Existing Repo
+
+Same loop, different first command.
+
+```
+> /ck:sketch --from-code
+  Scanning repo… Next.js 14, Prisma, NextAuth.
+  6 kits reverse-engineered. 4 requirements flagged as gaps (not yet implemented).
+  Next: /ck:map --filter collaboration   (or whichever domain you're adding to)
+
+> /ck:map --filter collaboration
+  8 tasks, 3 tiers.
+  Next: /ck:make
+
+> /ck:make
+  …
+
+> /ck:check
+  Verdict: APPROVE. Design-system compliance: 100%.
+```
+
+See [example.md](example.md) for fully annotated sessions.
+
+---
+
+## Commands
+
+The main cycle is four commands. Everything else is optional.
+
+### Core
+
+| Command | Phase | What it does |
+|---------|-------|--------------|
+| `/ck:sketch` | Draft | Decompose into domains; write kits with R-numbered requirements and testable acceptance criteria |
+| `/ck:map` | Architect | Generate a tiered build site (task dependency graph) from kits |
+| `/ck:make` | Build | Autonomous parallel build loop; validates each task against its criteria |
+| `/ck:check` | Inspect | Gap analysis + peer review; verdict APPROVE / REVISE / REJECT |
+| `/ck:ship` | End-to-end | One-shot sketch → map → make → check, no user gates. Tiny features only. |
+
+### Auxiliary
+
+| Command | What it does |
+|---------|--------------|
+| `/ck:init` | Bootstrap `context/` and `.cavekit/` runtime state. `--tools-only` re-detects capabilities. |
+| `/ck:design` | Create / import / update / audit `DESIGN.md` (9-section visual system) |
+| `/ck:research` | Parallel multi-agent research → brief in `context/refs/` |
+| `/ck:revise` | Trace manual fixes back into kits. `--trace` runs the single-failure backpropagation protocol (auto-invoked on test failure). |
+| `/ck:review` | Branch review: kit compliance + code quality. `--mode gap`, `--codex`, `--tier`, `--strict` narrow scope. |
+| `/ck:status` | Task frontier and runtime state. `--watch` tails the live dashboard. |
+| `/ck:config` | Execution presets and runtime keys. `--global` writes to `~/.cavekit/config`. |
+| `/ck:resume` | Recover an interrupted loop. |
+| `/ck:team` | Multi-person / multi-device coordination (opt-in). See [Teams](#teams). |
+| `/ck:help` | Command reference. |
+
+Run `/ck:help` for flag-level detail on any command.
+
+### CLI
+
+| Command | What it does |
+|---------|--------------|
+| `cavekit monitor` | Interactive launcher — pick build sites, launch in tmux |
+| `cavekit status` | Build site progress |
+| `cavekit kill` | Stop all sessions, clean up worktrees |
+| `cavekit version` | Print version |
+| `cavekit reset` | Clear persisted state |
 
 ---
 
@@ -138,285 +190,79 @@ Registers the plugin with Claude Code, syncs into Codex marketplace, installs th
 
 Four phases. Each one a slash command.
 
-```
-  RESEARCH         DRAFT            ARCHITECT           BUILD              INSPECT
-  ────────         ─────            ─────────           ─────              ───────
-  (optional)       "What are we     Break into tasks,   Auto-parallel:     Gap analysis:
-  Multi-agent       building?"      map dependencies,    /ck:make          built vs.
-  codebase +                        organize into        groups work        intended.
-  web research     Produces:        tiered build site    into adaptive      Peer review.
-                   kits with        + dependency graph   subagent packets   Trace to specs.
-  Produces:        R-numbered                            tier by tier
-  research brief   requirements     Produces:                               Produces:
-                                    task graph           Codex reviews      findings report
-                   Codex challenges                      every tier gate
-                   the design
-```
+### 1. Sketch — define the what
 
-### 0. Research — ground the design (optional)
+Describe what you're building in natural language. Cavekit decomposes it into **domain kits** — structured documents with numbered requirements (R1, R2, …) and testable acceptance criteria. Stack-independent. Human-readable.
 
-```
-/ck:research "build a C+ compiler"
-```
+If Codex is installed, kits go through a [design challenge](#codex-review-modes) — adversarial review that catches decomposition flaws before any code is written.
 
-Dispatches 2–8 parallel subagents to explore the codebase and search the web for best practices, library landscape, reference implementations, and common pitfalls. A synthesizer agent cross-validates findings and produces a research brief in `context/refs/`.
+Brownfield: `/ck:sketch --from-code` reverse-engineers kits from your code and flags gaps.
 
-### /ck:design — establish the design system
+### 2. Map — plan the order
 
-```
-/ck:design
-```
+Reads every kit. Breaks requirements into tasks. Maps dependencies. Organizes into a **tiered build site** — a dependency graph where Tier 0 has no deps, Tier 1 depends only on Tier 0, and so on. Includes a Coverage Matrix mapping every acceptance criterion to its task(s). Nothing specified gets lost in translation.
 
-Creates or imports a **DESIGN.md** design system — a cross-cutting constraint layer enforced across the entire pipeline. Every kit references its design tokens, every task carries a Design Ref, every build result is audited for violations.
-
-| Sub-command | What it does |
-|------------|-------------|
-| `/ck:design create` | Generate new DESIGN.md via guided Q&A |
-| `/ck:design import` | Extract DESIGN.md from existing codebase |
-| `/ck:design audit` | Check implementation against DESIGN.md |
-| `/ck:design update` | Revise DESIGN.md, log to changelog |
-
-### 1. Draft — define the what
-
-```
-/ck:sketch
-```
-
-Describe what you're building in natural language. Cavekit decomposes it into **domain kits** — structured documents with numbered requirements (R1, R2, ...) and testable acceptance criteria. Stack-independent. Human-readable.
-
-After internal review, kits go to Codex for a [design challenge](#design-challenge--catch-spec-flaws-before-building) — adversarial review that catches decomposition flaws, missing requirements, and ambiguous criteria before any code is written.
-
-For existing codebases: `/ck:sketch --from-code` reverse-engineers kits from your code and identifies gaps.
-
-### 2. Architect — plan the order
-
-```
-/ck:map
-```
-
-Reads all kits. Breaks requirements into tasks. Maps dependencies. Organizes into a **tiered build site** — a dependency graph where Tier 0 has no deps, Tier 1 depends only on Tier 0, and so on. Includes a **Coverage Matrix** mapping every acceptance criterion to its task(s). Nothing specified gets lost in translation.
-
-### 3. Build — run the loop
-
-```
-/ck:make
-```
+### 3. Make — run the loop
 
 Pre-flight coverage check validates all acceptance criteria are covered. Then the loop runs:
 
 ```
-  ┌──────────────────────────────────────────────────────┐
-  │                                                      │
-  │  Read build site → Find next unblocked task          │
-  │       │                                              │
-  │       ▼                                              │
-  │  Load relevant kit + acceptance criteria             │
-  │       │                                              │
-  │       ▼                                              │
-  │  Implement the task                                  │
-  │       │                                              │
-  │       ▼                                              │
-  │  Validate (build + tests + acceptance criteria)      │
-  │       │                                              │
-  │       ├── PASS → commit → mark done → next ──┐      │
-  │       │                                       │      │
-  │       └── FAIL → diagnose → fix → revalidate  │      │
-  │                                               │      │
-  │  ◄────────────────────────────────────────────┘      │
-  │                                                      │
-  │  Loop until: all tasks done OR limit reached         │
-  └──────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────┐
+│  Read build site → Find next unblocked task          │
+│       ▼                                              │
+│  Load kit + acceptance criteria                      │
+│       ▼                                              │
+│  Implement task                                      │
+│       ▼                                              │
+│  Validate (build + tests + acceptance criteria)      │
+│       ▼                                              │
+│  PASS → commit → mark done → next ──┐                │
+│  FAIL → diagnose → fix → revalidate │                │
+│  ◄──────────────────────────────────┘                │
+│                                                      │
+│  Loop until: all tasks done OR budget exhausted      │
+└──────────────────────────────────────────────────────┘
 ```
 
-At every tier boundary, [Codex adversarial review](#codex-adversarial-review) gates advancement. P0/P1 findings must be fixed before the next tier starts. With speculative review (default), this adds near-zero latency.
-
-Post-flight verification cross-references what was built against original kits. Gaps get remediation tasks.
-
-### 4. Inspect — verify the result
-
-```
-/ck:check
-```
-
-Gap analysis: built vs. specified. Peer review: bugs, security, missed requirements. Everything traced back to kit requirements.
-
----
-
-## Quick Start
-
-**Greenfield:**
-
-```
-> /ck:sketch
-What are you building?
-
-> A REST API for task management. Users, projects, tasks
-  with priorities and due dates. PostgreSQL.
-
-Created 4 kits (22 requirements, 69 acceptance criteria)
-Next: /ck:map
-
-> /ck:map
-Generated build site: 34 tasks, 5 tiers
-Next: /ck:make
-
-> /ck:make
-Loop activated — 34 tasks, 20 max iterations.
-...
-All tasks done. Build passes. Tests pass.
-CAVEKIT COMPLETE — 34 tasks in 18 iterations.
-```
-
-**Existing codebase:**
-
-```
-> /ck:sketch --from-code
-Exploring codebase... Next.js 14, Prisma, NextAuth.
-Created 6 kits — 4 requirements are gaps (not yet implemented).
-
-> /ck:map --filter collaboration
-Generated build site: 8 tasks, 3 tiers
-
-> /ck:make
-CAVEKIT COMPLETE — 8 tasks in 8 iterations.
-```
-
-See [example.md](example.md) for full annotated sessions.
-
----
-
-## Parallel Execution
-
-`/ck:make` parallelizes automatically. Multiple ready tasks get grouped into coherent work packets and dispatched concurrently.
+`/ck:make` parallelizes automatically. Multiple ready tasks get grouped into coherent work packets and dispatched concurrently:
 
 ```
 ═══ Wave 1 ═══
 3 task(s) ready:
-  T-001: Database schema       (tier 0, deps: none)
-  T-002: Auth middleware        (tier 0, deps: none)
-  T-003: Config loader          (tier 0, deps: none)
+  T-001: Database schema   (tier 0)
+  T-002: Auth middleware   (tier 0)
+  T-003: Config loader     (tier 0)
 
-Dispatching 2 grouped subagents...
-All 3 tasks complete. Merging...
+Dispatching 2 grouped subagents…
+All 3 tasks complete. Merging…
 
 ═══ Wave 2 ═══
 2 task(s) ready:
-  T-004: User endpoints         (tier 1, deps: T-001, T-002)
-  T-005: Health check           (tier 1, deps: T-003)
-
-Dispatching 2 grouped subagents...
-All done.
-
-═══ BUILD COMPLETE ═══
-Waves: 2 | Tasks: 5/5
+  T-004: User endpoints    (tier 1, deps: T-001, T-002)
+  T-005: Health check      (tier 1, deps: T-003)
+…
 ```
 
-| Step | What happens |
-|------|-------------|
-| **Compute frontier** | Find all tasks whose dependencies are complete |
-| **Group** | Bundle frontier into work packets by shared files, subsystem, task size |
-| **Dispatch** | Run packets as parallel subagents |
-| **Merge** | Collect results, compute next frontier |
-| **Repeat** | Wave-by-wave until all tasks done — no manual intervention |
+Circuit breakers prevent infinite loops: 3 test failures → task BLOCKED; all blocked → stop and report.
 
-Circuit breakers prevent infinite loops: 3 test failures → task BLOCKED, all blocked → stop and report.
+At every tier boundary, optional [Codex review](#codex-review-modes) gates advancement. P0/P1 findings must be fixed before the next tier starts. Speculative review (default) adds near-zero latency.
+
+### 4. Check — verify the result
+
+Gap analysis: built vs. specified. Peer review: bugs, security, missed requirements. Everything traced back to kit requirements. Verdict: APPROVE / REVISE / REJECT. Gaps feed back as remediation tasks.
 
 ---
 
-## Codex Adversarial Review
+## Design System (optional)
 
-Cavekit uses [Codex](https://github.com/openai/codex) as an adversarial reviewer — a second model with different training and different blind spots. Catches things Claude cannot see in its own output. Operates at three levels:
-
-### Design Challenge — catch spec flaws before building
-
-After kits are drafted and internally reviewed, the full set goes to Codex:
+If the project has UI, run `/ck:design` first. It creates or imports `DESIGN.md` — a 9-section Google-Stitch-format design system. Every kit then references its design tokens; every UI task carries a Design Ref; every build result is audited for design violations during `/ck:check`.
 
 ```
-Claude drafts            Kit set             Codex challenges         User reviews
-kits ──────► reviewer approves ──────► the design ──────► kits + findings
+/ck:design                       # interactive
+/ck:design --import vercel       # start from a known system
+/ck:design --from-site <url>     # extract tokens from a live site
+/ck:design --audit               # gap-check an existing DESIGN.md
 ```
-
-| Finding type | Behavior |
-|-------------|----------|
-| **Critical** | Must fix before building. Auto-fix loop, up to 2 cycles |
-| **Advisory** | Presented alongside kits at user review gate |
-
-No implementation feedback allowed. No framework suggestions. Only design-level concerns that would cause real problems during build.
-
-### Tier Gate — catch code defects between tiers
-
-Every completed tier triggers a Codex code review before advancing:
-
-```
-═══ Tier 0 Complete ═══
-Codex reviews diff (T-001, T-002, T-003) ...
-Review: 2 findings (1 P0, 1 P3)
-Gate: BLOCKED → fix cycle 1/2
-
-Fixing P0: nil pointer in auth middleware ...
-Re-review ...
-Gate: PROCEED
-
-═══ Tier 1 starting ═══
-```
-
-| Severity | Behavior |
-|----------|----------|
-| **P0** (critical) | Blocks advancement. Auto-generates fix task |
-| **P1** (high) | Blocks advancement. Auto-generates fix task |
-| **P2** (medium) | Logged, does not block |
-| **P3** (low) | Logged, does not block |
-
-Gate modes: `severity` (default — P0/P1 block), `strict` (all block), `permissive` (nothing blocks), `off`.
-
-Fix cycle runs up to 2 iterations per tier. After that, advances with warning. Never deadlocks.
-
-### Speculative Review — eliminate gate latency
-
-Codex reviews the *previous* tier in the background while Claude builds the *current* tier:
-
-```
-Tier 0 complete ───────────────────────────► Tier 1 complete
-     │                                            │
-     └── Codex reviews Tier 0 (background) ──────►│
-                                                   │
-                         Results ready ◄───────────┘
-                         before gate runs
-```
-
-Results are already available when the gate checks. Near-zero latency. Falls back to synchronous if needed.
-
-### Command Safety Gate
-
-PreToolUse hook intercepts every Bash command before execution:
-
-```
-Agent runs command
-     │
-     ▼
-Fast-path check ──► allowlist (50+ safe commands) → approve
-     │           └► blocklist (rm -rf, force push, DROP TABLE) → block
-     │
-     ▼ (ambiguous)
-Codex classifies ──► safe / warn / block
-     │
-     ▼ (cached)
-Verdict cache ──► normalized pattern → reuse verdict
-```
-
-Integrates with Claude Code's permission system. Cached per session. Falls back to static rules when Codex is unavailable — never blocks solely because classifier is unreachable.
-
-### Graceful Degradation
-
-All Codex features are **additive**. Without Codex installed:
-
-| Feature | Fallback |
-|---------|----------|
-| Design challenge | Skipped — internal reviewer still runs |
-| Tier gate | Skipped — build proceeds without review pauses |
-| Command gate | Static allowlist/blocklist only |
-
-Cavekit works the same. Codex makes it harder to ship bad specs and bad code.
 
 ---
 
@@ -429,93 +275,275 @@ Settings live in two places:
 | `~/.cavekit/config` | User default |
 | `.cavekit/config` | Project override (takes precedence) |
 
-| Setting | Values | Default | Purpose |
-|---------|--------|---------|---------|
-| `bp_model_preset` | `expensive` `quality` `balanced` `fast` | `quality` | Model selection for Cavekit commands |
-| `codex_review` | `auto` `off` | `auto` | Enable/disable Codex reviews |
-| `codex_model` | model string | (Codex default) | Model for Codex calls |
-| `tier_gate_mode` | `severity` `strict` `permissive` `off` | `severity` | How findings gate tier advancement |
-| `command_gate` | `all` `interactive` `off` | `all` | Which sessions get command gating |
-| `command_gate_timeout` | milliseconds | `3000` | Codex safety classification timeout |
-| `speculative_review` | `on` `off` | `on` | Background review of previous tier |
-| `speculative_review_timeout` | seconds | `300` | Max wait for speculative results |
-| `caveman_mode` | `on` `off` | `on` | Token-compressed output (~75% savings) |
-| `caveman_phases` | comma-separated | `build,inspect` | Which phases use caveman-speak |
-
-**Model presets:**
+### Model Presets
 
 | Preset | Reasoning | Execution | Exploration |
 |--------|-----------|-----------|-------------|
-| `expensive` | `opus` | `opus` | `opus` |
-| `quality` | `opus` | `opus` | `sonnet` |
-| `balanced` | `opus` | `sonnet` | `haiku` |
-| `fast` | `sonnet` | `sonnet` | `haiku` |
+| `expensive` | opus | opus | opus |
+| `quality` | opus | opus | sonnet |
+| `balanced` | opus | sonnet | haiku |
+| `fast` | sonnet | sonnet | haiku |
 
 ```
-/ck:config                      # show current
-/ck:config preset balanced      # change preset
-/ck:config preset fast --global # change default
+/ck:config                       # show current
+/ck:config preset balanced       # change preset for this repo
+/ck:config preset fast --global  # change default for all repos
 ```
+
+<details>
+<summary><strong>All configuration keys</strong></summary>
+
+| Setting | Values | Default | Purpose |
+|---------|--------|---------|---------|
+| `bp_model_preset` | `expensive` `quality` `balanced` `fast` | `quality` | Model selection |
+| `codex_review` | `auto` `off` | `auto` | Enable/disable Codex reviews |
+| `codex_model` | model string | (Codex default) | Model for Codex calls |
+| `tier_gate_mode` | `severity` `strict` `permissive` `off` | `severity` | How findings gate tier advancement |
+| `command_gate` | `all` `interactive` `off` | `all` | Command-gating scope |
+| `command_gate_timeout` | ms | `3000` | Codex classification timeout |
+| `speculative_review` | `on` `off` | `on` | Background review of previous tier |
+| `speculative_review_timeout` | s | `300` | Max wait for speculative results |
+| `caveman_mode` | `on` `off` | `on` | Token-compressed output (~75% savings) |
+| `caveman_phases` | comma-separated | `build,inspect` | Which phases use caveman-speak |
+| `session_budget` | tokens | `500000` | Loop token cap before auto-halt |
+| `max_iterations` | integer | `60` | Stop-hook iteration cap |
+| `task_budget_quick` | tokens | `8000` | Per-task budget for `depth: quick` |
+| `task_budget_standard` | tokens | `20000` | Per-task budget for `depth: standard` |
+| `task_budget_thorough` | tokens | `45000` | Per-task budget for `depth: thorough` |
+| `auto_backprop` | `on` `off` | `on` | Trigger backpropagation on test failure |
+| `tool_cache` | `on` `off` | `on` | Cache read-only tool results |
+| `tool_cache_ttl_ms` | ms | `120000` | TTL for cached tool results |
+| `test_filter` | `on` `off` | `on` | Condense test output around failures |
+| `progress_tracker` | `on` `off` | `on` | Write `.cavekit/.progress.json` |
+| `parallelism_max_agents` | integer | `3` | Max concurrent subagents per wave |
+| `parallelism_max_per_repo` | integer | `2` | Max concurrent subagents writing the same repo |
+| `model_routing` | `on` `off` | `on` | Score-based tier routing |
+| `graphify_enabled` | `on` `off` | `off` | Use knowledge-graph queries |
+
+</details>
 
 ---
 
-## Commands
+## Teams
 
-### Claude Code
+Cavekit has an **opt-in team mode** that lets multiple people — or the same person on multiple devices — safely share one build site without stepping on each other.
 
-| Command | Phase | What it does |
-|---------|-------|-------------|
-| `/ck:research` | Research | Multi-agent codebase + web research, produces brief |
-| `/ck:design` | Design | Create, import, audit, or update DESIGN.md |
-| `/ck:sketch` | Draft | Decompose requirements into domain kits |
-| `/ck:map` | Architect | Generate tiered build site from kits |
-| `/ck:make` | Build | Auto-parallel build with validation loop |
-| `/ck:check` | Inspect | Gap analysis + peer review against kits |
-| `/ck:config` | — | Show or update execution preset |
-| `/ck:judge` | — | Standalone Codex adversarial review on diff |
-| `/ck:progress` | — | Check build site progress |
-| `/ck:scan` | — | Compare built vs. intended |
-| `/ck:revise` | — | Trace manual fixes back into kits |
-| `/ck:help` | — | Usage guide |
+It is *not* a server. It's a CAS-backed ledger on its own git ref plus a pre-commit guard, so the coordination state travels with the repo and nothing else needs to be hosted.
 
-### CLI
+### Setup
 
-| Command | What it does |
-|---------|-------------|
-| `cavekit monitor` | Interactive launcher — pick build sites, launch in tmux |
-| `cavekit status` | Show build site progress |
-| `cavekit kill` | Stop all sessions, clean up worktrees |
-| `cavekit version` | Print version |
-| `cavekit debug` | Show state file path and version |
-| `cavekit reset` | Clear persisted state |
+```bash
+cavekit team init   # once, per repo — creates the ledger ref on origin and installs a pre-commit hook
+cavekit team join   # in every other checkout / clone / machine
+```
+
+### What it gives you
+
+- **Claims on tasks** — `cavekit team claim T-013` reserves a task for your identity. Teammates see it and `team next` skips it.
+- **Path-scoped claims** — two people can share one task if their file footprints are disjoint: `claim T-013 --paths "src/auth/**,tests/auth/**"`.
+- **Automatic path scoping from kits** — if the build site declares a `Files` column, claims default to those globs. No one has to guess.
+- **Pre-commit guard** — a local hook refuses to commit files another teammate has actively claimed. Emergency override: `CAVEKIT_TEAM_OVERRIDE=1 git commit …` (recorded in the ledger).
+- **Offline-safe** — claims and releases queue locally if you can't reach origin, and drain on the next successful op.
+- **No feature-branch pollution** — the ledger lives on `refs/heads/cavekit/team`, not on your working branch.
+
+### Declaring file footprints in kits (`Files` column)
+
+Add an optional trailing `Files` column to any build-site table. When present, the scheduler uses it for real path-overlap detection and `claim` auto-defaults to these globs:
+
+```markdown
+## Tier 0 — No Dependencies
+
+| Task  | Title       | Spec     | Requirement | Effort | Files                         |
+|-------|-------------|----------|-------------|--------|-------------------------------|
+| T-001 | Auth module | spec.md  | R1          | S      | src/auth/**, tests/auth/**    |
+
+## Tier 1 — Depends on Tier 0
+
+| Task  | Title   | Spec    | Requirement | blockedBy | Effort | Files                           |
+|-------|---------|---------|-------------|-----------|--------|---------------------------------|
+| T-003 | DB layer| spec.md | R2          | T-001     | M      | internal/db/**; migrations/**   |
+```
+
+Separate globs with commas (or semicolons if a pattern itself contains a comma). Kits without a `Files` column keep working — the scheduler falls back to coarser heuristics for those tasks.
+
+### Day-to-day
+
+```bash
+cavekit team status              # active claims, recent activity, idle members
+cavekit team status --conflicts  # add race/override/outbox diagnostics
+cavekit team next --json         # best unclaimed path-safe task for you
+cavekit team claim T-013         # paths default to the kit's Files column
+cavekit team release T-013 --complete
+cavekit team sync --timeout 5    # fetch ledger + drain offline outbox
+```
+
+`/ck:make` integrates automatically — when team mode is active, it claims packets before dispatch, runs a background heartbeat, and releases on merge or failure.
+
+Configuration lives in `.cavekit/team/config.json` (`lease_ttl_seconds`, `heartbeat_interval_seconds`, `allow_offline`, …). Exit codes and troubleshooting are in `/ck:team --help` and [`commands/team.md`](commands/team.md).
 
 ---
 
-## File Structure
+<details>
+<summary><strong>Codex review modes</strong></summary>
+
+Cavekit uses [Codex](https://github.com/openai/codex) as an adversarial reviewer — a second model with different training and different blind spots. Three levels:
+
+### Design Challenge — catch spec flaws before building
+
+After kits are drafted and internally reviewed, the full set goes to Codex.
+
+| Finding type | Behavior |
+|--------------|----------|
+| **Critical** | Must fix before building. Auto-fix loop, up to 2 cycles. |
+| **Advisory** | Presented alongside kits at user review gate. |
+
+Only design-level concerns. No implementation feedback.
+
+### Tier Gate — catch code defects between tiers
+
+Every completed tier triggers a Codex code review before advancing.
+
+| Severity | Behavior |
+|----------|----------|
+| **P0** (critical) | Blocks advancement. Auto-generates fix task. |
+| **P1** (high) | Blocks advancement. Auto-generates fix task. |
+| **P2** (medium) | Logged, does not block. |
+| **P3** (low) | Logged, does not block. |
+
+Gate modes: `severity` (default — P0/P1 block), `strict` (all block), `permissive` (nothing blocks), `off`.
+
+Fix cycle runs up to 2 iterations per tier. After that, advances with warning. Never deadlocks.
+
+### Speculative Review — eliminate gate latency
+
+Codex reviews the previous tier in the background while Claude builds the current tier. Results are ready when the gate checks. Near-zero latency. Falls back to synchronous if needed.
+
+### Command Safety Gate
+
+PreToolUse hook intercepts every Bash command. Fast-path allowlist (50+ safe commands) / blocklist (rm -rf, force push, DROP TABLE). Ambiguous commands → Codex classifies → safe / warn / block. Verdict cached per session. Falls back to static rules when Codex is unavailable — never blocks solely because classifier is unreachable.
+
+### Graceful Degradation
+
+Without Codex installed: design challenge skipped, tier gate skipped, command gate falls back to static allowlist. Cavekit works the same; Codex makes it harder to ship bad specs and bad code.
+
+</details>
+
+<details>
+<summary><strong>Autonomous runtime internals</strong></summary>
+
+`/ck:make` is an autonomous loop. A Claude Code **Stop hook** drives the session iteration by iteration until every task is complete or a budget trips a circuit breaker.
+
+- **`hooks/stop-hook.sh`** — state-machine driver. Fires on every Stop event, routes the next prompt, returns `{"decision":"block"}` so the session continues.
+- **`hooks/token-monitor.sh`** — PostToolUse budget guard. Warns at 80% of per-task budget, halts at 100%.
+- **`hooks/tool-cache.js` / `tool-cache-store.js`** — 120s TTL cache for read-only commands (`git status`, `ls`, `Read`, `Grep`, `Glob`).
+- **`hooks/test-output-filter.js`** — condenses test output around failures.
+- **`hooks/auto-backprop.js`** — on test failure, writes a flag file; next iteration prepends a trace directive.
+- **`hooks/progress-tracker.js`** — zero-stdout snapshot writer for `/ck:status --watch`.
+- **`scripts/cavekit-tools.cjs`** — orchestration engine: state machine, heartbeat lock, token ledger, task registry, routing, capability discovery, checkpoints, artifact summaries.
+- **`scripts/cavekit-router.cjs`** — model-tier router. Scores tasks across five axes, maps to haiku/sonnet/opus within each role's band, demotes under budget pressure.
+
+Runtime state under `<project>/.cavekit/`:
 
 ```
-context/
-├── kits/                     # Domain kits (persist across cycles)
-│   ├── kit-overview.md
-│   └── kit-{domain}.md
-├── designs/                  # Design system artifacts
+.cavekit/
+├── config.json
+├── state.md
+├── .loop.json
+├── .loop.lock
+├── token-ledger.json
+├── task-status.json
+├── capabilities.json
+├── .progress.json
+├── .auto-backprop-pending.json
+├── history/backprop-log.md
+└── tool-cache/
+```
+
+Agents end the loop cleanly by emitting `<promise>CAVEKIT COMPLETE</promise>` on its own line. Debug with `CAVEKIT_DEBUG=1`. Recover with `/ck:resume`.
+
+### Per-phase runtime calls
+
+| Phase | Runtime call |
+|-------|--------------|
+| `/ck:init` | `cavekit-tools init` + `discover`; seeds `.cavekit/` and `.gitignore` |
+| `/ck:sketch` | dispatches `ck:complexity` per kit to auto-fill `complexity:` |
+| `/ck:map` | writes `.cavekit/tasks.json` + `init-registry` + `cavekit-router` |
+| `/ck:make` | `setup-build.sh` calls `setup-loop`; stop-hook drives waves |
+| `/ck:check` | dispatches `ck:verifier` for goal-backward check |
+| `/ck:review` | two-pass review; fix-cycle emits fix tasks back into the loop |
+| `/ck:revise` | routes each manual fix through the single-failure trace |
+| `/ck:status` | prints live runtime status; `--watch` tails snapshots |
+| `/ck:resume` | steals stale locks, validates state, re-enters the loop |
+| `/ck:config` | surfaces runtime keys alongside preset controls |
+
+Opt in per repo with `/ck:init`. Commands fall back to the pre-3.0 path when `.cavekit/` is absent.
+
+</details>
+
+<details>
+<summary><strong>File structure</strong></summary>
+
+```
+context/                       # Project artifacts (persist across cycles)
+├── kits/
+│   ├── cavekit-overview.md
+│   └── cavekit-{domain}.md
+├── designs/
 │   ├── DESIGN.md
 │   └── design-changelog.md
-├── sites/                    # Build sites (one per plan)
-│   └── build-site-*.md
-├── impl/                     # Implementation tracking
+├── plans/
+│   └── build-site.md
+├── impl/
 │   ├── impl-{domain}.md
 │   ├── impl-review-findings.md
-│   ├── impl-speculative-log.md
 │   └── loop-log.md
-└── refs/                     # Research briefs + raw findings
+└── refs/
+
+.cavekit/                      # Runtime state (machine-managed)
+├── config.json
+├── state.md
+├── .loop.json
+├── .loop.lock
+├── token-ledger.json
+├── task-status.json
+├── capabilities.json
+├── .progress.json
+├── .auto-backprop-pending.json
+├── history/backprop-log.md
+└── tool-cache/
 ```
 
----
+</details>
 
-## Methodology
+<details>
+<summary><strong>Skills</strong></summary>
 
-Cavekit applies the **scientific method** to AI-generated code. LLMs are non-deterministic. Software engineering doesn't have to be.
+| Skill | What it covers |
+|-------|----------------|
+| [Methodology](skills/methodology) | Core Hunt lifecycle |
+| [Design System](skills/design-system) | Create and maintain DESIGN.md |
+| [UI Craft](skills/ui-craft) | Component patterns, animation, accessibility, review checklist |
+| [Cavekit Writing](skills/cavekit-writing) | Write kits agents can consume |
+| [Peer Review](skills/peer-review) | Six review modes + Codex Loop Mode |
+| [Validation-First Design](skills/validation-first) | Every requirement must be verifiable |
+| [Context Architecture](skills/context-architecture) | Progressive disclosure for agent context |
+| [Revision](skills/revision) | Trace bugs upstream to kits (includes automated backprop) |
+| [Convergence Monitoring](skills/convergence-monitoring) | Detect when iterations plateau |
+| [Impl Tracking](skills/impl-tracking) | Living records of build progress |
+| [Brownfield Adoption](skills/brownfield-adoption) | Add Cavekit to existing codebases |
+| [Speculative Pipeline](skills/speculative-pipeline) | Overlap phases for faster builds |
+| [Prompt Pipeline](skills/prompt-pipeline) | Design the prompts driving each phase |
+| [Documentation Inversion](skills/documentation-inversion) | Docs for agents, not just humans |
+| [Karpathy Guardrails](skills/karpathy-guardrails) | Think-before-code, simplicity, surgical changes |
+| [Autonomous Loop](skills/autonomous-loop) | State machine, sentinels, lock protocol |
+| [Caveman](skills/caveman) | Token-compressed output (~75% savings) |
+
+</details>
+
+<details>
+<summary><strong>Methodology</strong></summary>
+
+Cavekit applies the **scientific method** to AI-generated code. LLMs are non-deterministic. Software engineering does not have to be.
 
 | Concept | Role |
 |---------|------|
@@ -525,43 +553,15 @@ Cavekit applies the **scientific method** to AI-generated code. LLMs are non-det
 | **Implementation tracking** | Lab notebook — what was tried, what worked, what failed |
 | **Revision** | Update the hypothesis — trace bugs back to kits |
 
-Ships with 9 specialized agents (including **design-reviewer** for UI validation against DESIGN.md), a multi-agent research system, and 15 skills covering the full methodology. With Codex, operates as a **dual-model architecture** — Claude builds, Codex reviews — catching errors single-model self-review cannot.
-
-<details>
-<summary><strong>All 16 skills</strong></summary>
-
-| Skill | What it covers |
-|-------|---------------|
-| [Design System](skills/design-system) | Create and maintain DESIGN.md |
-| [UI Craft](skills/ui-craft) | Component patterns, animation, accessibility, review checklist |
-| [Cavekit Writing](skills/cavekit-writing) | Write kits agents can consume |
-| [Convergence Monitoring](skills/convergence-monitoring) | Detect when iterations plateau |
-| [Peer Review](skills/peer-review) | Six modes for cross-model review |
-| [Validation-First Design](skills/validation-first) | Every requirement must be verifiable |
-| [Context Architecture](skills/context-architecture) | Progressive disclosure for agent context |
-| [Revision](skills/revision) | Trace bugs upstream to kits |
-| [Brownfield Adoption](skills/brownfield-adoption) | Add Cavekit to existing codebases |
-| [Speculative Pipeline](skills/speculative-pipeline) | Overlap phases for faster builds |
-| [Prompt Pipeline](skills/prompt-pipeline) | Design the prompts driving each phase |
-| [Implementation Tracking](skills/impl-tracking) | Living records of build progress |
-| [Documentation Inversion](skills/documentation-inversion) | Docs for agents, not just humans |
-| [Peer Review Loop](skills/peer-review-loop) | Combine build loop with cross-model review |
-| [Core Methodology](skills/methodology) | The full Hunt lifecycle |
-| [Caveman](skills/caveman) | Token-compressed output (~75% savings), built-in for build/inspect phases |
-
-</details>
-
----
-
-## Why "Cavekit"
-
-Most AI coding tools treat the agent as a black box. Prompt, generate, hope. Cavekit inverts this.
+Ships with specialized agents (including **design-reviewer** for UI validation against DESIGN.md), a multi-agent research system, and 21 skills. With Codex, operates as a **dual-model architecture** — Claude builds, Codex reviews — catching errors single-model self-review cannot.
 
 **The spec is the product. The code is a derivative.**
 
-When the spec is clear, the code follows. When the code is wrong, the spec tells you why. Without a specification, there's nothing to validate against. Cavekit gives every agent — current and future — a contract to build from and a standard to meet.
+When the spec is clear, the code follows. When the code is wrong, the spec tells you why.
 
 Two models disagreeing is a signal. Two models agreeing is confidence.
+
+</details>
 
 ---
 
@@ -573,10 +573,21 @@ If cavekit save you mass debug time — leave star.
 
 ---
 
+## 🪨 The Caveman Ecosystem
+
+Three tools. One philosophy: **agent do more with less**.
+
+| Repo | What | One-liner |
+|------|------|-----------|
+| [**caveman**](https://github.com/JuliusBrussee/caveman) | Output compression skill | *why use many token when few do trick* — ~75% fewer output tokens across Claude Code, Cursor, Gemini, Codex |
+| [**cavemem**](https://github.com/JuliusBrussee/cavemem) | Cross-agent persistent memory | *why agent forget when agent can remember* — compressed SQLite + MCP, local by default |
+| [**cavekit**](https://github.com/JuliusBrussee/cavekit) *(you are here)* | Spec-driven autonomous build loop | *why agent guess when agent can know* — natural language → kits → parallel build → verified |
+
+They compose: **cavekit** orchestrates the build, **caveman** compresses what the agent *says* (bundled, on by default for build/inspect phases), **cavemem** compresses what the agent *remembers* across sessions. Install one, some, or all — each stands alone.
+
 ## Also by Julius Brussee
 
-- **[Caveman](https://github.com/JuliusBrussee/caveman)** — Claude Code skill that cuts ~75% of output tokens. Same accuracy, way less fluff. Bundled in Cavekit and enabled by default for build/inspect phases. Standalone install: `npx skills add JuliusBrussee/caveman`
-- **[Revu](https://github.com/JuliusBrussee/revu-swift)** — local-first macOS study app with FSRS spaced repetition, decks, exams, and study guides. [revu.cards](https://revu.cards)
+- **[Revu](https://github.com/JuliusBrussee/revu-swift)** — local-first macOS study app with FSRS spaced repetition. [revu.cards](https://revu.cards)
 
 ## License
 

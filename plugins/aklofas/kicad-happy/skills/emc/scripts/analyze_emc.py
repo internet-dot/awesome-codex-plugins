@@ -556,16 +556,11 @@ def main():
         from analysis_cache import (hash_source_file, should_create_new_run,
                                     create_run, overwrite_current,
                                     CANONICAL_OUTPUTS, MANIFEST_FILENAME,
-                                    save_manifest, _empty_manifest, GITIGNORE_CONTENT)
+                                    save_manifest, _empty_manifest, GITIGNORE_CONTENT,
+                                    resolve_analysis_dir)
 
-        # Resolve --analysis-dir relative to CWD, not to the schematic JSON's
-        # directory. The schematic argument is typically *already* inside the
-        # analysis tree (analysis/<run>/schematic.json); anchoring on its
-        # parent would recursively create analysis/<run>/analysis/<run>/…
-        if not os.path.isabs(args.analysis_dir):
-            analysis_dir = os.path.abspath(args.analysis_dir)
-        else:
-            analysis_dir = args.analysis_dir
+        # Keep analysis-dir semantics aligned with the core KiCad analyzers.
+        analysis_dir = resolve_analysis_dir(args.analysis_dir)
 
         os.makedirs(analysis_dir, exist_ok=True)
         manifest_path = os.path.join(analysis_dir, MANIFEST_FILENAME)

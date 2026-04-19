@@ -3,12 +3,10 @@
 <!--
 Badges: CI + OpenSSF Scorecard will turn green once Phase 3 Batch A (CI workflow + Scorecard workflow) lands and runs its first job. Until then they may render as "no status" / 404 — that is expected and self-resolves automatically.
 -->
-[![CI](https://github.com/ndycode/oc-codex-multi-auth/actions/workflows/ci.yml/badge.svg)](https://github.com/ndycode/oc-codex-multi-auth/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/oc-codex-multi-auth.svg)](https://www.npmjs.com/package/oc-codex-multi-auth)
 [![npm downloads](https://img.shields.io/npm/dw/oc-codex-multi-auth.svg)](https://www.npmjs.com/package/oc-codex-multi-auth)
 [![Node.js Version](https://img.shields.io/node/v/oc-codex-multi-auth.svg)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/ndycode/oc-codex-multi-auth/badge)](https://securityscorecards.dev/viewer/?uri=github.com/ndycode/oc-codex-multi-auth)
 
 Use your ChatGPT Plus/Pro subscription inside OpenCode with OAuth login, GPT-5/Codex model presets, and multi-account failover.
 
@@ -119,6 +117,36 @@ Detailed configuration lives outside this README:
 - [Getting Started](docs/getting-started.md) for install and first-run setup
 - [Configuration Reference](docs/configuration.md) for config keys, env vars, and fallback behavior
 - [Config Templates](config/README.md) for modern vs legacy OpenCode examples
+
+## Credential Storage
+
+By default, this plugin stores OAuth refresh tokens as a V3 JSON file under the per-project path determined by `lib/storage/paths.ts`. File permissions are restricted (`0o600` on the file, `0o700` on containing directories) on platforms that honour them.
+
+### Optional: OS-native keychain
+
+Set `CODEX_KEYCHAIN=1` in the environment to store credentials in the OS keychain instead:
+
+- **macOS**: Keychain
+- **Windows**: Credential Manager
+- **Linux**: libsecret (requires a running secret service such as GNOME Keyring or KWallet)
+
+The opt-in is strict: only the literal value `"1"` enables the keychain backend. Any other value (unset, `"0"`, `"false"`, `""`, `"yes"`, ...) leaves behavior identical to earlier releases. Existing users see zero change by default.
+
+When enabled on an existing install, the plugin auto-migrates the JSON file into the keychain on the next credential write and renames the original as `accounts.json.migrated-to-keychain.<timestamp>` for rollback. The original is never deleted automatically.
+
+Use the `codex-keychain` tool to inspect and manage the backend:
+
+```bash
+codex-keychain status     # which backend is active, is the keychain reachable
+codex-keychain migrate    # force-migrate on-disk JSON to the keychain now
+codex-keychain rollback   # restore the most recent .migrated-to-keychain.<ts> backup
+```
+
+### Keychain fallback
+
+If the OS keychain is unavailable (Linux without secret service, permission denied, locked session, missing native module), the plugin logs a clear warning and falls back to the JSON backend for that operation. Credentials are never silently lost.
+
+See [SECURITY.md](SECURITY.md#credential-storage-backends) for the threat model that applies to each backend.
 
 ## Troubleshooting
 
