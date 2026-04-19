@@ -44,7 +44,7 @@
       "url": "https://github.com/hyhmrright/brooks-lint",
       "owner": "hyhmrright",
       "repo": "brooks-lint",
-      "description": "AI code reviews grounded in six classic engineering books — decay risk diagnostics with book citations, severity labels, and four analysis modes (PR review, architecture audit, tech debt, test quality).",
+      "description": "AI code reviews grounded in six classic engineering books \u2014 decay risk diagnostics with book citations, severity labels, and four analysis modes (PR review, architecture audit, tech debt, test quality).",
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/hyhmrright/brooks-lint/main/.codex-plugin/plugin.json"
@@ -74,7 +74,7 @@
       "url": "https://github.com/alirezarezvani/claude-skills",
       "owner": "alirezarezvani",
       "repo": "claude-skills",
-      "description": "223 production-ready skills, 23 agents, and 298 Python tools across 9 domains — engineering, marketing, product, compliance, and more.",
+      "description": "223 production-ready skills, 23 agents, and 298 Python tools across 9 domains \u2014 engineering, marketing, product, compliance, and more.",
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/alirezarezvani/claude-skills/main/.codex-plugin/plugin.json"
@@ -144,17 +144,27 @@
       "url": "https://github.com/Kanevry/session-orchestrator",
       "owner": "Kanevry",
       "repo": "session-orchestrator",
-      "description": "Session orchestration for Claude Code, Codex, and Cursor IDE — structured planning, wave-based execution, VCS integration (GitLab + GitHub), quality gates, and clean session close-out with issue tracking.",
+      "description": "Session orchestration for Claude Code, Codex, and Cursor IDE \u2014 structured planning, wave-based execution, VCS integration (GitLab + GitHub), quality gates, and clean session close-out with issue tracking.",
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/Kanevry/session-orchestrator/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "tailtest",
+      "url": "https://github.com/avansaber/tailtest-codex",
+      "owner": "avansaber",
+      "repo": "tailtest-codex",
+      "description": "Automatically generates and runs tests for every file Codex creates or modifies. Stop hook queues changed files and instructs Codex to write and run tests. 8 languages. Zero config.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/avansaber/tailtest-codex/main/.codex-plugin/plugin.json"
     },
     {
       "name": "VibePortrait",
       "url": "https://github.com/dadwadw233/VibePortrait",
       "owner": "dadwadw233",
       "repo": "VibePortrait",
-      "description": "Developer personality portrait generator — analyzes AI conversation history to produce MBTI type (16 color themes), capability radar, developer rating, 3-dimension famous match, and a persona skill that lets any AI \"think like you\".",
+      "description": "Developer personality portrait generator \u2014 analyzes AI conversation history to produce MBTI type (16 color themes), capability radar, developer rating, 3-dimension famous match, and a persona skill that lets any AI \"think like you\".",
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/dadwadw233/VibePortrait/main/.codex-plugin/plugin.json"
@@ -364,7 +374,7 @@
       "url": "https://github.com/talkstream/ru-text",
       "owner": "talkstream",
       "repo": "ru-text",
-      "description": "Russian text quality — ~1,040 rules for typography, info-style, editorial, UX writing, and business correspondence.",
+      "description": "Russian text quality \u2014 ~1,040 rules for typography, info-style, editorial, UX writing, and business correspondence.",
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/talkstream/ru-text/main/.codex-plugin/plugin.json"
@@ -374,7 +384,7 @@
       "url": "https://github.com/sitemd-cc/sitemd",
       "owner": "sitemd-cc",
       "repo": "sitemd",
-      "description": "Build websites from Markdown via MCP — 22 tools for creating pages, generating content, validating, running SEO audits, configuring settings, and deploying static sites to Cloudflare Pages.",
+      "description": "Build websites from Markdown via MCP \u2014 22 tools for creating pages, generating content, validating, running SEO audits, configuring settings, and deploying static sites to Cloudflare Pages.",
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/sitemd-cc/sitemd/main/.codex-plugin/plugin.json"
