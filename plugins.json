@@ -150,6 +150,16 @@
       "install_url": "https://raw.githubusercontent.com/Kanevry/session-orchestrator/main/.codex-plugin/plugin.json"
     },
     {
+      "name": "tailtest",
+      "url": "https://github.com/avansaber/tailtest-codex",
+      "owner": "avansaber",
+      "repo": "tailtest-codex",
+      "description": "Hook-powered test generation -- detects files changed during an agent turn and instructs Codex to write and run tests automatically. Zero config, 8 languages.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/avansaber/tailtest-codex/main/.codex-plugin/plugin.json"
+    },
+    {
       "name": "VibePortrait",
       "url": "https://github.com/dadwadw233/VibePortrait",
       "owner": "dadwadw233",
