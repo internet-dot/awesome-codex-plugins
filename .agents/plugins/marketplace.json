@@ -305,6 +305,18 @@
       "category": "Tools & Integrations"
     },
     {
+      "name": "kachilu-browser",
+      "source": {
+        "source": "local",
+        "path": "./plugins/kachilu-inc/kachilu-browser"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Tools & Integrations"
+    },
+    {
       "name": "kicad-happy",
       "source": {
         "source": "local",
