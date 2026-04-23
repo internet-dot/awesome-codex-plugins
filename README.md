@@ -47,7 +47,32 @@ pipx run codex-plugin-scanner lint .
 pipx run codex-plugin-scanner verify .
 ```
 
-This repo also publishes a real Codex repo marketplace at `.agents/plugins/marketplace.json`. The generated marketplace points at mirrored installable plugin bundles under `./plugins/`, so a local clone of this repository can act as a curated plugin source in Codex exactly the way the OpenAI docs describe.
+This repo publishes a Codex repo marketplace at `.agents/plugins/marketplace.json`. The marketplace points at mirrored installable plugin bundles under `./plugins/`, so a clone of this repo can act as a curated plugin source in Codex.
+
+### Use this marketplace in Codex
+
+Install plugins directly from this curated list by pointing Codex at the repo marketplace:
+
+**CLI:**
+```bash
+# Add this repo as a marketplace source (one-time setup)
+codex config set plugin.marketplaces.awesome \
+  "https://raw.githubusercontent.com/hashgraph-online/awesome-codex-plugins/main/.agents/plugins/marketplace.json"
+
+# Then browse and install
+codex plugin list --source awesome
+codex plugin install <plugin-name> --source awesome
+```
+
+**Desktop App / IDE Extension:**
+1. Open Codex settings → Plugins → Marketplace Sources
+2. Add this URL:
+   ```
+   https://raw.githubusercontent.com/hashgraph-online/awesome-codex-plugins/main/.agents/plugins/marketplace.json
+   ```
+3. The curated plugin list appears as an available marketplace source.
+
+Each plugin entry includes a `source.path` pointing at a mirrored bundle under `./plugins/` in this repo, so installations are fast and reproducible without hitting upstream repos at install time.
 
 ## Official Plugins
 
