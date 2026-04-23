@@ -5,6 +5,15 @@
 
 ---
 
+## Sub-Modes
+
+| Invocation | Behavior |
+|---|---|
+| `/plan retro` (no arg) | Full retro flow — Phases 1 → 2 → 3 |
+| `/plan retro vault-backfill` | Phases 1 → 1.6 (vault backfill), then exit — Phases 2-3 skipped |
+
+---
+
 ## Phase 1: Data Collection (Automatic)
 
 Gather ALL data before asking questions. No user input. Present a dashboard when done.
@@ -65,6 +74,86 @@ If fewer than 10 sessions exist, use all available data and note limited sample.
 ```
 
 Omit sections where no data was found. Show trends only with 5+ sessions of comparison data.
+
+---
+
+## Phase 1.6: Vault Backfill (conditional sub-mode)
+
+> **Activation**: This phase runs ONLY when the user invokes `/plan retro vault-backfill`.
+> When invoked without the `vault-backfill` argument, skip this phase entirely and proceed to Phase 2.
+
+### Workflow
+
+**Step 1 — Read config**
+
+Read Session Config to obtain the `vault-integration.gitlab-groups` list. If not set, prompt the user to supply `--groups <CSV>` directly, or abort with a message.
+
+**Step 2 — Dry-run scan**
+
+```bash
+node scripts/vault-backfill.mjs --groups <CSV>
+```
+
+Captures stdout (per-repo JSON action records) and stderr (progress logging). Present the dry-run table to the user so they can review which repos would receive `.vault.yaml` stubs.
+
+**Step 3 — User choice (AskUserQuestion)**
+
+After the dry-run, present:
+
+1. **Apply all changes** → re-invoke with `--apply` (optionally `--out-dir <path>` to override staging dir)
+2. **Apply via headless manifest** → user provides manifest JSON path → invoke `--yes <path> --apply [--out-dir <path>]`
+3. **Skip backfill — proceed to Phase 2** → no writes, continue retro
+4. **Abort** → exit retro session
+
+**Step 4 — Log results to retro narrative**
+
+On apply, append per-repo results to Section 4 of the retro document so the artifact captures what was backfilled this session.
+
+If `vault-backfill` sub-mode was used, exit after this phase — Phases 2 and 3 are skipped.
+
+### CLI Flag Reference
+
+| Flag | Default | Description |
+|---|---|---|
+| `--groups <CSV>` | — | Comma-separated GitLab group paths to scan |
+| `--dry-run` | yes | Preview changes without writing (default behavior) |
+| `--apply` | off | Write `.vault.yaml` files to staging directory; review and copy into repos manually |
+| `--out-dir <path>` | `./.vault-backfill-staging` | Staging directory for `--apply` writes; files written to `<out-dir>/<group>/<repo>/.vault.yaml` |
+| `--yes <manifest.json>` | — | Headless mode — skip all interactive prompts; manifest is authoritative scope (no live API check) |
+| `--vault-dir <path>` | — | Override target directory for vault folder stubs |
+| `--verbose` | off | Emit detailed per-repo logging to stderr |
+
+> **Real apply writes to a staging directory.** User reviews the generated `.vault.yaml` files under `--out-dir`, then manually copies them into each repo (or scripts a follow-up push).
+
+### Headless Manifest Example
+
+```json
+{
+  "version": 1,
+  "manifest_date": "YYYY-MM-DD",
+  "gitlab_groups": ["infrastructure"],
+  "repos": [
+    {"id": 42, "path": "infrastructure/auth-service", "slug": "auth-service", "tier": "active", "visibility": "internal"},
+    {"id": 57, "path": "infrastructure/api-gateway", "slug": "api-gateway", "tier": "top", "visibility": "internal"}
+  ]
+}
+```
+
+### Exit-Code Interpretation
+
+| Code | Meaning | Retro action |
+|---|---|---|
+| 0 | Success — clean run (dry or apply, even if some repos skipped) | Log results, continue |
+| 1 | Validation error — bad CLI flags, missing `--groups` AND no Session Config groups, malformed manifest, missing `glab` CLI | Show error message, offer to abort or reconfigure |
+| 2 | Filesystem error — template not found, cannot write to `--out-dir` (EACCES, ENOSPC) | Show error, check `PROJECTS_BASELINE_DIR` / disk space, then retry |
+| 3 | GitLab API error — auth failure, rate limit, or ALL groups failed to resolve | Prompt user to check `GITLAB_TOKEN` and group paths, then abort |
+| 4 | Nothing to backfill — dry-run found no repos missing `.vault.yaml` (or all manifest entries marked `skip:true`) | Expected for Step 2 when fully synced; present table and proceed to Phase 2 |
+
+### Cross-References
+
+- Implementation: `scripts/vault-backfill.mjs` (C1)
+- Related drift detector: `skills/discovery/probes/vault-staleness.mjs`
+- Tracking issue: GitLab #241
 
 ---
 

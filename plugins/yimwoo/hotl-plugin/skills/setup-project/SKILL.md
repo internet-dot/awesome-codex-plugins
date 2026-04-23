@@ -20,7 +20,7 @@ Generate the right config files so every code assistant on your team follows HOT
    - Cursor
    - GitHub Copilot
 
-2. Ask: "Will this project run multi-phase initiatives?" **Default: no.** Only answer yes for multi-phase work like major migrations, v1/v2 rewrites, platform rebuilds, or any effort that will span multiple phases with separate plan docs. For a single feature, bug fix, or refactor, answer no — the standard HOTL flow handles those just fine.
+2. Ask: "Will this project run multi-phase initiatives?" **Default: no.** Only answer yes for multi-phase work like major migrations, v1/v2 rewrites, platform rebuilds, or any effort that will span multiple phases with separate phase design docs and workflows. For a single feature, bug fix, or refactor, answer no — the standard HOTL flow handles those just fine.
 
    **If yes**, ask the follow-up: "What's the initiative slug? (kebab-case, e.g. `ai-assurance`, `v2-migration`)". Validate the answer matches `[a-z0-9][a-z0-9-]*`.
 
@@ -38,11 +38,12 @@ Generate the right config files so every code assistant on your team follows HOT
 
 4. Each generated file contains:
    - HOTL operating principles (intent/verification/governance contracts)
-   - Link to `hotl-workflow-<slug>.md` format
+   - Brainstorming guidance that produces design docs in `docs/designs/`
+   - Link to `docs/plans/YYYY-MM-DD-<slug>-workflow.md` format
    - Risk level guidelines
    - What always requires human review
 
-5. **If the user opted in to initiative support in step 2**, invoke the scaffolder to create `.hotl/config.yml`, the six `docs/<tier>/` directories, and the four initiative-tier templates under `docs/prompts/`.
+5. **If the user opted in to initiative support in step 2**, invoke the scaffolder to create `.hotl/config.yml`, the six `docs/<tier>/` directories, and the four initiative-tier templates under `docs/prompts/`. The scaffolder should configure `docs/designs/` as the canonical design-doc home and `docs/plans/` as the canonical workflow home.
 
    **Resolve `hotl-init-initiative.sh`** using the same six-location order as `document-lint.sh` and `hotl-config.sh` (see `skills/document-review/SKILL.md`):
 
@@ -82,7 +83,7 @@ This project follows the Human-on-the-Loop (HOTL) development model.
 ## How to Work
 
 1. Before feature work: brainstorm with intent/verification/governance contracts
-2. Create a `hotl-workflow-<slug>.md` with steps, loop conditions, and gates
+2. Brainstorm into a design doc in `docs/designs/`, then create a dated workflow file at `docs/plans/YYYY-MM-DD-<slug>-workflow.md`
 3. Execute steps autonomously within guardrails
 4. Pause at `gate: human` for high-risk steps
 
@@ -101,5 +102,5 @@ This project follows the Human-on-the-Loop (HOTL) development model.
 
 ## Workflow Format
 
-See `hotl-workflow-*.md` in project root or `workflows/` in the plugin for templates.
+See `docs/plans/YYYY-MM-DD-<slug>-workflow.md` for canonical workflow instances or `workflows/` in the plugin for templates.
 ```

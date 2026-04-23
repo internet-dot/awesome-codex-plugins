@@ -53,13 +53,14 @@ nix profile install github:avivsinai/bitbucket-cli
 
 Pin to a specific tag or commit by appending a ref (e.g. `github:avivsinai/bitbucket-cli/v1.2.3`).
 
-> **Note:** The Nix package does not embed OAuth client credentials. For Bitbucket Cloud OAuth (`bkt auth login --kind cloud --web`), set `BKT_OAUTH_CLIENT_ID` and `BKT_OAUTH_CLIENT_SECRET` in your environment.
-
 Don't have Nix yet? See [nixos.asia/en/install](https://nixos.asia/en/install) for a quick setup guide (installs Nix with flakes enabled out of the box).
 
 ### Binary Downloads
 
 Download pre-built binaries for your platform from the [releases page](https://github.com/avivsinai/bitbucket-cli/releases/latest).
+The `.tar.gz` and `.zip` release archives also include `skills/bkt/`, so the CLI and canonical skill files stay in sync when you install from a release artifact.
+
+For Bitbucket Cloud OAuth (`bkt auth login --kind cloud --web`), set `BKT_OAUTH_CLIENT_ID` and `BKT_OAUTH_CLIENT_SECRET` in your environment. Official binaries, source installs, and Nix builds do not embed Cloud OAuth consumer credentials. API-token login via `--web-token` works without that extra setup.
 
 ### Bitbucket Pipelines
 
@@ -71,7 +72,7 @@ pipelines:
     - step:
         name: Open PR
         script:
-          - export BKT_VERSION="0.19.0"  # pin to a specific release
+          - export BKT_VERSION="0.26.0"  # pin to a released version
           - curl -sL "https://github.com/avivsinai/bitbucket-cli/releases/download/v${BKT_VERSION}/bkt_${BKT_VERSION}_linux_x86_64.tar.gz" | tar xz -C /tmp && install /tmp/bkt /usr/local/bin/
           - bkt pr create --title "Auto PR" --source "$BITBUCKET_BRANCH"
 ```

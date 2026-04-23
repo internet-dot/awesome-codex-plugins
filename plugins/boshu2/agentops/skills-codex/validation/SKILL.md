@@ -7,6 +7,14 @@ description: 'Full validation phase orchestrator. Vibe + post-mortem + retro + f
 
 **YOU MUST EXECUTE THIS WORKFLOW. Do not just describe it.**
 
+## Strict Delegation Contract (default)
+
+Validation delegates to `$vibe`, `$post-mortem`, `$retro`, and `$forge` (plus lifecycle skills `$test`, `$deps`, `$review`, `$perf`) as **separate skill invocations**. Strict delegation is the **default**.
+
+**Anti-pattern to reject:** spawning judges directly in place of `$vibe`, inlining post-mortem analysis, skipping `$forge`. See [`../shared/references/strict-delegation-contract.md`](../shared/references/strict-delegation-contract.md) for the full contract and supported compression escapes (`--quick`, `--no-retro`, `--no-forge`, `--no-lifecycle`, `--no-behavioral`, `--allow-critical-deps`).
+
+See [`.agents/learnings/2026-04-19-orchestrator-compression-anti-pattern.md`](../../.agents/learnings/2026-04-19-orchestrator-compression-anti-pattern.md) for the live compression signature.
+
 ## DAG — Execute This Sequentially
 
 ```
@@ -42,7 +50,7 @@ Skip silently if ao is unavailable or returns no results.
 **Run every step in order. Do not stop between steps.**
 
 ```
-STEP 1  ──  Skill(skill="vibe", args="recent [--quick]")
+STEP 1  ──  $vibe recent [--quick]
               Use --quick for fast/standard. Full council for full.
               PASS/WARN? → continue
               FAIL?      → write summary, output <promise>FAIL</promise>, stop
@@ -67,20 +75,20 @@ STEP 1.7 ── Lifecycle Checks (advisory except critical dependency findings)
               On budget expiry: skip remaining sub-steps, write [TIME-BOXED].
 
               a) if lifecycle tier >= minimal AND test_framework_detected:
-                   Skill(skill="test", args="coverage --quick")
+                   $test coverage --quick
                    Append coverage delta to phase summary.
 
               b) if lifecycle tier >= standard AND dependency_manifest_exists:
-                   Skill(skill="deps", args="vuln --quick")
+                   $deps vuln --quick
                    CRITICAL vulns (CVSS >= 9.0): **FAIL** (block shipping). Opt-out: `--allow-critical-deps` for acknowledged risk acceptance.
                    Non-critical: advisory note only.
 
               c) if lifecycle tier >= standard:
-                   Skill(skill="review", args="--diff --quick")
+                   $review --diff --quick
                    Append review findings to summary as advisory.
 
               d) if lifecycle tier == full AND modified_files_touch_hot_path:
-                   Skill(skill="perf", args="profile --quick")
+                   $perf profile --quick
                    Append perf findings to summary as advisory.
                    Hot path detection: modified files match benchmark files
                    or patterns (handler, middleware, router, parser, engine,
@@ -115,15 +123,15 @@ STEP 1.8 ── Stage 4: Behavioral Validation (holdout scenarios + agent-built 
             FAIL? → write summary, output <promise>FAIL</promise>, stop
 
 STEP 2  ──  if epic_id:
-              Skill(skill="post-mortem", args="<epic-id> [--quick]")
+              $post-mortem <epic-id> [--quick]
             else:
-              Skill(skill="post-mortem", args="recent [--quick]")
+              $post-mortem recent [--quick]
               Use --quick for fast/standard. Full council for full.
               PASS/WARN? → continue
               FAIL?      → write summary, output <promise>FAIL</promise>, stop
 
 STEP 3  ──  if not --no-retro:
-              Skill(skill="retro")
+              $retro
 
 STEP 4  ──  if not --no-forge AND ao available:
               if [ -n "${CODEX_THREAD_ID:-}" ] || [ "${CODEX_INTERNAL_ORIGINATOR_OVERRIDE:-}" = "Codex Desktop" ]; then
@@ -143,20 +151,7 @@ STEP 5  ──  write phase summary to .agents/rpi/phase-3-summary-YYYY-MM-DD-<s
 
 ## Setup Detail
 
-**State:**
-```
-validation_state = {
-  epic_id: "<epic-id or null>",
-  complexity: <fast|standard|full>,
-  no_retro: <true if --no-retro>,
-  no_forge: <true if --no-forge>,
-  strict_surfaces: <true if --strict-surfaces>,
-  vibe_verdict: null,
-  post_mortem_verdict: null
-}
-```
-
-**Load execution packet** (if available): read `complexity`, `contract_surfaces`, and `done_criteria` from `.agents/rpi/execution-packet.json`. When a current `run_id` is known, prefer the matching `.agents/rpi/runs/<run-id>/execution-packet.json` archive over the latest alias.
+Track state inline: `epic_id`, `complexity`, `no_retro`, `no_forge`, `strict_surfaces`, `vibe_verdict`, `post_mortem_verdict`. Load execution packet (if available): read `complexity`, `contract_surfaces`, and `done_criteria` from `.agents/rpi/execution-packet.json`. When a current `run_id` is known, prefer the matching `.agents/rpi/runs/<run-id>/execution-packet.json` archive over the latest alias.
 
 ## Gate Detail
 

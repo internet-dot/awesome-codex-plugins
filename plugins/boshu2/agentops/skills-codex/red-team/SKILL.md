@@ -194,7 +194,7 @@ When the same finding appears from multiple personas:
 Run council with red-team preset to review and consolidate all findings:
 
 ```
-Skill(skill="council", args="--preset=red-team [--quick] validate .agents/red-team/")
+$council --preset=red-team [--quick] validate .agents/red-team/
 ```
 
 Use `--quick` by default. Use full council (omit `--quick`) when `--deep` flag is set.

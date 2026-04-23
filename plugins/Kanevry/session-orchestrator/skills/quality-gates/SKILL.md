@@ -18,15 +18,27 @@ This skill defines the canonical quality check commands. Do NOT invoke this skil
 Consuming skills (session-start, wave-executor, session-end, session-reviewer) reference the
 variant they need and execute the commands inline.
 
-## Session Config Fields
+## Command Resolution (policy-file-first, #183)
 
-Read these from the project's `## Session Config` section in CLAUDE.md (Claude Code / Cursor) or AGENTS.md (Codex CLI):
+Quality-gate commands are resolved in this priority order:
 
-- **`test-command`** — Custom test command. Default: `pnpm test --run`
-- **`typecheck-command`** — Custom typecheck command. Default: `tsgo --noEmit`
-- **`lint-command`** — Custom lint command. Default: `pnpm lint`
+1. **`.orchestrator/policy/quality-gates.json`** — canonical policy file (preferred). Schema: `.orchestrator/policy/quality-gates.schema.json`. Bootstrap writes a package-manager-aware default; hand-edit to customize.
+2. **Session Config** `test-command` / `typecheck-command` / `lint-command` in CLAUDE.md (Claude Code / Cursor) or AGENTS.md (Codex CLI) — fallback.
+3. **Hardcoded defaults** — last resort: `pnpm test --run`, `tsgo --noEmit`, `pnpm lint`.
 
-If a field is missing, use the default. If set to `skip`, skip that check entirely.
+Loader: `scripts/lib/quality-gates-policy.mjs` exports `loadQualityGatesPolicy(repoRoot)` and `resolveCommand(policy, key, fallback)`. The Bash-side runner `scripts/run-quality-gate.sh` performs the same resolution inline inside `extract_command()`.
+
+If any resolved command is set to the literal string `skip`, skip that check entirely.
+
+## Session Config Fields (legacy fallback)
+
+Read these from the project's `## Session Config` section when `.orchestrator/policy/quality-gates.json` is absent:
+
+- **`test-command`** — Custom test command.
+- **`typecheck-command`** — Custom typecheck command.
+- **`lint-command`** — Custom lint command.
+
+If a field is missing, use the hardcoded default.
 
 ## Variant 1: Baseline
 

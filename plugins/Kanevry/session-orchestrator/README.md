@@ -1,7 +1,7 @@
 # Session Orchestrator
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.0.0-green.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.0.0--dev-orange.svg)](CHANGELOG.md)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-blueviolet.svg)](https://docs.anthropic.com/en/docs/claude-code)
 [![Codex](https://img.shields.io/badge/Codex-Compatible-green.svg)](https://developers.openai.com/codex/)
 [![Cursor IDE](https://img.shields.io/badge/Cursor_IDE-Compatible-blue.svg)](https://cursor.com)
@@ -12,6 +12,8 @@ Session orchestration plugin for Claude Code, Codex, and Cursor IDE. Covers proj
 
 ## Install
 
+> **Prerequisite:** Node.js 20 or later. Check with `node --version`. v3.x runs as ES modules and requires a real Node runtime (no Bash shim). [Install Node.js](https://nodejs.org/).
+
 ### Claude Code
 
 Run these two slash commands **inside** Claude Code (they are not shell commands; there is no `claude plugin` CLI):
@@ -21,7 +23,14 @@ Run these two slash commands **inside** Claude Code (they are not shell commands
 /plugin install session-orchestrator@kanevry
 ```
 
-The first command registers this repository as a marketplace (named `kanevry`), the second installs the plugin from it. Reload Claude Code so the slash commands (`/session`, `/go`, `/close`, …) become available.
+Then install Node dependencies **once** (hooks import `zx`):
+
+```bash
+cd "$(claude plugin dir session-orchestrator 2>/dev/null || echo ~/.claude/plugins/session-orchestrator)"
+npm install
+```
+
+Restart Claude Code so the slash commands (`/session`, `/go`, `/close`, …) become available.
 
 Prefer installing from a local clone? Use an absolute path instead of the `owner/repo` shorthand:
 
@@ -34,7 +43,9 @@ Prefer installing from a local clone? Use an absolute path instead of the `owner
 
 ```bash
 git clone https://github.com/Kanevry/session-orchestrator.git ~/Projects/session-orchestrator
-bash ~/Projects/session-orchestrator/scripts/codex-install.sh
+cd ~/Projects/session-orchestrator
+npm install
+bash scripts/codex-install.sh
 ```
 
 ### Cursor IDE
@@ -42,9 +53,11 @@ bash ~/Projects/session-orchestrator/scripts/codex-install.sh
 ```bash
 # 1. Clone the session-orchestrator repo
 git clone https://github.com/Kanevry/session-orchestrator.git ~/Projects/session-orchestrator
+cd ~/Projects/session-orchestrator
+npm install
 
 # 2. Install Cursor rules into your project
-bash ~/Projects/session-orchestrator/scripts/cursor-install.sh /path/to/your/project
+bash scripts/cursor-install.sh /path/to/your/project
 
 # Session Config goes in CLAUDE.md (Cursor reads it natively)
 ```
@@ -80,13 +93,16 @@ See [Usage](#usage) for all 7 commands and [User Guide](docs/USER-GUIDE.md) for 
 
 ## Prerequisites
 
+- **Node.js 20 or later** — plugin runs as ES modules; no Bash runtime needed.
 - **Claude Code**, **Codex**, or **Cursor IDE**: [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | [Codex](https://developers.openai.com/codex/) | [Cursor IDE](https://cursor.com)
-- **jq** (recommended): required for scope and command enforcement hooks
+- **jq** (optional): convenience for editing the `.orchestrator/policy/*.json` files. Not invoked by hooks at runtime in v3.
+- **git** — any recent version.
 
 ### Platform Support
 
 | Feature | Claude Code | Codex | Cursor IDE |
 |---------|------------|-----------|------------|
+| OS | macOS, Linux, **Windows (native)** | macOS, Linux, **Windows (native)** | macOS, Linux, **Windows (native)** |
 | All 7 commands | Native slash commands | Native plugin commands | Rules-based (.mdc) |
 | Parallel agents | Agent tool | Multi-agent roles | Sequential only |
 | Session persistence | .claude/STATE.md | .codex/STATE.md | .cursor/STATE.md |
@@ -96,7 +112,45 @@ See [Usage](#usage) for all 7 commands and [User Guide](docs/USER-GUIDE.md) for 
 | Quality gates | Full | Full | Full |
 | Design alignment | Pencil integration | Pencil integration | Pencil integration |
 
-All platforms share the same skills, commands, hooks, and scripts. Platform-specific adaptations are handled automatically via `scripts/lib/platform.sh`. See setup guides: [Codex](docs/codex-setup.md) | [Cursor IDE](docs/cursor-setup.md).
+Windows support is **native** as of v3.0.0 — no WSL, no Git-Bash, no msys. All file paths use `path.join`, all tmp paths use `os.tmpdir()`, and CI verifies on `windows-latest` alongside `ubuntu-latest` and `macos-latest`.
+
+All platforms share the same skills, commands, hooks, and scripts. Platform-specific adaptations are handled automatically via `scripts/lib/platform.mjs`. See setup guides: [Codex](docs/codex-setup.md) | [Cursor IDE](docs/cursor-setup.md).
+
+## Troubleshooting
+
+### Hooks silently no-op after install
+
+Most common cause on any OS: `npm install` was not run in the plugin directory, so `zx` is missing. Run it and restart your editor. Verify with `ls node_modules/zx` in the plugin root.
+
+### Windows: `Cannot use import statement outside a module` or `node` not found
+
+`node` must be on the editor's `PATH`. If you installed Node via nvm-windows or fnm, relaunch the editor from a shell where `node --version` prints `v20.x` or later. In Claude Code you can sanity-check with `!node --version`.
+
+### Windows: CRLF breaks shell scripts / hooks after upgrade
+
+v3 ships `.gitattributes` with explicit LF rules for `.sh`, `.mjs`, `.md`, `.json`, and `.yaml`. Clones from before v3 may still have CRLF endings in tracked files. Normalize once:
+
+```bash
+git config core.autocrlf false
+git rm --cached -r .
+git reset --hard
+```
+
+Back up any uncommitted work first.
+
+### macOS / Linux: `Permission denied` on a hook
+
+v3 hooks are `.mjs` files invoked via `node <path>` — the executable bit is not required. If your editor reports `Permission denied`, it is still pointing at a stale `.sh` path. Re-run the platform install script (`scripts/codex-install.sh`, `scripts/cursor-install.sh`) or re-add the plugin in Claude Code.
+
+### `SyntaxError` in hooks
+
+Confirm Node version (`node --version` must be `v20.x+`) and that `package.json` has `"type": "module"`. Both are required for ESM imports.
+
+### `npm install` fails with `ERESOLVE`
+
+Use Node 20 or 22 LTS. If the error persists: `npm install --legacy-peer-deps`. Open an issue if it still fails.
+
+For a longer walkthrough including rollback, see [docs/migration-v3.md](docs/migration-v3.md).
 
 ## Why Session Orchestrator
 
@@ -310,11 +364,33 @@ Superpowers handles the **task layer** (TDD, debugging, brainstorming per featur
 - **Output Styles**: 3 styles (session-report, wave-summary, finding-report) for consistent reporting
 - `.codex-plugin/`: Codex plugin manifest (`plugin.json`) + compatibility config + 3 agent role definitions
 - `scripts/codex-install.sh`: installs into the active Codex desktop plugin catalog or falls back to a local marketplace
-- `scripts/`: 5 deterministic scripts (parse-config, run-quality-gate, validate-wave-scope, validate-plugin, token-audit) + shared lib + 328 tests
+- `scripts/`: deterministic scripts (parse-config, run-quality-gate, validate-wave-scope, validate-plugin, token-audit) + shared lib (`scripts/lib/*.mjs`) + vitest suite (533+ tests)
+
+## Development
+
+Clone, install, and verify in three commands:
+
+```bash
+git clone https://github.com/Kanevry/session-orchestrator.git && cd session-orchestrator
+npm install
+npm test        # vitest — primary test flow
+```
+
+Additional scripts:
+
+- `npm run test:watch` — vitest in watch mode
+- `npm run lint` / `npm run lint:fix` — ESLint v9 + Prettier
+- `npm run typecheck` — `node --check` on every `.mjs` file (syntactic-only; no TypeScript yet)
+
+The legacy `bats` shell suite (`scripts/test/run-all.sh`) is retained for historical reference but is **deprecated** and will be removed in a future release. Do not add new tests there — use `tests/**/*.test.mjs` under vitest.
+
+For contributor-facing architecture, hook authoring, and the `zx`-vs-stdlib heuristic, see [docs/plugin-architecture-v3.md](docs/plugin-architecture-v3.md).
 
 ## Documentation
 
 - [User Guide](docs/USER-GUIDE.md): installation, config reference, workflow walkthrough, FAQ
+- [Migration to v3](docs/migration-v3.md): upgrade path from v2.x to v3.0.0, known issues, rollback
+- [Plugin Architecture (v3)](docs/plugin-architecture-v3.md): contributor guide — layering, hook anatomy, lib catalog, testing
 - [CONTRIBUTING.md](CONTRIBUTING.md): plugin architecture, skill anatomy, development setup
 - [CHANGELOG.md](CHANGELOG.md): version history
 - [Example Configs](docs/examples/): Session Config examples for Next.js, Express, Swift

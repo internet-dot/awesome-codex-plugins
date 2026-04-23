@@ -29,18 +29,6 @@
       "category": "Development & Workflow"
     },
     {
-      "name": "ck",
-      "source": {
-        "source": "local",
-        "path": "./plugins/JuliusBrussee/blueprint"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Development & Workflow"
-    },
-    {
       "name": "brooks-lint",
       "source": {
         "source": "local",
@@ -165,6 +153,30 @@
       "source": {
         "source": "local",
         "path": "./plugins/Kanevry/session-orchestrator"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
+    },
+    {
+      "name": "tailtest",
+      "source": {
+        "source": "local",
+        "path": "./plugins/avansaber/tailtest-codex"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
+    },
+    {
+      "name": "tool-advisor",
+      "source": {
+        "source": "local",
+        "path": "./plugins/dragon1086/claude-skills"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -345,6 +357,18 @@
       "source": {
         "source": "local",
         "path": "./plugins/BlockchainHB/launchfast_codex_plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Tools & Integrations"
+    },
+    {
+      "name": "mobazha",
+      "source": {
+        "source": "local",
+        "path": "./plugins/mobazha/mobazha-skills"
       },
       "policy": {
         "installation": "AVAILABLE",

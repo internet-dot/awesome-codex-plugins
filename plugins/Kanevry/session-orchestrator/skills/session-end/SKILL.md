@@ -100,6 +100,55 @@ Run ALL checks listed in the verification checklist. If any check fails: fix if 
 
 Read `skills/session-end/vault-operations.md` for validator bash contract and reporting matrix.
 
+### 2.2 CLAUDE.md Drift Check (if configured)
+
+Read `skills/session-end/drift-operations.md` for checker bash contract and reporting matrix. Complements 2.1: vault-sync validates frontmatter inside the vault tree; drift-check validates narrative claims (paths, counts, issue refs, session-file refs) in top-level repo docs.
+
+### 2.3 Vault Staleness Check (if configured)
+
+> Skip this subsection if `vault-staleness.enabled` is not `true` (default: `false`).
+
+#### Step 1 — Resolve mode
+
+Read `vault-staleness.mode` from `$CONFIG` (default: `warn`). Valid values: `off | warn | strict`.
+
+If `mode === 'off'`, skip Phase 2.3 entirely.
+
+#### Step 2 — Invoke staleness probes
+
+Both probes already ship in `skills/discovery/probes/`. Invoke each via Node import (no shell-out):
+
+```js
+import { runProbe as runStaleness } from '$REPO_ROOT/skills/discovery/probes/vault-staleness.mjs';
+import { runProbe as runNarrative }  from '$REPO_ROOT/skills/discovery/probes/vault-narrative-staleness.mjs';
+
+const projectStaleness = await runStaleness(projectRoot, config);
+const narrativeStaleness = await runNarrative(projectRoot, config);
+```
+
+Each probe returns `{ findings: Array, metrics: Object, duration_ms: Number }` and auto-appends a JSONL summary record to its respective metrics file.
+
+#### Step 3 — Aggregate and route by mode
+
+```
+totalFindings = projectStaleness.findings.length + narrativeStaleness.findings.length
+```
+
+- `mode === 'warn'` (default): report findings to closing report Docs Health line. Never block close.
+- `mode === 'strict'`:
+  - If `totalFindings === 0`: continue, log `Vault staleness: clean (mode=strict)`.
+  - If `totalFindings > 0`: BLOCK the close. Present the findings list and offer override:
+    - On Claude Code: AskUserQuestion with options:
+      1. "Fix and retry Phase 2.3" (Recommended) — exit close, let user investigate
+      2. "Override and close" — proceed, log a Deviation entry in STATE.md `## Deviations`:
+         `- [<ISO timestamp>] Phase 2.3: Vault staleness strict-mode findings overridden by user. Findings: <count> (projects: <N>, narratives: <M>).`
+      3. "Abort close" — exit close without writing
+    - On Codex CLI / Cursor IDE: same options as numbered Markdown list.
+
+#### Step 4 — Surface to closing report
+
+Pass the aggregated counts and mode forward to Phase 6 Final Report (Docs Health line — see Phase 6 below).
+
 ## Phase 3: Documentation Updates
 
 ### 3.0 Defensive Cleanup
@@ -117,7 +166,157 @@ This should have been cleaned up by wave-executor after the final wave, but cras
 - Update `CLAUDE.md` if patterns or conventions changed during this session
 - Check `<state-dir>/rules/` — if a new pattern was established, suggest a new rule file
 
-### 3.2 Session Handover (for significant sessions)
+### 3.2 Docs Verification (docs-orchestrator integration)
+
+> Skip this subsection if `docs-orchestrator.enabled` config is not `true` (default: `false`). Also skip entirely if `docs-orchestrator.mode` is `off`.
+
+#### Step 1 — Load docs-tasks SSOT
+
+Read `docs-tasks` from STATE.md frontmatter. This field is written by wave-executor Pre-Wave 1b when `docs-orchestrator.enabled: true` and session-plan emitted a `### Docs Tasks (machine-readable)` block.
+
+Use `scripts/lib/state-md.mjs` to parse the frontmatter safely — do NOT re-implement YAML parsing inline. Example accessor:
+
+```bash
+node --input-type=module -e "
+import {readFileSync} from 'node:fs';
+import {parseFrontmatter} from '${PLUGIN_ROOT}/scripts/lib/state-md.mjs';
+const raw = readFileSync('<state-dir>/STATE.md', 'utf8');
+const fm = parseFrontmatter(raw);
+const tasks = fm['docs-tasks'];
+if (!Array.isArray(tasks)) { process.stdout.write('ABSENT'); process.exit(0); }
+process.stdout.write(JSON.stringify(tasks));
+"
+```
+
+**Fallback — missing field:** If `docs-tasks` is absent from frontmatter, attempt to re-parse the session-plan output's `### Docs Tasks (machine-readable)` YAML fenced block from conversation context. This is degraded but functional.
+
+**No tasks found at all:** Log `"ℹ docs-orchestrator enabled but no docs-tasks persisted — skipping verification"` in the session report and skip Phase 3.2 entirely. This is NOT an error.
+
+**Silent-failure guard:** If STATE.md is unreadable, if frontmatter YAML is malformed, or if `docs-tasks` is present but not a list — these MUST produce an explicit error entry in the session final report. Do NOT skip silently:
+```
+⚠ Phase 3.2: docs-tasks parse error — <reason>. Manual docs verification required.
+```
+
+#### Step 2 — Read SESSION_START_REF
+
+Read `session-start-ref` from STATE.md frontmatter. Full accessor and fallback chain are documented in `plan-verification.md § SESSION_START_REF accessor`. Summary:
+- Primary: `session-start-ref` field in STATE.md frontmatter.
+- Fallback: `git diff --name-only origin/main...HEAD` (no specific base SHA).
+
+If `git diff` itself fails (network issue, corrupt repo), log:
+```
+⚠ Phase 3.2: git diff failed — <stderr>. Docs verification skipped.
+```
+and skip Phase 3.2. This is an explicit error, not a silent skip.
+
+#### Step 3 — Compute changed files
+
+```bash
+CHANGED_FILES=$(git diff --name-only "$SESSION_START_REF..HEAD")
+```
+
+Cache this list for the per-task loop below. If the command exits non-zero, surface the error per the guard above and skip Phase 3.2.
+
+#### Step 4 — Audience → file-pattern reference
+
+The following mini-table mirrors `skills/docs-orchestrator/audience-mapping.md` (authoritative source — consult it for updates):
+
+| Audience | Target file patterns |
+|----------|----------------------|
+| `user` | `README.md`, `docs/user/**/*.md`, `docs/getting-started.md`, `examples/**/*.md` |
+| `dev` | `CLAUDE.md`, `docs/dev/**/*.md`, `docs/adr/**/*.md` |
+| `vault` | `<vault>/01-projects/<slug>/context.md`, `<vault>/01-projects/<slug>/decisions.md`, `<vault>/01-projects/<slug>/people.md` |
+
+Each `docs-task` carries its own `target-pattern` field (set during session-plan Step 1.8, derived from the audience-mapping table above). Use `task.target-pattern` as the primary match target; the table above is for human reference and fallback when `target-pattern` is absent.
+
+#### Step 5 — Per-task verification loop
+
+For each `task` in `docs-tasks`:
+
+1. **Resolve target:** glob-match `task.target-pattern` against the cached `CHANGED_FILES` list.
+
+2. **Not matched → GAP:**
+   - No file matching `task.target-pattern` appears in the diff.
+   - Record outcome: `gap`.
+
+3. **Matched → inspect diff:**
+   ```bash
+   git diff "$SESSION_START_REF..HEAD" -- <matched-file>
+   ```
+   - **Substantive content change** (non-whitespace, non-comment-only lines added/removed): outcome `ok`.
+   - **Whitespace-only or structural-only diff** (no prose or code content changed): outcome `gap`.
+   - **File contains `<!-- REVIEW: source needed -->` markers within changed regions:** outcome `partial`. This means content was written but requires human review before release. `partial` does NOT block in strict mode — it is always a warning, by policy choice. Document both the `ok` content and the markers in the report.
+
+4. Record `{id, audience, target-pattern, wave, status: ok|partial|gap}` for the aggregate report.
+
+#### Step 6 — Aggregate and report per mode
+
+Read `docs-orchestrator.mode` from Session Config (default: `warn`).
+
+**`mode: warn`** (default, non-blocking):
+- Append a subsection to the Phase 6 Final Report (see below).
+- `/close` proceeds regardless of gap count.
+
+**`mode: strict`** (blocking on any gap):
+- If ALL tasks are `ok` or `partial`: proceed — append report, continue close.
+- If ANY task is `gap`:
+  - **Claude Code:** use `AskUserQuestion` with these options (mark Recommended):
+    ```
+    Phase 3.2 found documentation gaps. How would you like to proceed?
+    1. Address gaps and retry Phase 3.2 (Recommended)
+    2. Override — close session with gaps (deviations logged)
+    3. Abort close
+    ```
+  - **Codex CLI / Cursor fallback:** render a numbered Markdown list:
+    ```markdown
+    ## Phase 3.2: Documentation Gaps Detected (mode=strict)
+
+    Choose one:
+    1. **Address gaps and retry Phase 3.2** *(Recommended)*
+    2. Override — close session with gaps (deviations will be logged)
+    3. Abort close
+
+    Gap tasks: <list task IDs and target-patterns>
+    ```
+  - On "Address and retry": pause close, allow user to dispatch docs-writer manually or fix docs directly, then re-run Phase 3.2 from Step 3.
+  - On "Override": log a deviation in the `## Deviations` section of STATE.md:
+    ```
+    - [Phase 3.2] docs-orchestrator strict-mode gaps overridden by user. Tasks: <ids>. Timestamp: <ISO 8601>.
+    ```
+    Then append the report and proceed with close.
+  - On "Abort": stop `/close` entirely. User must re-invoke.
+
+**`mode: off`:** This path is not reached because the Phase gate at the top of 3.2 exits early for `mode: off`. Documented here for completeness.
+
+#### Step 7 — Documentation Coverage report block
+
+Emit the following block to be included in Phase 6 Final Report under `### Documentation Coverage (docs-orchestrator)`:
+
+```
+### Documentation Coverage (docs-orchestrator)
+
+Mode: <warn|strict>
+Tasks verified: <total>
+
+| Task ID | Audience | Target pattern | Wave | Status |
+|---------|----------|----------------|------|--------|
+| <id>    | <user|dev|vault> | <pattern> | <N> | ✅ ok / ⚠ partial / ❌ gap |
+...
+
+Summary: <N> ok, <N> partial (REVIEW markers present — human review needed before release), <N> gap
+```
+
+For `partial` tasks, append a note per task:
+```
+⚠ <target-pattern>: contains <!-- REVIEW: source needed --> markers — content written but not fully source-cited. Review before release.
+```
+
+For `gap` tasks in warn mode, append:
+```
+ℹ Gap tasks were not addressed. No docs-writer output found for these patterns. Consider scheduling in a follow-up session.
+```
+
+### 3.2a Session Handover (for significant sessions)
 If this session made substantial changes, create or update:
 - `<state-dir>/session-handover/` doc with: tasks completed, resume point, metrics changed, issues opened/closed
 - Or update `<state-dir>/STATE.md` with session digest
@@ -131,14 +330,51 @@ Review `<state-dir>/rules/` files that are relevant to this session's work:
 
 ### 3.4 Update STATE.md
 
-> **Ownership Reference:** See `skills/_shared/state-ownership.md`. session-end is authorized to set `status: completed` only — no other fields.
+> **Ownership Reference:** See `skills/_shared/state-ownership.md`. session-end is authorized to set `status: completed` plus the optional `updated` timestamp (#184) — no other fields.
 
 > Gate: Only run if `persistence` is enabled in Session Config and `<state-dir>/STATE.md` exists.
 1. Set frontmatter `status: completed`
 2. Record final wave count and completion time in the frontmatter
-3. Keep the file as a record — do NOT delete it (next session-start reads it)
+3. Touch `updated: <ISO 8601 UTC>` in the frontmatter (issue #184). Use `scripts/lib/state-md.mjs` → `touchUpdatedField` for safety:
+   ```bash
+   node --input-type=module -e "
+   import {readFileSync, writeFileSync} from 'node:fs';
+   import {touchUpdatedField} from '${PLUGIN_ROOT}/scripts/lib/state-md.mjs';
+   const p = '<state-dir>/STATE.md';
+   writeFileSync(p, touchUpdatedField(readFileSync(p, 'utf8'), new Date().toISOString()));
+   "
+   ```
+   Silent no-op if the file has no frontmatter.
+4. Keep the file as a record — do NOT delete it (next session-start reads it)
 
 If STATE.md doesn't exist, skip this subsection.
+
+### 3.4a Coordinator Snapshot Cleanup (#196)
+
+Pre-dispatch snapshots (`refs/so-snapshots/<sessionId>/wave-*`) are created by wave-executor before each wave dispatch so that session-start can offer recovery if a session is interrupted mid-wave. On a clean close those snapshots are no longer needed and should be deleted. In addition, orphaned refs from older sessions that were never cleaned up (e.g. after a hard crash) are garbage-collected using an age-based policy (14 days).
+
+> Gate: Only run if `persistence` is `true` in Session Config. Skip entirely when persistence is off (snapshots are never written in that mode).
+
+```bash
+node --input-type=module -e "
+import { listSnapshots, deleteSnapshot, gcSnapshots } from '${PLUGIN_ROOT}/scripts/lib/coordinator-snapshot.mjs';
+
+// Step A: delete this session's snapshots (clean close → we don't need them)
+const mine = await listSnapshots({ sessionId: '${SESSION_ID}' });
+for (const s of mine) {
+  const r = await deleteSnapshot({ refName: s.ref });
+  if (!r.ok) console.error('snapshot cleanup:', r.error);
+}
+
+// Step B: GC orphans older than 14 days (non-fatal)
+const gc = await gcSnapshots({ olderThanDays: 14 });
+console.log(\`snapshot cleanup: deleted \${mine.length} from this session + \${gc.deletedCount} expired orphans (scanned \${gc.scanned}).\`);
+"
+```
+
+Failures in either step are logged to stderr but do **not** block session close — a missed cleanup is self-healing via the 14-day GC on the next session.
+
+This cleanup is the counterpart to the session-start Phase 1.5 recovery prompt: once a session closes cleanly, future sessions must not be offered recovery for its snapshots.
 
 ### 3.5 Session Memory
 
@@ -250,6 +486,10 @@ Present to the user:
 - TypeScript: 0 errors
 - Commits: [N] pushed to [branch]
 - Mirror: [synced/skipped]
+- Docs Health: Vault staleness — [render one of the three cases below based on Phase 2.3 result]
+  - Findings present (warn mode): `[N stale projects, M stale narratives] (mode=warn). See .orchestrator/metrics/vault-staleness.jsonl.`
+  - Skipped (disabled or mode=off): `skipped (disabled | mode=off).`
+  - Clean run: `clean (mode=<mode>).`
 - Enforcement: [N violations blocked / M warnings] (or "N/A" if enforcement off)
 - Circuit breaker: [N agents hit limits, M spirals detected] (or "none")
 - Metrics written to: `.orchestrator/metrics/sessions.jsonl`
@@ -261,6 +501,8 @@ Present to the user:
 - Notes: [any context for next session]
 ```
 
+> **Documentation Coverage anchor:** If Phase 3.2 ran and produced task verification results (i.e. `docs-orchestrator.enabled: true` and `docs-tasks` were found), the results appear here as a `### Documentation Coverage (docs-orchestrator)` subsection emitted by Phase 3.2 Step 7. The content is written dynamically — it is not pre-populated in this template. When `docs-orchestrator.enabled` is `false` or `docs-tasks` were absent, this subsection is omitted entirely.
+
 ## Sub-File Reference
 
 | File | Purpose |
@@ -270,6 +512,7 @@ Present to the user:
 | `discovery-scan.md` | Phase 1.5 embedded discovery dispatch and findings triage |
 | `metrics-collection.md` | Phase 1.7 JSONL schema and conditional field rules |
 | `vault-operations.md` | Phase 2.1 validator bash contract and reporting matrix |
+| `drift-operations.md` | Phase 2.2 drift-checker bash contract and reporting matrix |
 | `learning-patterns.md` | Phases 3.5a + 3.6 extraction heuristics, confidence updates, passive decay, and JSONL write procedure |
 | `session-metrics-write.md` | Phase 3.7 JSONL append, vault-mirror invocation, and behavior matrix |
 

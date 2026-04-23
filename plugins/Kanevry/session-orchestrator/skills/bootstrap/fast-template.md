@@ -43,15 +43,28 @@ if grep -q "^## Session Config" CLAUDE.md; then
   echo "Session Config block confirmed."
 else
   # Sentinel absent — claude init did NOT populate the file (or wrote minimal content).
-  # Fall back to plugin-template generation: append Session Config with project-name and vcs.
-  echo "## Session Config" >> CLAUDE.md
-  echo "" >> CLAUDE.md
-  echo "project-name: <PROJECT_NAME>" >> CLAUDE.md
-  echo "vcs: <VCS>" >> CLAUDE.md
+  # Fall back to plugin-template generation: append canonical Session Config block
+  # (issue #182: 7 mandatory fields enforced by scripts/lib/config-schema.mjs).
+  cat >> CLAUDE.md <<'EOF'
+
+## Session Config
+
+project-name: <PROJECT_NAME>
+vcs: <VCS>
+persistence: true
+enforcement: warn   # strict | warn | off
+waves: 5
+agents-per-wave: 6
+test-command: <detect per package-manager>
+typecheck-command: <detect>
+lint-command: <detect>
+recent-commits: 20
+stale-branch-days: 7
+EOF
 fi
 ```
 
-If `## Session Config` is present, confirm `project-name` and `vcs` keys exist within it. If either is missing, add them.
+If `## Session Config` is present, confirm the 7 mandatory fields (per issue #182, enforced by `scripts/lib/config-schema.mjs`) plus `project-name` and `vcs` are present. Mandatory: `test-command`, `typecheck-command`, `lint-command`, `agents-per-wave`, `waves`, `persistence`, `enforcement`. If any are missing, append them.
 
 **Config file selection by platform:**
 - Claude Code → `CLAUDE.md`
@@ -124,6 +137,23 @@ build/
 
 Note: `.orchestrator/` is NOT gitignored — `bootstrap.lock` must be committed. Only the platform state dirs (`.claude/`, `.codex/`, `.cursor/`) are excluded.
 
+## Step 3a: Install Parallel-Sessions Rule
+
+Write the vendored rule from `$PLUGIN_ROOT/templates/_shared/rules/parallel-sessions.md` to `$REPO_ROOT/.claude/rules/parallel-sessions.md`.
+
+Idempotency:
+- Missing → create
+- Exists and byte-identical → skip silently
+- Exists and differs → overwrite (vendored is canonical)
+
+Shell:
+```bash
+mkdir -p "$REPO_ROOT/.claude/rules"
+cp "$PLUGIN_ROOT/templates/_shared/rules/parallel-sessions.md" "$REPO_ROOT/.claude/rules/parallel-sessions.md"
+```
+
+Why: PSA-003 destructive-command safeguards require every consumer repo to carry the rule. See issue #155.
+
 ## Step 4: Generate README.md
 
 ```markdown
@@ -149,6 +179,8 @@ tier: fast
 archetype: null
 timestamp: <current ISO 8601 UTC — e.g., 2026-04-16T09:30:00Z>
 source: <claude-init | plugin-template>
+plugin-version: <session-orchestrator plugin version — read from $PLUGIN_ROOT/package.json .version field>
+bootstrapped-at: <current ISO 8601 UTC — same value as timestamp; distinct field for age-validation probe>
 ```
 
 Set `source`:
@@ -161,7 +193,7 @@ Stage all created files and commit:
 
 ```bash
 cd "$REPO_ROOT"
-BOOTSTRAP_FILES=(CLAUDE.md AGENTS.md .gitignore README.md .orchestrator/bootstrap.lock)
+BOOTSTRAP_FILES=(CLAUDE.md AGENTS.md .gitignore README.md .orchestrator/bootstrap.lock .claude/rules/parallel-sessions.md)
 # Add only the files bootstrap created — no sweeping -u/-A to avoid catching pre-existing files
 for _f in "${BOOTSTRAP_FILES[@]}"; do
   [[ -e "$_f" ]] && git add -- "$_f"
@@ -177,10 +209,11 @@ After the commit succeeds, output a concise summary:
 
 ```
 Bootstrap (fast) complete. Created:
-  CLAUDE.md (or AGENTS.md)  — Session Config with project-name, vcs
-  .gitignore                 — <stack>-appropriate minimal rules
-  README.md                  — one-line stub
-  .orchestrator/bootstrap.lock — version: 1, tier: fast
+  CLAUDE.md (or AGENTS.md)              — Session Config with project-name, vcs
+  .gitignore                            — <stack>-appropriate minimal rules
+  README.md                             — one-line stub
+  .claude/rules/parallel-sessions.md   — vendored PSA rule (issue #155)
+  .orchestrator/bootstrap.lock          — version: 1, tier: fast
 Committed: "chore: bootstrap (fast)"
 ```
 

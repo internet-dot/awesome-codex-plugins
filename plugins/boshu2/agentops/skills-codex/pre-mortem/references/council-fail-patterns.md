@@ -85,7 +85,7 @@ Direction reverses mid-execution, doubling the mechanical cost of propagation.
 **Signals:**
 - "Create X" in one wave, "flatten X" in a later wave
 - Architecture decisions reconsidered after propagation work begins
-- Multiple pivots without shipping code between them (Olympus pattern: 5 pivots, zero code)
+- Multiple pivots without shipping code between them (pivot-heavy, zero-code delivery)
 
 **Pre-mortem check:** Has the architectural direction been validated (via council or user confirmation) BEFORE propagation work begins?
 

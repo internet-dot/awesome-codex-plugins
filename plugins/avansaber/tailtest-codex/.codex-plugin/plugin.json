@@ -1,0 +1,16 @@
+{
+  "name": "tailtest",
+  "version": "4.5.0",
+  "description": "Automatically generates and runs tests alongside your Codex session. Any language. No commands. No setup.",
+  "author": {
+    "name": "AvanSaber Inc.",
+    "email": "support@avansaber.com",
+    "url": "https://avansaber.com"
+  },
+  "homepage": "https://tailtest.com",
+  "repository": "https://github.com/avansaber/tailtest-codex",
+  "license": "MIT",
+  "keywords": ["testing", "auto-test", "codex", "openai", "assistant", "framework-agnostic"],
+  "hooks": { "config": "hooks/hooks.json" },
+  "skills": [{ "path": "skills/tailtest" }]
+}

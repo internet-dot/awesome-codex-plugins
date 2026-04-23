@@ -455,6 +455,56 @@ If the call fails, log the structured message above and continue. Raw API respon
 
 ---
 
+## Step 3a: Install Parallel-Sessions Rule
+
+Write the vendored rule from `$PLUGIN_ROOT/templates/_shared/rules/parallel-sessions.md` to `$REPO_ROOT/.claude/rules/parallel-sessions.md`.
+
+Idempotency:
+- Missing → create
+- Exists and byte-identical → skip silently
+- Exists and differs → overwrite (vendored is canonical)
+
+Shell:
+```bash
+mkdir -p "$REPO_ROOT/.claude/rules"
+cp "$PLUGIN_ROOT/templates/_shared/rules/parallel-sessions.md" "$REPO_ROOT/.claude/rules/parallel-sessions.md"
+```
+
+Why: PSA-003 destructive-command safeguards require every consumer repo to carry the rule. See issue #155.
+
+Note: This step runs before D99. If D99 (via inherited S99) executes and fetches a newer version of `parallel-sessions.md` from the baseline, the baseline version wins (S99 overwrites by design — acceptable).
+
+## Step 3b: Initialize .orchestrator/metrics/ (Deep) (#185)
+
+Deep tier creates both learnings and sessions metrics plus a schema-linking README:
+
+```bash
+mkdir -p "$REPO_ROOT/.orchestrator/metrics"
+[[ -f "$REPO_ROOT/.orchestrator/metrics/learnings.jsonl" ]] || \
+  : > "$REPO_ROOT/.orchestrator/metrics/learnings.jsonl"
+[[ -f "$REPO_ROOT/.orchestrator/metrics/sessions.jsonl" ]] || \
+  : > "$REPO_ROOT/.orchestrator/metrics/sessions.jsonl"
+
+cat > "$REPO_ROOT/.orchestrator/metrics/README.md" <<'README'
+# Metrics
+
+- `learnings.jsonl` — session-scoped learnings (confidence-weighted patterns).
+  Managed by the `/evolve` skill.
+- `sessions.jsonl` — per-session execution summaries.
+  Written by `/close` via session-end.
+
+Schema: https://gitlab.gotzendorfer.at/infrastructure/session-orchestrator
+(see skills/evolve/SKILL.md and skills/session-end/).
+
+**Do NOT gitignore** — these files are project artifacts intended to persist
+across sessions and contributors.
+README
+```
+
+**Idempotent.** Existing files are preserved.
+
+**Gitignore guidance:** same as Standard — `.orchestrator/metrics/*.jsonl` MUST remain tracked.
+
 ## Step D99: (Optional) Baseline Fetch — Inherited from Standard
 
 Standard-template Step S99 already executed as part of "Step 1–8: Execute Standard Tier" above. No additional fetch action is needed here.
@@ -462,6 +512,65 @@ Standard-template Step S99 already executed as part of "Step 1–8: Execute Stan
 If S99 ran successfully, `.claude/rules/*.md` and `.claude/.baseline-fetch.lock` are already written to `$REPO_ROOT`. These files are included in the Deep commit at Step D8 via the `.claude/` entry in `BOOTSTRAP_FILES`.
 
 If S99 was skipped (no `baseline-ref` or no `GITLAB_TOKEN`), that skip state is already logged; rules will arrive via the legacy Clank weekly sync MR path.
+
+---
+
+## Step D6.5: .claude/agents/ Scaffold (#189)
+
+Copy the opinionated agent templates into the consumer repo:
+
+```bash
+mkdir -p "$REPO_ROOT/.claude/agents"
+cp "$PLUGIN_ROOT/skills/bootstrap/templates/agents/"*.md "$REPO_ROOT/.claude/agents/"
+```
+
+This scaffolds 3 opinionated agents (`project-discovery`, `project-code-review`, `project-quality-gate`) following CLAUDE.md Agent Authoring Rules. Consumer repos should edit descriptions/bodies to match project specifics — but keep the frontmatter structure intact (validated by `agent-frontmatter-invalid` probe).
+
+**Idempotency:** Existing files under `.claude/agents/` are not overwritten — skip any file that already exists.
+
+---
+
+## Step D6.6: Vault-Registration Prompt (Product Repos) (#190)
+
+If this repo shows product-repo signals (framework dep + personas/content dir + product env vars), offer to register a vault entry in Session Config. This step mirrors standard-template Step 5.5 — if the standard tier already ran it and the user accepted, `hasVaultConfig` will return true and this step is a no-op.
+
+**Detection (via `scripts/lib/product-repo-detect.mjs`):**
+
+```bash
+node --input-type=module -e "
+import { detectProductRepo, hasVaultConfig } from '${PLUGIN_ROOT}/scripts/lib/product-repo-detect.mjs';
+const result = detectProductRepo({ repoRoot: process.cwd() });
+const already = hasVaultConfig('$REPO_ROOT/CLAUDE.md') || hasVaultConfig('$REPO_ROOT/AGENTS.md');
+if (!result.isProductRepo || already) process.exit(0);
+process.stdout.write(JSON.stringify(result, null, 2));
+process.exit(10);  // signal: prompt user
+"
+```
+
+When the script exits 10 (product signals detected, no vault yet): prompt the user:
+
+> Repo appears to carry product data (framework: \<detected>, signals: \<list>). Create vault registration in Session Config? [Y/n]
+
+**On Y (default):** Append the following block to the `## Session Config` section of CLAUDE.md:
+
+```yaml
+vault:
+  path: ${VAULT_PATH:-$HOME/Projects/vault}
+  product-domain: <prompt user for a short domain tag, e.g. "buchhaltung", "lead-gen">
+  persona-db: <optional: path to persona data file, blank if N/A>
+```
+
+**On N:** skip silently. The detection may re-run on next bootstrap; idempotency comes from `hasVaultConfig` — once `vault:` exists in Session Config, the prompt is skipped.
+
+**Examples from real repos:**
+
+| Repo | Framework | Signals | Vault Entry |
+|------|-----------|---------|-------------|
+| BuchhaltGenie | Next.js | supabase, stripe, personas/ | `product-domain: buchhaltung` |
+| LeadPipeDACH | Next.js | stripe, posthog | `product-domain: lead-gen` |
+| GotzendorferAT | Nuxt | postgres, sentry | `product-domain: portfolio` |
+
+**Idempotent.** If CLAUDE.md already has a `vault:` key inside Session Config, the prompt is skipped.
 
 ---
 
@@ -476,6 +585,8 @@ tier: deep
 archetype: <CONFIRMED_ARCHETYPE>
 timestamp: <current ISO 8601 UTC — e.g., 2026-04-16T09:30:00Z>
 source: <claude-init | plugin-template | projects-baseline>
+plugin-version: <session-orchestrator plugin version — read from $PLUGIN_ROOT/package.json .version field>
+bootstrapped-at: <current ISO 8601 UTC — same value as timestamp; distinct field for age-validation probe>
 ```
 
 Set `source` using the same logic as fast-template Step 5.
@@ -490,6 +601,7 @@ Stage all created files and commit:
 cd "$REPO_ROOT"
 BOOTSTRAP_FILES=(
   CLAUDE.md AGENTS.md .gitignore README.md .orchestrator/bootstrap.lock
+  .orchestrator/policy/quality-gates.json
   package.json pyproject.toml tsconfig.json eslint.config.mjs .prettierrc
   .editorconfig src/ tests/ CHANGELOG.md CODEOWNERS
   .gitlab/ .github/ .claude/
@@ -519,12 +631,15 @@ Bootstrap (deep, <archetype>) complete. Created:
   <tsconfig.json>                       — if JS/TS archetype
   <eslint.config.mjs + .prettierrc>    — if JS/TS archetype
   <tests/sanity.test.ts or equiv>       — sanity test
+  .claude/rules/parallel-sessions.md   — vendored PSA rule (issue #155)
+  .claude/STATE.md                      — idle placeholder (issue #184)
   CHANGELOG.md                          — initial entry
   CODEOWNERS (or .github/CODEOWNERS)   — placeholder owner
   <.gitlab-ci.yml or .github/workflows/ci.yml> — CI pipeline
   <issue templates>                     — Bug + Feature templates
   <MR/PR template>                      — Default merge/pull request template
   .orchestrator/bootstrap.lock          — version: 1, tier: deep
+  .orchestrator/policy/quality-gates.json — test/typecheck/lint commands (issue #183)
   Branch protection on main             — via glab/gh api (result logged above)
 Committed: "chore: bootstrap (deep)"
 ```

@@ -17,6 +17,7 @@
 - **Custom Watchlists** — Add your own entities via simple markdown files — no code changes needed
 - **5 Infographic Styles** — `classic`, `dark`, `glassmorphism`, `newspaper`, `tech` — ready for social sharing
 - **Message Digest** — Concise, copy-paste-friendly digest with one-line summaries + links, optimized for WeChat, Telegram, Slack and other messaging platforms
+- **Email Subscription** — Push the daily digest to a recipient list via SMTP (Gmail/QQ/Outlook/etc.). Multipart HTML + plain-text, optional infographic attachment, per-recipient language overrides, dry-run preview mode, RFC 8058 one-click unsubscribe headers
 - **Scheduled & Unattended** — Idempotent daily runs, no interactive prompts, partial success support
 
 ## Sample Output
@@ -56,6 +57,8 @@ SKILL.md (loaded by any AI tool)
     +- Step 4: (optional) Read skills/gen-infographic/SKILL.md  ->  cover image
     |
     +- Step 6: (optional) Read skills/gen-message/SKILL.md  ->  message digest + image
+    |
+    +- Step 7: (optional) python3 skills/gen-email/scripts/send_email.py  ->  SMTP delivery to subscribers
 ```
 
 The Python collector runs 5 sources concurrently (Reddit, HN, GitHub, HuggingFace, arXiv), then scores, deduplicates, and cross-links results. The AI tool also searches X/Twitter via web search for tracked entities, then reads the JSON output and generates a formatted Markdown report.
@@ -154,7 +157,18 @@ Create a config file at `~/.config/morning-ai/.env`:
 ```env
 GITHUB_TOKEN=gh_xxx               # GitHub (optional, higher rate limits)
 MESSAGE_ENABLED=true               # Message digest (optional, for messaging platforms)
+
+# Email subscription (optional — push the digest to your inbox / team)
+EMAIL_ENABLED=true
+EMAIL_RECIPIENTS=you@example.com,teammate@example.com
+EMAIL_SMTP_HOST=smtp.gmail.com
+EMAIL_SMTP_PORT=587
+EMAIL_SMTP_USER=you@gmail.com
+EMAIL_SMTP_PASSWORD=xxxx-xxxx-xxxx-xxxx   # Gmail App Password (NOT account password)
+EMAIL_FROM=MorningAI <you@gmail.com>
 ```
+
+See [docs/email-setup.md](docs/email-setup.md) for SMTP walkthroughs (Gmail / QQ / Outlook / Alibaba Cloud Enterprise Mail).
 
 Without any API keys, all sources work out of the box: **Reddit**, **Hacker News**, **GitHub**, **HuggingFace**, **arXiv**, and **X/Twitter**.
 

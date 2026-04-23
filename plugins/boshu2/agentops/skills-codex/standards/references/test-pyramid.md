@@ -18,25 +18,25 @@
 ## Agent Autonomy Boundaries
 
 ```
-┌─────────────────────────────────────────────────────┐
-│  AGENT-AUTONOMOUS (L0–L3)                           │
-│  Agent writes tests AND implementation.             │
-│  No human input needed for test design.             │
-│                                                     │
-│  L0: Contract — from SPEC.md alone                  │
-│  L1: Unit     — TDD RED→GREEN from spec             │
-│  L2: Integration — from subsystem spec + adapters   │
+┌───────────────────────────────────────────────────────┐
+│  AGENT-AUTONOMOUS (L0–L3)                             │
+│  Agent writes tests AND implementation.               │
+│  No human input needed for test design.               │
+│                                                       │
+│  L0: Contract — from SPEC.md alone                    │
+│  L1: Unit     — TDD RED→GREEN from spec               │
+│  L2: Integration — from subsystem spec + adapters     │
 │  L3: Component — agent writes, human defines scenarios│
-├─────────────────────────────────────────────────────┤
-│  HUMAN-GUIDED (L4–L7)                               │
-│  Human defines WHAT to test.                        │
-│  Agent builds the test infrastructure.              │
-│                                                     │
-│  L4: Smoke     — human defines "critical path"      │
-│  L5: E2E       — human designs flow, agent harness  │
-│  L6: Acceptance— human only validates               │
-│  L7: Prod      — monitors + human judgment          │
-└─────────────────────────────────────────────────────┘
+├───────────────────────────────────────────────────────┤
+│  HUMAN-GUIDED (L4–L7)                                 │
+│  Human defines WHAT to test.                          │
+│  Agent builds the test infrastructure.                │
+│                                                       │
+│  L4: Smoke     — human defines "critical path"        │
+│  L5: E2E       — human designs flow, agent harness    │
+│  L6: Acceptance— human only validates                 │
+│  L7: Prod      — monitors + human judgment            │
+└───────────────────────────────────────────────────────┘
 ```
 
 ## RPI Phase Mapping

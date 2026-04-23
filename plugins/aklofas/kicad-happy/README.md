@@ -117,13 +117,24 @@ Use Codex's built-in skill installer first:
 
 If you prefer a manual install, install the skills into `~/.codex/skills/`.
 
-Clone the repo:
+**Google Gemini CLI:**
+
+`gemini skills install <url>` does not recurse into this monorepo's `skills/` directory. Clone and link all 12 at once:
 
 ```bash
 git clone https://github.com/aklofas/kicad-happy.git
+gemini skills link ./kicad-happy/skills
 ```
 
-After installing new skills, restart Codex if they do not appear immediately.
+Or install all 12 skills directly from the URL using `--path` (requires Gemini CLI ≥ Jan 13 2026):
+
+```bash
+for skill in kicad spice emc datasheets bom digikey mouser lcsc element14 jlcpcb pcbway kidoc; do
+  gemini skills install https://github.com/aklofas/kicad-happy.git --path skills/$skill
+done
+```
+
+See [install-guidance.md](install-guidance.md#google-gemini-cli) for workspace-scope installs and upgrade notes.
 
 <details>
 <summary><strong>Manual install & other platforms</strong></summary>

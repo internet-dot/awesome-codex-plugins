@@ -76,15 +76,20 @@ If `claude init` exits 0 and produces a non-empty `CLAUDE.md`, it is the base. P
 ```markdown
 ## Session Config
 
-persistence: true
-enforcement: warn
-vcs: <detect: "gitlab" | "github" | "none" — see VCS detection below>
 project-name: <REPO_NAME>
+vcs: <detect: "gitlab" | "github" | "none" — see VCS detection below>
+persistence: true
+enforcement: warn   # strict | warn | off
+waves: 5
+agents-per-wave: 6
+test-command: <detect per package-manager — e.g., "npm test">
+typecheck-command: <detect — e.g., "npm run typecheck">
+lint-command: <detect — e.g., "npm run lint">
 recent-commits: 20
 stale-branch-days: 7
 ```
 
-Note: `plan-baseline-path` is intentionally omitted on the Public path.
+Note: `plan-baseline-path` is intentionally omitted on the Public path. The 7 mandatory fields enforced by the Session Config validator (`scripts/lib/config-schema.mjs`, issue #182) are: `test-command`, `typecheck-command`, `lint-command`, `agents-per-wave`, `waves`, `persistence`, `enforcement`.
 
 If `claude init` fails (non-zero exit or empty output), fall through to the Codex/Cursor path below.
 

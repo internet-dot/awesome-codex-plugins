@@ -8,6 +8,14 @@ description: 'Full RPI lifecycle orchestrator. Delegates to $discovery, $crank, 
 **YOU MUST EXECUTE THIS WORKFLOW. Do not just describe it.**
 **THREE-PHASE RULE + FULLY AUTONOMOUS.** Read `references/autonomous-execution.md` — it defines the mandatory 3-phase lifecycle, autonomous execution rules, anti-patterns, and phase completion logging. Unless `--interactive` is set, RPI runs hands-free. Do NOT stop after Phase 2. Do NOT ask the user anything between phases.
 
+## Strict Delegation Contract (default)
+
+RPI delegates via `$discovery`, `$crank`, `$validation` as **separate skill invocations**. Strict delegation is the **default** — there is no `--full` flag because strict delegation is always on.
+
+**Anti-pattern to reject:** compressing phases into one pass, substituting direct agent-spawns for `$skill` invocations, skipping `$validation`. See [`../shared/references/strict-delegation-contract.md`](../shared/references/strict-delegation-contract.md) for the full contract, rationalizations to reject, supported compression escapes (`--quick`, `--fast-path`, `--from=<phase>`, `--no-retro`, `--no-forge`, `--no-budget`), and detection rules.
+
+A live compression was observed 2026-04-19; see [`.agents/learnings/2026-04-19-orchestrator-compression-anti-pattern.md`](../../.agents/learnings/2026-04-19-orchestrator-compression-anti-pattern.md).
+
 ## Codex Lifecycle Guard
 
 When this skill runs in Codex hookless mode (`CODEX_THREAD_ID` is set or

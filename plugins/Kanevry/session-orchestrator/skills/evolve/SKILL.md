@@ -43,6 +43,19 @@ Read mode from `$ARGUMENTS`:
 
 ### 1.4 Load Data
 
+**Lazy-create defensive (#185):** If `.orchestrator/metrics/learnings.jsonl` does not exist (pre-#185 repo or bootstrap skipped), create an empty file and emit an info log — do NOT hard-fail:
+
+```bash
+LEARNINGS_FILE=".orchestrator/metrics/learnings.jsonl"
+if [[ ! -f "$LEARNINGS_FILE" ]]; then
+  mkdir -p "$(dirname "$LEARNINGS_FILE")"
+  : > "$LEARNINGS_FILE"
+  echo "info(#185): auto-created $LEARNINGS_FILE (was missing)" >&2
+fi
+```
+
+This defensive step is idempotent and cheap — it ensures `/evolve analyze|review|list` never fails because of a missing artifact file.
+
 1. Read `.orchestrator/metrics/sessions.jsonl` (session history). If it does not exist, check `<state-dir>/metrics/sessions.jsonl` as a legacy fallback (where `<state-dir>` is `.claude/`, `.codex/`, or `.cursor/` per platform). If neither exists, warn: "No session history found. Run at least one session first."
 2. Read `.orchestrator/metrics/learnings.jsonl` if it exists. If not found, check `<state-dir>/metrics/learnings.jsonl` as a legacy fallback.
 3. Count existing learnings, note any where `expires_at` < current date (expired)

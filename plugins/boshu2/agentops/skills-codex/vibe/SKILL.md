@@ -201,7 +201,7 @@ If unconsumed high-severity items are found, include them in the council packet 
 **If the project has constraint tests, run them before council:**
 
 ```bash
-# Check if constraint tests exist (Olympus pattern)
+# Check if constraint tests exist
 if [ -d "internal/constraints" ] && ls internal/constraints/*_test.go &>/dev/null; then
   echo "Running constraint tests..."
   go test ./internal/constraints/ -run TestConstraint -v 2>&1
@@ -210,7 +210,7 @@ if [ -d "internal/constraints" ] && ls internal/constraints/*_test.go &>/dev/nul
 fi
 ```
 
-**Why:** Constraint tests catch mechanical violations (ghost references, TOCTOU races, dead code at entry points) that council judges miss. Proven by Argus ghost ref in ol-571 — council gave PASS while constraint test caught it.
+**Why:** Constraint tests catch mechanical violations (ghost references, TOCTOU races, dead code at entry points) that council judges miss.
 
 Include constraint test results in the council packet context. Failed constraint tests are CRITICAL findings that override council PASS verdict.
 
@@ -225,44 +225,6 @@ Run mechanical checks BEFORE council — catches errors LLMs estimate instead of
 4. **Diagram sanity** — files with >3 ASCII boxes should have matching labels
 
 Include failures in council packet as `context.metadata_failures` (MECHANICAL findings). If all pass, note in report.
-
-### Step 2c: Deterministic Validation (Olympus)
-
-**Skip if `--quick` (see Step 1.5).**
-
-**Guard:** Only run when `.ol/config.yaml` exists AND `which ol` succeeds. Skip silently otherwise.
-
-**Implementation:**
-
-```bash
-# Run ol-validate.sh
-skills/vibe/scripts/ol-validate.sh
-ol_exit_code=$?
-
-case $ol_exit_code in
-  0)
-    # Passed: include the validation report in vibe output
-    echo "✅ Deterministic validation passed"
-    # Append the report section to council context and vibe report
-    ;;
-  1)
-    # Failed: abort vibe with FAIL verdict
-    echo "❌ Deterministic validation FAILED"
-    echo "VIBE FAILED — Olympus Stage1 validation did not pass"
-    exit 1
-    ;;
-  2)
-    # Skipped: note and continue
-    echo "⚠️ OL validation skipped"
-    # Continue to council
-    ;;
-esac
-```
-
-**Behavior:**
-- **Exit 0 (passed):** Include the validation report section in vibe output and council context. Proceed normally.
-- **Exit 1 (failed):** Auto-FAIL the vibe. Do NOT proceed to council.
-- **Exit 2 (skipped):** Note "OL validation skipped" in report. Proceed to council.
 
 ### Step 2d: Codex Review (opt-in via `--mixed`)
 
@@ -808,6 +770,5 @@ See `references/examples.md` for additional examples: security audit with spec c
 
 ### scripts/
 
-- `scripts/ol-validate.sh`
 - `scripts/prescan.sh`
 - `scripts/validate.sh`

@@ -63,7 +63,7 @@ Compute the average score across all five dimensions.
 Invoke council with the product preset. See [references/product-council-preset.md](references/product-council-preset.md) for judge configuration.
 
 ```
-Skill(skill="council", args="--preset=product validate design alignment for: <goal>")
+$council --preset=product validate design alignment for: <goal>
 ```
 
 Pass the alignment matrix from Step 2 as context to the council judges.

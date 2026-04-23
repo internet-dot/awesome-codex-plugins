@@ -20,13 +20,16 @@ Execution state is persisted at `.hotl/state/<run-id>.json`. This is the **autho
 ```json
 {
   "run_id": "<slug>-<YYYYMMDDTHHMMSSZ>",
-  "workflow_path": "hotl-workflow-<slug>.md",
+  "workflow_path": "/abs/path/to/execution-root/docs/plans/YYYY-MM-DD-<slug>-workflow.md",
+  "source_workflow_path": "/abs/path/to/original/workflow.md",
   "workflow_slug": "<slug>",
   "intent": "<from workflow frontmatter>",
   "branch": "<branch name>",
+  "repo_root": "/abs/path/to/repo",
+  "execution_root": "/abs/path/to/repo-or-worktree",
   "worktree_path": null,
   "executor_mode": "loop | executing-plans | subagent",
-  "start_time": "<ISO 8601>",
+  "started_at": "<ISO 8601>",
   "last_update": "<ISO 8601>",
   "status": "running | paused | blocked | completed | abandoned",
   "current_step": 3,
@@ -41,7 +44,7 @@ Execution state is persisted at `.hotl/state/<run-id>.json`. This is the **autho
 
 ### Run ID Format
 
-`<slug>-<YYYYMMDDTHHMMSSZ>` (e.g., `add-auth-20260320T212315Z`). Derived from the workflow filename and UTC execution start time.
+`<slug>-<YYYYMMDDTHHMMSSZ>` (e.g., `add-auth-20260320T212315Z`). Derived from the semantic workflow slug and UTC execution start time, not from the date prefix in canonical workflow filenames.
 
 ### Status Values
 
@@ -54,7 +57,7 @@ Execution state is persisted at `.hotl/state/<run-id>.json`. This is the **autho
 ## Run Resolution
 
 1. If the user provides a `run_id` → load that specific run
-2. If the user provides a workflow filename → search `.hotl/state/*.json` for matching `workflow_path`
+2. If the user provides a workflow filename → search `.hotl/state/*.json` for matching `workflow_path` or `source_workflow_path`
 3. If **one match** → use it
 4. If **multiple matches** → list all matching runs with run_id, step progress, branch, and age. Ask the user which to resume or whether to start fresh. **Never silently choose among multiple runs.**
 5. If **no match** → report "No interrupted run found for this workflow."
@@ -71,13 +74,14 @@ Execution state is persisted at `.hotl/state/<run-id>.json`. This is the **autho
 
 ```
 1. Load sidecar state for the resolved run
-2. Check for existing report at report_path from the sidecar
+2. Change into `execution_root` from the sidecar before invoking runtime/helpers
+3. Check for existing report at report_path from the sidecar
    - If report exists: surface its path to the user and continue appending to it
    - If report is missing: create a new report from sidecar state
-3. Repair workflow checkboxes from sidecar if drift is detected
+4. Repair workflow checkboxes from sidecar if drift is detected
    (crash may have interrupted between sidecar write and checkbox update)
-4. Find the current unfinished step (first step without status: completed)
-4. Check verify type for that step:
+5. Find the current unfinished step (first step without status: completed)
+6. Check verify type for that step:
 
    a. Machine-runnable verify (type: shell or type: artifact):
       → Run verify first
@@ -92,8 +96,9 @@ Execution state is persisted at `.hotl/state/<run-id>.json`. This is the **autho
       → Pause and ask: "Step N was in progress when the session ended.
         Re-run the step, or skip after manual inspection?"
 
-5. Continue normal execution from the resumed point
-6. Use the original executor mode (loop, executing-plans, or subagent)
+7. Continue normal execution from the resumed point, using the original `run_id` for every `hotl-rt step/gate/finalize` call
+8. If the resumed run reaches completion, keep using that same `run_id` when invoking `hotl:finishing-a-development-branch`
+8. Use the original executor mode (loop, executing-plans, or subagent)
 ```
 
 ## Checkpoint Drift Repair

@@ -25,7 +25,7 @@ This skill receives the agreed session scope from session-start. The scope inclu
 - **Issue list**: VCS issue numbers and titles selected by the user
 - **Session type**: housekeeping, feature, or deep
 - **Recommended focus**: the option the user selected in session-start Phase 7
-- **Session Config**: parsed JSON from `parse-config.sh`
+- **Session Config**: parsed JSON from `parse-config.mjs`
 
 These are passed via the conversation context (not a file). Parse the preceding session-start output to extract the agreed scope.
 
@@ -94,7 +94,8 @@ Before assigning tasks to waves, discover available agents for this session:
    - **Priority 3**: `general-purpose` (fallback)
 
 4. **Match tasks to agents**: For each task from Step 1:
-   - If `agent-mapping` config specifies a mapping for the task's domain → use that agent
+   - If `agent-mapping` config specifies a mapping for the task's domain → use that agent. For Docs-role tasks specifically, check `agent-mapping.docs` first; if set, use that agent name instead of the default below.
+   - **Docs-role fast path (high-priority — runs before keyword matching):** If the task's role is classified as `Docs` (per Step 1.8) AND `docs-orchestrator.enabled: true` in Session Config → resolve `subagent_type: "docs-writer"`. The `docs-writer` project agent is discovered at `<state-dir>/agents/docs-writer.md` during the Priority 1 scan above. No colon prefix — it is a project agent, not a plugin agent. If `agent-mapping.docs` is set, use that name instead of `"docs-writer"`.
    - Else, match task description against agent descriptions (keyword overlap: database/schema/migration → db agent, test/coverage/spec → test agent, UI/component/style/page → ui agent, security/auth/OWASP → security agent)
    - Else, use role-based default: Impl-Core/Impl-Polish → `code-implementer`, Quality → `test-writer`
    - Record the resolved `subagent_type` for each task
@@ -110,6 +111,7 @@ For each task from Step 1, assign exactly one role. Use these signal-to-role map
 | Needs codebase understanding before changes; audit, explore, verify assumptions, check existing coverage | **Discovery** | "Audit auth flow", "Check test coverage for module X", "Identify affected modules" |
 | New feature code, new API endpoints, DB schema changes, primary UI components, new modules | **Impl-Core** | "Add /api/users endpoint", "Create migration for invoices table", "Implement auth middleware" |
 | Bug fixes from prior waves, secondary features, integration work, edge cases, polish of existing code | **Impl-Polish** | "Fix pagination edge case", "Integrate payment with billing", "Handle error states in form" |
+| Documentation updates — new/changed README sections, CLAUDE.md updates, vault context.md/decisions.md narratives, ADR edits. Audience-aware (User/Dev/Vault). Gated on `docs-orchestrator.enabled` | **Docs** | "Update README for new --no-vault flag", "Write CLAUDE.md section for new hook", "Append vault decisions.md entry for architecture change" |
 | Write/update tests, lint fixes, security review, code simplification, type errors | **Quality** | "Add tests for auth module", "Fix TypeScript errors", "Security audit of new API" |
 | Documentation updates, issue cleanup, commit preparation, SSOT refresh, changelog | **Finalization** | "Update README", "Close resolved issues", "Write session handover notes" |
 
@@ -118,6 +120,30 @@ For each task from Step 1, assign exactly one role. Use these signal-to-role map
 - If a task is "fix something from a previous session" (not from this session's Impl-Core) → classify as **Impl-Core** (it is new work for this session).
 - If a task is "write tests for new feature code being built this session" → classify as **Quality** (not Impl-Core). Tests run after implementation.
 - If unsure between Impl-Core and Impl-Polish → if the task is on the critical path (other tasks depend on it), it is **Impl-Core**. If independent polish, it is **Impl-Polish**.
+- **Docs role** is only active when `docs-orchestrator.enabled: true` in Session Config. When disabled (default), documentation-update tasks fall into **Impl-Polish** (inline doc changes alongside code) or **Finalization** (standalone doc/SSOT updates) as today.
+
+#### Step 1.8 Docs-role: Consuming the Phase 2.5 Emission Block
+
+When `docs-orchestrator.enabled: true`, session-start Phase 2.5 emits a delimited block in the conversation context. Read and parse it before synthesizing Docs-role tasks:
+
+**Locating the block:** Search the conversation context for the header `### Docs Planning Result (Phase 2.5)`. If the header is absent, Phase 2.5 was skipped — emit **0 Docs tasks** and do not fabricate any.
+
+**Parsing rules (apply in document order):**
+- `Audiences:` — comma-separated list of active audience identifiers (e.g., `user, dev`). Trim whitespace around each value.
+- `Mode:` — single enum value: `warn`, `strict`, or `off`. Store as `$docs_mode`.
+- `Docs-tasks-seed:` — multi-entry bullet list. Each top-level `- audience:` bullet is **one seed task**. Parse in document order; do not merge entries. Each seed task has:
+  - `audience:` — target audience (`user`, `dev`, or `vault`)
+  - `rationale:` — free-text description of what needs documenting
+
+**Synthesizing Docs-role tasks:** For each seed task entry (in document order):
+1. Set `role: Docs`.
+2. Set `description` derived from the `rationale` field (paraphrase as an actionable imperative, e.g., "Document the new `--no-vault` flag in user-facing README").
+3. Set `audience` from the `audience` field.
+4. Set `target-pattern` by looking up the audience in the `Audiences & File Patterns` table in `skills/docs-orchestrator/audience-mapping.md`. Use the glob pattern listed there for the matched audience row.
+5. Resolve `subagent_type` per the Docs-role fast path in Step 1.5 point 4 above.
+
+**If the block is absent:** Do not fabricate Docs tasks. The Docs role remains empty; apply the empty-role rule from Step 2.
+
 - Housekeeping sessions: skip Steps 1.8, 2, and 3 — all tasks go into a single consolidated wave:
   - No role classification — all tasks treated as generic housekeeping work
   - Agent count: fixed at 1-2 per task (from wave-template.md housekeeping row), capped by `agents-per-wave`
@@ -125,6 +151,38 @@ For each task from Step 1, assign exactly one role. Use these signal-to-role map
   - Wave plan output uses: `### Wave 1: Housekeeping ([N agents])`
 
 Record the assigned role next to each task before proceeding to Step 2.
+
+### Docs-tasks persistence (for session-end Phase 3.2)
+
+When `docs-orchestrator.enabled: true` AND the plan contains 1+ Docs tasks, session-plan MUST emit a machine-readable block **at the end of its plan output** (after the wave plan, before `Ready to execute?`). This block is the single source of truth (SSOT) consumed downstream:
+
+- **wave-executor Pre-Wave 1b (STATE.md init):** reads this block and persists `docs-tasks: [...]` into STATE.md frontmatter.
+- **session-end Phase 3.2 (docs verification):** reads `docs-tasks` back from STATE.md to verify each task produced a diff.
+
+**Emit format:**
+
+```yaml
+### Docs Tasks (machine-readable)
+docs-tasks:
+  - id: docs-1
+    audience: <user|dev|vault>
+    target-pattern: <glob from skills/docs-orchestrator/audience-mapping.md>
+    rationale: <verbatim rationale from Phase 2.5 seed>
+    wave: <wave number where this docs-writer agent is dispatched>
+    status: planned
+  - id: docs-2
+    ...
+```
+
+**Field rules:**
+- `id`: sequential index-based identifier (`docs-1`, `docs-2`, …). No UUID generation required.
+- `audience`: one of `user`, `dev`, `vault`.
+- `target-pattern`: the glob from `skills/docs-orchestrator/audience-mapping.md` for this audience row — do not invent patterns.
+- `rationale`: copy the `rationale` text from the Phase 2.5 seed entry verbatim (do not paraphrase here).
+- `wave`: the actual wave number assigned in Step 2 where the `docs-writer` agent for this task is dispatched.
+- `status`: always `planned` at plan time. Terminal values are set by session-end Phase 3.2 per-task verification loop: `ok` (diff substantive), `partial` (diff has `<!-- REVIEW: source needed -->` markers), or `gap` (no matching diff). wave-executor does NOT perform intermediate status updates — `status: planned` remains until session-end writes the terminal value.
+
+**Omission rule:** When `docs-orchestrator.enabled: false` OR there are 0 Docs tasks, do NOT emit the `### Docs Tasks (machine-readable)` block. Absence of the block signals to wave-executor and session-end that no docs verification is needed for this session.
 
 ## Step 2: Wave Assignment
 
@@ -152,6 +210,18 @@ Map roles to the configured wave count:
 | 6+ | W1=Discovery, W2-W3=Impl-Core (split), W4-W5=Impl-Polish (split), W6=Quality+Finalization |
 
 When roles are combined into a single wave, agents from both roles execute in that wave. The combined wave inherits the more restrictive verification level.
+
+**Docs role dispatch rule (conditional — `docs-orchestrator.enabled: true` only):**
+
+When `docs-orchestrator.enabled: true`, apply the following concrete dispatch rule based on the count of synthesized Docs tasks from Step 1.8:
+
+- `len(docs-tasks) == 0` → **skip Docs role entirely**. Apply the empty-role rule: do not create a Docs wave slot, do not dispatch any `docs-writer` agent.
+- `len(docs-tasks) == 1` → **inline with Finalization wave**. Dispatch one `docs-writer` agent alongside the Finalization agent in the Finalization wave. The `docs-writer` agent's file scope must not overlap the Finalization agent's files (deconflict per Step 3.5).
+- `len(docs-tasks) >= 2` → **dedicated Impl-Polish sub-slot or dedicated wave slot**. Options in priority order:
+  1. If Impl-Polish wave has remaining agent capacity (below `agents-per-wave`): add `docs-writer` agents to the Impl-Polish wave as a sub-slot. The `docs-writer` agents MUST NOT share file scopes with any `code-implementer` agents in the same wave — verify via Step 3.5 deconfliction.
+  2. If Impl-Polish is at capacity: add a dedicated Docs slot within the closest wave with capacity (prefer the wave immediately before Finalization).
+- **NEVER add a 6th wave** for Docs. Docs always occupies an existing wave slot.
+- When `docs-orchestrator.enabled` is `false` (default), this rule has no effect — the Docs role does not exist.
 
 **Cross-role constraint in combined waves:** Tasks from different roles within a combined wave CANNOT be merged into a single agent (different scope permissions — e.g., Discovery is read-only, Impl-Core has write access). If the combined wave exceeds `agents-per-wave`, defer the lower-priority role's tasks: in W1=Discovery+Impl-Core, defer Impl-Core tasks to the next applicable wave. In W2=Impl-Polish+Quality, defer Quality tasks to a separate phase within the same wave.
 

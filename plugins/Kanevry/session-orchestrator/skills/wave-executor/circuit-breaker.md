@@ -56,8 +56,20 @@ The coordinator determines each agent's status after the wave completes:
 
 ## Worktree Isolation
 
-1. **When to use**: Read `isolation` from Session Config. Default: `worktree` for feature/deep sessions, `none` for housekeeping.
-2. **Dispatch with isolation**: When isolation is enabled, add `isolation: "worktree"` to Agent tool calls:
+1. **When to use — graduated default (#194)**: Resolve isolation per wave via `resolveIsolation({ agentCount, sessionType, collisionRisk, configIsolation })` from `scripts/lib/wave-sizing.mjs`. User-explicit `isolation: worktree` or `isolation: none` in Session Config overrides the graduation. Plan-level `collision-risk: high` forces `worktree` even at ≤2 agents.
+
+   | agentCount | sessionType | resolved isolation |
+   |---|---|---|
+   | ≤ 2 | any | `none` (coordinator-direct / in-place) |
+   | 3–4 | housekeeping | `none` |
+   | 3–4 | feature / deep | `worktree` |
+   | ≥ 5 | any | `worktree` |
+
+   Rationale: the verified learning `coordinator-over-worktree-on-shared-files` (confidence 0.75) shows that small waves on partitioned scopes merge cleaner when run in-place. Two consecutive deep-session regressions (2026-04-20 07:30, 09:00) were worktree base-ref staleness on ≤2-agent waves editing the same SKILL.md. Graduated default makes worktree the tool for parallelism, not the default tax on every wave.
+
+2. **Enforcement auto-promote (#194)**: Call `resolveEnforcement({ isolation, configEnforcement })` from the same module. When isolation resolves to `none` and the user has not explicitly set `configEnforcement: 'off'`, enforcement auto-promotes from `warn` → `strict`. Worktrees provide filesystem-level isolation; in-place dispatch relies on the scope hook as the only barrier — it must be hard, not informational. Write the resolved value into `wave-scope.json` `enforcement`.
+
+3. **Dispatch with isolation**: When resolved isolation is `worktree`, add `isolation: "worktree"` to Agent tool calls:
    ```
    Agent({
      description: "...",
@@ -67,14 +79,16 @@ The coordinator determines each agent's status after the wave completes:
      isolation: "worktree"
    })
    ```
-3. **Post-wave merge**: After wave completes, worktree changes are automatically available. If agents made changes in worktrees:
+   When resolved isolation is `none`, omit the `isolation` parameter (agents run in the coordinator's working tree).
+
+4. **Post-wave merge**: After wave completes, worktree changes are automatically available. If agents made changes in worktrees:
    - Review each agent's changes for conflicts using `git diff` between worktree branches
    - **Merge strategy**: Apply agent changes sequentially (by agent number). For each agent:
      a. Attempt fast-forward merge. If clean, proceed.
      b. If conflicts: prefer the later agent's version for new code, prefer the earlier agent's version for modified existing code. When unclear, keep both versions and add a fix task to the next wave.
    - After all agents merged, run incremental quality checks
    - Document any conflict resolutions in the wave progress update
-4. **Fallback**: If worktree creation fails (e.g., git state issue), fall back to shared directory with a warning logged.
+5. **Fallback**: If worktree creation fails (e.g., git state issue), fall back to shared directory with a warning logged.
 
 ## Stagnation Patterns
 

@@ -44,10 +44,101 @@ Before reading STATE.md contents, validate the branch field:
 - If STATE.md's `branch` does not match `git rev-parse --abbrev-ref HEAD`, log: "⚠ STATE.md from branch [X], current branch is [Y] — treating as stale." Skip to step 2 (treat as if STATE.md does not exist).
 
 1. **STATE.md exists** — read it and inspect the `status` field:
-   - `status: active` — previous session crashed or was interrupted. Use the AskUserQuestion tool to present: "Found unfinished session from [started_at]. [N] waves completed. Resume or start fresh?" with options to resume the previous plan or start a new session.
-   - `status: paused` — session was intentionally paused. Use AskUserQuestion to offer resuming from the pause point or starting fresh.
-   - `status: completed` — previous session ended cleanly. Note the summary for context (what was done, what was deferred) but continue with normal initialization.
+   - `status: active` — previous session crashed or was interrupted. Use the AskUserQuestion tool to present: "Found unfinished session from [started_at]. [N] waves completed. Resume or start fresh?" with options to resume the previous plan or start a new session. After a resume choice, proceed to **Snapshot Recovery** subsection below.
+   - `status: paused` — session was intentionally paused. Use AskUserQuestion to offer resuming from the pause point or starting fresh. After a resume choice, proceed to **Snapshot Recovery** subsection below.
+   - `status: completed` — previous session ended cleanly. Note the summary for context (what was done, what was deferred), then **reset STATE.md to idle** before any new session state is written (see "Idle Reset" below). Continue with normal initialization.
 2. **STATE.md does not exist** — first session or persistence was previously off. Continue normally.
+
+### Idle Reset (completed-branch only)
+
+When (and only when) the prior `status` is `completed`, rewrite STATE.md to a clean idle state before Phase 1b (Initialize STATE.md) runs. This prevents the next agent from reading a stale "completed" banner at session-start, while preserving the prior session's record in a demoted archive block.
+
+Reset rules — applies ONLY on the `completed` branch. Do NOT perform this reset on `active` or `paused`; those paths stay user-interactive via AskUserQuestion.
+
+1. Set frontmatter `status: idle`.
+2. Clear `current-wave` (set to `0`).
+3. Move the existing `## Wave History` body into a new `## Previous Session` archive section (retain the record, but demote it below the new session's live state). Remove the original `## Wave History` section — wave-executor will recreate it on the next wave.
+4. Clear `## Deviations` (leave the heading with an empty body so the schema is preserved).
+5. Leave other frontmatter fields (`schema-version`, `session-type`, `branch`, `issues`, `started_at`, `total-waves`) intact until Phase 1b overwrites them with the new session's values.
+
+Rationale: `/close` intentionally keeps STATE.md as a record so the next session-start can read it. This reset completes that contract by demoting the record before new session state is written, so a fresh session never appears "already completed".
+
+### Snapshot Recovery (#196)
+
+Applies ONLY after the user chose to **resume** from the `active`/`paused` branch above. Skip entirely on the `completed` branch (snapshots for completed sessions are GC'd by session-end, not offered for recovery) and on the "start fresh" path of an `active`/`paused` prompt (starting fresh implies abandoning any snapshot).
+
+```js
+import { listSnapshots, deleteSnapshot } from '$PLUGIN_ROOT/scripts/lib/coordinator-snapshot.mjs';
+
+const snaps = await listSnapshots({ sessionId: '<sessionId from STATE.md>' });
+```
+
+If `snaps.length === 0` → no snapshots to recover; continue to the Current-Task Banner.
+
+If `snaps.length >= 1` → present the following choice:
+
+**Claude Code (AskUserQuestion):**
+
+```js
+AskUserQuestion({
+  questions: [{
+    question: `Found ${snaps.length} coordinator snapshot(s) from the resumed session (latest from ${humanAgeOf(snaps[0].createdAt)}). Recover, keep as backup, or discard?`,
+    header: "Snapshot",
+    multiSelect: false,
+    options: [
+      { label: "Recover (diff vs current tree) (Recommended)", description: "Apply the latest snapshot back onto the working tree. You will see a diff and can unstage unwanted changes before committing." },
+      { label: "Keep as backup", description: "Leave refs/so-snapshots/* in place untouched. You can recover manually later via `git stash apply $(git rev-parse <ref>)`." },
+      { label: "Discard all", description: "Delete all refs/so-snapshots/<sessionId>/* immediately via deleteSnapshot." },
+    ],
+  }],
+});
+```
+
+**Codex CLI / Cursor IDE fallback (numbered Markdown list):**
+
+```markdown
+Snapshot recovery options:
+
+1. **Recover (Recommended)** — Apply the latest snapshot back onto the working tree. You will see a diff and can unstage unwanted changes before committing.
+2. **Keep as backup** — Leave the refs in place untouched. You can recover manually later.
+3. **Discard all** — Delete all refs/so-snapshots/<sessionId>/* immediately.
+
+Reply with the number of your choice.
+```
+
+On user choice:
+- **Recover** → `git stash apply <snaps[0].sha>` (use apply, not pop — leaves the ref intact in case the user changes their mind). Then show the resulting `git diff --stat` so the user sees what landed.
+- **Keep as backup** → no-op. Log in the Session Overview: `Snapshot(s) retained: <N>. Recover manually with \`git stash apply <sha>\`.`
+- **Discard all** → for each snapshot in `snaps`, call `deleteSnapshot({refName: snap.ref})`. Log count.
+
+Snapshot age (`humanAgeOf`) is derived from `snap.createdAt` (ISO 8601 from `git for-each-ref --format='%(committerdate:iso8601)'`). A simple inline helper:
+
+```js
+function humanAgeOf(iso) {
+  const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+```
+
+### Current-Task Banner (#184)
+
+After the continuity checks above, render a one-line banner showing the current task from STATE.md. This gives the user an immediate "where am I" signal before the rest of the session overview loads.
+
+```bash
+node --input-type=module -e "
+import {readFileSync} from 'node:fs';
+import {readCurrentTask} from '${PLUGIN_ROOT}/scripts/lib/state-md.mjs';
+try {
+  const t = readCurrentTask(readFileSync('<state-dir>/STATE.md', 'utf8'));
+  if (t) console.log('Current task: ' + t.description);
+} catch {}
+"
+```
+
+Skip silently when STATE.md is absent or unreadable. The banner is informational, not load-bearing.
 
 Also read `<state-dir>/STATUS.md` if it exists for additional project-level context.
 
@@ -68,6 +159,124 @@ Run these checks in parallel using Bash:
 3. **Unpushed/uncommitted**: `git status --short` + `git log origin/main..HEAD --oneline`
 4. **Open branches**: list all local branches, identify which are mergeable to develop/main
 5. **Stale branches**: branches with no commits in more than `stale-branch-days` (default: 7) days
+
+## Phase 2.5: Docs Planning (Docs-Orchestrator Integration)
+
+> Skip this phase if `docs-orchestrator.enabled` config is not `true` (default: `false`).
+
+### Step 1: Read Docs-Orchestrator Config
+
+Read the three controlling fields from `$CONFIG` using the canonical `jq` accessor pattern:
+
+```bash
+DOCS_ENABLED=$(echo "$CONFIG" | jq -r '."docs-orchestrator".enabled // false')
+DOCS_AUDIENCES=$(echo "$CONFIG" | jq -r '."docs-orchestrator".audiences // ["user","dev","vault"] | join(",")')
+DOCS_MODE=$(echo "$CONFIG" | jq -r '."docs-orchestrator".mode // "warn"')
+```
+
+Valid values for `mode`: `warn` | `strict` | `off`. Never use `hard`.
+
+If `DOCS_ENABLED` is not `true`, skip all remaining steps in this phase and proceed directly to Phase 3.
+
+### Step 2: Audience Auto-Detection
+
+Using signals already gathered in Phases 2–5 (git analysis, VCS issues, branch state, SSOT checks), apply the following heuristic to determine which audiences are likely affected. Record each match with its triggering signal for inclusion in the output block.
+
+**User audience** — flag as likely when any of the following are true:
+- Affected files include `README.md`, `docs/user/**/*.md`, `docs/getting-started.md`, or `examples/**/*.md`
+- Open or recently closed issues reference CLI UX changes, new user-facing commands, or a breaking API change
+- New public commands are introduced (e.g. changes to `commands/` directory)
+- Install flow or setup instructions are modified
+
+**Dev audience** — flag as likely when any of the following are true:
+- Affected files include `CLAUDE.md`, `docs/dev/**/*.md`, or `docs/adr/**/*.md`
+- Issues describe an architecture decision, major refactor, new module or subsystem, test-coverage shift, dependency upgrade, or an ADR-worthy choice
+- New `.mjs` scripts, skill files (`skills/**`), hook files (`hooks/**`), or agent definitions (`agents/**`) are added or substantially changed
+
+**Vault audience** — flag as likely when ALL of the following are true:
+- `vault-integration.enabled: true` is present in `$CONFIG`
+- Issues involve project-status change, ownership transition, stack/infra decision, cross-project dependency, migration, or archival event
+
+After detection, intersect the detected set with the audiences listed in `DOCS_AUDIENCES` (the user may have narrowed the allowed set in config). If the intersection is empty, proceed to Step 3 without pre-selecting any option as "Recommended" and add a note that no audiences were auto-detected.
+
+See `skills/docs-orchestrator/audience-mapping.md` for the authoritative audience → file-pattern and trigger table.
+
+### Step 3: Confirm Audiences with User
+
+Present the audience confirmation using the platform-appropriate interaction pattern.
+
+**Claude Code (AskUserQuestion):**
+
+Mark the auto-detected primary audience (or audiences, if multiple) with `(Recommended)`. `multiSelect: true` because a single change commonly touches more than one audience.
+
+```js
+AskUserQuestion({
+  questions: [{
+    question: "Welche Audiences berührt dieser Scope? (Mehrfachauswahl möglich)",
+    header: "Audiences",
+    multiSelect: true,
+    options: [
+      {
+        label: "Dev (Recommended)",   // add "(Recommended)" to each detected audience
+        description: "Architektur-, Modul- oder Refactoring-Änderungen — aktualisiert CLAUDE.md, docs/dev/**, docs/adr/**."
+      },
+      {
+        label: "User",
+        description: "Öffentlich sichtbare Änderungen — aktualisiert README.md, docs/user/**, examples/**."
+      },
+      {
+        label: "Vault",
+        description: "Strategische oder Status-Änderungen — aktualisiert <vault>/01-projects/<slug>/context.md, decisions.md, people.md."
+      }
+    ]
+  }]
+})
+```
+
+**Codex CLI / Cursor IDE fallback (numbered Markdown list):**
+
+```markdown
+Welche Audiences berührt dieser Scope? (Mehrfachauswahl möglich)
+
+Auto-detected: [dev]  ← list detected audiences here, or "none" if empty intersection
+
+1. **Dev (Recommended)** — Architektur-, Modul- oder Refactoring-Änderungen. Targets: CLAUDE.md, docs/dev/**, docs/adr/**.
+2. **User** — Öffentlich sichtbare Änderungen. Targets: README.md, docs/user/**, examples/**.
+3. **Vault** — Strategische oder Status-Änderungen. Targets: <vault>/01-projects/<slug>/context.md, decisions.md, people.md.
+
+Enter one or more numbers (comma-separated), or press Enter to accept the recommended default.
+```
+
+Store the confirmed audience list as `CONFIRMED_AUDIENCES`.
+
+### Step 4: Emit Docs Planning Result Block
+
+After the user confirms (or defaults are accepted), emit the following delimited block verbatim into the conversation context. This block is the **contract between Phase 2.5 and session-plan Step 1.8** — session-plan MUST parse it to classify tasks as `Docs` role and route them to the `docs-writer` agent.
+
+```markdown
+### Docs Planning Result (Phase 2.5)
+Audiences: [<comma-separated confirmed audiences, e.g. dev, user>]
+Detected-from: [<comma-separated detection signals, e.g. affected-files, issue-labels>]
+Mode: <warn|strict|off>
+Docs-tasks-seed:
+  - audience: "dev"
+    rationale: "<one-line reason derived from detection signal, e.g. 'new skill scaffolded in skills/docs-orchestrator'>"
+  - audience: "user"
+    rationale: "<one-line reason, or omit entry if audience not confirmed>"
+```
+
+Session-plan Step 1.8 identifies this block by the exact heading `### Docs Planning Result (Phase 2.5)` and reads `Audiences:` and `Docs-tasks-seed:` to seed the Docs role task list. **Parse rule for `Docs-tasks-seed:`:** each top-level `- audience:` bullet is exactly one seed task; parse all entries in document order; the following indented `rationale:` key binds to the most recent `- audience:`. If this block is absent (phase was skipped), session-plan MUST NOT create any Docs role tasks.
+
+### Step 5: Non-Overlap Discipline
+
+`docs-orchestrator` MUST NOT write to the following paths — they are owned by sibling skills:
+
+- `<vault>/01-projects/*/_overview.md` — owned by `vault-mirror` (regenerated from JSONL on every session-end)
+- `<vault>/03-daily/*` — owned by `daily` (idempotent day-level notes; a second writer would corrupt the file)
+
+See `skills/docs-orchestrator/audience-mapping.md` (Non-Overlap with Sibling Skills table) for the complete ownership list and source-citation rules.
+
+Proceed to Phase 3.
 
 ## Phase 3: VCS Deep Dive (parallel)
 
@@ -90,9 +299,19 @@ Group issues by:
 ## Phase 4: SSOT & Environment Check
 
 1. **SSOT freshness**: for each file in `ssot-files` config, check last modified date. Flag if older than `ssot-freshness-days` (default: 5) days.
-2. **Quality baseline**: Run Baseline quality checks per the quality-gates skill. Read `test-command`, `typecheck-command`, and `lint-command` from Session Config (defaults: `pnpm test --run`, `tsgo --noEmit`, `pnpm lint`). Report results but do not block the session.
+2. **Quality baseline**: Run Baseline quality checks per the quality-gates skill. Commands are resolved in this order (issue #183):
+   a. `.orchestrator/policy/quality-gates.json` — preferred source when present.
+   b. Session Config `test-command` / `typecheck-command` / `lint-command` — fallback.
+   c. Hardcoded defaults: `pnpm test --run`, `tsgo --noEmit`, `pnpm lint`.
+   Before running, perform a **command-availability check**: for each resolved command, extract the binary (first token) and run `command -v <binary>`. If absent, skip that check and log `⚠ Quality baseline: <binary> not found — skipping <variant>`. Report results but do not block the session.
 3. **Pencil design status**: if `pencil` is configured, verify the `.pen` file exists at the configured path. Report: "Pencil design configured at [path] — design-code alignment reviews will run after Impl-Core and Impl-Polish waves." If file not found, warn: "Pencil path configured but file not found at [path]."
 4. **Plugin freshness**: Determine the session-orchestrator plugin directory (navigate up from this skill's base directory to the plugin root). Run `git -C <plugin-dir> log -1 --format="%ci"` to get the last commit date. If older than `plugin-freshness-days` (default: 30) days, flag a warning in the Session Overview: `"⚠ Session Orchestrator plugin last updated [N] days ago — consider pulling the latest version."` Non-blocking — present in overview, don't halt.
+
+   Additionally, if `.orchestrator/bootstrap.lock` exists in the current repo, invoke the bootstrap-lock-freshness probe (`scripts/lib/bootstrap-lock-freshness.mjs`) to check lock age and plugin-version drift. When severity is `warn` or `alert`, render an additional banner alongside the plugin-freshness warning:
+   - **warn** (age 30–89d or version mismatch): `"⚠ bootstrap.lock: age=<N>d, plugin-version=<lock-ver> (current=<plugin-ver>) — consider re-running /bootstrap --retroactive to refresh."`
+   - **alert** (age ≥90d, unparseable, or missing): `"⚠ bootstrap.lock: <message> — re-run /bootstrap --retroactive is strongly recommended."`
+
+   Both banners are non-blocking — display in the Session Overview, do not halt the session. If `bootstrap-lock-freshness.mjs` is absent (pre-#186 plugin install), skip silently.
 
 ## Phase 5: Cross-Repo Status (if configured)
 

@@ -199,7 +199,7 @@ Or use `$test <feature>` to auto-generate test candidates, then hand-refine.
 If skip conditions above are NOT met AND `--no-lifecycle` is NOT set:
 
 ```
-Skill(skill="test", args="generate <feature-scope> --quick")
+$test generate <feature-scope> --quick
 ```
 
 The generated test request must preserve the selected `test_levels` and BF expectations from Step 3.6. Review the generated tests. Adjust as needed (tests are MUTABLE in this context). If `$test` fails to produce useful output or is unavailable, fall back to manual test writing in Step 3.6 above.

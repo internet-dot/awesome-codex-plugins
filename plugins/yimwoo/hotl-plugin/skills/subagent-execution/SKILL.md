@@ -13,7 +13,7 @@ This is a **delegation profile** over the HOTL execution state machine defined i
 
 ## When to Use
 
-- The workflow file already exists
+- The workflow file already exists (canonical `docs/plans/YYYY-MM-DD-<slug>-workflow.md` preferred; legacy root `hotl-workflow-<slug>.md` still accepted during migration)
 - Steps are independent enough to hand to one worker at a time
 - You want the controller to stay in this session and keep ownership of gates and verification
 
@@ -21,7 +21,7 @@ This is a **delegation profile** over the HOTL execution state machine defined i
 
 Follow the **HOTL Execution State Machine** in `skills/loop-execution/SKILL.md` for the full execution flow (workflow resolution, interrupted run detection, branch/worktree preflight, structural lint, execution state persistence, typed verification, loop rules, gate rules, completion).
 
-The controller owns all `hotl-rt` runtime calls. The controller calls `hotl-rt init`, `hotl-rt step N start/verify/retry/block`, `hotl-rt gate N`, and `hotl-rt finalize` — subagents never call the runtime directly. The runtime-managed `.hotl/state/<run-id>.json` and `.hotl/reports/<run-id>.md` are the source of truth; delegated workers do implementation only.
+The controller owns all `hotl-rt` runtime calls. The controller calls `hotl-rt init`, `hotl-rt step N start/verify/retry/block`, `hotl-rt gate N`, and `hotl-rt finalize` from the resolved `execution_root` and pins every call to the captured `run_id` (`--run-id <run-id>` or `HOTL_RUN_ID=<run-id>`). Subagents never call the runtime directly. The runtime-managed `.hotl/state/<run-id>.json` and `.hotl/reports/<run-id>.md` are the source of truth; delegated workers do implementation only. After execution is finalized, use `hotl:finishing-a-development-branch` to decide what happens to the execution branch/worktree.
 
 The only difference is **how each step body runs:**
 

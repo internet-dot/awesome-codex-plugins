@@ -5,6 +5,23 @@
 
 Read back the session plan that was agreed at the start. For EACH planned item:
 
+### SESSION_START_REF accessor
+
+> Referenced by Phase 3.2 (Docs Verification) and Phase 1.1a (File-Level Grounding). Canonical definition lives here.
+
+Read `session-start-ref` from STATE.md frontmatter. If the field is missing (older session or persistence disabled), fall back to `git diff --name-only origin/main...HEAD` (compares current HEAD against origin/main rather than a pinned SHA). The fallback is less precise but functional. Always prefer the pinned SHA when available.
+
+```bash
+SESSION_START_REF=$(node --input-type=module -e "
+import {readFileSync} from 'node:fs';
+import {parseFrontmatter} from '${PLUGIN_ROOT}/scripts/lib/state-md.mjs';
+const fm = parseFrontmatter(readFileSync('<state-dir>/STATE.md', 'utf8'));
+process.stdout.write(fm['session-start-ref'] ?? '');
+" 2>/dev/null)
+# Fallback when field absent
+[ -z "$SESSION_START_REF" ] && SESSION_START_REF="origin/main"
+```
+
 ### 1.1 Done Items
 - **Verify with evidence**: read the changed files, check git diff, run relevant test
 - Confirm acceptance criteria are met

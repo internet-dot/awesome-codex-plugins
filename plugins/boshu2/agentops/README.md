@@ -10,9 +10,38 @@
 
 AgentOps is the operational layer for coding agents. It adds bookkeeping, validation, primitives, and flows so every session starts where the last one left off.
 
-[Install](#install) · [Quick Start](#quick-start) · [Skills](#skills) · [CLI](#the-ao-cli) · [Docs](docs/INDEX.md)
+[Install](#install) · [Quick Start](#quick-start) · [Skills](#skills) · [CLI](#the-ao-cli) · [Doctrine](https://12factoragentops.com) · [Docs](docs/INDEX.md)
 
 </div>
+
+---
+
+## What AgentOps Gives You
+
+AgentOps gives your coding agent four things it does not have by default:
+
+| Layer | What changes |
+|-------|--------------|
+| **Bookkeeping** | Learnings, findings, handoffs, and reusable context land in local `.agents/` files |
+| **Validation** | `/pre-mortem`, `/vibe`, and `/council` challenge plans and code before they ship |
+| **Primitives** | Skills, hooks, and the `ao` CLI give agents reusable building blocks |
+| **Flows** | `/research`, `/implement`, `/validation`, and `/rpi` compose those primitives end to end |
+
+Session 1, your agent spends two hours debugging a timeout bug. Session 15, a new agent finds the lesson in seconds because the repo kept it.
+
+Under the hood, AgentOps acts as a context compiler: raw session signal becomes reusable knowledge, compiled prevention, and better next work.
+
+```mermaid
+flowchart LR
+    S[Session work] --> B[Bookkeeping]
+    S --> V[Validation]
+    B --> F[Knowledge flywheel]
+    V --> F
+    F --> N[Next session]
+    N --> S
+```
+
+Local and auditable: `.agents/` is plain text you can grep, diff, review, and commit when you choose. There is no telemetry or cloud service requirement.
 
 ---
 
@@ -156,35 +185,6 @@ The point is not a bigger prompt. The point is a repo that remembers what worked
 
 ---
 
-## What AgentOps Gives You
-
-AgentOps gives your coding agent four things it does not have by default:
-
-| Layer | What changes |
-|-------|--------------|
-| **Bookkeeping** | Learnings, findings, handoffs, and reusable context land in local `.agents/` files |
-| **Validation** | `/pre-mortem`, `/vibe`, and `/council` challenge plans and code before they ship |
-| **Primitives** | Skills, hooks, and the `ao` CLI give agents reusable building blocks |
-| **Flows** | `/research`, `/implement`, `/validation`, and `/rpi` compose those primitives end to end |
-
-Session 1, your agent spends two hours debugging a timeout bug. Session 15, a new agent finds the lesson in seconds because the repo kept it.
-
-Under the hood, AgentOps acts as a context compiler: raw session signal becomes reusable knowledge, compiled prevention, and better next work.
-
-```mermaid
-flowchart LR
-    S[Session work] --> B[Bookkeeping]
-    S --> V[Validation]
-    B --> F[Knowledge flywheel]
-    V --> F
-    F --> N[Next session]
-    N --> S
-```
-
-Local and auditable: `.agents/` is plain text you can grep, diff, review, and commit when you choose. There is no telemetry or cloud service requirement.
-
----
-
 ## Skills
 
 Every skill works alone. Flows compose them when you want more structure.
@@ -298,6 +298,7 @@ Run Dream overnight, then run Evolve in the morning against a fresher corpus. Th
 
 | Topic | Where |
 |-------|-------|
+| Published site | [boshu2.github.io/agentops](https://boshu2.github.io/agentops/) |
 | Start navigating | [Docs index](docs/INDEX.md) |
 | New contributor orientation | [Newcomer guide](docs/newcomer-guide.md) |
 | Full skill catalog | [Skills](docs/SKILLS.md) |
@@ -305,6 +306,31 @@ Run Dream overnight, then run Evolve in the morning against a fresher corpus. Th
 | Architecture | [Architecture](docs/ARCHITECTURE.md) |
 | Behavioral discipline | [Behavior guide](docs/behavioral-discipline.md) |
 | FAQ | [FAQ](docs/FAQ.md) |
+
+**Building docs locally.** The site is built with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/). Python 3.10+ is required; the dev toolchain is pinned in `requirements-docs.txt`.
+
+```bash
+scripts/docs-build.sh --serve    # live-reload dev server at http://127.0.0.1:8000
+scripts/docs-build.sh --check    # strict build (mirrors what CI runs)
+scripts/docs-build.sh            # build site to _site/
+```
+
+The first run creates `.venv-docs/` and installs the toolchain via `uv` (preferred) or `pip`. The deploy workflow at `.github/workflows/docs.yml` runs the same `mkdocs build --strict` on every push to `main` and publishes to GitHub Pages.
+
+---
+
+## The 12-Factor Doctrine
+
+AgentOps is shaped by a set of public principles — the 12 factors of agent operations. Foundation, Flow, Knowledge, and Scale. Read them at **[12factoragentops.com](https://12factoragentops.com)**.
+
+| Tier | Factors |
+|------|---------|
+| **Foundation (I-III)** | Context Is Everything · Track Everything in Git · One Agent, One Job |
+| **Flow (IV-VI)** | Research Before You Build · Validate Externally · Lock Progress Forward |
+| **Knowledge (VII-IX)** | Extract Learnings · Compound Knowledge · Measure What Matters |
+| **Scale (X-XII)** | Isolate Workers · Supervise Hierarchically · Harvest Failures as Wisdom |
+
+The AgentOps product implements these principles through skills, the `ao` CLI, and local bookkeeping in `.agents/`. See each factor page at [12factoragentops.com/factors](https://12factoragentops.com/factors) for the doctrine behind the mechanism.
 
 ---
 

@@ -26,7 +26,7 @@ $swarm ──► parallelize anything: research, brainstorm, implement, council
 │  $implement ────► research + plan + build + vibe│
 │  $vibe ─────────► $complexity + $council        │
 │  $pre-mortem ───► $council (failure simulation) │
-│  $post-mortem ──► $council + knowledge lifecycle │
+│  $post-mortem ──► $council + knowledge lifecycle│
 │  $council ──────► parallel judges (multi-model) │
 └─────────────────────────────────────────────────┘
 ```

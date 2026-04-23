@@ -4,7 +4,7 @@
 
 ## Platform Detection
 
-The current platform is determined by the `scripts/lib/platform.sh` library:
+The current platform is determined by the `scripts/lib/platform.mjs` library:
 - `$SO_PLATFORM` = `claude` | `codex` | `cursor`
 - Environment: `$CLAUDE_PLUGIN_ROOT` (Claude Code), `$CODEX_PLUGIN_ROOT` (Codex CLI), or `$CURSOR_RULES_DIR` (Cursor IDE)
 

@@ -1,8 +1,8 @@
 # HOTL Plugin for Codex, Claude Code, and Cline
 
-**HOTL (Human-on-the-Loop)** is an AI coding workflow plugin and skill pack for **Codex**, **Claude Code**, and **Cline**. It adds design, planning, review, and verification guardrails so AI-generated changes do not land without evidence.
+**HOTL (Human-on-the-Loop)** is an AI coding workflow plugin and skill pack for **Codex**, **Claude Code**, and **Cline**. It adds design, workflow planning, review, and verification guardrails so AI-generated changes do not land without evidence.
 
-Use HOTL when you want a structured AI development workflow: brainstorm before coding, write a plan before implementation, review risky changes, and verify results before claiming success.
+Use HOTL when you want a structured AI development workflow: brainstorm into a design doc before coding, turn that design into an executable workflow before implementation, review risky changes, and verify results before claiming success.
 
 Works with **Claude Code**, **Codex**, and **Cline**. Adapter templates are also available for Cursor and GitHub Copilot.
 
@@ -61,17 +61,18 @@ Full guide: [`docs/README.cline.md`](docs/README.cline.md)
 
 ## How It Works
 
-Implementation tasks follow seven phases:
+Implementation tasks follow eight phases:
 
 | Phase | What happens |
 | --- | --- |
-| **Brainstorm** | Clarify requirements. Compare approaches. Define intent, verification, and governance contracts. |
-| **Plan** | Generate a `hotl-workflow-<slug>.md` with steps, verification, loop conditions, and gates. |
+| **Brainstorm** | Clarify requirements. Compare approaches. Define intent, verification, and governance contracts. Save a design doc in `docs/designs/`. |
+| **Write Workflow** | Use `writing-plans` to generate `docs/plans/YYYY-MM-DD-<slug>-workflow.md` with steps, verification, loop conditions, and gates. |
 | **Lint** | Self-check built into planning. Structural lint runs automatically in execution preflight. |
-| **Branch** | Create an isolated git branch. Dirty repos hard-fail. |
+| **Branch** | Resolve an isolated execution root. Default is a git worktree on `hotl/<slug>`; `worktree: false` stays in the current checkout instead of a separate worktree. To keep the exact current branch, also pin `branch:` explicitly. Dirty repos hard-fail. |
 | **Execute** | Run the plan in loop, manual, or subagent mode. |
 | **Review** | Review findings are checked against the codebase and HOTL contracts before acting. |
 | **Verify** | Run tests, lint, and verify commands. No green light without proof. |
+| **Finish** | Decide what happens to the execution branch/worktree: merge back, publish/PR, keep, or discard. HOTL records that disposition so execution history stays understandable later. |
 
 Here is what a real HOTL feature-delivery session can look like:
 
@@ -109,7 +110,7 @@ HOTL does not force ceremony on every task. It routes by intent:
 | Asking a question ("how does this work?") | Just answers — no workflow |
 | Quick fix (typo, config, one-liner) | Fixes it, verifies, reports back |
 | Debugging ("why is this failing?") | Structured debugging — no brainstorm needed |
-| Building something new | Full workflow: brainstorm, plan, execute, verify |
+| Building something new | Full workflow: brainstorm, write workflow, execute, verify |
 
 ## Commands & Usage
 
@@ -117,8 +118,8 @@ HOTL does not force ceremony on every task. It routes by intent:
 
 | Command | What it does |
 | --- | --- |
-| `/hotl:brainstorm` | Design the change before coding |
-| `/hotl:write-plan` | Create a `hotl-workflow-<slug>.md` |
+| `/hotl:brainstorm` | Design the change before coding and save a design doc |
+| `/hotl:write-plan` | Create `docs/plans/YYYY-MM-DD-<slug>-workflow.md` from the approved design |
 | `/hotl:loop` | Run the workflow with autonomous loop execution |
 | `/hotl:execute-plan` | Run the workflow with manual checkpoints |
 | `/hotl:subagent-execute` | Run the workflow with delegated subagent execution |
@@ -135,8 +136,9 @@ There is no `/hotl:*` command syntax in Codex. Instead, describe the task in nat
 
 | Category | Skills | What they do |
 | --- | --- | --- |
-| Design & Planning | `brainstorming`, `writing-plans`, `document-review` | Clarify requirements, define contracts, and create executable workflow plans |
+| Design & Planning | `brainstorming`, `writing-plans`, `document-review` | Clarify requirements, define contracts, write design docs, and create executable workflows |
 | Execution | `loop-execution`, `executing-plans`, `subagent-execution`, `resuming`, `dispatch-agents` | Run workflows with verification, retries, persistence, and delegation |
+| Finish | `finishing-a-development-branch` | Close the execution lifecycle intentionally: merge back, publish for review, keep, or discard the execution checkout |
 | Quality & Review | `pr-reviewing`, `code-review`, `requesting-code-review`, `receiving-code-review`, `verification-before-completion` | Review changes and require evidence before completion. Both `code-review` and `pr-reviewing` reference shared [review checklists](docs/checklists/) for SOLID/architecture, security, performance/boundary conditions, and removal/simplification heuristics. |
 | Dev Practices | `tdd`, `systematic-debugging` | Apply test-first development and structured debugging workflows |
 | Setup | `setup-project`, `using-hotl` | Generate adapter files and establish HOTL operating context |
@@ -173,10 +175,12 @@ workflows/       Workflow templates (feature, bugfix, refactor)
 cline/rules/     Global rules for Cline
 adapters/        Templates for AGENTS.md, Cursor, Copilot, and other tools
 scripts/         Utility scripts including document-lint.sh
-docs/            Setup docs, workflow format reference, and detailed guides
+docs/            Published user-facing docs, setup guides, and references
 docs/contracts/  Output contracts (PR review, code review, execution report)
 docs/checklists/ Reusable review heuristics
 ```
+
+Repo-local work-product docs such as `docs/designs/`, `docs/plans/`, `docs/research/`, `docs/reviews/`, and `docs/requirements/` are intentionally gitignored in this repo so releases only ship end-user documentation.
 
 ## Contributing
 

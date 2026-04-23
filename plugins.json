@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
-  "last_updated": "2026-04-22",
-  "total": 44,
+  "last_updated": "2026-04-23",
+  "total": 46,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -28,16 +28,6 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/boshu2/agentops/main/.codex-plugin/plugin.json"
-    },
-    {
-      "name": "Blueprint",
-      "url": "https://github.com/JuliusBrussee/blueprint",
-      "owner": "JuliusBrussee",
-      "repo": "blueprint",
-      "description": "Specification-driven development pipeline that turns natural language into domain blueprints with testable acceptance criteria, generates parallel build plans, and implements them with automated validation and cross-model adversarial review.",
-      "category": "Development & Workflow",
-      "source": "awesome-codex-plugins",
-      "install_url": "https://raw.githubusercontent.com/JuliusBrussee/blueprint/main/.codex-plugin/plugin.json"
     },
     {
       "name": "Brooks Lint",
@@ -158,6 +148,16 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/avansaber/tailtest-codex/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Tool Advisor",
+      "url": "https://github.com/dragon1086/claude-skills",
+      "owner": "dragon1086",
+      "repo": "claude-skills",
+      "description": "Read-only meta-skill that scans your MCP servers, skills, plugins, and CLI tools, then suggests up to three ranked approaches (Methodical / Fast / Deep) with a copy-paste Quick Action table.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/dragon1086/claude-skills/main/.codex-plugin/plugin.json"
     },
     {
       "name": "VibePortrait",
@@ -308,6 +308,16 @@
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/BlockchainHB/launchfast_codex_plugin/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Mobazha",
+      "url": "https://github.com/mobazha/mobazha-skills",
+      "owner": "mobazha",
+      "repo": "mobazha-skills",
+      "description": "Decentralized e-commerce skills — deploy self-hosted stores, import products from Shopify/Amazon, configure custom domains and Telegram bots, set up Tor privacy, and manage your store via MCP.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/mobazha/mobazha-skills/main/.codex-plugin/plugin.json"
     },
     {
       "name": "MorningAI",

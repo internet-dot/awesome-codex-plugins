@@ -30,6 +30,7 @@ Use the `Skill` tool to invoke any of these when appropriate:
 | `hotl:loop-execution` | Execute a `hotl-workflow-*.md` with loops + auto-approve |
 | `hotl:subagent-execution` | Delegated step runner over the loop execution engine — delegates eligible steps to fresh subagents |
 | `hotl:dispatch-agents` | 2+ independent tasks that can run in parallel |
+| `hotl:finishing-a-development-branch` | After execution — merge back, publish/PR, keep, or discard the execution branch/worktree |
 | `hotl:tdd` | Before writing any implementation code |
 | `hotl:systematic-debugging` | When encountering any bug or unexpected behavior |
 | `hotl:document-review` | Optional — review existing docs, external specs, or hand-authored plans |

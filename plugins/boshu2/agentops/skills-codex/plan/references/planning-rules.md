@@ -49,7 +49,7 @@ During plan creation (Step 2), evaluate each issue and wave against all 7 rules.
 
 **Rule:** Organize components around clear contracts and boundaries, not hierarchical layers. Each component should have a single, unambiguous responsibility.
 
-**Evidence:** Olympus failed by adding a third layer with fuzzy boundaries — unclear ownership caused bugs at every seam. OpenClaw succeeds with horizontal separation (SOUL/AGENTS/IDENTITY own contracts completely). ArgoCD sync waves enforce ordering without external tooling.
+**Evidence:** OpenClaw succeeds with horizontal separation (SOUL/AGENTS/IDENTITY own contracts completely). ArgoCD sync waves enforce ordering without external tooling. Prior attempts at adding a third layer with fuzzy boundaries produced unclear ownership and bugs at every seam.
 
 **Detection Question:** Does the plan add layers or separate concerns? Are boundaries between components explicit contracts?
 

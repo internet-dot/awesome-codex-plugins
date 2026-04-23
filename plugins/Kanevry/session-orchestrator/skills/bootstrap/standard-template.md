@@ -587,6 +587,39 @@ indent_size = 2
 
 ---
 
+## Step 3a: Install Parallel-Sessions Rule
+
+Write the vendored rule from `$PLUGIN_ROOT/templates/_shared/rules/parallel-sessions.md` to `$REPO_ROOT/.claude/rules/parallel-sessions.md`.
+
+Idempotency:
+- Missing → create
+- Exists and byte-identical → skip silently
+- Exists and differs → overwrite (vendored is canonical)
+
+Shell:
+```bash
+mkdir -p "$REPO_ROOT/.claude/rules"
+cp "$PLUGIN_ROOT/templates/_shared/rules/parallel-sessions.md" "$REPO_ROOT/.claude/rules/parallel-sessions.md"
+```
+
+Why: PSA-003 destructive-command safeguards require every consumer repo to carry the rule. See issue #155.
+
+Note: This step runs before S99. If S99 executes and fetches a newer version of `parallel-sessions.md` from the baseline, the baseline version wins (S99 overwrites by design — acceptable).
+
+## Step 3b: Initialize .orchestrator/metrics/ (#185)
+
+Create the metrics directory and an empty learnings file so the `/evolve` skill and discovery probes have a write target from day one:
+
+```bash
+mkdir -p "$REPO_ROOT/.orchestrator/metrics"
+[[ -f "$REPO_ROOT/.orchestrator/metrics/learnings.jsonl" ]] || \
+  : > "$REPO_ROOT/.orchestrator/metrics/learnings.jsonl"
+```
+
+**Idempotent.** Re-running bootstrap does not overwrite an existing file.
+
+**Gitignore guidance:** Do NOT add `.orchestrator/metrics/*.jsonl` to `.gitignore`. The files are intentionally visible in version control — they carry project learnings and session history that future contributors benefit from.
+
 ## Step S99: (Optional) Fetch Canonical Rules + Agents from Baseline
 
 This step is OPT-IN and only executes when ALL of the following are true:
@@ -658,6 +691,50 @@ fi
 
 ---
 
+## Step 5.5: Vault-Registration Prompt (Product Repos) (#190)
+
+If this repo shows product-repo signals (framework dep + personas/content dir + product env vars), offer to register a vault entry in Session Config.
+
+**Detection (via `scripts/lib/product-repo-detect.mjs`):**
+
+```bash
+node --input-type=module -e "
+import { detectProductRepo, hasVaultConfig } from '${PLUGIN_ROOT}/scripts/lib/product-repo-detect.mjs';
+const result = detectProductRepo({ repoRoot: process.cwd() });
+const already = hasVaultConfig('$REPO_ROOT/CLAUDE.md') || hasVaultConfig('$REPO_ROOT/AGENTS.md');
+if (!result.isProductRepo || already) process.exit(0);
+process.stdout.write(JSON.stringify(result, null, 2));
+process.exit(10);  // signal: prompt user
+"
+```
+
+When the script exits 10 (product signals detected, no vault yet): prompt the user:
+
+> Repo appears to carry product data (framework: \<detected>, signals: \<list>). Create vault registration in Session Config? [Y/n]
+
+**On Y (default):** Append the following block to the `## Session Config` section of CLAUDE.md:
+
+```yaml
+vault:
+  path: ${VAULT_PATH:-$HOME/Projects/vault}
+  product-domain: <prompt user for a short domain tag, e.g. "buchhaltung", "lead-gen">
+  persona-db: <optional: path to persona data file, blank if N/A>
+```
+
+**On N:** skip silently. The detection may re-run on next bootstrap; idempotency comes from `hasVaultConfig` — once `vault:` exists in Session Config, the prompt is skipped.
+
+**Examples from real repos:**
+
+| Repo | Framework | Signals | Vault Entry |
+|------|-----------|---------|-------------|
+| BuchhaltGenie | Next.js | supabase, stripe, personas/ | `product-domain: buchhaltung` |
+| LeadPipeDACH | Next.js | stripe, posthog | `product-domain: lead-gen` |
+| GotzendorferAT | Nuxt | postgres, sentry | `product-domain: portfolio` |
+
+**Idempotent.** If CLAUDE.md already has a `vault:` key inside Session Config, the prompt is skipped.
+
+---
+
 ## Step 6: Write bootstrap.lock (Standard)
 
 Write `.orchestrator/bootstrap.lock`:
@@ -669,12 +746,76 @@ tier: standard
 archetype: <CONFIRMED_ARCHETYPE>
 timestamp: <current ISO 8601 UTC — e.g., 2026-04-16T09:30:00Z>
 source: <claude-init | plugin-template | projects-baseline>
+plugin-version: <session-orchestrator plugin version — read from $PLUGIN_ROOT/package.json .version field>
+bootstrapped-at: <current ISO 8601 UTC — same value as timestamp; distinct field for age-validation probe>
 ```
 
 Set `source` using the same logic as fast-template Step 5:
 - `projects-baseline` if `PATH_TYPE = private` and baseline scripts were used
 - `claude-init` if `claude init` ran successfully
 - `plugin-template` otherwise
+
+## Step 6.5: Quality-Gate Policy File (#183)
+
+Write the canonical quality-gate commands to `.orchestrator/policy/quality-gates.json`. Bootstrap detects the package manager and writes sensible defaults; users may hand-edit afterwards.
+
+**Idempotency:** Skip this step if `.orchestrator/policy/quality-gates.json` already exists. Do not overwrite user edits.
+
+```bash
+POLICY_FILE="$REPO_ROOT/.orchestrator/policy/quality-gates.json"
+if [[ ! -f "$POLICY_FILE" ]]; then
+  mkdir -p "$REPO_ROOT/.orchestrator/policy"
+  # Detect package manager via scripts/lib/package-manager.mjs (falls back to npm defaults)
+  PM_JSON="$(node --input-type=module -e "
+    import { detectPackageManager, defaultQualityGateCommands } from '$PLUGIN_ROOT/scripts/lib/package-manager.mjs';
+    const pm = detectPackageManager('$REPO_ROOT');
+    process.stdout.write(JSON.stringify(defaultQualityGateCommands(pm)));
+  " 2>/dev/null)"
+
+  # Fallback if node helper unavailable: hardcode npm defaults
+  if [[ -z "$PM_JSON" ]]; then
+    PM_JSON='{"test":{"command":"npm test","required":true},"typecheck":{"command":"npm run typecheck","required":true},"lint":{"command":"npm run lint","required":true}}'
+  fi
+
+  jq -n --argjson cmds "$PM_JSON" '{
+    "version": 1,
+    "rationale": "Canonical quality-gate commands. Generated by bootstrap. Edit to change test/typecheck/lint invocations across skills. Schema: .orchestrator/policy/quality-gates.schema.json",
+    "commands": $cmds
+  }' > "$POLICY_FILE"
+  echo "Wrote $POLICY_FILE"
+fi
+```
+
+## Step 6.6: STATE.md Scaffold (#184)
+
+Scaffold a placeholder `.claude/STATE.md` using the template at `skills/bootstrap/STATE.md.template`. The placeholder records `status: idle` — sessions overwrite it at Pre-Wave 1b.
+
+**Idempotency:** Skip if `.claude/STATE.md` already exists.
+
+```bash
+STATE_FILE="$REPO_ROOT/.claude/STATE.md"
+if [[ ! -f "$STATE_FILE" ]]; then
+  mkdir -p "$REPO_ROOT/.claude"
+  ISO_NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  sed "s|<ISO>|$ISO_NOW|g" "$PLUGIN_ROOT/skills/bootstrap/STATE.md.template" > "$STATE_FILE"
+  echo "Wrote $STATE_FILE"
+fi
+```
+
+On Codex CLI / Cursor IDE, substitute `.codex/` or `.cursor/` for `.claude/` per the platform state-directory convention.
+
+## Step 6.7: .claude/agents/ Scaffold (#189)
+
+Copy the opinionated agent templates into the consumer repo:
+
+```bash
+mkdir -p "$REPO_ROOT/.claude/agents"
+cp "$PLUGIN_ROOT/skills/bootstrap/templates/agents/"*.md "$REPO_ROOT/.claude/agents/"
+```
+
+This scaffolds 3 opinionated agents (`project-discovery`, `project-code-review`, `project-quality-gate`) following CLAUDE.md Agent Authoring Rules. Consumer repos should edit descriptions/bodies to match project specifics — but keep the frontmatter structure intact (validated by `agent-frontmatter-invalid` probe).
+
+**Idempotency:** Existing files under `.claude/agents/` are not overwritten — skip any file that already exists.
 
 ## Step 7: Initial Git Commit
 
@@ -684,6 +825,7 @@ Stage all created files and commit:
 cd "$REPO_ROOT"
 BOOTSTRAP_FILES=(
   CLAUDE.md AGENTS.md .gitignore README.md .orchestrator/bootstrap.lock
+  .orchestrator/policy/quality-gates.json
   package.json pyproject.toml tsconfig.json eslint.config.mjs .prettierrc
   .editorconfig src/ tests/ .claude/
 )
@@ -702,15 +844,18 @@ After the commit succeeds, output a concise summary of all files created (Fast +
 
 ```
 Bootstrap (standard, <archetype>) complete. Created:
-  CLAUDE.md (or AGENTS.md)           — Session Config with project-name, vcs
-  .gitignore                          — stack-appropriate rules
-  README.md                           — expanded with Installation, Usage, Dev
-  .editorconfig                       — consistent editor settings
-  <manifest file>                     — e.g., package.json / pyproject.toml
-  <tsconfig.json>                     — if JS/TS archetype
-  <eslint.config.mjs + .prettierrc>  — if JS/TS archetype
-  <tests/sanity.test.ts or equiv>     — sanity test
-  .orchestrator/bootstrap.lock        — version: 1, tier: standard
+  CLAUDE.md (or AGENTS.md)             — Session Config (7 mandatory fields, validated)
+  .gitignore                            — stack-appropriate rules
+  README.md                             — expanded with Installation, Usage, Dev
+  .editorconfig                         — consistent editor settings
+  <manifest file>                       — e.g., package.json / pyproject.toml
+  <tsconfig.json>                       — if JS/TS archetype
+  <eslint.config.mjs + .prettierrc>    — if JS/TS archetype
+  <tests/sanity.test.ts or equiv>       — sanity test
+  .claude/rules/parallel-sessions.md   — vendored PSA rule (issue #155)
+  .claude/STATE.md                      — idle placeholder (issue #184)
+  .orchestrator/bootstrap.lock          — version: 1, tier: standard
+  .orchestrator/policy/quality-gates.json — test/typecheck/lint commands (issue #183)
 Committed: "chore: bootstrap (standard)"
 ```
 

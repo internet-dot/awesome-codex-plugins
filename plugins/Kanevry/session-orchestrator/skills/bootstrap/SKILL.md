@@ -32,6 +32,8 @@ Store `INVOCATION_MODE = transitive | direct`.
 **Mode dispatch (direct invocation only):**
 - If `--upgrade <tier>` is present in `$ARGUMENTS`: jump to **Upgrade Flow** section. Do not proceed to Phase 1.
 - If `--retroactive` is present in `$ARGUMENTS`: jump to **Retroactive Flow** section. Do not proceed to Phase 1.
+- If `--sync-rules` is present in `$ARGUMENTS`: jump to **Sync-Rules Flow** section. Do not proceed to Phase 1.
+- If `--ecosystem-health` is present in `$ARGUMENTS`: jump to **Ecosystem-Health Flow** section. Do not proceed to Phase 1.
 - Otherwise: continue to Phase 1 below.
 
 ## Phase 0.5: Determine Private vs. Public Path
@@ -160,9 +162,9 @@ Entered when `$ARGUMENTS` contains `--upgrade <tier>`. No scaffolding questions 
 
 ## Retroactive Flow (`--retroactive`)
 
-Entered when `$ARGUMENTS` contains `--retroactive`. No scaffolding changes are made — only the lock file is written.
+Entered when `$ARGUMENTS` contains `--retroactive`. Writes the lock file and, per #182, optionally patches missing mandatory Session Config fields with defaults.
 
-**Purpose:** Adopt an existing repo that already has `CLAUDE.md` + `## Session Config` but was bootstrapped manually (no `bootstrap.lock`). Writes the lock so the gate passes on all future invocations.
+**Purpose:** Adopt an existing repo that already has `CLAUDE.md` + `## Session Config` but was bootstrapped manually (no `bootstrap.lock`). Writes the lock so the gate passes on all future invocations, and ensures the Session Config block satisfies the validated schema defined in `scripts/lib/config-schema.mjs`.
 
 **Steps:**
 
@@ -198,14 +200,97 @@ Entered when `$ARGUMENTS` contains `--retroactive`. No scaffolding changes are m
    source: retroactive
    ```
 
-6. **Commit.** Stage lock file only and commit:
+6. **Patch Session Config (#182).** Run the validator against the current `## Session Config` block; append any missing mandatory fields with defaults. The 7 mandatory fields (per `scripts/lib/config-schema.mjs`) are: `test-command`, `typecheck-command`, `lint-command`, `agents-per-wave`, `waves`, `persistence`, `enforcement`.
+
+   ```bash
+   CONFIG_OUT="$(node "$PLUGIN_ROOT/scripts/parse-config.mjs" 2>&1 >/dev/null)"
+   # parse-config.mjs emits validation warnings to stderr when enforcement=warn.
+   # Grep for 'must be' lines (issued by validate-config.mjs) to detect missing fields.
+   MISSING_FIELDS="$(echo "$CONFIG_OUT" | grep -oE '(test-command|typecheck-command|lint-command|agents-per-wave|waves|persistence|enforcement)' | sort -u || true)"
+   if [[ -n "$MISSING_FIELDS" ]]; then
+     # Detect package manager to pick sensible defaults for commands.
+     PM_DEFAULTS="$(node --input-type=module -e "
+       import {detectPackageManager, defaultQualityGateCommands} from '$PLUGIN_ROOT/scripts/lib/package-manager.mjs';
+       const pm = detectPackageManager(process.cwd());
+       const cmds = defaultQualityGateCommands(pm);
+       console.log('test-command: ' + cmds.test.command);
+       console.log('typecheck-command: ' + cmds.typecheck.command);
+       console.log('lint-command: ' + cmds.lint.command);
+     " 2>/dev/null)"
+
+     CONFIG_FILE="CLAUDE.md"
+     [[ -f "AGENTS.md" ]] && CONFIG_FILE="AGENTS.md"
+
+     # Append each missing field under the ## Session Config block.
+     for field in $MISSING_FIELDS; do
+       case "$field" in
+         test-command|typecheck-command|lint-command)
+           default_line="$(echo "$PM_DEFAULTS" | grep "^$field:")" ;;
+         agents-per-wave) default_line="agents-per-wave: 6" ;;
+         waves)           default_line="waves: 5" ;;
+         persistence)     default_line="persistence: true" ;;
+         enforcement)     default_line="enforcement: warn" ;;
+       esac
+       # Insert after `## Session Config` line if not already present.
+       grep -q "^$field:" "$CONFIG_FILE" \
+         || awk -v insert="$default_line" '/^## Session Config/ && !done { print; print ""; print insert; done=1; next } { print }' "$CONFIG_FILE" > "$CONFIG_FILE.tmp" \
+         && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
+     done
+     echo "Patched $CONFIG_FILE with defaults for: $MISSING_FIELDS"
+   fi
+   ```
+
+   This patch is best-effort: existing fields are never overwritten. If no fields are missing, this step is a no-op.
+
+7. **Commit.** Stage the lock file (and the patched config file, if it changed) and commit:
    ```bash
    mkdir -p .orchestrator
    git add .orchestrator/bootstrap.lock
+   # Also stage CLAUDE.md/AGENTS.md if step 6 patched it.
+   git diff --name-only --cached CLAUDE.md AGENTS.md 2>/dev/null | head -1 >/dev/null || {
+     [[ -f CLAUDE.md ]] && git diff --quiet CLAUDE.md || git add CLAUDE.md
+     [[ -f AGENTS.md ]] && git diff --quiet AGENTS.md || git add AGENTS.md
+   }
    git commit -m "chore: bootstrap lock (retroactive)"
    ```
 
-7. **Report.** Print: `Retroactive bootstrap complete. Lock written (tier: <INFERRED_TIER>, source: retroactive). No files were changed.`
+8. **Report.** Print: `Retroactive bootstrap complete. Lock written (tier: <INFERRED_TIER>, source: retroactive).` Include a second line `Patched Session Config: <fields>` when step 6 applied any patches, otherwise `No config changes.`.
+
+---
+
+## Sync-Rules Flow (`--sync-rules`)
+
+Entered when `$ARGUMENTS` contains `--sync-rules`. This is a standalone flow — it short-circuits the tier/archetype/scaffolding flow. No `bootstrap.lock` read, no template dispatched, no initial commit.
+
+**Purpose:** Vendor canonical rules from the plugin's `rules/` library (`rules/always-on/*.md`, and in the future `rules/opt-in-stack/*.md` and `rules/opt-in-domain/*.md`) into the consumer repo's `.claude/rules/`. Plugin-sourced files (identified by a `<!-- source: session-orchestrator plugin … -->` header) are overwritten on re-run; files without that header are preserved as local overrides. See `rules/_index.md` for the canonical manifest and `scripts/lib/rules-sync.mjs` for the implementation.
+
+**Steps:**
+
+1. **Resolve plugin root.** The plugin's `rules/_index.md` lives next to `SKILL.md`'s plugin directory. Use the plugin root inferred by the harness (`PLUGIN_ROOT`).
+
+2. **Invoke `scripts/lib/rules-sync.mjs`.** Run the CLI entrypoint from the consumer repo:
+
+   ```bash
+   node "$PLUGIN_ROOT/scripts/lib/rules-sync.mjs" --repo-root "$(pwd)"
+   ```
+
+   The script reads `rules/_index.md` from the plugin, iterates `always-on/` sources, and writes each file into `.claude/rules/` under the target repo. Stdout is a JSON object with `written[]`, `skipped[]`, `preserved[]`, and `errors[]`. Exit 1 on any error, 0 otherwise.
+
+   Add `--dry-run` to preview without writing.
+
+3. **Interpret the output.** Report a human summary:
+   - `written`: files newly created OR plugin-owned files overwritten with fresh canonical content.
+   - `skipped`: plugin-owned files already up-to-date (byte-identical).
+   - `preserved`: existing `.claude/rules/*.md` files that do NOT carry the plugin source header — left untouched as local overrides.
+   - `errors`: per-file failures (missing source, read/write errors, malformed `_index.md`).
+
+4. **Commit (optional).** `--sync-rules` does not auto-commit. If rules changed, prompt the user to review `git status` and stage/commit the updates manually. Rationale: rules are canonical artifacts and should travel with an intentional review, not land silently.
+
+5. **Report.** Print: `rules-sync complete. Written: <N>. Skipped: <N>. Preserved: <N>. Errors: <N>.` If `errors > 0`, non-zero exit.
+
+**Local overrides.** Any `.claude/rules/<name>.md` without the plugin source header is considered local and never overwritten. To replace a local override with the canonical version, delete it before re-running.
+
+**Idempotency.** Running `/bootstrap --sync-rules` twice in a row with no upstream changes emits `written: 0, skipped: <N>`. Safe to wire into CI or scheduled maintenance.
 
 ---
 
@@ -231,6 +316,10 @@ Follow the template's instructions precisely. The template is responsible for cr
 
 **Platform note for CLAUDE.md generation:**
 When `PATH_TYPE = public`, read `skills/bootstrap/public-fallback.md` for the full platform-specific CLAUDE.md generation logic (claude init path for Claude Code; `_minimal` template synthesis for Codex/Cursor). When `PATH_TYPE = private`, use the baseline scripts at `$BASELINE_PATH`.
+
+## Phase 3.4: Vault-Registration Prompt (#190)
+
+Standard and Deep tier templates include Step 5.5 (standard) / D6.6 (deep) which runs `scripts/lib/product-repo-detect.mjs` to check for product-repo signals (framework dep, content dir, product env vars). When signals are detected and no `vault:` key exists in Session Config, the template prompts the user to register a vault entry. Idempotency via `hasVaultConfig`. Fast tier skips this step.
 
 ## Phase 3.5: (Optional) Rules-Fetch Bridge
 
@@ -280,6 +369,49 @@ files:
 | `baseline_ref` | The git ref (branch/tag/SHA) at fetch time. |
 | `fetched_at` | ISO 8601 UTC timestamp. |
 | `files` | List of fetched file paths (relative to repo root). |
+
+---
+
+## Ecosystem-Health Flow (`--ecosystem-health`)
+
+Entered when `$ARGUMENTS` contains `--ecosystem-health`. This is a **standalone flow** — it does not scaffold repo structure and does not write `bootstrap.lock`. Dispatch immediately; do not proceed to Phase 1.
+
+**Purpose:** Populate the `health-endpoints`, `pipelines`, and `criticalIssueLabels` configuration consumed by `skills/ecosystem-health/SKILL.md`. Runs the interactive wizard in `scripts/lib/ecosystem-wizard.mjs`, which detects CI provider + package manager automatically and prompts the user for the remaining values.
+
+**Steps:**
+
+1. **Run the wizard.**
+
+   ```bash
+   node "$PLUGIN_ROOT/scripts/lib/ecosystem-wizard.mjs" --repo-root "$(pwd)"
+   ```
+
+   The wizard will:
+   - Detect CI provider (`.gitlab-ci.yml` → `gitlab`; `.github/workflows/` → `github`; else `none`)
+   - Detect package manager from lockfile
+   - Prompt for health endpoints (format: `Name|URL`, comma-separated)
+   - Prompt for CI pipeline identifiers (format: `id` or `id:label`, comma-separated)
+   - Prompt for critical issue labels (comma-separated strings)
+
+2. **Wizard writes two files** (or skips each if already present):
+   - `CLAUDE.md` (or `AGENTS.md`) — appends `ecosystem-health:` block inside `## Session Config`
+   - `.orchestrator/policy/ecosystem.json` — full policy file (schema: `.orchestrator/policy/ecosystem.schema.json`)
+
+3. **No auto-commit.** The wizard prints what it wrote. The user reviews with `git status && git diff` and commits manually.
+
+**Report:** The wizard prints a one-line summary per file:
+
+```
+Ecosystem-Health Wizard complete.
+Written: .orchestrator/policy/ecosystem.json, CLAUDE.md
+Skipped (already present): (none)
+
+Review changes with: git status && git diff
+```
+
+**Idempotency:** Safe to re-run. If both output files are already present with matching content, the wizard exits 0 with "Nothing to do." To update, remove the existing `ecosystem-health:` key from Session Config and delete `.orchestrator/policy/ecosystem.json`, then re-run.
+
+See `skills/ecosystem-health/wizard.md` for the full prompt spec and schema details.
 
 ---
 

@@ -1,6 +1,6 @@
 {
   "name": "@sitemd-cc/sitemd",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "description": "Websites from Markdown. Built for AI coding assistants.",
   "bin": {
     "sitemd": "sitemd/sitemd"
@@ -11,7 +11,9 @@
   "files": [
     "sitemd/",
     "site.md",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE.md"
   ],
   "keywords": [
     "static-site-generator",

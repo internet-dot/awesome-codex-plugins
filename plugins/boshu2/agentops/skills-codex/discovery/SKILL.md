@@ -7,6 +7,14 @@ description: 'Full discovery phase orchestrator. Brainstorm + ao search + resear
 
 **YOU MUST EXECUTE THIS WORKFLOW. Do not just describe it.**
 
+## Strict Delegation Contract (default)
+
+Discovery delegates to `$brainstorm` (conditional), `$design` (conditional), `$research`, `$plan`, and `$pre-mortem` as **separate skill invocations** per step. Strict delegation is the **default**.
+
+**Anti-pattern to reject:** inlining `$research` work, collapsing `$plan` into an inline decomposition, skipping `$pre-mortem`. See [`../shared/references/strict-delegation-contract.md`](../shared/references/strict-delegation-contract.md) for the full contract and supported compression escapes (`--quick`, `--skip-brainstorm`, `--interactive`/`--auto`, `--no-scaffold`).
+
+See [`.agents/learnings/2026-04-19-orchestrator-compression-anti-pattern.md`](../../.agents/learnings/2026-04-19-orchestrator-compression-anti-pattern.md) for the live compression signature.
+
 ## Codex Lifecycle Guard
 
 When this skill runs in Codex hookless mode (`CODEX_THREAD_ID` is set or
@@ -60,14 +68,14 @@ STEP 4  ──  $plan <goal> [--auto]
               After: extract epic-id, auto-detect complexity from issue count
               (1-2 → fast, 3-6 → standard, 7+ → full) unless --complexity override.
 
-STEP 4.5 ── if --no-lifecycle is NOT set
+STEP 4.5 ── if --no-scaffold is NOT set (alias: --no-lifecycle, deprecated)
               AND plan output contains new project/module creation
               (keywords: scaffold, new project, bootstrap, init, create module,
                new package, new service):
                 detect language from plan context or existing project files
                 $scaffold <detected-language> <project-name>
                 Scaffold output becomes input context for pre-mortem.
-              Skip if: --no-lifecycle flag, no new project/module detected in plan.
+              Skip if: --no-scaffold flag (or deprecated --no-lifecycle), no new project/module detected in plan.
 
 STEP 5  ──  $pre-mortem <plan-path> [--quick]
               Use --quick for fast/standard. Full council for full.
@@ -142,11 +150,13 @@ if command -v ao &>/dev/null; then AO_AVAILABLE=true; else AO_AVAILABLE=false; f
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--interactive` | off | Human gates in research and plan |
-| `--skip-brainstorm` | auto | Skip brainstorm step |
-| `--complexity=<level>` | auto | Force complexity level (fast/standard/full) |
+| `--auto` | on | Fully autonomous (no human gates). Inverse of `--interactive`. Passed through to `$research` and `$plan`. |
+| `--interactive` | off | Human gates in research and plan (STEP 3, STEP 4). Does NOT affect pre-mortem gate. |
+| `--skip-brainstorm` | auto | Skip STEP 1 brainstorm when goal is already specific |
+| `--complexity=<level>` | auto | Force complexity level (`fast` / `standard` / `full`) |
 | `--no-budget` | off | Disable phase time budgets |
-| `--no-lifecycle` | off | Skip scaffold auto-invocation in STEP 4.5 |
+| `--no-scaffold` | off | Skip scaffold auto-invocation in STEP 4.5 (canonical name) |
+| `--no-lifecycle` | off | **DEPRECATED ALIAS** for `--no-scaffold`. Honored through v2.40.0. Treated as `--no-scaffold`. |
 
 ## Quick Start
 

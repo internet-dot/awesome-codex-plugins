@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.0.0-blue.svg" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.1.0-blue.svg" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="MIT License">
   <img src="https://img.shields.io/badge/Claude_Code-Plugin-blueviolet.svg" alt="Claude Code Plugin">
   <img src="https://img.shields.io/badge/Codex_CLI-Skill-orange.svg" alt="Codex CLI Skill">
@@ -199,7 +199,8 @@ cp commands/*.md ~/.claude/commands/
 
 #### Manual Install
 ```bash
-cp -r skills/ ~/.claude/skills/brooks-lint
+mkdir -p ~/.claude/skills/brooks-lint
+cp -r skills/* ~/.claude/skills/brooks-lint/
 ```
 
 ### Gemini CLI
@@ -211,7 +212,8 @@ cp -r skills/ ~/.claude/skills/brooks-lint
 
 #### Manual Install
 ```bash
-cp -r skills/ ~/.gemini/skills/brooks-lint
+mkdir -p ~/.gemini/skills/brooks-lint
+cp -r skills/* ~/.gemini/skills/brooks-lint/
 ```
 
 ### Codex CLI
@@ -244,6 +246,7 @@ cp -r /tmp/brooks-lint/skills/* ~/.codex/skills/brooks-lint/
 | `/brooks-lint:brooks-debt` | `/brooks-debt` | Tech debt assessment |
 | `/brooks-lint:brooks-test` | `/brooks-test` | Test suite health review |
 | `/brooks-lint:brooks-health` | `/brooks-health` | Health dashboard — all four dimensions |
+| `/brooks-lint:brooks-sweep` | `/brooks-sweep` | Full sweep — analyse all dimensions and auto-fix findings |
 
 > Short-form commands are auto-installed on first session start by the session-start hook.
 
@@ -255,6 +258,7 @@ cp -r /tmp/brooks-lint/skills/* ~/.codex/skills/brooks-lint/
 | `/brooks-debt` | Tech debt assessment |
 | `/brooks-test` | Test suite health review |
 | `/brooks-health` | Health dashboard — all four dimensions |
+| `/brooks-sweep` | Full sweep — analyse all dimensions and auto-fix findings |
 
 ### Codex CLI
 
@@ -265,6 +269,7 @@ cp -r /tmp/brooks-lint/skills/* ~/.codex/skills/brooks-lint/
 | `$brooks-debt` | Tech debt assessment |
 | `$brooks-test` | Test suite health review |
 | `$brooks-health` | Health dashboard — all four dimensions |
+| `$brooks-sweep` | Full sweep — analyse all dimensions and auto-fix findings |
 
 The skills also trigger automatically when you discuss code quality, architecture, maintainability, or test health.
 
@@ -308,7 +313,7 @@ Classifies your debt across the six decay risks, scores each finding by Pain × 
 $brooks-test                        # Codex CLI
 ```
 
-Audits your test suite against six test-space decay risks — Test Obscurity, Test Brittleness, Test Duplication, Mock Abuse, Coverage Illusion, and Architecture Mismatch — sourced from xUnit Test Patterns, The Art of Unit Testing, How Google Tests Software, and Working Effectively with Legacy Code. PR reviews also include a lightweight Step 7 Quick Test Check automatically.
+Audits your test suite against six test-space decay risks — Test Obscurity, Test Brittleness, Test Duplication, Mock Abuse, Coverage Illusion, and Architecture Mismatch — sourced from xUnit Test Patterns, The Art of Unit Testing, How Google Tests Software, and Working Effectively with Legacy Code. PR reviews also include a lightweight Step 7 Quick Test Check automatically (skipped for docs-only or non-production diffs).
 
 ### Health Dashboard
 
@@ -319,6 +324,16 @@ $brooks-health                      # Codex CLI
 ```
 
 Runs abbreviated scans across all four quality dimensions and produces a weighted composite Health Score (0–100). Use it before a release, when onboarding a new team, or whenever you want a big-picture "how are we doing?" report. For deeper diagnosis on any dimension, use the focused skill instead.
+
+### Full Sweep
+
+```
+/brooks-sweep                       # Claude Code (short form) / Gemini CLI
+/brooks-lint:brooks-sweep           # Claude Code (full form)
+$brooks-sweep                       # Codex CLI
+```
+
+Runs a unified scan across all production (R1–R6) and test (T1–T6) decay risks plus architecture in a single pass, then applies fixes: safe changes are auto-applied immediately, multi-file or interface-touching changes require confirmation, and complex architectural decisions are flagged as manual items. Outputs a Fix Log, Health Score delta, and a residual item list.
 
 ## Configuration
 
@@ -390,9 +405,12 @@ brooks-lint/
 │   ├── brooks-test/             # Mode 4: Test Quality Review
 │   │   ├── SKILL.md
 │   │   └── test-guide.md
-│   └── brooks-health/           # Mode 5: Health Dashboard
+│   ├── brooks-health/           # Mode 5: Health Dashboard
+│   │   ├── SKILL.md
+│   │   └── health-guide.md
+│   └── brooks-sweep/            # Mode 6: Full Sweep & Auto-Fix
 │       ├── SKILL.md
-│       └── health-guide.md
+│       └── sweep-guide.md
 ├── hooks/                       # SessionStart hook
 ├── commands/                    # Short-form command wrappers (auto-installed by hook)
 ├── evals/                       # Benchmark test cases
@@ -435,6 +453,8 @@ The action posts the review as a PR comment and optionally fails the check if th
 **Cost:** ~$0.05–0.15 per PR run depending on diff size and model. Recommend running on `pull_request` events only.
 
 ## Roadmap
+
+> **Current state (v1.0):** 12-book foundation, 6 production decay risks (R1–R6) + 6 test decay risks (T1–T6), 5 skills — PR Review, Architecture Audit, Tech Debt, Test Quality, Health Dashboard. Earlier entries below describe historical milestones, not the current feature set.
 
 - [x] **v0.2**: Plugin infrastructure (`.claude-plugin/`, hooks, slash commands)
 - [x] **v0.3**: Eight Brooks dimensions, documentation completeness scoring

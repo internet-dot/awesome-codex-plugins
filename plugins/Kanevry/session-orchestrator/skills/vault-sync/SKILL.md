@@ -179,6 +179,72 @@ The following fields are planned for Phase 2/3 but are not consumed by the curre
 7. Should the skill learn from previous findings (cache last-known-clean state, skip files whose mtime has not changed) or always run fresh? Caching is a significant perf win on big vaults but introduces its own correctness risks.
 8. How are secrets in vault files handled? If a note contains an accidentally-committed token in its `sources` field, should the skill block on it (SEC-type check) or is that strictly the job of the existing secret-scan pre-commit hook?
 
+## Schema sync
+
+### Source of truth
+
+The canonical schema lives in the private GitLab monorepo:
+
+```
+projects-baseline/packages/zod-schemas/src/vault-frontmatter.ts
+```
+
+The vendored copy in `validator.mjs` is auto-generated — it is never edited by hand inside the sentinel block.
+
+### Sync workflow
+
+When the canonical schema changes:
+
+1. Maintainer runs from the `session-orchestrator` root:
+   ```bash
+   node scripts/sync-vault-schema.mjs --write
+   ```
+2. Commits the resulting `validator.mjs` change (only the schema block between sentinels changes).
+3. GitLab CI verifies via `--check` mode: it clones the canonical source and asserts that the vendored copy contains no drift. The pipeline fails if the generated output differs from what is currently committed.
+
+### Sentinel markers
+
+The schema block in `validator.mjs` is delimited by:
+
+```
+// ── BEGIN GENERATED SCHEMA (sync-vault-schema.mjs) — do not edit between sentinels ──
+...
+// ── END GENERATED SCHEMA ──
+```
+
+**Never edit the content between these sentinels by hand.** Any manual edit will be overwritten on the next `--write` run and will cause `--check` to report drift.
+
+### Drift detection
+
+`tests/schema-drift.test.mjs` covers 5 scenarios via vitest:
+
+1. **Idempotency** — running `--write` twice produces identical output.
+2. **--check clean** — exits 0 when vendored copy matches canonical.
+3. **--check drift** — exits 1 when vendored copy has been modified outside sentinels.
+4. **Missing canonical** — exits 2 when the canonical source file is not found.
+5. **Sentinel presence** — asserts both sentinel markers exist in `validator.mjs`.
+
+### CLI reference
+
+`node scripts/sync-vault-schema.mjs [options]`
+
+| Flag / Env var | Description |
+|---|---|
+| `--write` | Overwrite the vendored schema block in `validator.mjs` with the canonical source. |
+| `--check` | Exit 0 if vendored copy matches canonical; exit 1 if drift detected. Used in CI. |
+| `--canonical <path>` | Override path to the canonical `.ts` source file. |
+| `--validator <path>` | Override path to the target `validator.mjs` file. |
+| `CANONICAL_VAULT_FRONTMATTER` | Env var alternative to `--canonical <path>`. |
+
+### Failure modes
+
+| Exit code | Meaning |
+|---|---|
+| `0` | No drift (--check) or write succeeded (--write). |
+| `1` | Drift detected (--check only). |
+| `2` | Source or target file not found. |
+| `3` | Malformed sentinels (BEGIN/END markers missing or out of order in `validator.mjs`). |
+
 ## References
 
 - `<project>/scripts/vault/validate.ts` -- reference implementation of the validator (Layer A/C entry point)

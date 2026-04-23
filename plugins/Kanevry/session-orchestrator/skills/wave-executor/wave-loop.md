@@ -17,7 +17,83 @@ For each wave, resolve its assigned role(s) from the session plan's role-to-wave
 
 Use the **Agent tool** to dispatch all agents for this wave IN PARALLEL in a SINGLE message.
 
-Read each wave's dispatch metadata from the session plan header (e.g., `(4 agents, parallel, isolation: worktree)`). Pass the `isolation` value to each Agent() tool call per `circuit-breaker.md`. If the plan does not specify isolation, read from `$CONFIG.isolation` (default: `auto` = worktree for feature/deep, none for housekeeping). Before dispatching, verify the wave's agent count does not exceed `$CONFIG.agents-per-wave` — if it does, warn the user and request plan revision.
+Read each wave's dispatch metadata from the session plan header (e.g., `(4 agents, parallel, isolation: worktree)`). When the plan specifies `isolation`, use it verbatim. When the plan does not specify, resolve the effective value via `resolveIsolation({ agentCount, sessionType, collisionRisk, configIsolation })` from `scripts/lib/wave-sizing.mjs` — the graduated default (#194) replaces the previous session-type-only switch. Pass the resolved value to each Agent() tool call per `circuit-breaker.md` (omit the parameter when resolved to `none`).
+
+After resolving `isolation`, compute the wave's enforcement via `resolveEnforcement({ isolation, configEnforcement })` (same module) and write it into `wave-scope.json` under `enforcement`. When isolation resolves to `none`, enforcement auto-promotes from `warn` → `strict` unless the user explicitly set `off` — this ensures the scope hook is hard, not informational, when worktree-level isolation is absent.
+
+Before dispatching, verify the wave's agent count does not exceed `$CONFIG.agents-per-wave` — if it does, warn the user and request plan revision.
+
+#### Pre-Dispatch New-Directory Detection (#243)
+
+> **Motivation:** Claude Code's worktree merge-back fails silently when an agent creates a new directory inside the worktree — the new directory is not copied back to the coordinator's working tree (learning `agent-tool-worktree-no-sync-regression`, conf 0.90, 3rd-consecutive observation). The fix is to detect this condition BEFORE resolving isolation and force `isolation: 'none'` so worktree is never used for those agents, eliminating the regression rather than trying to recover from it (learning `wave3-isolation-none-dispatch`, conf 0.75, proven-pattern).
+
+Run this step only when `configIsolation` (read from the Execution Config or `$CONFIG.isolation`) is `'auto'`. If the user explicitly set `configIsolation: 'none'`, skip entirely — user override already achieves the desired outcome. If the user explicitly set `configIsolation: 'worktree'`, honour it but emit an ⚠ warning (see branch 4 below).
+
+```js
+import fs from 'fs';
+import path from 'path';
+
+// configIsolation: resolved from Execution Config or $CONFIG.isolation (default 'auto')
+// agentSpecs: array of agent specifications from the session plan for this wave
+//   Each spec has: { subagent_type, fileScope: string[] }  (fileScope = "Files:" entries)
+
+function detectNewDirAgents(agentSpecs, repoRoot) {
+  // Returns the count of agents whose scope includes at least one new (non-existent) directory.
+  let newDirCount = 0;
+  for (const agent of agentSpecs) {
+    const willCreateNewDir = (agent.fileScope ?? []).some((scopePath) => {
+      // Resolve relative to repo root; handle globs by taking the literal dirname.
+      const resolved = path.resolve(repoRoot, scopePath);
+      const dir = path.dirname(resolved);
+      return !fs.existsSync(dir);
+    });
+    if (willCreateNewDir) newDirCount++;
+  }
+  return newDirCount;
+}
+
+const repoRoot = process.cwd(); // coordinator CWD restored by Step 2.0 before this wave
+const newDirAgentCount = detectNewDirAgents(agentSpecs, repoRoot);
+
+// Branch 1 — no new directories detected, configIsolation: 'auto' → normal resolution path
+if (newDirAgentCount === 0 && configIsolation === 'auto') {
+  // Proceed to resolveIsolation() unchanged.
+}
+
+// Branch 2 — new directories detected, configIsolation: 'auto' → force isolation to 'none'
+if (newDirAgentCount > 0 && configIsolation === 'auto') {
+  configIsolation = 'none'; // override BEFORE calling resolveIsolation()
+  console.warn(
+    `⚠ Pre-dispatch: ${newDirAgentCount} agent(s) in this wave will create new directories ` +
+    `— isolation forced to 'none' per learning agent-tool-worktree-no-sync-regression (conf 0.90). ` +
+    `Reason: Claude Code worktree merge-back fails on new directories (issue #243).`
+  );
+  // NOTE: resolveEnforcement() will auto-promote 'warn' → 'strict' because isolation resolves
+  // to 'none'. The scope hook therefore becomes a hard barrier (not informational) for this wave —
+  // document this in the wave progress update so the operator understands enforcement escalated.
+}
+
+// Branch 3 — configIsolation: 'none' set explicitly by user → skip detection entirely
+if (configIsolation === 'none') {
+  // User override respected. No change needed.
+}
+
+// Branch 4 — configIsolation: 'worktree' set explicitly by user → honour but warn if new dirs exist
+if (configIsolation === 'worktree' && newDirAgentCount > 0) {
+  console.warn(
+    `⚠ Pre-dispatch: ${newDirAgentCount} agent(s) will create new directories AND ` +
+    `isolation is explicitly set to 'worktree'. ` +
+    `Known regression: Claude Code merge-back silently drops new directories (issue #243). ` +
+    `Override configIsolation to 'none' to avoid data loss.`
+  );
+  // Proceed with worktree as requested — user accepted the risk.
+}
+
+// Branch 5 — configIsolation: 'auto', newDirAgentCount === 0 → no-op (same as Branch 1)
+// Explicit for clarity; covered by Branch 1 above.
+```
+
+After running this detection block, call `resolveIsolation({ agentCount, sessionType, collisionRisk, configIsolation })` with the (possibly overridden) `configIsolation`. Then call `resolveEnforcement({ isolation, configEnforcement })` as normal — when isolation resolved to `'none'` via Branch 2, enforcement auto-promotes `warn` → `strict`, which MUST be noted explicitly in the wave progress update.
 
 #### Agent-Type Resolution
 
@@ -75,7 +151,63 @@ The helper emits one `grounding_injected` event per injected file to `.orchestra
 
 **Fallback for agents without explicit file scope:** if the session plan's agent specification does not list a "Files:" scope for an agent, fall back to the wave-level `allowedPaths` (from `wave-scope.json`). If that is also empty, skip injection for that agent.
 
-**Relationship to `### 3b. File-level grounding`:** this pre-dispatch feature is DIFFERENT from the post-wave file-level grounding check. Pre-dispatch grounding injects file content into agent prompts (prevents friction). Post-wave grounding verifies agents stayed within their planned scope (detects scope creep). The two features share no code and run at different times.
+**Relationship to `### 3c. File-level grounding`:** this pre-dispatch feature is DIFFERENT from the post-wave file-level grounding check. Pre-dispatch grounding injects file content into agent prompts (prevents friction). Post-wave grounding verifies agents stayed within their planned scope (detects scope creep). The two features share no code and run at different times.
+
+#### Pre-Dispatch Untracked-Overlap Check (#180)
+
+Claude Code's Agent tool with `isolation: "worktree"` syncs the agent's worktree back into the coordinator's working tree on completion. If the coordinator holds untracked files inside the agent's scope, the sync silently overwrites them — observed as data loss in the 2026-04-19 deep-drift-check session (4 files, ~700 LoC wiped). See issue #180.
+
+**Apply this check only when dispatching with `isolation: "worktree"`.** For `isolation: "none"` or coordinator-direct execution, skip — there is no merge-back to worry about.
+
+For each worktree-isolated agent about to be dispatched:
+
+```js
+import { checkUntrackedOverlap } from '$PLUGIN_ROOT/scripts/lib/pre-dispatch-check.mjs';
+
+const result = checkUntrackedOverlap({
+  scope: agentFileScope,        // same array used for `allowedPaths`
+  cwd: process.cwd(),
+  mode: 'warn',                 // 'warn' (default) | 'block' | 'off'
+});
+
+if (result.decision === 'block') {
+  // Refuse dispatch. Report result.message to the user.
+  // Ask: commit the files, stash them, or rerun with mode=warn to acknowledge.
+} else if (result.decision === 'warn') {
+  // Print result.message to the wave progress update.
+  // Dispatch proceeds, but the coordinator has an audit trail if data loss occurs.
+}
+```
+
+The helper is stdlib-only and cross-platform. `mode=block` is recommended when the coordinator holds uncommitted work of non-trivial size in the agent's scope — it trades a friction prompt for the guarantee that the merge-back cannot silently overwrite. `mode=warn` keeps the historical behavior and simply records the risk. `mode=off` short-circuits entirely.
+
+This is a downstream backstop: the underlying worktree merge-back strategy lives in the Claude Code harness and is outside this plugin's control. The correct fix (preserve untracked coordinator files during merge-back) must come upstream. Until then, this check is the only defense.
+
+#### Pre-Dispatch Coordinator Snapshot (#196)
+
+Before dispatching agents for this wave, checkpoint any uncommitted coordinator work as a git stash snapshot. This is a backup — it does NOT touch the working tree and does NOT block dispatch on failure.
+
+**Gate:** `$CONFIG.persistence == true`. When `persistence: false`, skip this step entirely.
+
+```js
+import { saveSnapshot } from '$PLUGIN_ROOT/scripts/lib/coordinator-snapshot.mjs';
+
+const snap = await saveSnapshot({
+  sessionId: '<session_id>',
+  waveN: <wave_num>,
+  label: 'pre-dispatch',
+});
+
+if (!snap.ok) {
+  // Non-fatal — log the error in the wave progress update but do not block.
+  console.warn(`coordinator-snapshot: snapshot failed (non-fatal): ${snap.error}`);
+}
+// snap.skipped === true when the working tree is clean; also fine, dispatch continues.
+```
+
+The snapshot is stored under `refs/so-snapshots/<sessionId>/wave-<N>-pre-dispatch`. It survives Claude process termination (unlike memory-only state) and is cleaned up by session-end on clean close (see session-end/SKILL.md). Orphaned snapshots from crashed sessions are reclaimed by `gcSnapshots({olderThanDays: 14})`.
+
+See issue #196 for the full rationale. This is complementary to the untracked-overlap check above (#180 is scope-level detection; this is working-tree-level backup).
 
 #### Structured Reasoning (STATE:/PLAN:) — opt-in via `reasoning-output: true` (#79)
 
@@ -104,6 +236,9 @@ Rules:
    a. Project agent matching the task domain (e.g., `"database-architect"` for DB tasks)
    b. Plugin agent (e.g., `"session-orchestrator:code-implementer"`)
    c. `"general-purpose"` (final fallback)
+
+   > **Docs-role dispatch (A3):** `docs-writer` is the canonical first-class agent for Docs-role tasks (audience-split documentation generation per `skills/docs-orchestrator/SKILL.md`). It flows through step 3a naturally: when the session plan specifies `subagent_type: "docs-writer"` (project-level) or `subagent_type: "session-orchestrator:docs-writer"` (plugin-level), the resolution chain matches at step 3a without a separate branch. Cross-reference: `agents/docs-writer.md` (agent definition), `skills/docs-orchestrator/SKILL.md` (execution protocol and hook points). No new resolution branch is required — 3a handles it.
+
 4. **Finalization** → direct execution (no subagent needed)
 
 > **How to detect project agents:** The session plan's "Agent Registry" section lists all discovered agents. If an agent name does NOT contain a colon (`:`), it's a project-level agent. If it contains `session-orchestrator:`, it's a plugin agent.
@@ -134,6 +269,20 @@ The `agents-per-wave` config is ignored on Cursor — all work is sequential. Se
 
 ### 2. Review Agent Outputs
 
+**Step 2.0 — Restore coordinator CWD (#219):** BEFORE reading any agent output or running any quality check, restore the coordinator's working directory. Claude Code's `Agent` tool with `isolation: "worktree"` `chdir()`s into each worktree internally and does NOT restore it on agent return. Subsequent Edit/Write/Bash calls would silently route to whichever worktree's tree CWD last drifted into.
+
+```js
+import { restoreCoordinatorCwd } from '$PLUGIN_ROOT/scripts/lib/worktree.mjs';
+
+const cwd = await restoreCoordinatorCwd();
+if (cwd.restored) {
+  console.warn(`wave-executor: restored coordinator CWD from ${cwd.from} → ${cwd.to}`);
+  // Include this line in the wave progress update so the coordinator has an audit trail.
+}
+```
+
+Run this step for every wave, regardless of isolation setting — it is a no-op when CWD never drifted.
+
 After ALL agents in the wave complete:
 
 1. **Read each agent's result** carefully
@@ -149,7 +298,21 @@ After ALL agents in the wave complete:
 
 Assign `error_class` using the taxonomy defined in `circuit-breaker.md` § "3. Error Echo" → Error-Class Taxonomy. For non-error-echo patterns, omit the `error_class` field. Paths are relative to the project root. `occurrences` is the count of pattern repetitions detected (minimum 3 per the trigger threshold).
 
-3b. **File-level grounding** (per wave, informational, gated by `grounding-check: true` — default): compute Planned (union of agent file scopes for this wave from the dispatch metadata) vs Actual (files actually edited by this wave's agents). Report scope creep (Actual ∖ Planned) and incomplete coverage (Planned ∖ Actual). Does NOT block the next wave. Reuses the semantics defined in `skills/session-end/plan-verification.md` § 1.1a — the session-end variant computes against `$SESSION_START_REF`, the per-wave variant computes against the wave's pre-dispatch HEAD snapshot. Not to be confused with pre-dispatch grounding injection (§ Pre-Dispatch Grounding Injection above): that feature is per-agent and runs before dispatch to prevent friction; this check is per-wave and runs after dispatch to detect scope creep. Skip the entire check when `grounding-check: false`.
+3b. **Worktree base-ref freshness check (#195)**: For each agent dispatched with `isolation: "worktree"` in this wave, verify that the coordinator has not advanced `main` past the worktree's base commit before the merge-back copies files. Call `checkWorktreeBaseRefFresh({ suffix, targetBranch: 'main', agentScope, cwd })` from `scripts/lib/worktree-freshness.mjs`:
+
+- `decision: 'pass'` (baseSha === currentSha) → proceed with merge-back.
+- `decision: 'warn'` (main advanced, no agent-scope overlap) → proceed, but log the drift in the wave progress update so the coordinator can audit. This is typically benign — coordinator commits to unrelated files.
+- `decision: 'block'` (main advanced, drift files overlap the agent's scope) → **STOP** the merge-back for this agent. The agent's copy would silently overwrite coordinator-committed work (this is exactly the 2026-04-20 07:30 and 09:00 regression). Either: (a) run `git diff main..wt-branch -- <overlap-files>` and manually reconcile before committing, or (b) ask the user whether to rebase the agent's branch onto current main and retry the merge. Do NOT proceed automatically.
+- `decision: 'no-meta'` (meta file missing or corrupted) → log a warning and fall back to manual diff review before commit. Missing meta usually means the worktree was created by an older plugin version; corrupted meta warrants an issue.
+
+Skip the check entirely for agents dispatched with `isolation: "none"` — there is no worktree merge-back in that path.
+
+Log every non-`pass` result as an event to `.orchestrator/metrics/events.jsonl` (gated on `persistence: true`):
+```json
+{"event":"freshness_check","timestamp":"<ISO 8601 UTC>","session":"<session_id>","wave":N,"agent":"<description>","suffix":"<worktree suffix>","decision":"pass|warn|block|no-meta","drift_commits":N,"overlap_files":M}
+```
+
+3c. **File-level grounding** (per wave, informational, gated by `grounding-check: true` — default): compute Planned (union of agent file scopes for this wave from the dispatch metadata) vs Actual (files actually edited by this wave's agents). Report scope creep (Actual ∖ Planned) and incomplete coverage (Planned ∖ Actual). Does NOT block the next wave. Reuses the semantics defined in `skills/session-end/plan-verification.md` § 1.1a — the session-end variant computes against `$SESSION_START_REF`, the per-wave variant computes against the wave's pre-dispatch HEAD snapshot. Not to be confused with pre-dispatch grounding injection (§ Pre-Dispatch Grounding Injection above): that feature is per-agent and runs before dispatch to prevent friction; this check is per-wave and runs after dispatch to detect scope creep. Skip the entire check when `grounding-check: false`.
 4. **Run incremental verification** (per the quality-gates skill, based on the wave's role):
    - After **Discovery**: no verification needed (read-only)
    - After **Impl-Core**: Incremental quality checks per quality-gates (test changed files, typecheck)
@@ -282,13 +445,26 @@ Before each wave dispatch:
 
 1. **Write `<state-dir>/wave-scope.json`** with the wave's scope:
    > (Platform-specific: `.claude/wave-scope.json` on Claude Code, `.codex/wave-scope.json` on Codex CLI, `.cursor/wave-scope.json` on Cursor IDE)
+
+   **Deriving `blockedCommands` (policy-file-first, #155):** Before writing `wave-scope.json`, extract the blocked patterns from the consolidated policy file:
+   ```bash
+   BLOCKED=$(jq -c '[.rules[] | select(.severity == "block") | .pattern]' .orchestrator/policy/blocked-commands.json)
+   ```
+   Use `$BLOCKED` as the `blockedCommands` value in `wave-scope.json`.
+
+   **Fallback:** If `.orchestrator/policy/blocked-commands.json` is missing (pre-#155 repo), use the legacy hardcoded array and log a warning in the wave progress update:
+   ```bash
+   BLOCKED='["rm -rf", "git push --force", "DROP TABLE", "git reset --hard", "git checkout -- ."]'
+   # Warning: policy file .orchestrator/policy/blocked-commands.json not found — using legacy hardcoded blocklist
+   ```
+
    ```json
    {
      "wave": N,
      "role": "<role>",
      "enforcement": "<from Session Config, default: warn>",
      "allowedPaths": ["<from agent specs in session plan>"],
-     "blockedCommands": ["rm -rf", "git push --force", "DROP TABLE", "git reset --hard", "git checkout -- ."],
+     "blockedCommands": "<derived dynamically from .orchestrator/policy/blocked-commands.json (severity: block rules); falls back to legacy 5-element array if policy file absent>",
      "gates": "<copy of enforcement-gates from Session Config, or omit if unset>"
    }
    ```

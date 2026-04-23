@@ -18,7 +18,7 @@
        "$HOME/.cursor/plugins/session-orchestrator" \
        "$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}" 2>/dev/null || echo "")")")" \
      ; do
-       if [[ -n "$candidate" && -f "$candidate/scripts/parse-config.sh" ]]; then
+       if [[ -n "$candidate" && -f "$candidate/scripts/parse-config.mjs" ]]; then
          PLUGIN_ROOT="$candidate"
          break
        fi
@@ -30,7 +30,7 @@
 
 > **Canonical Field Reference:** For the complete list of all Session Config fields, types, defaults, and descriptions, see `docs/session-config-reference.md`. Skills should NOT maintain inline copies of field documentation — always reference the canonical doc.
 
-Run `bash "$PLUGIN_ROOT/scripts/parse-config.sh"` to get the validated config JSON. If it exits with code 1, read stderr for the error and report to the user.
+Run `node "$PLUGIN_ROOT/scripts/parse-config.mjs"` to get the validated config JSON. If it exits with code 1, read stderr for the error and report to the user.
 
 Store the JSON output as `$CONFIG` for use throughout this skill — extract fields with `echo "$CONFIG" | jq -r '.field-name'`.
 
