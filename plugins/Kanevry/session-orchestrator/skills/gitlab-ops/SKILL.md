@@ -100,7 +100,8 @@ gh api "repos/<owner>/<name>" --jq '.full_name'
 
 ### Type Labels
 - `bug` | `feature` | `enhancement` | `refactor`
-- `chore` | `documentation` | `epic` | `discovery`
+- `chore` | `documentation` | `epic` | `discovery` | `carryover`
+- `carryover` — auto-created for 2×SPIRAL or FAILED agent tasks; see `scripts/lib/spiral-carryover.mjs`.
 
 ## Common CLI Commands
 

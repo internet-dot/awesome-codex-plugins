@@ -3,17 +3,23 @@
   "version": "3.0.0-dev",
   "description": "Session Orchestrator — Claude Code plugin for structured development sessions",
   "type": "module",
-  "engines": { "node": ">=20.0.0" },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "test": "vitest --run",
+    "test:coverage": "vitest --run --coverage",
     "test:watch": "vitest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "node scripts/typecheck.mjs"
   },
-  "dependencies": { "zx": "^8.1.0" },
+  "dependencies": {
+    "zx": "^8.1.0"
+  },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
+    "@vitest/coverage-v8": "^2.1.9",
     "eslint": "^9.0.0",
     "prettier": "^3.0.0",
     "vitest": "^2.0.0"

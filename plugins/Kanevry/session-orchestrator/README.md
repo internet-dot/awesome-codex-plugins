@@ -89,7 +89,7 @@ Add Session Config to `AGENTS.md`, restart Codex, then run:
 /close
 ```
 
-See [Usage](#usage) for all 7 commands and [User Guide](docs/USER-GUIDE.md) for the full walkthrough.
+See [Usage](#usage) for all 8 commands and [User Guide](docs/USER-GUIDE.md) for the full walkthrough.
 
 ## Prerequisites
 
@@ -103,7 +103,7 @@ See [Usage](#usage) for all 7 commands and [User Guide](docs/USER-GUIDE.md) for 
 | Feature | Claude Code | Codex | Cursor IDE |
 |---------|------------|-----------|------------|
 | OS | macOS, Linux, **Windows (native)** | macOS, Linux, **Windows (native)** | macOS, Linux, **Windows (native)** |
-| All 7 commands | Native slash commands | Native plugin commands | Rules-based (.mdc) |
+| All 8 commands | Native slash commands | Native plugin commands | Rules-based (.mdc) |
 | Parallel agents | Agent tool | Multi-agent roles | Sequential only |
 | Session persistence | .claude/STATE.md | .codex/STATE.md | .cursor/STATE.md |
 | Shared knowledge | .orchestrator/metrics/ | .orchestrator/metrics/ | .orchestrator/metrics/ |
@@ -357,9 +357,9 @@ Superpowers handles the **task layer** (TDD, debugging, brainstorming per featur
 
 ## Components
 
-- **13 Skills**: session-start, session-plan, wave-executor, session-end, ecosystem-health, gitlab-ops, quality-gates, discovery, plan, evolve, vault-sync, bootstrap, daily
-- **7 Commands**: /session, /go, /close, /discovery, /plan, /evolve, /bootstrap
-- **6 Agents**: code-implementer, test-writer, ui-developer, db-specialist, security-reviewer (generic base agents) + session-reviewer (inter-wave quality gate)
+- **16 Skills**: session-start, session-plan, wave-executor, session-end, claude-md-drift-check, ecosystem-health, gitlab-ops, quality-gates, discovery, plan, evolve, vault-sync, vault-mirror, bootstrap, daily, docs-orchestrator
+- **8 Commands**: /session, /go, /close, /discovery, /plan, /evolve, /bootstrap, /harness-audit
+- **7 Agents**: code-implementer, test-writer, ui-developer, db-specialist, security-reviewer, docs-writer (generic base agents) + session-reviewer (inter-wave quality gate)
 - **Hooks**: SessionStart notification + Clank Event Bus integration + PreToolUse enforcement (scope + commands)
 - **Output Styles**: 3 styles (session-report, wave-summary, finding-report) for consistent reporting
 - `.codex-plugin/`: Codex plugin manifest (`plugin.json`) + compatibility config + 3 agent role definitions

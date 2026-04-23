@@ -314,6 +314,24 @@ Log every non-`pass` result as an event to `.orchestrator/metrics/events.jsonl` 
 
 3c. **File-level grounding** (per wave, informational, gated by `grounding-check: true` — default): compute Planned (union of agent file scopes for this wave from the dispatch metadata) vs Actual (files actually edited by this wave's agents). Report scope creep (Actual ∖ Planned) and incomplete coverage (Planned ∖ Actual). Does NOT block the next wave. Reuses the semantics defined in `skills/session-end/plan-verification.md` § 1.1a — the session-end variant computes against `$SESSION_START_REF`, the per-wave variant computes against the wave's pre-dispatch HEAD snapshot. Not to be confused with pre-dispatch grounding injection (§ Pre-Dispatch Grounding Injection above): that feature is per-agent and runs before dispatch to prevent friction; this check is per-wave and runs after dispatch to detect scope creep. Skip the entire check when `grounding-check: false`.
 4. **Run incremental verification** (per the quality-gates skill, based on the wave's role):
+
+   **Baseline cache check (#258)** — before running Incremental quality checks for this wave, consult the session-start Baseline cache. If the cache is still valid and the diff since `$SESSION_START_REF` is narrow (<50 files), skip Incremental for this wave and note the skip in the wave progress update.
+
+   ```js
+   // import at the top of the wave-executor runtime
+   import { shouldSkipIncremental } from '$PLUGIN_ROOT/scripts/lib/quality-gates-cache.mjs';
+
+   const skip = shouldSkipIncremental({ repoRoot: process.cwd(), sessionStartRef: SESSION_START_REF });
+   if (skip.skip) {
+     console.log(`ℹ Incremental quality check skipped — ${skip.reason} (${skip.changedFileCount} files changed).`);
+     // proceed to next wave without running Incremental
+   } else {
+     // run Incremental quality check as before (per role-specific rules below)
+   }
+   ```
+
+   `shouldSkipIncremental` never throws — on any error (git failure, unreadable cache) it returns `skip: false` so Incremental runs. Full Gate at session-end is NEVER skipped regardless of the cache — see the close-safety invariant in `skills/quality-gates/SKILL.md § Baseline Cache (#258)`.
+
    - After **Discovery**: no verification needed (read-only)
    - After **Impl-Core**: Incremental quality checks per quality-gates (test changed files, typecheck)
    - After **Impl-Polish**: Incremental quality checks + integration verification
@@ -330,6 +348,7 @@ Log every non-`pass` result as an event to `.orchestrator/metrics/events.jsonl` 
         - Model: sonnet
      4. After simplification agents complete, proceed to Quality test/review agents
    - After **Quality**: Full Gate quality checks per quality-gates (typecheck + test + lint, must all pass)
+     (Full Gate is NEVER skipped regardless of cache state — this is the close-safety invariant.)
    - After **Finalization**: final git status check
 5. **Session-reviewer dispatch** (after Impl-Core, Impl-Polish, and Quality waves only):
    - After **Impl-Core** and **Impl-Polish** waves, dispatch the session-reviewer agent to verify wave output:

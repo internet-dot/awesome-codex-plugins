@@ -37,6 +37,8 @@ The `session-type: none` + `status: idle` combination is used only for bootstrap
 | `## Wave History` | Completed wave records | wave-executor (post-wave) |
 | `## Deviations` | Plan adaptation log | wave-executor (step 3) |
 
+Wave History lines MAY include a `→ issue #NNN` suffix (or `→ existing #NNN` when a duplicate was detected) for SPIRAL/FAILED agents, linking to the auto-created carryover issue (#261). This is optional and backward-compatible; readers that do not recognize the notation can skip it. Session-end Phase 1.6 uses the presence of this suffix to decide whether to retro-file a carryover as a fallback safety net.
+
 ## Ownership Model
 
 | Skill | Access | Operations |

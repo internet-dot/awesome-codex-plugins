@@ -215,7 +215,7 @@ Housekeeping sessions use a simplified single-wave execution model instead of th
 3. Dispatch tasks serially with 1-2 agents per task
 4. Run Baseline quality checks after all tasks complete (not between tasks)
 5. Skip session-reviewer dispatch — housekeeping changes are low-risk
-6. Update STATE.md to `status: completed` when done
+6. Do NOT update STATE.md to `status: completed` — that write is reserved for session-end per state-ownership contract (`skills/_shared/state-ownership.md`). Leave `status: active`.
 7. Proceed directly to session-end (`/close`)
 
 Focus: git cleanup, SSOT refresh, CI fixes, branch merges, documentation.
@@ -248,7 +248,7 @@ End with a single commit summarizing all housekeeping work.
 
 After the Finalization wave completes successfully:
 1. Report final status to the user
-2. Suggest invoking `/close` to finalize the session
+2. If `persistence: true`, suggest invoking `/close` to finalize the session. If `persistence: false`, note that the session is complete (no STATE.md to close — session-end would be a no-op).
 3. Do NOT auto-commit — `/close` handles that with proper verification
 
 ## Anti-Patterns

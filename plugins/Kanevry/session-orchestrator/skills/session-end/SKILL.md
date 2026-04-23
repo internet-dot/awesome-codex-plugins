@@ -73,6 +73,26 @@ Review safety metrics from the session. This is informational — it does NOT bl
    ```
 4. If any agents were `SPIRAL` or `FAILED`, ensure carryover issues exist (cross-reference with Phase 1.2)
 
+5. **Carryover validation fallback (#261):** Walk each Wave History entry in STATE.md. For every agent whose status is `SPIRAL` or `FAILED`, check whether the line ends with a `→ issue #NNN` suffix (or `→ existing #NNN`). If the suffix is absent, the auto-create call in wave-executor did not run (e.g. the session crashed before dispatch completed, or the CLI was offline at detection time). Retroactively file the carryover via `createSpiralCarryoverIssue`:
+
+   ```js
+   import { createSpiralCarryoverIssue } from '${PLUGIN_ROOT}/scripts/lib/spiral-carryover.mjs';
+
+   // For each SPIRAL/FAILED agent missing the "→ issue #NNN" suffix:
+   const result = await createSpiralCarryoverIssue({
+     taskDescription: '<agent task from Wave History>',
+     kind: 'SPIRAL', // or 'FAILED'
+     context: '<Deviations / error context from STATE.md>',
+     priority: 'high',
+     vcs: '<from Session Config>'
+   });
+   // result.created → note new issue id in Final Report under "New Issues Created"
+   // result.skipped === 'duplicate' → an earlier session already filed one; record the existing id
+   // result.skipped === 'error' → log in Final Report as "⚠ carryover filing failed for <task>: <error>" and continue (do NOT block close)
+   ```
+
+   The module is idempotent via its task-hash dedup marker, so re-running the fallback across sessions will not create duplicates.
+
 ### 1.7 Metrics Collection
 
 Read `skills/session-end/metrics-collection.md` for JSONL schema and conditional field rules.

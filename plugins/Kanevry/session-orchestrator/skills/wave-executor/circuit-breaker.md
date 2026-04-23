@@ -50,9 +50,35 @@ The coordinator determines each agent's status after the wave completes:
 | **spiral** | Agent got stuck in an edit loop | Same file edited 3+ times (detected post-wave) | Revert agent's changes, narrow scope, split task if needed |
 
 3. **Recovery protocol**:
-   - FAILED agent → log in STATE.md, add fix task to next wave with corrected instructions
+   - FAILED agent → log in STATE.md, add fix task to next wave with corrected instructions, AND auto-create a carryover issue (see "Carryover Auto-Create" below) the first time this task is marked FAILED (check STATE.md Wave History for a prior `→ issue #NNN` on this task before filing).
    - PARTIAL agent → carry forward remaining work with context
-   - SPIRAL agent → revert the agent's changes (`git checkout -- <affected-files>` or `git stash` the agent's worktree), narrow scope to a single file or function, re-dispatch in next wave. If the task spiraled twice, escalate to the user.
+   - SPIRAL agent → revert the agent's changes (`git checkout -- <affected-files>` or `git stash` the agent's worktree), narrow scope to a single file or function, re-dispatch in next wave. If the task spiraled twice, escalate to the user AND auto-create a carryover issue (see "Carryover Auto-Create" below).
+
+### Carryover Auto-Create (#261)
+
+When a task is escalated (2×SPIRAL or first-time FAILED with no prior carryover), the coordinator MUST call `createSpiralCarryoverIssue` so the work is tracked on the VCS platform even if the user is inactive. Escalating to the user alone is not enough — the user may miss the message, or the session may crash before they see it.
+
+**Ownership split:** auto-create happens HERE (inline at detection time), not deferred to session-end. Session-end Phase 1.6 only *validates* that each SPIRAL/FAILED entry in Wave History has an `→ issue #NNN` suffix and retroactively files one if missing.
+
+```js
+import { createSpiralCarryoverIssue } from '$PLUGIN_ROOT/scripts/lib/spiral-carryover.mjs';
+
+// On 2×SPIRAL detection for <task>:
+const result = await createSpiralCarryoverIssue({
+  taskDescription: '<agent task description>',
+  kind: 'SPIRAL',
+  context: '<relevant STATE.md Deviations entry>',
+  priority: 'high',
+  vcs: '<from Session Config: $CONFIG.vcs>'
+});
+// result.created === true            → append "→ issue #<id>" to the Wave History line for this agent
+// result.skipped === 'duplicate'     → append "→ existing #<id>" (do NOT create a new one)
+// result.skipped === 'error'         → log result.error to stderr + continue escalation (do NOT block the session)
+```
+
+For the FAILED branch, use the same call shape with `kind: 'FAILED'`. Before calling, scan STATE.md Wave History for an existing `→ issue #NNN` entry on the same task — if present, skip the call (the dedup check in the module will also catch it via the `<!-- task-hash: ... -->` marker, but skipping early avoids an unnecessary `glab`/`gh` round-trip).
+
+The function never throws — it always returns a result object. Treat `skipped: 'error'` as a logged warning, not a session blocker.
 
 ## Worktree Isolation
 

@@ -152,13 +152,29 @@ Also read `<state-dir>/STATUS.md` if it exists for additional project-level cont
 
 ## Phase 2: Git Analysis (parallel)
 
-Run these checks in parallel using Bash:
+Run these checks as ONE parallel Bash block — background the independent git ops with `&` and `wait`:
 
-1. **Branch state**: `git branch -a`, current branch, ahead/behind origin
-2. **Recent commits**: `git log --oneline -N` where N is read from `recent-commits` config (default: 20) — identify last session's work by commit patterns
-3. **Unpushed/uncommitted**: `git status --short` + `git log origin/main..HEAD --oneline`
-4. **Open branches**: list all local branches, identify which are mergeable to develop/main
-5. **Stale branches**: branches with no commits in more than `stale-branch-days` (default: 7) days
+```bash
+# Independent ops — launch in parallel, collect output via tmpfiles
+git branch -a > /tmp/so-branches.$$ &
+git log --oneline -N > /tmp/so-commits.$$ &        # N from Session Config `recent-commits` (default 20)
+git status --short > /tmp/so-status.$$ &
+git log origin/main..HEAD --oneline > /tmp/so-ahead.$$ &
+wait
+# Then read the 4 tmpfiles in a single step and derive: branch state, recent commits,
+# unpushed/uncommitted, open branches. Clean up tmpfiles once derivations are done:
+rm -f /tmp/so-branches.$$ /tmp/so-commits.$$ /tmp/so-status.$$ /tmp/so-ahead.$$
+```
+
+Checks to run (derived from the collected output):
+
+1. **Branch state**: current branch (from `branch -a`), ahead/behind origin (from `ahead` tmpfile)
+2. **Recent commits**: parse `commits` tmpfile — identify last session's work by commit patterns
+3. **Unpushed/uncommitted**: `status` tmpfile + `ahead` tmpfile combined
+4. **Open branches**: parse `branch -a` tmpfile, identify which are mergeable to develop/main
+5. **Stale branches**: run AFTER the parallel block — requires iterating over branches (depends on `branch -a` output). Use `git log -1 --format=%ct <branch>` per branch; flag those with no commits in more than `stale-branch-days` (default: 7) days.
+
+**Rationale:** The 4 independent ops are I/O-bound — running them in parallel cuts Phase 2 wall-clock from ~500ms to ~150ms. The stale-branches check depends on the branch list, so it runs after `wait`.
 
 ## Phase 2.5: Docs Planning (Docs-Orchestrator Integration)
 

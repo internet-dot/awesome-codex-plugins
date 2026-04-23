@@ -3,7 +3,7 @@
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
   "last_updated": "2026-04-23",
-  "total": 46,
+  "total": 47,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -228,6 +228,16 @@
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/2kDarki/codex-mem/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Codex Obsidian",
+      "url": "https://github.com/greg-asher/codex-obsidian",
+      "owner": "greg-asher",
+      "repo": "codex-obsidian",
+      "description": "Local Obsidian note and vault workflows through the official desktop `obsidian` CLI.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/greg-asher/codex-obsidian/main/.codex-plugin/plugin.json"
     },
     {
       "name": "Codex SEO",
