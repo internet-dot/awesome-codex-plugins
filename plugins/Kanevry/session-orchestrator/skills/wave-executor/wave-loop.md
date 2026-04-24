@@ -13,6 +13,42 @@ For each wave, resolve its assigned role(s) from the session plan's role-to-wave
 3. Proceed to next wave immediately
 4. Do NOT write wave-scope.json for skipped waves
 
+### 0.5. Pre-Dispatch Resource Gate (#193)
+
+Before dispatching agents, the coordinator runs a resource gate to decide whether the wave should proceed as planned, reduce its agent count, or escalate to coordinator-direct. Gated on `$CONFIG["resource-awareness"]` (default: true).
+
+```js
+import {evaluateWaveResourceGate, formatGateReport} from "scripts/lib/wave-resource-gate.mjs";
+
+const gate = await evaluateWaveResourceGate({
+  config: $CONFIG,
+  plannedAgents: <wave's planned agent count>,
+  waveRole: "<Discovery|Impl-Core|Impl-Polish|Quality|Finalization>"
+});
+```
+
+**Act on the decision:**
+
+| Decision | Coordinator action |
+|----------|---------------------|
+| `proceed` | Dispatch at `gate.agents` (= `plannedAgents`). Include `gate.reasons` in the wave progress update (informational). |
+| `reduce` | Dispatch at `gate.agents` (< `plannedAgents`). Log the reduction as a deviation in STATE.md. Include `gate.reasons` in the wave progress update. |
+| `coordinator-direct` | Do NOT dispatch subagents. Coordinator executes the wave's tasks directly. Log as a deviation in STATE.md. Continue to `### 1. Dispatch Agents` only for stagnation-pattern detection wording — the section's execution is skipped. |
+
+Reasons MUST appear in the wave's progress update under a "Resource gate:" bullet. Measurements (RAM free GB, CPU %, concurrent sessions) appear verbatim so the user can trust the decision.
+
+Probe failures never block a wave — the gate returns `proceed` with a "probe failed (ignored)" reason and the wave continues at the planned count. A config without `resource-thresholds` (legacy pre-#166) returns `proceed` with `"resource-thresholds missing from config — gate skipped"` — a defensive fallback so the gate never crashes the dispatch loop.
+
+**STATE.md deviation contract (#193):** when the gate returns `reduce` or `coordinator-direct`, append a single timestamped entry to `## Deviations` in `<state-dir>/STATE.md`. Use this exact format so future sessions and the evolve skill can mine for hardware-pattern learnings:
+
+```
+- [<ISO 8601 UTC>] Wave N resource-gate <reduce|coordinator-direct>: <gate.reasons[0]>. Measurements: ramFreeGb=<N>, cpuLoadPct=<N>, concurrentSessions=<N>. Planned agents=<M>, dispatched=<gate.agents>.
+```
+
+Skip the deviation entry on `proceed`, even when `concurrentSessions` warns — informational reasons belong in the wave progress update, not in deviations.
+
+---
+
 ### 1. Dispatch Agents
 
 Use the **Agent tool** to dispatch all agents for this wave IN PARALLEL in a SINGLE message.
@@ -401,11 +437,13 @@ After reviewing wave results, decide:
 
 - **On track**: proceed to next wave as planned
 - **Minor issues**: add fix tasks to next wave's agent assignments
-- **Major blocker**: inform the user, propose revised plan for remaining waves
+- **Major blocker**: propose a revised plan for the remaining waves and present the choice to the user via `AskUserQuestion` (proceed / revise / abort). See `.claude/rules/ask-via-tool.md` — never surface this as an inline prose question.
 - **Agent failed**: re-dispatch with corrected instructions in next wave
-- **Scope change**: document why, adjust remaining waves, inform user
+- **Scope change**: document why, adjust remaining waves, present scope deltas to the user via `AskUserQuestion` (accept / reject / modify).
 
 **Deviation protocol**: ALWAYS document WHY you deviated from the plan. Log it in a brief note that session-end can reference.
+
+**User interaction protocol**: Any decision surfaced to the user from this loop — plan revisions, scope changes, recovery-path choice, pause/continue prompts — goes through `AskUserQuestion`. Inline markdown-list choices are a bug; see `.claude/rules/ask-via-tool.md`.
 
 #### Dynamic Scaling
 
@@ -488,7 +526,7 @@ Before each wave dispatch:
    }
    ```
    The `gates` field (optional) mirrors `enforcement-gates` from Session Config (#77). When present, hooks check each gate individually via `gate_enabled()`. Missing gate entries default to enabled, preserving default behavior.
-2. Validate by piping through `bash "$PLUGIN_ROOT/scripts/validate-wave-scope.sh"` (where `$PLUGIN_ROOT` is `$CLAUDE_PLUGIN_ROOT`, `$CODEX_PLUGIN_ROOT`, or `$CURSOR_RULES_DIR` per platform — see `skills/_shared/config-reading.md`). If validation fails (exit 1), fix the JSON based on stderr errors and retry.
+2. Validate by piping through `node "$PLUGIN_ROOT/scripts/validate-wave-scope.mjs"` (where `$PLUGIN_ROOT` is `$CLAUDE_PLUGIN_ROOT`, `$CODEX_PLUGIN_ROOT`, or `$CURSOR_RULES_DIR` per platform — see `skills/_shared/config-reading.md`). If validation fails (exit 1), fix the JSON based on stderr errors and retry.
 3. `allowedPaths` is the UNION of all agent file scopes for this wave
    To compute `allowedPaths`: read each agent's specification from the session plan. Each agent lists its "Files:" scope (e.g., `skills/session-end/SKILL.md`, `scripts/*.sh`). Collect all file paths and glob patterns from all agents in this wave into a single flat array. Deduplicate entries. If an agent's scope uses globs (e.g., `scripts/*.sh`), include the glob pattern as-is — the enforcement hook resolves globs at check time.
 4. Read `enforcement` from Session Config (default: `warn`). The `enforcement` field is REQUIRED in `wave-scope.json` — always write it explicitly. The hooks default to `warn` if the field is missing, which would silently degrade strict enforcement. If jq was confirmed missing in Pre-Execution Check step 4, set `enforcement` to `off` and include a comment in the progress update noting that enforcement is disabled.

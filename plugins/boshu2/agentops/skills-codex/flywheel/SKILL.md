@@ -1,6 +1,6 @@
 ---
 name: flywheel
-description: 'Knowledge flywheel health monitoring. Checks velocity, pool depths, staleness. Triggers: "flywheel status", "knowledge health", "is knowledge compounding".'
+description: 'Check knowledge flywheel health, velocity, staleness, and pool depth.'
 ---
 # Flywheel Skill
 Monitor the knowledge flywheel health.

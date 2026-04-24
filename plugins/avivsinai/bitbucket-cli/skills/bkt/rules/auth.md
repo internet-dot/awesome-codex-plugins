@@ -19,9 +19,52 @@ bkt auth <command> [flags]
 
 | Subcommand | Description | Key Flags |
 |---|---|---|
+| [doctor](#bkt-auth-doctor) | Diagnose authentication and keychain issues | — |
 | [login](#bkt-auth-login) | Authenticate against a Bitbucket Data Center or Cloud host | `--allow-http`, `--allow-insecure-store`, `--auth-method`, `--kind` |
 | [logout](#bkt-auth-logout) | Remove stored credentials for a host | `--host` |
 | [status](#bkt-auth-status) | Show authentication status for configured hosts | — |
+
+## bkt auth doctor
+
+Inspect the keychain/secret store wiring and explain why prompts or
+timeouts may be happening.
+
+On macOS this reports the current bkt binary's code signature, Designated
+Requirement, and whether a stored token item is present for the host. If the
+stored item was created by a bkt binary with a different Designated
+Requirement — which is common after `brew upgrade bkt` — macOS will
+keep prompting for the Keychain password on every read. The fix in that case
+is to re-run `bkt auth login` so the item is recreated with the
+current binary's DR.
+
+The command never reads the stored secret itself.
+
+### Usage
+
+```
+bkt auth doctor [host] [flags]
+```
+
+### Inherited Flags
+
+| Flag | Short | Description |
+|---|---|---|
+| `--context` | `-c` | Active Bitbucket context name |
+| `--format` |  | Output format: json or yaml (alias for --json/--yaml) |
+| `--jq` |  | Apply a jq expression to JSON output (requires --json or --format json) |
+| `--json` |  | Output in JSON format when supported |
+| `--template` |  | Render output using Go templates |
+| `--yaml` |  | Output in YAML format when supported |
+
+### Examples
+
+```bash
+# Inspect the default host
+  bkt auth doctor
+
+  # Inspect a specific host
+  bkt auth doctor bitbucket.example.com
+```
 
 ## bkt auth login
 

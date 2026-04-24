@@ -4,7 +4,7 @@
 
 ## Problem
 
-During `/crank` execution, plans often need modification:
+During `$crank` execution, plans often need modification:
 - A task turns out to be more complex than estimated (needs splitting)
 - A dependency is discovered mid-implementation (needs reordering)
 - A task becomes unnecessary after another task completes (needs skipping)
@@ -91,7 +91,7 @@ All mutations are logged to `.agents/plans/<epic-id>-mutations.jsonl`:
 
 One line per mutation, append-only (JSONL format for streaming reads).
 
-## Integration with /crank
+## Integration with $crank
 
 ### When to Mutate
 Crank's orchestrator decides to mutate when:
@@ -108,7 +108,7 @@ Crank's orchestrator decides to mutate when:
 - **Reorders:** Max 3 per epic (excessive reordering = bad initial plan)
 - **Abandon:** 1 (terminal)
 
-If insert budget exceeded: log warning and suggest `/plan` re-run instead.
+If insert budget exceeded: log warning and suggest `$plan` re-run instead.
 
 ### Crank Checkpoint Integration
 After any mutation, write to the wave checkpoint:
@@ -122,7 +122,7 @@ After any mutation, write to the wave checkpoint:
 }
 ```
 
-## Integration with /plan
+## Integration with $plan
 
 ### Adversarial Review Gate
 Before finalizing a plan, optionally spawn a reviewer (strongest available model) to check:
@@ -139,7 +139,7 @@ Before finalizing a plan, optionally spawn a reviewer (strongest available model
 
 The reviewer produces a findings list. Critical findings block plan finalization; WARN findings are logged.
 
-## Integration with /post-mortem
+## Integration with $post-mortem
 
 Post-mortem should read the mutation log to assess plan quality:
 - High mutation count → plan was underspecified

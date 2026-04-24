@@ -12,17 +12,18 @@
     "test:watch": "vitest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "typecheck": "node scripts/typecheck.mjs"
+    "typecheck": "node scripts/typecheck.mjs",
+    "share:hw-learnings": "node scripts/export-hw-learnings.mjs"
   },
   "dependencies": {
     "zx": "^8.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
-    "@vitest/coverage-v8": "^2.1.9",
+    "@vitest/coverage-v8": "^4.1.5",
     "eslint": "^9.0.0",
     "prettier": "^3.0.0",
-    "vitest": "^2.0.0"
+    "vitest": "^4.1.5"
   },
   "license": "MIT",
   "repository": {

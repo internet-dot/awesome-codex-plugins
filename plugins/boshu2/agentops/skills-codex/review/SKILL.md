@@ -1,8 +1,7 @@
 ---
 name: review
-description: 'Review incoming PRs, agent-generated changes, or diffs. Structured review with security, correctness, performance, and maintainability checks. Triggers: "review", "review PR", "review changes", "code review", "review this PR", "review agent output", "check this diff".'
+description: 'Review code, PRs, diffs, or agent output for correctness and risk.'
 ---
-
 # Review Skill
 
 > **Quick Ref:** `$review <PR>` reviews a PR, `$review --diff` reviews local changes, `$review --agent <path>` reviews agent output with extra scrutiny.

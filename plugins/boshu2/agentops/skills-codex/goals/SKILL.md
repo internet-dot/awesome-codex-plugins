@@ -1,9 +1,7 @@
 ---
 name: goals
-description: 'Maintain GOALS.yaml and GOALS.md fitness specifications. Measure fitness, manage directives, track drift, add/prune goals. Triggers: "goals", "goal status", "show goals", "add goals", "prune goals", "clean goals", "goal drift", "goal history", "export goals", "meta goals", "migrate goals".'
+description: 'Maintain GOALS.yaml and GOALS.md fitness specs, directives, and drift.'
 ---
-
-
 # $goals — Fitness Goal Maintenance
 
 > Maintain GOALS.yaml and GOALS.md fitness specifications. Use `ao goals` CLI for all operations.

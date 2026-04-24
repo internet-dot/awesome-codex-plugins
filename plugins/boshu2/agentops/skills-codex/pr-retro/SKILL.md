@@ -1,9 +1,7 @@
 ---
 name: pr-retro
-description: 'Learn from PR outcomes. Analyzes accept/reject patterns and updates contribution lessons. Triggers: "pr retro", "learn from PR", "PR outcome", "why was PR rejected", "analyze PR feedback".'
+description: 'Learn from PR outcomes and update contribution lessons.'
 ---
-
-
 # PR Retro Skill
 
 Learn from PR outcomes by analyzing accept/reject patterns.

@@ -1,9 +1,19 @@
 {
   "name": "oc-codex-multi-auth",
-  "version": "6.1.1",
+  "version": "6.1.6",
   "description": "OpenCode plugin for Codex-first GPT-5 workflows with ChatGPT Plus/Pro OAuth, multi-account rotation, and guided setup",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./tui": {
+      "types": "./dist/tui.d.ts",
+      "import": "./dist/tui.js"
+    }
+  },
   "type": "module",
   "license": "MIT",
   "author": "ndycode",
@@ -98,8 +108,12 @@
   "dependencies": {
     "@napi-rs/keyring": "~1.2.0",
     "@openauthjs/openauth": "^0.4.3",
-    "@opencode-ai/plugin": "^1.2.9",
+    "@opencode-ai/plugin": "^1.14.22",
+    "@opentui/core": "^0.1.99",
+    "@opentui/solid": "^0.1.99",
     "hono": "4.12.14",
+    "solid-js": "^1.9.11",
+    "web-tree-sitter": "^0.25.10",
     "zod": "^4.3.6"
   },
   "overrides": {

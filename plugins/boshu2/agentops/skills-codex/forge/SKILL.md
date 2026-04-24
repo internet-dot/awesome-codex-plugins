@@ -1,8 +1,7 @@
 ---
 name: forge
-description: 'Mine transcripts for knowledge - decisions, learnings, failures, patterns. Triggers: "forge insights", "mine transcripts", "extract knowledge".'
+description: 'Mine transcripts and artifacts into reusable learnings, decisions, and patterns.'
 ---
-
 # Forge Skill
 
 **Typically runs automatically via SessionEnd hook.**

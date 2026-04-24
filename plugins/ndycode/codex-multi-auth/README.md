@@ -333,7 +333,7 @@ codex auth doctor --json
 
 ## Release Notes
 
-- Current stable: [docs/releases/v1.3.0.md](docs/releases/v1.3.0.md)
+- Current stable: [docs/releases/v1.3.1.md](docs/releases/v1.3.1.md)
 - Previous stable: [docs/releases/v1.2.6.md](docs/releases/v1.2.6.md)
 - Earlier stable: [docs/releases/v1.2.5.md](docs/releases/v1.2.5.md)
 - Full release archive: [docs/README.md#release-history](docs/README.md#release-history)

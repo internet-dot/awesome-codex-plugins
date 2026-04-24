@@ -354,7 +354,7 @@ bd mol pour {topic-slug} --var service_name=rate-limiter
 ```
 
 ## Next Steps
-Run `$crank <epic-id>` for hands-free execution, or `/implement-wave <epic-id>` for supervised.
+Run `$crank <epic-id>` for hands-free execution, or `$implement-wave <epic-id>` for supervised.
 ```
 
 ---
@@ -424,7 +424,7 @@ $crank xxx              # Full auto until epic closed
 
 **Supervised (sequential, same session):**
 ```bash
-/implement-wave xxx     # One wave at a time
+$implement-wave xxx     # One wave at a time
 ```
 
 ### Alternative: Manual Execution

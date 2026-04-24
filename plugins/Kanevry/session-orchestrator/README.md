@@ -400,6 +400,10 @@ For contributor-facing architecture, hook authoring, and the `zx`-vs-stdlib heur
 - [Homepage](https://gotzendorfer.at/en/session-orchestrator)
 - [Privacy Policy](https://gotzendorfer.at/en/session-orchestrator/privacy)
 
+## Weiterführend
+
+- **Agent-Kontext & Internals:** Siehe [`CLAUDE.md`](./CLAUDE.md) für Plugin-Architektur, Skills, Hooks und Entwicklungs-Konventionen.
+
 ## License
 
 [MIT](LICENSE)

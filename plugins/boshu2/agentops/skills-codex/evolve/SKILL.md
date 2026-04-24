@@ -1,17 +1,16 @@
 ---
 name: evolve
-description: 'Goal-driven v2 autonomous improvement loop. Runs the post-mortem, repo analysis, next-work selection, plan/pre-mortem, implementation, validation, and repeat cadence through $rpi and ao evolve. Also pulls from open beads when goals all pass. Use when you want to "improve", "iterate", "fix issues", "work through tasks", "evolve", "check goal fitness", "run improvement loop", "pick up next work", or "postmortem and continue".'
+description: 'Run autonomous improvement: goals, planning, implementation, validation, repeat.'
 ---
-
-
 # $evolve — Goal-Driven Compounding Loop
 
 > Measure what's wrong. Fix the worst thing. Measure again. Compound.
 
-**V2 command surface:** keep the name `evolve`. Use `ao evolve` for the
-terminal-native loop. It is the top-level operator entrypoint for
-`ao rpi loop --supervisor`, preserving the old `$evolve` concept while reusing
-the v2 RPI loop engine.
+**Codex orchestration default:** keep the skill name `$evolve`. In Codex,
+run the loop by chaining Codex skills: `$evolve` selects work and invokes
+complete `$rpi --auto` cycles. Treat `ao evolve` and `ao rpi` as terminal
+wrapper commands for humans or non-skill runtimes, not as the Codex skill
+default.
 
 **Operator cadence:** post-mortem finished work, analyze the current repo state,
 select or create the next highest-value work item, let `$rpi` handle research,
@@ -226,7 +225,7 @@ These notes inform work selection throughout the evolve session. Store them in a
 
 Skip if `--skip-baseline` or `--beads-only` or baseline already exists.
 
-`ao evolve` captures this automatically before entering the RPI loop. It hashes
+The terminal wrapper (`ao evolve`) captures this automatically before entering the RPI loop. It hashes
 the active GOALS.md or GOALS.yaml file to an era ID, then writes a snapshot
 under `.agents/evolve/fitness-baselines/goals-<hash>/` if that era directory
 does not already contain a JSON snapshot.
@@ -272,7 +271,7 @@ bash scripts/evolve-measure-fitness.sh \
 
 **Do NOT write per-cycle `fitness-{N}-pre.json` files.** The rolling file is sufficient for work selection and regression detection.
 
-This writes a fitness snapshot to `.agents/evolve/` atomically via a temp file plus JSON validation. The AgentOps CLI is required for fitness measurement because the wrapper shells out to `ao goals measure`. If measurement exceeds the whole-command bound or returns invalid JSON, the wrapper fails without clobbering the previous rolling snapshot.
+This writes a fitness snapshot to `.agents/evolve/` atomically via a temp file plus JSON validation. The AgentOps CLI is required for fitness measurement because the measurement wrapper shells out to `ao goals measure`. If measurement exceeds the whole-command bound or returns invalid JSON, the wrapper fails without clobbering the previous rolling snapshot.
 
 ### Step 3: Select Work
 

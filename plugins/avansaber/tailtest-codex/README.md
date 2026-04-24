@@ -9,22 +9,20 @@ tailtest blocks Codex at the end of every turn and asks it to write and run test
 ## Install
 
 ```bash
-# Clone the plugin
+# One-time setup (any terminal):
 git clone https://github.com/avansaber/tailtest-codex ~/.codex/plugins/tailtest
 
-# Register in marketplace (~/.agents/plugins/marketplace.json):
-{ "plugins": [{ "name": "tailtest", "path": "~/.codex/plugins/tailtest" }] }
+# Enable the hooks feature flag in ~/.codex/config.toml:
+echo -e "\n[features]\ncodex_hooks = true" >> ~/.codex/config.toml
 
-# Enable hooks in ~/.codex/config.toml:
-[features]
-codex_hooks = true
-
-# Copy hook files into your project:
-cp ~/.codex/plugins/tailtest/.codex/config.toml <project>/.codex/config.toml
-cp ~/.codex/plugins/tailtest/hooks/hooks.json <project>/.codex/hooks.json
+# Per-project setup (run inside each project where you want tailtest active):
+cd <your-project>
+bash ~/.codex/plugins/tailtest/scripts/init.sh
 ```
 
-Restart Codex.
+That's it. Start a `codex` session in the project and tailtest fires on every file edit.
+
+The init script creates `.codex/hooks.json` in your project pointing at the tailtest hook scripts. It is idempotent (safe to re-run) and never overwrites an existing hooks.json with different content — it writes a `.codex/hooks.json.tailtest` sidecar instead for manual merging.
 
 ---
 

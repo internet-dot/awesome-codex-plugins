@@ -6,7 +6,7 @@
 
 **Russian text quality plugin for Claude Code, GitHub Copilot, Windsurf, Cursor, JetBrains, and [6 more platforms](#quick-start)** — typography, information style, editorial standards, UX writing, and business correspondence.
 
-~1,040 independently formulated rules informed by 16 canonical Russian-language sources. All formulations are original — no verbatim quotes, full attribution.
+~1,044 independently formulated rules informed by 16 canonical Russian-language sources. All formulations are original — no verbatim quotes, full attribution.
 
 ## Acknowledgments
 
@@ -19,7 +19,7 @@ ru-text gives your AI coding assistant a deep understanding of Russian text qual
 
 Works with Claude Code, GitHub Copilot, Windsurf, Cursor, Cline, JetBrains (Junie), Continue.dev, Codex CLI, Gemini CLI, OpenClaw, and Notion.
 
-- **~1,040 rules** across 7 domains, packed into 9 reference files + addenda
+- **~1,044 rules** across 7 domains, packed into 9 reference files + addenda
 - **Auto-activation** — no need to remember to turn it on
 - **Covers everything** — from em dashes and guillemets to UX microcopy and business email tone
 - **Non-dogmatic** — your explicit style request always overrides default rules
@@ -240,7 +240,7 @@ If you explicitly request a specific style — casual, academic, SEO, literary, 
 Built to Anthropic's Claude Code plugin specs:
 - SKILL.md: 539 words, 88 lines (guideline: under 2,000 words, under 500 lines)
 - 9 reference files load on demand, never at session start
-- ~1,040 rules organized into 7 thematic areas with progressive disclosure
+- ~1,044 rules organized into 7 thematic areas with progressive disclosure
 
 ## Intellectual property notice
 

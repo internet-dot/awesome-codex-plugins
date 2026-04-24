@@ -130,6 +130,23 @@ For each of the 6 learning types, apply these heuristics:
   - Evidence = "<N> sessions with stagnation_events for this file/class"
 - These learnings feed #85 (pre-edit grounding injection) when it ships — high-frequency pairs trigger grounding.
 
+#### 7. hardware-pattern (type: `hardware-pattern`)
+
+> **v3.1.0 / Sub-Epic #160 (C2, issue #171).** Keyed on `host_class` rather than project — surfaces hardware-bound problems that affect the user across every repo on the same machine. Complements the project-keyed types above.
+
+- Read `.orchestrator/metrics/events.jsonl` (session + wave events) and the registry `sweep.log` at `~/.config/session-orchestrator/sessions/sweep.log`. Both are optional — missing files produce no candidates.
+- Invoke `scripts/lib/hardware-pattern-detector.mjs` → `detectHardwarePatterns({events, sweepLogEntries, thresholds})`. Thresholds come from Session Config `resource-thresholds` when present, falling back to `DEFAULT_THRESHOLDS`.
+- Five detection signals (aggregated per `(signal, host_class)` pair, ≥2 occurrences required):
+  - **oom-kill** — `orchestrator.session.stopped` with `exit_code: 137` or OOM-marker in `error`
+  - **heartbeat-gap** — registry sweep-log entries with `gap_minutes` above `resource-thresholds.zombie-threshold-min`
+  - **concurrent-session-pressure** — session-start events with `peer_count ≥ concurrent-sessions-warn`
+  - **disk-full** — events whose `error` matches `ENOSPC` / "no space left"
+  - **thermal-throttle** — events whose `resource_snapshot.cpu_load_pct` crosses `cpu-load-max-pct`
+- Each candidate is piped through `candidateToLearning()` → `validateLearning()`. Default `scope` is `private` (in-repo only). To promote to `public`, the user runs `npm run share:hw-learnings -- --promote` (C3 export). This anonymizes each `private` hardware-pattern entry, validates via the privacy contract, and appends a `public` twin to `learnings.jsonl` (original preserved). Use `--dry-run` to preview without writing.
+- Subject convention: `<signal>::<host_class>` (e.g., `oom-kill::macos-arm64-m3pro`). The `::` separator avoids colliding with project-keyed subjects.
+- Confidence starts at 0.5 like other learning types, but decay is slower in practice: hardware stays the same longer than code. This is an emergent property of the existing expire-after-N-days policy applied to a mostly-stable `host_class` — no special-casing needed.
+- **Presentation in step 3.5** (see below): render hardware-patterns in a dedicated section titled `## Hardware Patterns (keyed on host_class)` after the project-keyed patterns. This makes the source of the learning obvious to the user at confirmation time.
+
 ### Step 3.2b: Zero Patterns Check
 
 If no patterns were extracted across all 6 types, report: "No patterns found in session history. This can happen with very few sessions or sessions that lack detailed wave/agent data." and skip to end (do not proceed to AskUserQuestion).

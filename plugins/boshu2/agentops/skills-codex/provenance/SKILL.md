@@ -1,9 +1,7 @@
 ---
 name: provenance
-description: 'Trace knowledge artifact lineage and sources. Find orphans, stale citations. Triggers: "where did this come from", "trace this learning", "knowledge lineage".'
+description: 'Trace where knowledge, decisions, or artifacts came from.'
 ---
-
-
 # Provenance Skill
 
 Trace knowledge artifact lineage to sources.

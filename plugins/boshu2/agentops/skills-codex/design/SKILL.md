@@ -1,8 +1,7 @@
 ---
 name: design
-description: 'Product validation gate for RPI pipeline. Validates goal alignment with PRODUCT.md before discovery. Checks: gap alignment, persona fit, competitive differentiation, precedent, scope boundaries. Council-gated with --preset=product. Triggers: "design", "product validation", "validate product fit", "design gate".'
+description: 'Validate product fit before discovery using PRODUCT.md and scope checks.'
 ---
-
 # $design -- Product Validation Gate (Codex Native)
 
 > **Quick Ref:** Validates that a proposed goal aligns with the product's strategic direction before discovery begins major work. Council-gated with `--preset=product`.

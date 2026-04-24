@@ -25,28 +25,28 @@ loop iterations, or nested failures. Flow Studio MCP exposes all of it.
 
 The core difference: **Graph API gives your agent run status. MCP gives your agent the inputs and outputs of every action.**
 
-| What the agent sees | Graph API | Flow Studio MCP |
-|---|---|---|
-| Run passed or failed | Yes | Yes |
-| **Action inputs and outputs** | **No** | **Yes** |
-| Error details beyond status code | No | Yes |
-| Child flow run details | No | Yes |
-| Loop iteration data | No | Yes |
-| Flow definition (read + write) | Limited | Full JSON |
-| Resubmit / cancel runs | Limited | Yes |
-| **Cached flow health & failure rates** | **No** | **Yes** |
-| **Maker / Power Apps / connection inventory** | **No** | **Yes** |
-| **Governance metadata (tags, impact, owner)** | **No** | **Yes** |
+| What the agent sees                           | Graph API | Flow Studio MCP |
+| --------------------------------------------- | --------- | --------------- |
+| Run passed or failed                          | Yes       | Yes             |
+| **Action inputs and outputs**                 | **No**    | **Yes**         |
+| Error details beyond status code              | No        | Yes             |
+| Child flow run details                        | No        | Yes             |
+| Loop iteration data                           | No        | Yes             |
+| Flow definition (read + write)                | Limited   | Full JSON       |
+| Resubmit / cancel runs                        | Limited   | Yes             |
+| **Cached flow health & failure rates**        | **No**    | **Yes**         |
+| **Maker / Power Apps / connection inventory** | **No**    | **Yes**         |
+| **Governance metadata (tags, impact, owner)** | **No**    | **Yes**         |
 
 ## Skills
 
-| Skill | Description |
-|---|---|
-| [`power-automate-mcp`](skills/power-automate-mcp/) | Connect to and operate Power Automate cloud flows — list flows, read definitions, check runs, resubmit, cancel |
-| [`power-automate-debug`](skills/power-automate-debug/) | Step-by-step diagnostic process for investigating failing flows |
-| [`power-automate-build`](skills/power-automate-build/) | Build, scaffold, and deploy Power Automate flow definitions from scratch |
-| [`power-automate-monitoring`](skills/power-automate-monitoring/) | Flow health, failure rates, maker inventory, Power Apps, environment and connection counts |
-| [`power-automate-governance`](skills/power-automate-governance/) | Classify flows by impact, detect orphans, audit connectors, manage notifications, compute archive scores |
+| Skill                                                            | Description                                                                                                    |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| [`power-automate-mcp`](skills/power-automate-mcp/)               | Connect to and operate Power Automate cloud flows — list flows, read definitions, check runs, resubmit, cancel |
+| [`power-automate-debug`](skills/power-automate-debug/)           | Step-by-step diagnostic process for investigating failing flows                                                |
+| [`power-automate-build`](skills/power-automate-build/)           | Build, scaffold, and deploy Power Automate flow definitions from scratch                                       |
+| [`power-automate-monitoring`](skills/power-automate-monitoring/) | Flow health, failure rates, maker inventory, Power Apps, environment and connection counts                     |
+| [`power-automate-governance`](skills/power-automate-governance/) | Classify flows by impact, detect orphans, audit connectors, manage notifications, compute archive scores       |
 
 The first three skills use **live** Power Automate API calls. The monitoring and governance
 skills use the **cached store** — a daily snapshot with aggregated stats, remediation hints,
@@ -71,6 +71,7 @@ claude --plugin-dir ./power-automate-mcp-skills
 ```
 
 Then connect the MCP server:
+
 ```bash
 claude mcp add --transport http flowstudio https://mcp.flowstudio.app/mcp \
   --header "x-api-key: <YOUR_TOKEN>"
@@ -81,6 +82,7 @@ Get your token at [mcp.flowstudio.app](https://mcp.flowstudio.app).
 ### Install in Codex
 
 Inside a Codex session, install skills directly:
+
 ```
 $skill-installer install https://github.com/ninihen1/power-automate-mcp-skills/tree/main/skills/power-automate-mcp
 $skill-installer install https://github.com/ninihen1/power-automate-mcp-skills/tree/main/skills/power-automate-debug
@@ -90,6 +92,7 @@ $skill-installer install https://github.com/ninihen1/power-automate-mcp-skills/t
 ```
 
 Then connect the MCP server in `~/.codex/config.toml`:
+
 ```toml
 [mcp_servers.flowstudio]
 url = "https://mcp.flowstudio.app/mcp"
@@ -130,12 +133,14 @@ Copy the skill folder(s) into your project's `.github/skills/` directory
 ### Connect the MCP server
 
 **Claude Code:**
+
 ```bash
 claude mcp add --transport http flowstudio https://mcp.flowstudio.app/mcp \
   --header "x-api-key: <YOUR_TOKEN>"
 ```
 
 **Codex** (`~/.codex/config.toml`):
+
 ```toml
 [mcp_servers.flowstudio]
 url = "https://mcp.flowstudio.app/mcp"
@@ -145,6 +150,7 @@ x-api-key = "<YOUR_TOKEN>"
 ```
 
 **Copilot / VS Code** (`.vscode/mcp.json`):
+
 ```json
 {
   "servers": {
@@ -177,139 +183,6 @@ These are from real production investigations, not demos.
   `split(Name, ', ')` crashed when 38% of records had null Names. Agent traced
   parent to child to loop to action, found the root cause, and deployed a fix
   via `update_live_flow`.
-
-## Real governance examples
-
-These are from a real tenant with 1,197 flows, not synthetic data.
-
-- **[Tenant governance dashboard](#governance-dashboard)** —
-  Agent called 5 list endpoints and produced a full tenant health summary in
-  under 10 seconds. No portal, no PowerShell, no CoE Starter Kit.
-
-- **[Orphaned resource detection](#orphan-detection)** —
-  Agent cross-referenced deleted makers against flow ownership. Found 47 flows
-  owned by 5 deleted accounts — all system-generated Dataverse flows with empty
-  owner arrays. Tagged them `#orphaned` for cleanup.
-
-- **[Maker offboarding](#maker-offboarding)** —
-  Agent pulled a departing maker's full footprint: 223 flows, 209 Power Apps
-  (77% of tenant), 3 shared apps with active users, 1 critical flow. Identified
-  the shared apps and critical flow as highest priority for handover.
-
-- **[Environment sprawl audit](#environment-audit)** —
-  Agent found 3 Developer environments, only 1 of 10 managed, and 884 flows
-  concentrated in the default environment with 1,374 connections.
-
-<details>
-<summary><a id="governance-dashboard"></a><b>Governance dashboard output</b></summary>
-
-```
-Tenant-Wide Governance Dashboard
-
-Metric                              Value
-------------------------------------+------------------
-Total flows                          1,197
-Active (with name, not deleted)      1,134
-Monitored                            72 (6.0%)
-With on-fail notifications           14 (19.4% of monitored)
-High-risk (fail rate > 20%)          65
-
-Makers                               18
-  Active                             9
-  Deleted with orphaned flows        5 (owning 47 flows)
-
-Power Apps                           271
-Environments                         10
-  Developer                          3
-  Managed                            1
-Connections                          1,589
-
-Governance Findings:
-  1. Low monitoring coverage — 6% of flows monitored
-  2. Low notification coverage — only 19% of monitored flows have alerts
-  3. 65 high-risk flows with >20% failure rate
-  4. 5 deleted accounts still own 47 flows
-  5. Default environment overloaded — 884 flows, 1,374 connections
-```
-
-</details>
-
-<details>
-<summary><a id="orphan-detection"></a><b>Orphan detection output</b></summary>
-
-```
-Orphaned Resource Detection
-
-Found 4 fully orphaned flows (no owners, creator deleted):
-
-Flow                                          Environment        State    Orphan Type
-----------------------------------------------+------------------+--------+---------------------------
-Project Service Core - Schedule MPP Cleanup    Default            Stopped  DataverseSystemUser deleted
-SLAInstanceMonitoringWarningAndExpiryFlow      CoE DataLake       Stopped  DataverseSystemUser deleted
-SLAInstanceMonitoringWarningAndExpiryFlow      sandy              Stopped  DataverseSystemUser deleted
-Search Dynamics 365 knowledge article flow     sandy              Stopped  DataverseSystemUser deleted
-
-All 4 are system-generated Dataverse flows with empty owner arrays.
-Tagged #orphaned via update_store_flow for tracking.
-```
-
-</details>
-
-<details>
-<summary><a id="maker-offboarding"></a><b>Maker offboarding output</b></summary>
-
-```
-Maker Offboarding Report — Catherine Han
-
-Profile:
-  Flows owned       223
-  Power Apps        209 (77% of 271 tenant-wide)
-  Account           Active
-  First flow        2023-08-09
-  Last flow         2026-04-04
-
-Critical flows (highest priority for handover):
-  Flow Studio Onboarding Emails    107 runs   0% fail   critical=true
-
-Shared Power Apps (other users depend on these):
-  Cleanup Old Objects App                          1 user shared
-  Admin - Access this App (Power BI embedded)      1 user shared
-  App and Flow Inactivity Notifications View       1 user shared
-
-Recommendation: 223 flows + 209 apps is a high-risk offboarding.
-Prioritize: 1 critical flow, 3 shared apps, then batch-tag the rest
-with #offboarding-catherine for structured handover.
-```
-
-</details>
-
-<details>
-<summary><a id="environment-audit"></a><b>Environment audit output</b></summary>
-
-```
-Environment Governance Audit — 10 environments
-
-Environment              SKU          Location    Managed  Flows  Connections
--------------------------+-----------+-----------+---------+------+------------
-Flow Studio (default)     Default     australia   No        884    1,374
-CoE DataLake Testing      Production  australia   No         99       39
-Flow Studio Demo          Production  australia   No         67       54
-Flow Maker Preview        Production  US-first    No         43       85
-Clarity Demo              Developer   australia   No         20       10
-sandy                     Sandbox     australia   Yes         5       11
-PowerPagesDeveloper       Developer   australia   No          3        0
-US                        Developer   US          No          8        3
-Work                      Teams       australia   No          0        0
-Dev John                  Teams       australia   No          4        7
-
-Findings:
-  1. 3 Developer environments — review if all still needed
-  2. Only 1 of 10 is managed (sandy) — less DLP enforcement elsewhere
-  3. Default environment holds 78% of flows and 86% of connections
-  4. Clarity Demo: service account lacks admin access (isAdmin=false)
-```
-
-</details>
 
 ## Prerequisites
 

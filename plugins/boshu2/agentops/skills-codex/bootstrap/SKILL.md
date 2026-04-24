@@ -1,8 +1,7 @@
 ---
 name: bootstrap
-description: 'One command to full AgentOps product layer. Sets up GOALS.md, PRODUCT.md, README.md, .agents/ structure, and hooks. Progressive -- fills gaps only. Triggers: "bootstrap", "setup agentops", "initialize repo", "full setup".'
+description: 'Initialize AgentOps project files, goals, product docs, README, hooks, and .agents state.'
 ---
-
 # $bootstrap (Codex Native)
 
 > **Quick Ref:** One command to set up the full AgentOps product layer. Progressive -- bare repos get everything, existing repos fill gaps only.

@@ -1,9 +1,7 @@
 ---
 name: oss-docs
-description: 'Scaffold and audit OSS documentation packs for open source projects. Triggers: "add OSS docs", "setup contributing guide", "add changelog", "prepare for open source", "add AGENTS.md", "OSS documentation".'
+description: 'Scaffold or audit open source docs such as README, CONTRIBUTING, and changelog.'
 ---
-
-
 # OSS Documentation Skill
 
 Scaffold and audit documentation for open source projects.

@@ -1,9 +1,7 @@
 ---
 name: quickstart
-description: 'New user onboarding. Detect setup, explain what AgentOps does, give one next action. Under 30 seconds. Triggers: "quickstart", "get started", "onboarding", "how do I start".'
+description: 'Detect AgentOps setup and give one concise next action.'
 ---
-
-
 # $quickstart
 
 > **One job:** Tell a new user what AgentOps does and what to do first. Fast.

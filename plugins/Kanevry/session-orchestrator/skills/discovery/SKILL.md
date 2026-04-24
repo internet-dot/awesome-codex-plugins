@@ -36,7 +36,7 @@ Do NOT proceed past Phase 0 if GATE_CLOSED. There is no bypass. Refer to `skills
 Read and parse Session Config per `skills/_shared/config-reading.md`. Store result as `$CONFIG`.
 
 Discovery-relevant fields (parse these specifically):
-- `discovery-on-close`, `discovery-probes`, `discovery-exclude-paths`, `discovery-severity-threshold`, `discovery-confidence-threshold`
+- `discovery-on-close`, `discovery-probes`, `discovery-exclude-paths`, `discovery-severity-threshold`, `discovery-confidence-threshold`, `discovery-parallelism`
 - `test-command`, `typecheck-command`, `lint-command`
 - `pencil`, `vcs`, `cross-repos`, `stale-issue-days`
 
@@ -88,7 +88,7 @@ Report: "Discovery: [N] probes active across [categories]. Stack: [detected]. Th
 
 ## Phase 3: Probe Execution
 
-Dispatch probe agents IN PARALLEL using the Agent tool. Group by category (max 5 agents):
+Dispatch probe agents IN PARALLEL using the Agent tool. Group by category (max `$CONFIG['discovery-parallelism']` agents, default 5):
 
 > **Cursor IDE:** No Agent() tool available. Run probes sequentially within the current session — one category at a time. Complete each category's analysis before moving to the next.
 

@@ -1,9 +1,7 @@
 ---
 name: using-agentops
-description: 'Meta skill explaining the AgentOps operating model. Hook-capable runtimes inject it at session start; Codex uses it through the explicit startup fallback. Covers bookkeeping, validation, primitives, flows, the RPI lifecycle, and the skill catalog.'
+description: 'Explain AgentOps operating model, lifecycle, skills, hooks, and context.'
 ---
-
-
 # AgentOps Operating Model
 
 AgentOps is the operational layer for coding agents.
@@ -163,9 +161,17 @@ AgentOps has three runtime modes. Do not assume hook automation exists everywher
 
 | Mode | When it applies | Start path | Closeout path | Guarantees |
 |------|-----------------|------------|---------------|------------|
-| `gc` | Gas City (`gc`) binary available and `city.toml` present | gc controller manages sessions; `ao rpi` auto-selects gc executor | gc event bus captures phase/gate/failure/metric events | Default when gc is available. Phase execution via gc sessions, events via gc event bus |
+| `gc` | Gas City (`gc`) binary available and `city.toml` present | terminal wrapper sessions can use the gc controller | gc event bus captures phase/gate/failure/metric events | CLI/runtime substrate for terminal launches; Codex skills still chain `$skill` invocations for lead orchestration |
 | `codex-hookless-fallback` | Codex Desktop / Codex CLI without hook surfaces (no gc) | `ao codex start` or `ao codex ensure-start` | `ao codex stop` or `ao codex ensure-stop` | Explicit startup context, citation tracking, transcript fallback, and close-loop metrics without hooks |
 | `manual` | Codex cannot resolve repo/runtime state automatically | `ao inject` / `ao lookup` | `ao forge transcript` + `ao flywheel close-loop` | Works everywhere, but lifecycle actions are operator-driven |
+
+Codex skill orchestration default is `$skill` chaining. Inside a Codex skill,
+invoke peer skills such as `$rpi`, `$discovery`, `$crank`, `$validation`,
+`$evolve`, `$plan`, and `$pre-mortem` directly. Use `ao rpi`, `ao evolve`, or
+similar lifecycle wrapper commands only when the user explicitly asks for a
+terminal wrapper or when documenting a non-skill runtime path. Operational CLI
+commands such as `ao lookup`, `ao goals measure`, `ao ratchet`, and
+`ao codex ensure-start` remain valid substrate calls.
 
 In Codex hookless mode, entry skills such as `$rpi`, `$research`, `$implement`,
 `$status`, `$recover`, and `$discovery` should ensure the start path once per

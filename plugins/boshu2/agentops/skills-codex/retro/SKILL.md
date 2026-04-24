@@ -1,9 +1,7 @@
 ---
 name: retro
-description: 'Quick-capture a learning. For full retrospectives, use $post-mortem. Trigger phrases: "quick learning", "capture lesson", "retro quick".'
+description: 'Capture a quick learning or session note for later compounding.'
 ---
-
-
 # Retro Skill
 
 **YOU MUST EXECUTE THIS WORKFLOW. Do not just describe it.**

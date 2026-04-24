@@ -1,6 +1,6 @@
 ---
 name: scenario
-description: 'Author and manage holdout scenarios for behavioral validation. Scenarios are stored in .agents/holdout/ where implementing agents cannot see them. Triggers: "$scenario", "holdout", "behavioral scenario", "create scenario", "list scenarios".'
+description: 'Author and manage holdout behavioral validation scenarios.'
 ---
 # Scenario Skill
 

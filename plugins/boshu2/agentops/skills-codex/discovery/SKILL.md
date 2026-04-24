@@ -1,8 +1,7 @@
 ---
 name: discovery
-description: 'Full discovery phase orchestrator. Brainstorm + ao search + research + plan + pre-mortem gate. Produces epic-id and execution-packet for $crank. Triggers: "discovery", "discover", "explore and plan", "research and plan", "discovery phase".'
+description: 'Orchestrate brainstorm, research, plan, and pre-mortem into an execution packet.'
 ---
-
 # $discovery — Full Discovery Phase Orchestrator
 
 **YOU MUST EXECUTE THIS WORKFLOW. Do not just describe it.**

@@ -1,9 +1,7 @@
 ---
 name: pr-validate
-description: 'PR-specific validation: isolation, upstream alignment, quality, scope creep. Triggers: "validate PR", "pr validation", "check PR scope", "scope creep check", "isolation check".'
+description: 'Validate PR scope, isolation, quality, and upstream alignment.'
 ---
-
-
 # PR Validate Skill
 
 PR-specific validation that ensures changes are clean, focused, and ready.

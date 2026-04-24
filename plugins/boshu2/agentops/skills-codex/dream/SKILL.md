@@ -1,8 +1,7 @@
 ---
 name: dream
-description: 'Private overnight operator mode. Routes interactive Dream requests to the shared `ao overnight` engine for setup, bedtime runs, and morning reports. Triggers: "$dream", "overnight", "bedtime run", "morning report", "dream setup", "dream report", "dream council", "dreamscape".'
+description: 'Run or review private overnight AgentOps compounding sessions.'
 ---
-
 # Dream Skill
 
 `$dream` is the interactive surface for the same Dream engine used by

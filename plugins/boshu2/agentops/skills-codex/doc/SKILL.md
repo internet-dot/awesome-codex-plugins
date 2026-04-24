@@ -1,9 +1,7 @@
 ---
 name: doc
-description: 'Generates, validates, and syncs documentation for any repository type. Produces code-maps, checks doc coverage, finds missing docs, and validates existing documentation against code. Triggers: doc, documentation, code-map, doc coverage, validate docs, generate docs, sync docs, update docs, find missing docs.'
+description: 'Generate, sync, and validate docs against repo evidence.'
 ---
-
-
 # Doc Skill
 
 **YOU MUST EXECUTE THIS WORKFLOW. Do not just describe it.**

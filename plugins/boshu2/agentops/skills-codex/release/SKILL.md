@@ -1,9 +1,7 @@
 ---
 name: release
-description: 'Release your software. Pre-flight validation, changelog generation, version bumps, release commit, tag, curated release notes. Boundary: everything up to the git tag. Triggers: "release", "cut a release", "prepare release", "release check".'
+description: 'Run release validation, changelog/version steps, tagging, and release notes.'
 ---
-
-
 # Release Skill
 
 > **Purpose:** Take a project from "code is ready" to "tagged and ready to push."

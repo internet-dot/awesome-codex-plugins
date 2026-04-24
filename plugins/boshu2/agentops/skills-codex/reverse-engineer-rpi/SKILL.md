@@ -1,9 +1,7 @@
 ---
 name: reverse-engineer-rpi
-description: 'Reverse-engineer a product into a feature catalog, code map, and specs. Uses RPI-style loop with verification gates. Triggers: “reverse engineer”, “catalog features”, “feature inventory”, “code map”, “docs to code mapping”, “binary analysis”.'
+description: 'Reverse-engineer a product into feature catalog, code map, and specs.'
 ---
-
-
 # $reverse-engineer-rpi
 
 Reverse-engineer a product into a mechanically verifiable feature inventory + registry + spec set, with optional security-audit artifacts and validation gates.

@@ -1,7 +1,7 @@
 # Scoring: text quality assessment (0–10)
 
 Analytic rubric for evaluating Russian text quality across 5 dimensions.
-Context-aware LLM evaluation based on ~1 040 rules from 16 sources.
+Context-aware LLM evaluation based on ~1 044 rules from 16 sources.
 
 ## Table of Contents
 
@@ -62,7 +62,7 @@ Type: hard (objective). Rule source: [typography.md](typography.md) (96 rules).
 
 ### Ч — Clarity (weight 0.25)
 
-Type: soft (expert). Rule sources: [info-style.md](info-style.md) (197 rules), [anti-patterns.md](anti-patterns.md) (139 rules).
+Type: soft (expert). Rule sources: [info-style.md](info-style.md) (197 rules), [anti-patterns.md](anti-patterns.md) (139 rules). Secondary signals (low weight): [addenda.md](addenda.md) AD-3 (patronizing explanation), AD-5 (subject-predicate mismatch, with technical-context exception).
 
 | Score | Criteria |
 |---|---|
@@ -86,7 +86,7 @@ Type: hard (objective). Rule sources: [editorial-grammar.md](editorial-grammar.m
 
 ### С — Structure (weight 0.20)
 
-Type: soft (expert). Rule sources: [info-style.md](info-style.md) (structure section), [addenda.md](addenda.md).
+Type: soft (expert). Rule sources: [info-style.md](info-style.md) (structure section), [addenda.md](addenda.md) — AD-1 (dash overuse), plus secondary signals (low weight): AD-2 (excessive parcellation), AD-4 (unprovoked rebuttal).
 
 | Score | Criteria |
 |---|---|

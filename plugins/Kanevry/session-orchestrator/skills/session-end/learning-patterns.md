@@ -19,6 +19,7 @@ Analyze the completed session to extract reusable learnings for future sessions.
 **Learning format** (append each as one JSONL line to `.orchestrator/metrics/learnings.jsonl`):
 ```json
 {
+  "schema_version": 1,
   "id": "<uuid-v4>",
   "type": "fragile-file|effective-sizing|recurring-issue|scope-guidance|deviation-pattern|stagnation-class-frequency",
   "subject": "<what the learning is about>",
@@ -30,6 +31,11 @@ Analyze the completed session to extract reusable learnings for future sessions.
   "expires_at": "<ISO 8601 + learning-expiry-days (default: 30)>"
 }
 ```
+
+**Schema versioning** (`schema_version`, introduced 2026-04):
+- All new records MUST carry `schema_version: 1`. `scripts/lib/learnings.mjs` auto-stamps missing values on append/rewrite so callers can omit the field safely.
+- Records without `schema_version` are treated as `schema_version: 0` (pre-versioning legacy). They are read and validated successfully for backward compat, but the reader emits a one-line WARN to stderr flagging the missing tag.
+- Both `schema_version: 0` and `schema_version: 1` pass `validateLearning`. Any other value is rejected.
 
 **Confidence updates for existing learnings:**
 Before writing new learnings, read `.orchestrator/metrics/learnings.jsonl` and check for existing entries with the same `type` + `subject` (exact string match on both fields):

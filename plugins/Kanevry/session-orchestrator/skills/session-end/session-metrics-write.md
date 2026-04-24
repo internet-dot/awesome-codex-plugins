@@ -10,10 +10,26 @@
 > This step writes the session JSONL entry, verifies it, then optionally mirrors the session summary to the configured Obsidian vault via `scripts/vault-mirror.mjs`.
 
 1. Ensure `.orchestrator/metrics/` directory exists: `mkdir -p .orchestrator/metrics`
-2. Append the prepared JSONL entry (from Phase 1.7) as a single line to `.orchestrator/metrics/sessions.jsonl`
-   > **Concurrent write safety**: Use shell `>>` append for the single JSONL line — this is atomic on POSIX systems for writes under PIPE_BUF (typically 4096 bytes). Do NOT read-modify-write the file.
-3. Create the file if it does not exist
-4. Verify: read back the last line to confirm valid JSON
+2. Append the prepared JSONL entry (from Phase 1.7) via the validating writer `scripts/emit-session.mjs` (issue #249):
+   ```bash
+   printf '%s' "$METRICS_ENTRY" | node "$PLUGIN_ROOT/scripts/emit-session.mjs" --file .orchestrator/metrics/sessions.jsonl
+   EMIT_EXIT=$?
+   if [[ $EMIT_EXIT -eq 1 ]]; then
+     echo "ERROR: session-end validation failed — entry rejected by scripts/emit-session.mjs. See stderr above. Session metrics NOT written." >&2
+     exit 1
+   elif [[ $EMIT_EXIT -ne 0 ]]; then
+     echo "ERROR: scripts/emit-session.mjs failed with exit $EMIT_EXIT. Session metrics NOT written." >&2
+     exit 1
+   fi
+   ```
+   `scripts/emit-session.mjs` calls `validateSession` from `scripts/lib/session-schema.mjs` before appending, stamps `schema_version: 1` if absent, and uses `appendJsonl` (atomic for lines < PIPE_BUF). Exit 1 on validation error, exit 2 on I/O error — block session close in both cases so malformed metrics can never reach disk.
+3. The writer creates the file if it does not exist.
+4. Verify: read back the last line to confirm valid JSON (sanity check; validation already ran):
+   ```bash
+   tail -1 .orchestrator/metrics/sessions.jsonl | jq . > /dev/null || {
+     echo "ERROR: last sessions.jsonl line is not valid JSON — manual fix required" >&2; exit 1;
+   }
+   ```
 5. **Vault Mirror** — mirror the session entry to the Obsidian vault (if configured):
 
    ```bash

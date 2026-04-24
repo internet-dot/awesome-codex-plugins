@@ -1,9 +1,7 @@
 ---
 name: codex-team
-description: 'Use when you have 2+ tasks that Codex agents should execute. Runtime-native: Codex sub-agents when available, Codex CLI fallback otherwise. Handles file conflicts via merge/wave strategies. Triggers: "codex team", "spawn codex", "codex agents", "use codex for", "codex fix".'
+description: 'Coordinate 2+ Codex agents on bounded parallel tasks with file ownership.'
 ---
-
-
 # Codex Team
 
 The lead orchestrates, Codex agents execute. Each agent gets one focused task. The team lead prevents file conflicts before spawning — the orchestrator IS the lock manager.

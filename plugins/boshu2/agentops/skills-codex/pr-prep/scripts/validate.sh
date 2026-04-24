@@ -64,7 +64,7 @@ check_exists "Beads skill exists" "$SKILL_DIR/../beads/SKILL.md"
 
 # Verify pr-prep workflow patterns in SKILL.md
 check_pattern "SKILL.md has git archaeology" "$SKILL_DIR/SKILL.md" "git|[Aa]rchaeology"
-check_pattern "SKILL.md has test validation" "$SKILL_DIR/SKILL.md" "[Tt]est.*[Vv]alid"
+check_pattern "SKILL.md has test validation" "$SKILL_DIR/SKILL.md" "[Tt]est.*[Vv]alid|[Vv]alidat.*[Tt]est"
 check_pattern "SKILL.md has PR body generation" "$SKILL_DIR/SKILL.md" "PR.*[Bb]ody|[Bb]ody.*PR"
 check_pattern "SKILL.md has user review gate" "$SKILL_DIR/SKILL.md" "[Rr]eview.*[Gg]ate|MANDATORY.*[Rr]eview"
 

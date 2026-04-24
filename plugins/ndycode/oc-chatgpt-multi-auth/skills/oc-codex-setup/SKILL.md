@@ -13,7 +13,7 @@ Use this skill when the user wants to install, reinstall, upgrade, or troublesho
 npx -y oc-codex-multi-auth@latest
 ```
 
-Use this when the user wants the full catalog config, including base entries like `gpt-5.4` and preset entries like `gpt-5.4-high`.
+Use this when the user wants the full catalog config, including base entries like `gpt-5.5` and explicit preset entries like `gpt-5.5-medium`.
 
 ## Modern compact install
 
@@ -29,7 +29,7 @@ Use this on OpenCode `v1.0.210+` when the user wants the compact variant-based c
 2. Run a quick verification request:
 
 ```bash
-opencode run "Explain this repository" --model=openai/gpt-5.4 --variant=medium
+opencode run "Explain this repository" --model=openai/gpt-5.5-medium
 ```
 
 3. For a Codex-focused workflow, try:

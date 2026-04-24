@@ -187,6 +187,17 @@ Claude Code's `Agent` tool with `isolation: "worktree"` changes `process.cwd()` 
 4. **Verify at checkpoints** — when in doubt, run `git rev-parse --show-toplevel` to confirm which tree is currently active.
 5. **Never `cd` into a worktree in the coordinator's top-level shell.** If you need to inspect a worktree, use `git -C <wt-path> ...` or spawn a subshell.
 
+## Coordinator User Interaction
+
+Every mid-wave user decision — pause/continue, scope changes, plan revisions, routing between alternate tracks, confirming a risky recovery step, picking between recommendations — MUST go through the `AskUserQuestion` tool. Inline markdown-list "choose 1/2/3" questions in chat prose are forbidden: the user reliably misses them in the dense wave-execution stream. See `.claude/rules/ask-via-tool.md` for the full rule (AUQ-001 through AUQ-005).
+
+Mechanics:
+- `AskUserQuestion` is a deferred tool in Claude Code. On the first coordinator decision point in a session, call `ToolSearch` with `"select:AskUserQuestion"` once to load its schema, then call the tool. Do not skip the question to avoid the load.
+- Option 1 always carries `(Recommended)` in the label. Each option carries a one-line `description` stating the trade-off.
+- `AskUserQuestion` is **not available inside dispatched subagents**. If an agent surfaces a decision back to you, ask the user via `AskUserQuestion` from the coordinator turn — do not let the agent emit a prose question.
+
+Applies to every interaction point in `wave-loop.md` that currently says "inform the user", "propose revised plan", "ask the user whether to…", or "report specific mismatches to user" when a choice is implied.
+
 ## Agent Prompt Best Practices
 
 Each agent prompt MUST include:
@@ -259,3 +270,4 @@ After the Finalization wave completes successfully:
 - **NEVER** continue to next wave if previous wave has unresolved failures
 - **NEVER** dispatch more agents than configured in `agents-per-wave`
 - **NEVER** let wave execution run without reporting progress to the user
+- **NEVER** ask the user a decision as inline prose or a numbered markdown list — always use `AskUserQuestion` (see `.claude/rules/ask-via-tool.md`)

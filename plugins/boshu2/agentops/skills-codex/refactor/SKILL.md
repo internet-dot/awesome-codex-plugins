@@ -1,8 +1,7 @@
 ---
 name: refactor
-description: 'Safe, verified refactoring with regression testing at each step. Identify targets, plan transformation, execute incrementally. Triggers: "refactor", "restructure", "extract", "rename", "move", "simplify", "reduce complexity", "clean up", "decompose".'
+description: 'Plan and execute safe refactors with regression checks at each step.'
 ---
-
 # Refactor Skill
 
 > **Quick Ref:** Safe, incremental refactoring with test verification at every step. One transformation, one test run, one commit. Never batch.

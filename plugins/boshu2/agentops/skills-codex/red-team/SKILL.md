@@ -1,8 +1,7 @@
 ---
 name: red-team
-description: 'Persona-based adversarial validation. Probes whether docs and skills actually work when someone with constraints tries to use them. Spawns context-restricted agents that attempt real tasks, then consolidates findings via council. Triggers: "red-team", "red team", "adversarial test", "persona test", "can someone use this", "usability test", "zero-context test".'
+description: 'Probe docs or skills with adversarial persona tests and consolidate findings.'
 ---
-
 # $red-team — Persona-Based Adversarial Validation
 
 > **Quick Ref:** Adopt constrained personas. Attempt real tasks. Report what breaks. Unlike `$council` (expert judgment) or `$vibe` (code quality), red-team tests whether things actually WORK when someone TRIES to use them.

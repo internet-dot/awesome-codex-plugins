@@ -1,9 +1,7 @@
 ---
 name: research
-description: 'Deep codebase exploration. Triggers: research, explore, investigate, understand, deep dive, current state.'
+description: 'Explore a codebase or question and write evidence-backed findings.'
 ---
-
-
 # Research Skill
 
 > **Quick Ref:** Deep codebase exploration with multi-angle analysis. Output: `.agents/research/*.md`

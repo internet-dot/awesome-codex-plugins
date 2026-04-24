@@ -1,9 +1,7 @@
 ---
 name: compile
-description: 'Knowledge compiler. Reads raw .agents/ artifacts (learnings, research, patterns, retros, findings) and compiles them into an interlinked markdown wiki at .agents/compiled/. Pluggable LLM backend via AGENTOPS_COMPILE_RUNTIME (ollama|api). Also runs Mine → Grow → Defrag maintenance cycle and Lint pass for gaps/contradictions. Triggers: "compile", "compile knowledge", "build wiki", "knowledge compile", "lint knowledge", "mine and grow", "knowledge defrag", "clean flywheel".'
+description: 'Compile .agents knowledge into .agents/compiled wiki and run maintenance checks.'
 ---
-
-
 # Compile — Knowledge Compiler
 
 Reads raw `.agents/` artifacts and compiles them into a structured, interlinked

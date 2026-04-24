@@ -1,9 +1,7 @@
 ---
 name: brainstorm
-description: 'Separate WHAT from HOW before planning. Clarify goals, explore approaches, capture structured design decisions. Triggers: brainstorm, explore idea, clarify goal, idea phase.'
+description: 'Separate goals from implementation; explore options and capture design decisions.'
 ---
-
-
 # $brainstorm — Clarify Goals Before Planning
 
 > **Purpose:** Separate WHAT from HOW. Explore the problem space before committing to a solution.

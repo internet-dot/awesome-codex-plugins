@@ -1,9 +1,7 @@
 ---
 name: harvest
-description: 'Cross-rig knowledge consolidation. One-time sweep + ongoing tiered promotion. Walks all .agents/ directories, extracts learnings/patterns/research, deduplicates across rigs, and promotes high-value items to global hub. Triggers: "harvest", "consolidate knowledge", "cross-rig sweep", "knowledge federation", "harvest knowledge".'
+description: 'Consolidate knowledge across .agents directories and promote useful items.'
 ---
-
-
 # Harvest — Cross-Rig Knowledge Consolidation
 
 > **Nightly usage (2026-04-09):** `$dream start` now runs harvest as part

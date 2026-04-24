@@ -1,9 +1,7 @@
 ---
 name: recover
-description: 'Post-compaction context recovery. Detects in-progress RPI and evolve sessions, loads knowledge, shows recent work and pending tasks. In Codex, it also prefers the explicit hookless lifecycle path. Triggers: "recover", "lost context", "where was I", "what was I working on".'
+description: 'Recover session context after compaction from RPI, evolve, and recent artifacts.'
 ---
-
-
 # $recover — Context Recovery After Compaction
 
 > **Purpose:** Help you get back up to speed after context compaction. Automatically detects in-progress work (RPI runs, evolve cycles), loads relevant knowledge, summarizes what you were doing and what's next, and prefers the Codex hookless lifecycle path when applicable.

@@ -1,9 +1,7 @@
 ---
 name: bug-hunt
-description: 'Investigate suspected bugs or run proactive code audits. Triggers: "bug", "broken", "doesn''''t work", "failing", "investigate bug", "debug", "find the bug", "troubleshoot", "audit code", "find bugs in", "code audit", "hunt bugs".'
+description: 'Investigate bugs or audit code with repro evidence, root cause analysis, and fixes.'
 ---
-
-
 # Bug Hunt Skill
 
 > **Quick Ref:** 4-phase investigation (Root Cause → Pattern → Hypothesis → Fix). Output: `.agents/research/YYYY-MM-DD-bug-*.md`

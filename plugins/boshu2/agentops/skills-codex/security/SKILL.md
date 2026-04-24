@@ -1,9 +1,7 @@
 ---
 name: security
-description: 'Continuous repository security scanning and release gating. Triggers: "security scan", "security audit", "pre-release security", "run scanners", "check vulnerabilities".'
+description: 'Run repository security scans and release-gating checks.'
 ---
-
-
 # Security Skill
 
 > **Purpose:** Run repeatable security checks across code, scripts, hooks, and release gates.

@@ -1,8 +1,7 @@
 ---
 name: crank
-description: 'Hands-free epic execution. Runs until ALL children are CLOSED. Uses Codex session agents for parallel waves. NO human prompts, NO stopping. Triggers: "crank", "run epic", "execute epic", "run all tasks", "hands-free execution", "crank it".'
+description: 'Execute an epic hands-free through waves until work is done or blocked.'
 ---
-
 # $crank - Autonomous Epic Execution (Codex Native)
 
 > **Quick Ref:** Execute every open issue in an epic via wave-based workers using `spawn_agent`, `wait_agent`, `send_input`, and `close_agent`. Output: closed issues + final validation.

@@ -1,9 +1,7 @@
 ---
 name: readme
-description: 'Generate a gold-standard README for any project. Interviews you about the problem, generates a draft following battle-tested patterns, then council-validates it. Triggers: "readme", "write readme", "generate readme", "improve readme", "rewrite readme".'
+description: 'Draft or improve a project README using structured evidence and review.'
 ---
-
-
 # $readme — Gold-Standard README Generation
 
 > **Purpose:** Generate a README that converts skimmers into users and satisfies deep readers — then validate it with a council.

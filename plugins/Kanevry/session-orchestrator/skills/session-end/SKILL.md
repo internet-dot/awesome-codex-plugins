@@ -350,7 +350,9 @@ Review `<state-dir>/rules/` files that are relevant to this session's work:
 
 ### 3.4 Update STATE.md
 
-> **Ownership Reference:** See `skills/_shared/state-ownership.md`. session-end is authorized to set `status: completed` plus the optional `updated` timestamp (#184) — no other fields.
+> **Ownership Reference:** See `skills/_shared/state-ownership.md`. session-end is authorized to set `status: completed` plus the optional `updated` timestamp (#184), and — as of Phase A of Epic #271 — the 5 Recommendation fields written by Phase 3.7a. No other fields.
+
+> **Runtime Ordering Note (Epic #271 Phase A):** Phase 3.4's `status: completed` write executes LAST in Phase 3, AFTER Phase 3.7 (sessions.jsonl) and Phase 3.7a (Compute and Write Recommendations). The ordinal position here (3.4) is kept for historical compatibility; the canonical runtime order is `3.1 → 3.2 → 3.3 → 3.4a → 3.5 → 3.5a → 3.7 → 3.7a → 3.4`. Rationale: Phase 3.7a reads in-memory session metrics and writes the 5 Recommendation fields via `updateFrontmatterFields`; that write must complete BEFORE the STATE.md frontmatter is finalized with `status: completed` so the Recommendation fields are visible to the next session-start while STATE.md is still `status: active`. Crash-resilience: if `/close` aborts between 3.7a and 3.4, STATE.md carries `status: active` + Recommendations; session-start Phase 1.5 offers resume (and the banner renders). If the reverse ordering were used (status: completed first), a crash would leave `status: completed` without Recommendations — the Reader would silently no-op the banner, losing the handoff.
 
 > Gate: Only run if `persistence` is enabled in Session Config and `<state-dir>/STATE.md` exists.
 1. Set frontmatter `status: completed`
@@ -416,6 +418,68 @@ Read `skills/session-end/learning-patterns.md` for extraction heuristics, confid
 ### 3.7 Write Session Metrics
 
 Read `skills/session-end/session-metrics-write.md` for JSONL append, vault-mirror invocation, and behavior matrix.
+
+### 3.7a Compute and Write Recommendations (Epic #271 Phase A)
+
+> Gate: Only run if `persistence` is `true` in Session Config AND `<state-dir>/STATE.md` exists. Skip silently otherwise.
+
+> **Ownership Reference:** See `skills/_shared/state-ownership.md`. session-end is the ONLY writer of the 5 Recommendation fields (`recommended-mode`, `top-priorities`, `carryover-ratio`, `completion-rate`, `rationale`). No other skill may write these keys.
+
+> **Ordering:** Runs AFTER Phase 3.7 (sessions.jsonl is just-written — reads in-memory session metrics, NOT JSONL) and BEFORE Phase 3.4 `status: completed` setting. See the Phase 3.4 Runtime Ordering Note for rationale.
+
+Compute the v0 recommendation from in-memory session metrics and additively write 5 fields to STATE.md frontmatter:
+
+```bash
+node --input-type=module -e "
+import {readFileSync, writeFileSync, appendFileSync, mkdirSync} from 'node:fs';
+import {updateFrontmatterFields} from '${PLUGIN_ROOT}/scripts/lib/state-md.mjs';
+import {computeV0Recommendation} from '${PLUGIN_ROOT}/scripts/lib/recommendations-v0.mjs';
+
+const STATE_PATH = '<state-dir>/STATE.md';
+const SWEEP_LOG = '.orchestrator/metrics/sweep.log';
+
+try {
+  // In-memory session metrics — pulled from the session's running state,
+  // NOT re-read from sessions.jsonl (which was just-written in Phase 3.7).
+  const completionRate = <number from session metrics: completed_issues / planned_issues>;
+  const carryoverRatio = <number: carryover_count / planned_issues (0 when planned=0)>;
+  const carryoverIssues = [<priority-sorted carryover issue IIDs, critical/high first, FIFO tiebreak>];
+
+  const rec = computeV0Recommendation({completionRate, carryoverRatio, carryoverIssues});
+
+  const fields = {
+    'recommended-mode': rec.mode,
+    'top-priorities': rec.priorities,
+    'carryover-ratio': Number(carryoverRatio.toFixed(2)),
+    'completion-rate': Number(completionRate.toFixed(2)),
+    'rationale': rec.rationale,
+  };
+
+  const contents = readFileSync(STATE_PATH, 'utf8');
+  writeFileSync(STATE_PATH, updateFrontmatterFields(contents, fields));
+  console.log('Recommendations written: ' + rec.mode + ' (' + rec.rationale + ')');
+} catch (err) {
+  // AC3: defensive — exception must NOT block Phase 3.4 status: completed.
+  mkdirSync('.orchestrator/metrics', {recursive: true});
+  const evt = {
+    timestamp: new Date().toISOString(),
+    event: 'recommendation-compute-failed',
+    error: String(err && err.message ? err.message : err),
+  };
+  appendFileSync(SWEEP_LOG, JSON.stringify(evt) + '\n');
+  console.error('⚠ Phase 3.7a: recommendation compute failed — fields omitted, sweep.log entry written. Continuing.');
+}
+"
+```
+
+**Data source guarantee:** The three inputs (`completionRate`, `carryoverRatio`, `carryoverIssues`) MUST come from the in-memory session metrics object built in Phase 1.7, NOT from a re-read of `.orchestrator/metrics/sessions.jsonl`. Reading the just-written JSONL would introduce a circular dependency and risk reading a truncated line if Phase 3.7's `appendJsonl` was mid-flush.
+
+**Field precision:**
+- `carryover-ratio` and `completion-rate` are rounded to 2 decimal places.
+- `top-priorities` contains 0–5 integer issue IIDs, already priority-sorted by the Phase 1.1 carryover loop.
+- `rationale` is a ≤ 120-char single-line string (v0 produces ≤ 40 chars).
+
+**Error mode (AC3):** On any exception from `computeV0Recommendation` or the file I/O, the catch block writes a `recommendation-compute-failed` event to `.orchestrator/metrics/sweep.log` and returns without touching STATE.md. Phase 3.4 then proceeds as normal, setting `status: completed` without Recommendation fields. The Reader (session-start Phase 1.5) handles the absent-fields case via graceful-no-banner fallback.
 
 ## Phase 4: Commit & Push
 

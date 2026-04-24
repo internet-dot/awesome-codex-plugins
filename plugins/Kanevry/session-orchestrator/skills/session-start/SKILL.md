@@ -46,8 +46,65 @@ Before reading STATE.md contents, validate the branch field:
 1. **STATE.md exists** — read it and inspect the `status` field:
    - `status: active` — previous session crashed or was interrupted. Use the AskUserQuestion tool to present: "Found unfinished session from [started_at]. [N] waves completed. Resume or start fresh?" with options to resume the previous plan or start a new session. After a resume choice, proceed to **Snapshot Recovery** subsection below.
    - `status: paused` — session was intentionally paused. Use AskUserQuestion to offer resuming from the pause point or starting fresh. After a resume choice, proceed to **Snapshot Recovery** subsection below.
-   - `status: completed` — previous session ended cleanly. Note the summary for context (what was done, what was deferred), then **reset STATE.md to idle** before any new session state is written (see "Idle Reset" below). Continue with normal initialization.
+   - `status: completed` — previous session ended cleanly. Note the summary for context (what was done, what was deferred), then **render the Recommendations Banner** (see subsection below) and **reset STATE.md to idle** before any new session state is written (see "Idle Reset" below). Continue with normal initialization.
 2. **STATE.md does not exist** — first session or persistence was previously off. Continue normally.
+
+### Recommendations Banner (Epic #271 Phase A)
+
+> Runs on the `status: completed` branch only, BEFORE Idle Reset archives the fields. Silent no-op on other branches.
+
+Read the 5 optional v1.1 Recommendation fields from STATE.md frontmatter via `parseRecommendations` (from `scripts/lib/state-md.mjs`). The writer is session-end Phase 3.7a (see `skills/session-end/SKILL.md`).
+
+```bash
+node --input-type=module -e "
+import {readFileSync} from 'node:fs';
+import {parseStateMd, parseRecommendations} from '${PLUGIN_ROOT}/scripts/lib/state-md.mjs';
+import {isValidMode} from '${PLUGIN_ROOT}/scripts/lib/recommendations-v0.mjs';
+import {appendFileSync, mkdirSync} from 'node:fs';
+
+const SWEEP_LOG = '.orchestrator/metrics/sweep.log';
+function logWarn(event, detail) {
+  try {
+    mkdirSync('.orchestrator/metrics', {recursive: true});
+    appendFileSync(SWEEP_LOG, JSON.stringify({timestamp: new Date().toISOString(), event, detail}) + '\n');
+  } catch {}
+}
+
+const parsed = parseStateMd(readFileSync('<state-dir>/STATE.md', 'utf8'));
+if (!parsed) process.exit(0);
+const rec = parseRecommendations(parsed.frontmatter);
+if (!rec) process.exit(0); // pre-v1.1 STATE.md — graceful silent no-banner (AC3)
+
+// AC4: type-mismatch in top-priorities — field-level null from parser; still render other fields
+if (rec.priorities === null && Object.prototype.hasOwnProperty.call(parsed.frontmatter, 'top-priorities')) {
+  logWarn('state-md-type-mismatch', {field: 'top-priorities', got: typeof parsed.frontmatter['top-priorities']});
+}
+
+// AC4: partial fields — warn but still render available ones
+const missingCount = [rec.mode, rec.priorities, rec.carryoverRatio, rec.completionRate, rec.rationale].filter((x) => x === null).length;
+if (missingCount > 0 && missingCount < 5) {
+  logWarn('state-md-partial-recommendation', {missing: missingCount});
+}
+
+const modeOk = rec.mode && isValidMode(rec.mode);
+const mode = modeOk ? rec.mode : '(unknown-mode)';
+const rationale = rec.rationale || '(no rationale)';
+const pct = (x) => (x === null ? '—' : Math.round(x * 100) + '%');
+console.log('📋 Previous session recommended: ' + mode + ' — ' + rationale + ' (completion: ' + pct(rec.completionRate) + ', carryover: ' + pct(rec.carryoverRatio) + ')');
+if (Array.isArray(rec.priorities) && rec.priorities.length > 0) {
+  console.log('  Suggested issues: ' + rec.priorities.map((id) => '#' + id).join(', '));
+}
+"
+```
+
+**Behavior matrix (AC1/AC3/AC4):**
+- All 5 fields present + valid → banner line + suggested-issues line (if priorities non-empty).
+- Field(s) absent entirely → no banner (graceful no-op, no WARN).
+- 1–4 fields present (partial) → banner renders with `—` for missing, WARN `state-md-partial-recommendation` to sweep.log.
+- `top-priorities` is not an array (type-mismatch) → treated as null, WARN `state-md-type-mismatch` to sweep.log, other fields still render.
+- Unknown `recommended-mode` value → banner shows `(unknown-mode)` instead of the string.
+
+The reader does NOT mutate STATE.md — it is a pure observer. Idle Reset (subsection below) is the only code path that modifies the file on the `completed` branch.
 
 ### Idle Reset (completed-branch only)
 
@@ -60,8 +117,20 @@ Reset rules — applies ONLY on the `completed` branch. Do NOT perform this rese
 3. Move the existing `## Wave History` body into a new `## Previous Session` archive section (retain the record, but demote it below the new session's live state). Remove the original `## Wave History` section — wave-executor will recreate it on the next wave.
 4. Clear `## Deviations` (leave the heading with an empty body so the schema is preserved).
 5. Leave other frontmatter fields (`schema-version`, `session-type`, `branch`, `issues`, `started_at`, `total-waves`) intact until Phase 1b overwrites them with the new session's values.
+6. **v1.1 Recommendation-field archival (Epic #271 Phase A, AC2):** If ANY of the 5 Recommendation fields (`recommended-mode`, `top-priorities`, `carryover-ratio`, `completion-rate`, `rationale`) is present in the frontmatter, remove them from the frontmatter via `updateFrontmatterFields(contents, {field: null, ...})` (null value deletes the key). Then prepend a readable block (NOT YAML) to the `## Previous Session` body:
 
-Rationale: `/close` intentionally keeps STATE.md as a record so the next session-start can read it. This reset completes that contract by demoting the record before new session state is written, so a fresh session never appears "already completed".
+   ```markdown
+   ### Recommendations (archived from v1.1 frontmatter)
+   - **Recommended mode:** <mode>
+   - **Rationale:** <rationale>
+   - **Completion rate:** <XX%>
+   - **Carryover ratio:** <XX%>
+   - **Top priorities:** #<id>, #<id>, …  _(or "none")_
+   ```
+
+   Omit individual bullets for null-valued fields. If all 5 are null (i.e., `parseRecommendations` returned non-null but every field is null after type-coercion), skip the archival block entirely.
+
+Rationale: `/close` intentionally keeps STATE.md as a record so the next session-start can read it. This reset completes that contract by demoting the record before new session state is written, so a fresh session never appears "already completed". The Recommendation archival (rule 6) preserves the session-to-session handoff in a human-readable form after the Recommendations Banner has rendered — Phase B's Mode-Selector will read the LIVE frontmatter of the current session and does not need the archived copy, so this is purely informational for humans browsing STATE.md history.
 
 ### Snapshot Recovery (#196)
 
@@ -328,6 +397,56 @@ Group issues by:
    - **alert** (age ≥90d, unparseable, or missing): `"⚠ bootstrap.lock: <message> — re-run /bootstrap --retroactive is strongly recommended."`
 
    Both banners are non-blocking — display in the Session Overview, do not halt the session. If `bootstrap-lock-freshness.mjs` is absent (pre-#186 plugin install), skip silently.
+
+## Phase 4.5: Resource Health (v3.1.0)
+
+> Skip this phase if `resource-awareness: false` in Session Config.
+
+Read `.orchestrator/host.json` (written by `hooks/on-session-start.mjs`) and run a live resource snapshot. Compare against `resource-thresholds` from Session Config to derive an adaptive wave-sizing recommendation before session-plan runs.
+
+### Probe + Evaluate
+
+```js
+// Conceptual — the wave-executor and session-plan skills call these directly.
+import { probe, evaluate } from '$PLUGIN_ROOT/scripts/lib/resource-probe.mjs';
+const snapshot = await probe();
+const verdict = evaluate(snapshot, config['resource-thresholds']);
+```
+
+The `evaluate()` result has three fields:
+- `verdict`: `green` | `warn` | `critical`
+- `reasons`: array of human-readable explanations
+- `recommended_agents_per_wave_cap`: integer cap (0 = coordinator-direct) or null
+
+### Adaptive Rules (default thresholds; configurable via `resource-thresholds`)
+
+| Signal | Threshold | Action |
+|--------|-----------|--------|
+| RAM free below `ram-free-min-gb` (default 4) | warn | Cap `agents-per-wave` at 2 |
+| RAM free below `ram-free-critical-gb` (default 2) | critical | Recommend coordinator-direct (0 agents) |
+| CPU load above `cpu-load-max-pct` (default 80) sustained | warn | Cap `agents-per-wave` at 2 |
+| Claude processes ≥ `concurrent-sessions-warn` (default 5) | warn | Warn; suggest sequencing or waiting |
+| SSH session detected AND `ssh-no-docker: true` | info | Append note: host is SSH-attached, Docker-dependent steps should run on a local dev host |
+
+### Presentation
+
+Print a one-line Resource Health verdict immediately after Phase 4's output:
+
+```
+Resource Health: ⚠ warn — RAM free 3.1 GB below threshold 4 GB; capping agents-per-wave at 2.
+```
+
+When verdict is `warn` or `critical`, use the AskUserQuestion tool to present:
+1. **Proceed as recommended** (apply the cap) — Recommended
+2. **Proceed as originally planned** (user accepts the risk)
+3. **Abort** (no wave planning runs; user closes or investigates)
+
+When SSH is detected and the session type is `deep`, auto-append this note to the plan handoff to session-plan (no user prompt needed):
+> Host is SSH-attached — Docker-dependent wave steps should run on a local dev host.
+
+### Integration with session-plan
+
+When Phase 4.5 recommends a cap, pass that cap into the session-plan handoff. session-plan honors the cap by reducing `agents-per-wave` for the upcoming plan, regardless of what the Session Config default says. This is an in-session override, not a config mutation.
 
 ## Phase 5: Cross-Repo Status (if configured)
 

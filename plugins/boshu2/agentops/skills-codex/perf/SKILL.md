@@ -1,8 +1,7 @@
 ---
 name: perf
-description: 'Performance profiling, benchmarking, regression detection, and optimization. Triggers: "perf", "performance", "benchmark", "profile", "slow", "optimize", "latency", "throughput", "memory leak", "perf regression".'
+description: 'Profile, benchmark, and optimize performance regressions or hotspots.'
 ---
-
 # Perf Skill
 
 > Quick Ref: `$perf profile <target>` | `$perf bench <target>` | `$perf compare <baseline> <candidate>` | `$perf optimize <target>`

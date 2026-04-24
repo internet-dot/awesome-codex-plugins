@@ -1,9 +1,7 @@
 ---
 name: pr-implement
-description: 'Fork-based PR implementation with isolation check. Runs isolation check before starting work. Triggers: "implement PR", "implement contribution", "fork implementation", "code the PR".'
+description: 'Implement a scoped open source PR from a researched contribution plan.'
 ---
-
-
 # PR Implement Skill
 
 Fork-based implementation for open source contributions with mandatory isolation check.

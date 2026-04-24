@@ -1,8 +1,7 @@
 ---
 name: post-mortem
-description: 'Wrap up completed work. Council validates the implementation, then extract and process learnings. Triggers: "post-mortem", "wrap up", "close epic", "what did we learn".'
+description: 'Review completed work, capture learnings, and feed follow-up knowledge.'
 ---
-
 # Post-Mortem Skill
 
 > **Purpose:** Wrap up completed work — validate it shipped correctly, extract learnings, process the knowledge backlog, activate high-value insights, and retire stale knowledge.

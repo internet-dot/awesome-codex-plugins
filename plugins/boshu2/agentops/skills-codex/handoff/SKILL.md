@@ -1,9 +1,7 @@
 ---
 name: handoff
-description: 'Create structured handoff for session continuation. Triggers: handoff, pause, save context, end session, pick up later, continue later.'
+description: 'Create compact session handoffs for continuation after pause or compaction.'
 ---
-
-
 # Handoff Skill
 
 > **Quick Ref:** Create structured handoff for session continuation. Output: `.agents/handoff/YYYY-MM-DD-<topic>.md` + continuation prompt.

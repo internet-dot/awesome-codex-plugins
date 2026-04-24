@@ -10,7 +10,8 @@ Manage `$autodev` as the Codex-facing operator surface for the repo-local
 2. Run `ao codex ensure-start 2>/dev/null || true` before editing or validating
    a program contract in Codex hookless mode.
 3. Use `ao autodev validate --json` as the structural gate before passing work
-   to `$evolve`, `ao evolve`, `$rpi`, or `ao rpi`.
+   to `$evolve` or `$rpi`. Do not use `ao evolve` or `ao rpi` as the Codex
+   handoff path unless the user explicitly asks for a terminal wrapper.
 4. Keep the distinction explicit: `autodev` defines the loop contract, `evolve`
    runs the autonomous loop, and `rpi` runs one lifecycle.
 5. When the requested work falls outside immutable scope, create or update a bead

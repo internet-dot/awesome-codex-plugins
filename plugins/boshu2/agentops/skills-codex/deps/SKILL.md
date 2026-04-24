@@ -1,8 +1,7 @@
 ---
 name: deps
-description: 'Dependency audit, update, vulnerability scanning, and license compliance. Triggers: "deps", "dependencies", "update deps", "audit dependencies", "dependency update", "vulnerable dependencies", "outdated packages", "license check", "dep audit".'
+description: 'Audit, update, and validate dependencies, vulnerabilities, and licenses.'
 ---
-
 # Deps Skill
 
 > Quick Ref: `$deps audit` | `$deps update [--major|--minor|--patch]` | `$deps vuln` | `$deps license`

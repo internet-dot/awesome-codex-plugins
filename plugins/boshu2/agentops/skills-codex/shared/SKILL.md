@@ -1,8 +1,7 @@
 ---
 name: shared
-description: 'Shared reference documents for multi-agent skills (not directly invocable)'
+description: 'Shared reference contracts used by other AgentOps skills.'
 ---
-
 # Shared References
 
 This directory contains shared reference documents used by multiple skills:

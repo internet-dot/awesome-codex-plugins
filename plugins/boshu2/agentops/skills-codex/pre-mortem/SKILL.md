@@ -1,9 +1,7 @@
 ---
 name: pre-mortem
-description: 'Validate a plan or spec before implementation using multi-model council. Answer: Is this good enough to implement? Triggers: "pre-mortem", "validate plan", "validate spec", "is this ready".'
+description: 'Stress-test a plan before implementation with council or inline review.'
 ---
-
-
 # Pre-Mortem Skill
 
 > **Purpose:** Is this plan/spec good enough to implement?

@@ -19,18 +19,35 @@ Finalize session metrics by reading the wave data accumulated during execution:
    - `total_agents`: sum of agents across all waves
    - `total_files_changed`: unique files changed across entire session (from `git diff --stat`)
    - `agent_summary`: `{complete: N, partial: N, failed: N, spiral: N}`
-3. Read stagnation events from `.orchestrator/metrics/events.jsonl` filtered by `event == "stagnation_detected"` AND `session == <session_id>`. If the file does not exist or contains no matching entries, treat as zero events (omit the field per the rule below) — do NOT fail the session close. Aggregate into `stagnation_events`:
-   - `total`: count of matching events
+3. Read `.orchestrator/metrics/events.jsonl` **once** and build both event aggregates in a single pass. If the file does not exist, treat both aggregates as zero events (omit both fields per the rules below) — do NOT fail the session close.
+
+   Filter all lines where `session == <session_id>`, then partition by `event` value:
+
+   ```bash
+   jq -s --arg sid "$SESSION_ID" '
+     [.[] | select(.session == $sid)]
+     | {
+         stagnation: [.[] | select(.event == "stagnation_detected")],
+         grounding:  [.[] | select(.event == "grounding_injected")]
+       }
+   ' .orchestrator/metrics/events.jsonl
+   ```
+
+   From the `stagnation` array, aggregate into `stagnation_events`:
+   - `total`: count of entries in the array
    - `by_pattern`: count by `pattern` value (omit zero-valued keys)
-   - `by_error_class`: count by `error_class` value (omit zero-valued keys; omit entire sub-object if all events lack error_class)
+   - `by_error_class`: count by `error_class` value (omit zero-valued keys; omit entire sub-object if all entries lack `error_class`)
    - `files`: unique list of non-null `file` values (deduplicated)
    - **Omit the entire `stagnation_events` field if `total == 0`** (keeps historical entries clean).
-4. Read grounding events from `.orchestrator/metrics/events.jsonl` filtered by `event == "grounding_injected"` AND `session == <session_id>`. If the file does not exist or contains no matching entries, treat as zero events (omit the field per the rule below) — do NOT fail the session close. Aggregate into `grounding_injections`:
-   - `count`: total number of matching events
-   - `files`: deduplicated list of unique file paths from the events (sort alphabetically)
-   - `total_lines`: sum of `lines` field across all events
+
+   From the `grounding` array, aggregate into `grounding_injections`:
+   - `count`: total number of entries in the array
+   - `files`: deduplicated list of unique file paths from the entries (sort alphabetically)
+   - `total_lines`: sum of `lines` field across all entries
    - **Omit the entire `grounding_injections` field if `count == 0`** (matches stagnation_events pattern to keep historical entries clean).
-5. Prepare the JSONL entry (written in Phase 3.7):
+
+   > **Per-category zero-match rule:** If the `stagnation` array is empty but the `grounding` array is non-empty (or vice versa), omit only the zero-match field — the other field is still populated normally. The single read handles both cases; no second file read is needed.
+4. Prepare the JSONL entry (written in Phase 3.7):
    ```json
    {
      "session_id": "<branch>-<YYYY-MM-DD>-<HHmm>",

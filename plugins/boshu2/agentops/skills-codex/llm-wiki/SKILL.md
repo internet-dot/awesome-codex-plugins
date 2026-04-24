@@ -1,9 +1,7 @@
 ---
 name: llm-wiki
-description: 'Build and maintain a compounding external-knowledge wiki from clipped articles, papers, and transcripts. Triggers: "llm wiki", "ingest this", "second brain", "compile my reading", "wiki lint", "what do we know about <topic>". Based on Andrej Karpathy''''s LLM Wiki pattern (April 2026).'
+description: 'Build an external-knowledge wiki from clipped articles, papers, and transcripts.'
 ---
-
-
 # LLM Wiki Skill (proposal)
 
 > **Purpose:** Keep a compounding markdown wiki of **external knowledge** (articles, papers, transcripts, clipped web content) maintained by an LLM so the bookkeeping is free and the knowledge accumulates. Based on Andrej Karpathy's "LLM Wiki" pattern published April 2026. See [references/architecture.md](references/architecture.md) for the full design rationale and how it interoperates with existing AgentOps skills.

@@ -249,6 +249,15 @@ without a native keychain.
 If your keyring requires an interactive unlock prompt, you can increase the keyring timeout via
 `BKT_KEYRING_TIMEOUT` (for example `BKT_KEYRING_TIMEOUT=2m`).
 
+##### macOS note: Keychain prompts after `brew upgrade`
+
+On macOS, every `brew upgrade bkt` may trigger one Keychain prompt because the
+stored item's ACL is tied to the installed binary. Re-run `bkt auth login` once
+after the upgrade to refresh the ACL, then subsequent invocations should not
+prompt. Releases pin the Designated Requirement to the bundle identifier, so
+the refresh is only needed once. Run `bkt auth doctor` to diagnose prompts
+that persist beyond that; it never reads the stored secret.
+
 ### 2. Create and activate a context
 
 #### Bitbucket Data Center

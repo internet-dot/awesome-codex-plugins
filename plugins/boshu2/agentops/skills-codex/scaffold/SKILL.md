@@ -1,8 +1,7 @@
 ---
 name: scaffold
-description: 'Project scaffolding, component generation, and boilerplate setup. Triggers: "scaffold", "new project", "init project", "create project", "generate component", "setup project", "starter", "boilerplate".'
+description: 'Create project, feature, component, or boilerplate scaffolds.'
 ---
-
 # Scaffold Skill
 
 > **Quick Ref:** Project scaffolding, component generation, CI/CD setup. `$scaffold <language> <name>` for new projects, `$scaffold component <type> <name>` for components, `$scaffold ci <platform>` for CI pipelines.
