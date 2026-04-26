@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
-  "last_updated": "2026-04-24",
-  "total": 47,
+  "last_updated": "2026-04-26",
+  "total": 48,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -148,6 +148,16 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/avansaber/tailtest-codex/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Tartiner Labs",
+      "url": "https://github.com/tartinerlabs/skills",
+      "owner": "tartinerlabs",
+      "repo": "skills",
+      "description": "Agent skills for git workflows, GitHub automation, security audits, code refactoring, and project tooling.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/tartinerlabs/skills/main/.codex-plugin/plugin.json"
     },
     {
       "name": "Tool Advisor",

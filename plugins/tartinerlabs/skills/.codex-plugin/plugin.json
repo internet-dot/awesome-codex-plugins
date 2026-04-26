@@ -1,0 +1,34 @@
+{
+  "name": "tartinerlabs",
+  "version": "1.18.0",
+  "description": "Agent skills for git workflows, GitHub automation, security audits, code refactoring, and project tooling",
+  "author": {
+    "name": "Tartiner Labs",
+    "url": "https://github.com/tartinerlabs"
+  },
+  "repository": "https://github.com/tartinerlabs/skills",
+  "license": "MIT",
+  "keywords": [
+    "git",
+    "github",
+    "security",
+    "refactoring",
+    "testing",
+    "tailwind",
+    "commit",
+    "pull-request",
+    "branch",
+    "naming",
+    "project-structure",
+    "deps",
+    "supply-chain"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Tartiner Labs",
+    "shortDescription": "Git, GitHub, security, refactor, and project tooling skills.",
+    "developerName": "Tartiner Labs",
+    "category": "Coding",
+    "websiteURL": "https://github.com/tartinerlabs/skills"
+  }
+}
