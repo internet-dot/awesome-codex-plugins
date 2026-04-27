@@ -19,10 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: gaurav-nelson/github-action-markdown-link-check@v1
-        with:
-          config-file: .mlc_config.json
-          folder-path: ./
+      - name: Markdown link check
+        run: npx markdown-link-check@latest README.md --config .mlc_config.json
 
   build:
     runs-on: ubuntu-latest
