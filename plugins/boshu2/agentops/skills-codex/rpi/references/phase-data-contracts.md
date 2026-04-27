@@ -37,4 +37,4 @@ Queue lifecycle rule:
 - consumers may rewrite existing queue lines to claim, release, fail, or consume items after initial write
 - the entry aggregate flips to `consumed=true` only after every child item is consumed
 
-Canonical schema contract: [`docs/contracts/next-work.schema.md`](../../../docs/contracts/next-work.schema.md) (v1.3)
+Canonical schema contract: [`docs/contracts/next-work.schema.md`](../../../docs/contracts/next-work.schema.md) (v1.4)

@@ -23,15 +23,17 @@ The PR number is provided as an argument or environment variable.
 
 ```bash
 PR_NUMBER="${PR_NUMBER:-$1}"
-gh pr view "$PR_NUMBER" --json number,url,title,body,isDraft
+gh api "repos/{owner}/{repo}/pulls/$PR_NUMBER" --jq '{number, url: .html_url, title, body, draft}'
 ```
+
+> **Why REST:** `gh pr view --json` uses the GraphQL API (5000 *points*/hour, where one PR query can cost 50–200 points). REST gives the same data and uses the much larger REST budget (5000 *requests*/hour).
 
 ## Step 2: Read PR Context
 
 1. PR description and diff:
    ```bash
-   gh pr view $PR_NUMBER --json body,title,isDraft
-   gh pr diff $PR_NUMBER
+   gh api "repos/{owner}/{repo}/pulls/$PR_NUMBER" --jq '{title, body, draft}'
+   gh api "repos/{owner}/{repo}/pulls/$PR_NUMBER" -H "Accept: application/vnd.github.diff"
    ```
 2. Feature artifacts:
    - `docs/features/<feature-id>/idea.md` — original problem
@@ -86,7 +88,7 @@ Review body format:
 **Inline comments**: For specific plan-section issues, post inline comments:
 
 ```bash
-COMMIT_SHA=$(gh pr view $PR_NUMBER --json headRefOid --jq '.headRefOid')
+COMMIT_SHA=$(gh api "repos/{owner}/{repo}/pulls/$PR_NUMBER" --jq '.head.sha')
 gh api repos/{owner}/{repo}/pulls/$PR_NUMBER/comments \
   --method POST \
   --field body="[your comment — reference the concern and suggest the fix]" \

@@ -320,12 +320,12 @@ Return a JSON array of paths only."
 #### 4e: Wait for Workers
 
 ```text
-wait_agent(ids=["agent-id-1", "agent-id-2"])
+wait_agent(targets=["agent-id-1", "agent-id-2"])
 ```
 
-If a worker needs a short correction, use `send_input(id=..., message=...)`.
+If a worker needs a short correction, use `send_input(target=..., message=...)`.
 
-If a worker stalls or is no longer needed, use `close_agent(id=...)`.
+If a worker stalls or is no longer needed, use `close_agent(target=...)`.
 
 ### Step 5: Verify and Sync
 

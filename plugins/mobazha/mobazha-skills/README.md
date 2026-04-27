@@ -64,7 +64,7 @@ Connect your AI agent directly to your store's API via the [Model Context Protoc
 
 ```mermaid
 graph LR
-    Agent["AI Agent"] -->|"MCP (SSE)"| Gateway["Mobazha Gateway"]
+    Agent["AI Agent"] -->|"MCP (Streamable HTTP)"| Gateway["Mobazha Gateway"]
     Gateway --> Products["Products"]
     Gateway --> Orders["Orders"]
     Gateway --> Chat["Chat"]

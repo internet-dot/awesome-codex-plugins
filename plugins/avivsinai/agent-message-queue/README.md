@@ -281,6 +281,7 @@ This guarantees crash-safety: if the process dies mid-write, no corrupt message 
 
 - [INSTALL.md](INSTALL.md) — Alternative installation methods
 - [docs/adapter-contract.md](docs/adapter-contract.md) — Formal v1 adapter contract for integration messages
+- [docs/adr-layer-extensions.md](docs/adr-layer-extensions.md) — ADR for stable layer extension surfaces
 - [COOP.md](COOP.md) — Co-op mode protocol & best practices
 - [CLAUDE.md](CLAUDE.md) — Agent instructions, CLI reference, architecture
 

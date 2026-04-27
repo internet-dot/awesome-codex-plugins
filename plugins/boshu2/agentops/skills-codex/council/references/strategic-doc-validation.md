@@ -7,7 +7,8 @@
 > purpose-built perspective battery.
 >
 > **Proven on:** 2026-04-09 AgentOps Founder OS reframe — two rounds, 6
-> judges each (3 Claude + 3 Codex), Codex pinned to `gpt-5.4` in round 2.
+> judges each (3 Claude + 3 Codex), with Codex pinned to a fixed model in
+> round 2 for reproducibility. For current runs, pin `gpt-5.5` when available.
 > Outcome: round 1 unanimous WARN → surgical revisions → round 2 = 4 PASS
 > + 2 WARN with specific fixes → shipped. Full audit trail at
 > `.agents/council/2026-04-09-council-founder-os*.md`.
@@ -76,9 +77,10 @@ a distinct class of issue. This is not dogma — reshape for your document
 
 ### Codex-side judges (3)
 
-Codex judges give you genuinely independent readings. Pin a specific
-model with `-m <model>` (e.g., `-m gpt-5.4`) when you want reproducible
-behavior across rounds.
+Codex judges give you genuinely independent readings. Use the current
+Codex default for day-to-day runs; when reproducibility matters, pin a
+specific model with `-m <model>` (for example `-m gpt-5.5` when
+available) across rounds.
 
 **4. Completeness auditor**
 - **Persona:** taxonomy expert. Reviews frameworks, skill trees, and

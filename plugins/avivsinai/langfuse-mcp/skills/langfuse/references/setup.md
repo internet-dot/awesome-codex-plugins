@@ -146,6 +146,7 @@ langfuse-mcp --tools traces,prompts
 | `LANGFUSE_MCP_TOOLS` | Comma-separated tool groups to load |
 | `LANGFUSE_MCP_LOG_FILE` | Log file path (default: `/tmp/langfuse_mcp.log`) |
 | `LANGFUSE_MCP_READ_ONLY` | Set to `true` to disable write tools (safer observability mode) |
+| `LANGFUSE_MCP_DEFAULT_OUTPUT_MODE` | Default MCP tool `output_mode` (`compact`, `full_json_string`, `full_json_file`) |
 
 ---
 

@@ -48,9 +48,8 @@ Scan the target files to identify languages:
 
 For each language detected, read the matching standard:
 
-Tool: Read
-Parameters:
-  file_path: "skills/vibe/references/<language>-standards.md"
+Read `skills/vibe/references/<language>-standards.md` with the available file
+read or shell tool.
 
 Only load standards for languages actually present in the review.
 
@@ -66,9 +65,9 @@ Cite specific sections: "Per python-standards.md section 3.2..."
 Files detected: src/main.py, pkg/handler.go, scripts/deploy.sh
 
 Load (3 standards only):
-1. Read("skills/vibe/references/python-standards.md")
-2. Read("skills/vibe/references/go-standards.md")
-3. Read("skills/vibe/references/shell-standards.md")
+1. `skills/vibe/references/python-standards.md`
+2. `skills/vibe/references/go-standards.md`
+3. `skills/vibe/references/shell-standards.md`
 
 Skip: typescript, yaml, json, markdown (not present)
 ```

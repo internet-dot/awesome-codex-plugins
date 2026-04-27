@@ -22,7 +22,7 @@ validate_next_work_item() {
 
   # Type enum validation
   case "$type" in
-    tech-debt|improvement|pattern-fix|process-improvement|feature|bug|task) ;;
+    tech-debt|improvement|pattern-fix|process-improvement|feature|bug|task|docs|chore) ;;
     *) echo "SCHEMA VALIDATION FAILED: invalid type '$type' for item '$title'"; return 1 ;;
   esac
 
@@ -34,7 +34,7 @@ validate_next_work_item() {
 
   # Source enum validation
   case "$source" in
-    council-finding|retro-learning|retro-pattern|evolve-generator|feature-suggestion|backlog-processing) ;;
+    council-finding|retro-learning|retro-pattern|evolve-generator|feature-suggestion|backlog-processing|post-mortem-finding|manifest-classification) ;;
     *) echo "SCHEMA VALIDATION FAILED: invalid source '$source' for item '$title'"; return 1 ;;
   esac
 
@@ -79,7 +79,7 @@ for i in "${!VALID_ITEMS[@]}"; do
   fi
 done
 
-# Append one entry per epic (schema v1.3: docs/contracts/next-work.schema.md)
+# Append one entry per epic (schema v1.4: docs/contracts/next-work.schema.md)
 # Only include VALID_ITEMS that passed schema validation
 # Each item: {title, type, severity, source, description, evidence, target_repo}
 # Entry aggregate fields: source_epic, timestamp, items[], consumed: false,

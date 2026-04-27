@@ -29,7 +29,7 @@ Write your result to .agents/swarm/results/3.json and stay within your assigned 
 Use `wait_agent` with the returned agent ids.
 
 ```text
-wait_agent(ids=["agent-id-1", "agent-id-2"])
+wait_agent(targets=["agent-id-1", "agent-id-2"])
 ```
 
 If one agent is lagging, keep the rest moving and `close_agent` the stalled one when needed.
@@ -39,7 +39,7 @@ If one agent is lagging, keep the rest moving and `close_agent` the stalled one 
 Use `send_input` for short retry or clarification messages only.
 
 ```text
-send_input(id="agent-id-1", message="Validation failed. Fix the test failure and retry.")
+send_input(target="agent-id-1", message="Validation failed. Fix the test failure and retry.")
 ```
 
 ## Cleanup
@@ -47,7 +47,7 @@ send_input(id="agent-id-1", message="Validation failed. Fix the test failure and
 Use `close_agent` to stop a stuck or no-longer-needed agent.
 
 ```text
-close_agent(id="agent-id-1")
+close_agent(target="agent-id-1")
 ```
 
 ## Key Rules

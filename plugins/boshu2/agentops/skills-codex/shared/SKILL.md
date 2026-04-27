@@ -75,9 +75,9 @@ Use capability detection at runtime, not hardcoded tool names. The same skill mu
 | Operation | Codex Session Agents | OpenCode Subagents | Inline Fallback |
 |-----------|----------------------|--------------------|------------------|
 | Spawn (read-only) | `spawn_agent(message=...)` | Read-only subagent prompt | Execute inline |
-| Follow-up | `send_input(id=..., message=...)` | not supported | N/A |
-| Wait | `wait_agent(ids=[...])` | Read-only task polling | N/A |
-| Cleanup | `close_agent(id=...)` | not supported | N/A |
+| Follow-up | `send_input(target=..., message=...)` | not supported | N/A |
+| Wait | `wait_agent(targets=[...])` | Read-only task polling | N/A |
+| Cleanup | `close_agent(target=...)` | not supported | N/A |
 
 **OpenCode limitations:**
 - No inter-agent messaging — workers run as independent sub-sessions

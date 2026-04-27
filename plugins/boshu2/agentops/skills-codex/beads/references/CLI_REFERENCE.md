@@ -346,7 +346,7 @@ bd vc commit -m "Repair beads state"
 - Use `strict` for controlled imports requiring guaranteed parent existence
 - Use `skip` rarely - only for selective imports
 
-See [CONFIG.md](CONFIG.md#example-import-orphan-handling) and [TROUBLESHOOTING.md](TROUBLESHOOTING.md#import-fails-with-missing-parent-errors) for more details.
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for repair paths and [ANTI_PATTERNS.md](ANTI_PATTERNS.md) for state-management pitfalls.
 
 ### Migration
 
@@ -528,8 +528,9 @@ bd dolt push  # Only if a Dolt remote is configured
 
 ## See Also
 
-- [AGENTS.md](../AGENTS.md) - Main agent workflow guide
-- [DAEMON.md](DAEMON.md) - Daemon management and event-driven mode
-- [GIT_INTEGRATION.md](GIT_INTEGRATION.md) - Git workflows and merge strategies
-- [LABELS.md](../LABELS.md) - Label system guide
-- [README.md](../README.md) - User documentation
+- [WORKFLOWS.md](WORKFLOWS.md) - Step-by-step bd usage patterns and checklists
+- [BOUNDARIES.md](BOUNDARIES.md) - When to use bd vs Task tools
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Error resolution and repair commands
+- [ANTI_PATTERNS.md](ANTI_PATTERNS.md) - Failure modes to avoid
+- [AGENTS.md](../../../AGENTS.md) - Repo-level agent workflow guide
+- [README.md](../../../README.md) - User-facing project overview

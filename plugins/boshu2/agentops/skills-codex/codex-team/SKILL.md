@@ -21,15 +21,15 @@ For verified Codex CLI commands and flags, see `../shared/references/codex-cli-v
 
 Select backend in this order:
 
-1. `spawn_agent` available -> **Codex experimental sub-agents** (preferred)
-2. Codex CLI available -> **Codex CLI via Bash** (`codex exec ...`)
+1. `spawn_agent` available -> **Codex sub-agents** (preferred; enabled by default in current Codex)
+2. Codex CLI available -> **Codex CLI via background shell commands** (`codex exec ...`)
 3. None of the above -> fall back to `$swarm`
 
 ## Pre-Flight (CLI backend only)
 
 ```
 # REQUIRED before spawning with Codex CLI backend
-if ! which codex > /dev/null 2>&1; then
+if ! command -v codex > /dev/null 2>&1; then
   echo "Codex CLI not found. Install: npm i -g @openai/codex"
   # Fallback: use $swarm
 fi
@@ -155,9 +155,12 @@ spawn_agent(message="Fix log rotation in pkg/log.go:rotateLogFile...")
 Codex CLI backend:
 
 ```
-Bash(command='codex exec --full-auto -C "$(pwd)" -o .agents/codex-team/auth-fix.md "Fix the null check in pkg/auth.go:validateToken around line 89..."', run_in_background=true)
-Bash(command='codex exec --full-auto -C "$(pwd)" -o .agents/codex-team/config-fix.md "Add timeout field to internal/config.go:Config struct..."', run_in_background=true)
-Bash(command='codex exec --full-auto -C "$(pwd)" -o .agents/codex-team/logging-fix.md "Fix log rotation in pkg/log.go:rotateLogFile..."', run_in_background=true)
+codex exec --full-auto -C "$(pwd)" -o .agents/codex-team/auth-fix.md "Fix the null check in pkg/auth.go:validateToken around line 89..." &
+auth_pid=$!
+codex exec --full-auto -C "$(pwd)" -o .agents/codex-team/config-fix.md "Add timeout field to internal/config.go:Config struct..." &
+config_pid=$!
+codex exec --full-auto -C "$(pwd)" -o .agents/codex-team/logging-fix.md "Fix log rotation in pkg/log.go:rotateLogFile..." &
+logging_pid=$!
 ```
 
 **Strategy: Merge (same file)**
@@ -168,11 +171,11 @@ Combine all fixes into a single agent prompt:
 spawn_agent(message="Fix these 3 issues in cmd/zeus.go: (1) rename spec_path to spec_location in QUEST_REQUEST payload (2) remove beads field (3) fix dispatch counter increment location")
 
 # CLI equivalent:
-Bash(command='codex exec --full-auto -C "$(pwd)" -o .agents/codex-team/zeus-fixes.md \
+codex exec --full-auto -C "$(pwd)" -o .agents/codex-team/zeus-fixes.md \
   "Fix these 3 issues in cmd/zeus.go: \
    (1) Line 245: rename spec_path to spec_location in QUEST_REQUEST payload \
    (2) Line 250: remove the spurious beads field from the payload \
-   (3) Line 196: fix dispatch counter — increment inside the loop, not outside"', run_in_background=true)
+   (3) Line 196: fix dispatch counter — increment inside the loop, not outside"
 ```
 
 One agent, one file, no conflicts possible.
@@ -185,27 +188,30 @@ spawn_agent(message='Fix null check in pkg/auth.go:89...')
 spawn_agent(message='Add timeout to internal/config.go...')
 
 # Wait for Wave 1 (sub-agent backend)
-wait(ids=["<id-1>", "<id-2>"], timeout_ms=120000)
+wait_agent(targets=["<id-1>", "<id-2>"], timeout_ms=120000)
 
 # Wave 1: non-overlapping tasks (CLI backend)
-Bash(command='codex exec ... -o .agents/codex-team/auth-fix.md "Fix null check in pkg/auth.go:89..."', run_in_background=true)
-Bash(command='codex exec ... -o .agents/codex-team/config-fix.md "Add timeout to internal/config.go..."', run_in_background=true)
+codex exec ... -o .agents/codex-team/auth-fix.md "Fix null check in pkg/auth.go:89..." &
+auth_pid=$!
+codex exec ... -o .agents/codex-team/config-fix.md "Add timeout to internal/config.go..." &
+config_pid=$!
 
 # Wait for Wave 1
 Poll the background shell handles until both complete, then read the output files.
 
 # Read Wave 1 results — understand what changed
-Read(.agents/codex-team/auth-fix.md)
+Read `.agents/codex-team/auth-fix.md`.
 git diff pkg/auth.go
 
 # Wave 2: task that shares files with Wave 1 (sub-agent backend)
 spawn_agent(message='Add rate limiting to pkg/auth.go and pkg/middleware.go. Note: validateToken now has a null check at line 89. Build on current file state.')
 
 # Wave 2: CLI backend equivalent
-Bash(command='codex exec ... -o .agents/codex-team/rate-limit.md \
+codex exec ... -o .agents/codex-team/rate-limit.md \
   "Add rate limiting to pkg/auth.go and pkg/middleware.go. \
    Note: pkg/auth.go was recently modified — the validateToken function now has a null check at line 89. \
-   Build on the current state of the file."', run_in_background=true)
+   Build on the current state of the file." &
+rate_limit_pid=$!
 
 Poll the background shell handle until it completes, then read the output file.
 ```
@@ -216,7 +222,7 @@ The team lead synthesizes Wave 1 results and injects relevant context into Wave 
 
 ```
 # Sub-agent backend:
-wait(ids=["<id-1>", "<id-2>", "<id-3>"], timeout_ms=120000)
+wait_agent(targets=["<id-1>", "<id-2>", "<id-3>"], timeout_ms=120000)
 
 # CLI backend:
 Poll each background shell handle until completion, then read the output files.

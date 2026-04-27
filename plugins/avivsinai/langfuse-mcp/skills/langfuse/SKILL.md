@@ -1,6 +1,6 @@
 ---
 name: langfuse
-version: 0.6.5
+version: 0.7.0
 description: Debug AI traces, find exceptions, analyze sessions, and manage prompts via Langfuse MCP. Use when debugging AI pipelines, investigating errors, analyzing latency, managing prompt versions, or setting up Langfuse. Triggers on "langfuse", "traces", "debug AI", "find exceptions", "what went wrong", "why is it slow", "datasets", "evaluation sets".
 metadata:
   short-description: Langfuse observability via MCP
@@ -55,6 +55,17 @@ LANGFUSE_MCP_READ_ONLY=true
 ```
 
 This disables write tools: `create_text_prompt`, `create_chat_prompt`, `update_prompt_labels`, `create_dataset`, `create_dataset_item`, `delete_dataset_item`.
+
+### Default Output Mode
+
+If you want MCP clients to default to writing full payloads to files when they omit `output_mode`, configure:
+
+```bash
+langfuse-mcp --default-output-mode full_json_file
+
+# Or via environment variable
+LANGFUSE_MCP_DEFAULT_OUTPUT_MODE=full_json_file
+```
 
 For manual `.mcp.json` setup or troubleshooting, see `references/setup.md`.
 

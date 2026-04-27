@@ -1,5 +1,21 @@
 {
   "name": "agentops",
-  "description": "The missing DevOps layer for coding agents. Repo-native memory, validation gates, and tracked execution.",
-  "skills": "./skills-codex"
+  "description": "The operational layer for coding agents. Bookkeeping, validation, and flows that compound knowledge between sessions.",
+  "skills": "./skills-codex",
+  "interface": {
+    "displayName": "AgentOps",
+    "shortDescription": "Repo-native memory, validation gates, and agent workflows.",
+    "longDescription": "AgentOps packages repo-native memory, validation gates, and agent workflows for Codex so sessions can carry context forward, run repeatable development flows, verify changes locally, and track work through closeout.",
+    "developerName": "AgentOps",
+    "category": "Productivity",
+    "capabilities": [
+      "Skills",
+      "Hooks"
+    ],
+    "defaultPrompt": [
+      "Use AgentOps to inspect ready work, claim a bead, and plan the change.",
+      "Use AgentOps to validate this change against the repo gates.",
+      "Use AgentOps to prepare closeout with beads, validation, and push readiness."
+    ]
+  }
 }

@@ -10,7 +10,7 @@
 
 AgentOps is the operational layer for coding agents. It adds bookkeeping, validation, primitives, and flows so every session starts where the last one left off.
 
-[Install](#install) · [Quick Start](#quick-start) · [Skills](#skills) · [CLI](#the-ao-cli) · [Doctrine](https://12factoragentops.com) · [Docs](docs/INDEX.md)
+[Install](#install) · [Quick Start](#quick-start) · [Skills](#skills) · [CLI](#the-ao-cli) · [Doctrine](https://12factoragentops.com) · [Docs](docs/documentation-index.md)
 
 </div>
 
@@ -287,10 +287,13 @@ Run Dream overnight, then run Evolve in the morning against a fresher corpus. Th
 
 | Tool | What it does well | What AgentOps adds |
 |------|-------------------|--------------------|
-| **[GSD](https://github.com/glittercowboy/get-shit-done)** | Clean subagent spawning, fights context rot | Cross-session bookkeeping and validation gates |
-| **[Compound Engineer](https://github.com/EveryInc/compound-engineering-plugin)** | Knowledge compounding, structured loop | Multi-runtime skills, council validation, and repo-native `ao` workflows |
+| **[GSD](https://github.com/glittercowboy/get-shit-done)** | Fresh-context phased execution, recovery loops, runtime breadth | Cross-session bookkeeping, pre-build validation, and the knowledge flywheel |
+| **[Compound Engineer](https://github.com/EveryInc/compound-engineering-plugin)** | Ideation, configurable reviewers, cross-runtime conversion | Automatic capture/scoring/injection, council validation, and repo-native `ao` workflows |
+| **[Spec Kit](https://github.com/github/spec-kit) / [Kiro](https://kiro.dev/)** | Spec-driven development and executable planning artifacts | Learning beyond specs: failures, decisions, retros, and prevention rules |
+| **[Superpowers](https://github.com/obra/superpowers)** | TDD discipline and autonomous work patterns | Memory, pre-mortems, and validation across repeated sessions |
+| **[Ruflo / Claude-Flow](https://github.com/ruvnet/ruflo)** | High-scale swarm orchestration and MCP-heavy coordination | Local, auditable compounding around whatever executes the work |
 
-[Detailed comparisons](docs/comparisons/)
+[Detailed comparisons](docs/comparisons/) · [Competitive radar](docs/comparisons/competitive-radar.md)
 
 ---
 
@@ -299,8 +302,9 @@ Run Dream overnight, then run Evolve in the morning against a fresher corpus. Th
 | Topic | Where |
 |-------|-------|
 | Published site | [boshu2.github.io/agentops](https://boshu2.github.io/agentops/) |
-| Start navigating | [Docs index](docs/INDEX.md) |
+| Start navigating | [Docs index](docs/documentation-index.md) |
 | New contributor orientation | [Newcomer guide](docs/newcomer-guide.md) |
+| Working with `.agents/` | [Operator guide](docs/agents-operator-guide.md) |
 | Full skill catalog | [Skills](docs/SKILLS.md) |
 | CLI reference | [CLI commands](cli/docs/COMMANDS.md) |
 | Architecture | [Architecture](docs/ARCHITECTURE.md) |
@@ -340,4 +344,4 @@ See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md). Agent contributors should also
 
 ## License
 
-Apache-2.0 · [Docs](docs/INDEX.md) · [CLI Reference](cli/docs/COMMANDS.md)
+Apache-2.0 · [Docs](docs/documentation-index.md) · [CLI Reference](cli/docs/COMMANDS.md)

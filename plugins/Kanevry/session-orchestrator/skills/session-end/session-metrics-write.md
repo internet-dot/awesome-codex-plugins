@@ -23,6 +23,14 @@
    fi
    ```
    `scripts/emit-session.mjs` calls `validateSession` from `scripts/lib/session-schema.mjs` before appending, stamps `schema_version: 1` if absent, and uses `appendJsonl` (atomic for lines < PIPE_BUF). Exit 1 on validation error, exit 2 on I/O error — block session close in both cases so malformed metrics can never reach disk.
+
+   **`autopilot_run_id` (additive, optional, #300):** when this session was launched by `/autopilot`, the wave-executor `sessionRunner` callback passes `args.autopilotRunId` from `runLoop`. session-end MUST persist that value as a top-level field on the JSONL record:
+
+   ```json
+   {"schema_version":1,"session_id":"…","autopilot_run_id":"main-2026-04-25-1432-autopilot",...}
+   ```
+
+   Manual sessions either omit the field or write `null` — both are treated identically per the v1 additive convention. Readers must NOT distinguish "missing" from "null" semantically. `validateSession` does not require this field; it passes through unknown keys unchanged.
 3. The writer creates the file if it does not exist.
 4. Verify: read back the last line to confirm valid JSON (sanity check; validation already ran):
    ```bash

@@ -6,7 +6,7 @@ Security updates are provided for the current maintained release line.
 
 | Version line | Status |
 | --- | --- |
-| `1.x` latest | Supported |
+| `2.x` latest | Supported |
 | pre-`1.0` historical releases | Not supported |
 
 ---
@@ -20,6 +20,8 @@ Key controls:
 - PKCE-based OAuth flow.
 - Local storage under `~/.codex/multi-auth` (or `CODEX_MULTI_AUTH_DIR`).
 - Refresh-token lifecycle management and account health isolation.
+- Runtime rotation proxy is loopback-only, enabled by default, and authenticated with a local client key. Users can opt out with `codex auth rotation disable` or `CODEX_MULTI_AUTH_RUNTIME_ROTATION_PROXY=0`.
+- Packaged Codex app bind is reversible and stores backup/router metadata under `~/.codex/multi-auth/app-bind/`.
 - No project-owned telemetry backend.
 
 ---
@@ -77,7 +79,7 @@ The following are not treated as vulnerabilities in this repository:
 
 Security override rationale (`package.json` -> `overrides`):
 
-- `hono`: pinned to `4.12.10` to keep builds out of the vulnerable `4.12.0-4.12.1` range reported in `GHSA-xh87-mx6m-69f3` (authentication bypass advisory).
+- `hono`: pinned to `4.12.14` to keep builds out of the vulnerable `4.12.0-4.12.1` range reported in `GHSA-xh87-mx6m-69f3` (authentication bypass advisory).
 - `rollup`: pinned to `^4.59.0` to keep the Vite and Vitest transitive graph above the vulnerable `<4.59.0` range surfaced by `npm audit`.
 
 Before release and after dependency changes:

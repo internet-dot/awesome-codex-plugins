@@ -155,6 +155,8 @@ These are the skills every user needs first. Everything else is available when y
 
 Every `$post-mortem` promotes learnings and patterns into `.agents/` so future `$research` starts with better context instead of zero.
 
+Inspect, lint, and triage the `.agents/` write surface contract via `ao agents inspect | lint | doctor` (`doctor` rolls up inspect + lint + orphan/stray-dir report; `--strict` fails on orphans).
+
 ## Runtime Modes
 
 AgentOps has three runtime modes. Do not assume hook automation exists everywhere.

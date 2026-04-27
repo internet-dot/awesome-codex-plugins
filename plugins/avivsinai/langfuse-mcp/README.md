@@ -122,6 +122,20 @@ LANGFUSE_MCP_READ_ONLY=true langfuse-mcp
 
 This disables: `create_text_prompt`, `create_chat_prompt`, `update_prompt_labels`, `create_dataset`, `create_dataset_item`, `delete_dataset_item`, `create_annotation_queue`, `create_annotation_queue_item`, `update_annotation_queue_item`, `delete_annotation_queue_item`, `create_annotation_queue_assignment`, `delete_annotation_queue_assignment`
 
+## Default Output Mode
+
+Set the MCP-exposed default `output_mode` so clients that omit the parameter automatically use your preferred mode:
+
+```bash
+langfuse-mcp --default-output-mode full_json_file
+# Or via environment variable
+LANGFUSE_MCP_DEFAULT_OUTPUT_MODE=full_json_file langfuse-mcp
+```
+
+Supported values: `compact`, `full_json_string`, `full_json_file`
+
+This updates the default shown in MCP tool schemas. Clients can still override it per call by passing `output_mode` explicitly.
+
 ## Other Clients
 
 ### Cursor
@@ -137,7 +151,8 @@ Create `.cursor/mcp.json` in your project (or `~/.cursor/mcp.json` for global):
       "env": {
         "LANGFUSE_PUBLIC_KEY": "pk-...",
         "LANGFUSE_SECRET_KEY": "sk-...",
-        "LANGFUSE_HOST": "https://cloud.langfuse.com"
+        "LANGFUSE_HOST": "https://cloud.langfuse.com",
+        "LANGFUSE_MCP_DEFAULT_OUTPUT_MODE": "full_json_file"
       }
     }
   }

@@ -149,7 +149,7 @@ If your runtime supports `agent_type`, mark these as `worker` agents and keep an
 ### Step 4: Wait and Collect Results
 
 ```text
-wait_agent(ids=["agent-id-1", "agent-id-2"])
+wait_agent(targets=["agent-id-1", "agent-id-2"])
 ```
 
 Collect worker result files from `.agents/swarm/results/`.
@@ -157,13 +157,13 @@ Collect worker result files from `.agents/swarm/results/`.
 If a worker needs a short correction, use:
 
 ```text
-send_input(id="agent-id-1", message="Validation failed. Fix the test failure and retry.")
+send_input(target="agent-id-1", message="Validation failed. Fix the test failure and retry.")
 ```
 
 If a worker stalls, use:
 
 ```text
-close_agent(id="agent-id-1")
+close_agent(target="agent-id-1")
 ```
 
 ### Step 5: Validate Wave

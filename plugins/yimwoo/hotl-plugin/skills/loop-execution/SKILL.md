@@ -75,7 +75,9 @@ After resolving the workflow file, run this preflight **before executing any ste
    - Explain clearly: the authoring checkout and the execution checkout can differ. HOTL can execute in a separate worktree while leaving the current checkout untouched
 
 5. Determine isolation mode
+   - If `worktree: host` in frontmatter → stay on the current checkout's current feature branch exactly as provided by the host tool; reject `main` and `master`
    - If `worktree: false` in frontmatter → stay in the current checkout and use a dedicated branch there
+   - If the current checkout is already a named linked git worktree, and the workflow frontmatter does not set `branch:` or `worktree:`, use host mode automatically to avoid stacking another worktree
    - Otherwise → use an isolated git worktree by default
 
 6. Check if the target branch/worktree already exists locally
@@ -87,7 +89,8 @@ After resolving the workflow file, run this preflight **before executing any ste
    - The helper returns JSON with: `branch`, `repo_root`, `execution_root`, `workflow_path`, `source_workflow_path`, `source_branch`, `source_head`, `worktree_path`
    - By default it creates a linked git worktree for the branch, copies the current workflow into that worktree, and returns that worktree as `execution_root`
    - If `worktree: false` in frontmatter → create/switch to the dedicated branch in the current checkout and return the repo root as `execution_root`
-   - If `branch:` matches the currently checked-out branch while worktree isolation is still enabled, the helper must STOP with a clear message telling the user to set `worktree: false` for same-branch continuity
+   - If `worktree: host` in frontmatter → keep the current branch and return the current checkout as `execution_root`; if `branch:` is set, it must match the current branch
+   - If `branch:` matches the currently checked-out branch while worktree isolation is still enabled, the helper must STOP with a clear message telling the user to set `worktree: false` or `worktree: host` for same-branch continuity
 8. Change into `execution_root`
    - Every later git command, runtime call, Codex helper call, and review command for this run MUST execute from that directory
 ```

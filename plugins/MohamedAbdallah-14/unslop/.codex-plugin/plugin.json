@@ -1,0 +1,15 @@
+{
+  "name": "unslop",
+  "displayName": "Unslop",
+  "version": "0.5.6",
+  "description": "Make Codex output sound like a careful human wrote it. Strip AI-isms, engineer burstiness, preserve every code block and technical term.",
+  "author": "Mohamed Abdallah",
+  "license": "MIT",
+  "skills": "./skills/",
+  "ui": {
+    "icon": "./assets/unslop-small.svg",
+    "logo": "./assets/unslop.svg",
+    "color": "#7C9885"
+  },
+  "defaultPrompt": "Activate unslop mode for this and every following response. Strip AI-isms (sycophancy, stock vocab, hedging stacks, em-dash pileups). Engineer burstiness. Preserve technical accuracy and code exactly. Read ./skills/unslop/SKILL.md for the full ruleset."
+}

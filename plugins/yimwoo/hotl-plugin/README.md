@@ -68,7 +68,7 @@ Implementation tasks follow eight phases:
 | **Brainstorm** | Clarify requirements. Compare approaches. Define intent, verification, and governance contracts. Save a design doc in `docs/designs/`. |
 | **Write Workflow** | Use `writing-plans` to generate `docs/plans/YYYY-MM-DD-<slug>-workflow.md` with steps, verification, loop conditions, and gates. |
 | **Lint** | Self-check built into planning. Structural lint runs automatically in execution preflight. |
-| **Branch** | Resolve an isolated execution root. Default is a git worktree on `hotl/<slug>`; `worktree: false` stays in the current checkout instead of a separate worktree. To keep the exact current branch, also pin `branch:` explicitly. Dirty repos hard-fail. |
+| **Branch** | Resolve an execution root. Default is a git worktree on `hotl/<slug>`; `worktree: false` stays in the current checkout and may switch/create the target branch; `worktree: host` keeps the current feature branch exactly as provided by Codex or another host tool. Dirty repos and protected-branch host mode hard-fail. |
 | **Execute** | Run the plan in loop, manual, or subagent mode. |
 | **Review** | Review findings are checked against the codebase and HOTL contracts before acting. |
 | **Verify** | Run tests, lint, and verify commands. No green light without proof. |

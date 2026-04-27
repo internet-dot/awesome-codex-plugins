@@ -31,7 +31,7 @@ Write your analysis to .agents/council/judge-2.md.")
 Wait for the agent ids returned by `spawn_agent`.
 
 ```text
-wait_agent(ids=["agent-id-1", "agent-id-2"])
+wait_agent(targets=["agent-id-1", "agent-id-2"])
 ```
 
 If one judge needs a correction, use `send_input` with a short follow-up prompt.
@@ -41,7 +41,7 @@ If one judge needs a correction, use `send_input` with a short follow-up prompt.
 Use `close_agent` for any judge you no longer need.
 
 ```text
-close_agent(id="agent-id-1")
+close_agent(target="agent-id-1")
 ```
 
 ## Mixed Mode: Codex CLI Judges

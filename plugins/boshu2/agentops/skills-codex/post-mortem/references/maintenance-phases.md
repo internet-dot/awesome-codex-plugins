@@ -105,7 +105,7 @@ bash hooks/finding-compiler.sh --quiet 2>/dev/null || true
 
 #### Step ACT.3: Feed Next-Work
 
-Actionable improvements identified during processing -> append one schema v1.3
+Actionable improvements identified during processing -> append one schema v1.4
 batch entry to `.agents/rpi/next-work.jsonl` using the tracked contract in
 [`../../docs/contracts/next-work.schema.md`](../../../docs/contracts/next-work.schema.md)
 and the write procedure in

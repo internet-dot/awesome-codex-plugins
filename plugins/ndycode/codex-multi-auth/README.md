@@ -3,9 +3,10 @@
 [![npm version](https://img.shields.io/npm/v/codex-multi-auth.svg)](https://www.npmjs.com/package/codex-multi-auth)
 [![npm downloads](https://img.shields.io/npm/dw/codex-multi-auth.svg)](https://www.npmjs.com/package/codex-multi-auth)
 
-Codex CLI-first multi-account OAuth manager for the official Codex CLI, including the `@openai/codex` npm launcher and native `codex` installs.
+Codex CLI-first multi-account OAuth manager for the official Codex CLI. The installed `codex` wrapper handles `codex auth ...` locally, forwards normal Codex commands to the official runtime, and can optionally route live Responses traffic through a localhost account-rotation proxy.
 
 <img width="1270" height="729" alt="2026-02-28 12_54_58-prompt txt ‎- Notepads" src="https://github.com/user-attachments/assets/0cecb77e-a6d3-432a-ba48-3577db0c7093" />
+
 
 
 > [!NOTE]
@@ -15,12 +16,15 @@ Codex CLI-first multi-account OAuth manager for the official Codex CLI, includin
 ## What You Get
 
 - Canonical `codex auth ...` workflow for account login, switching, checks, and diagnostics
+- Official Codex CLI forwarding for all non-auth commands
 - Multi-account OAuth pool with health-aware selection and automatic failover
 - Project-scoped account storage under `~/.codex/multi-auth/projects/<project-key>/...`
 - Interactive dashboard for account actions and settings
 - Experimental settings tab for staged sync, backup, and refresh-guard controls
 - Forecast, report, fix, and doctor commands for operational safety
 - Runtime counters, budget/cooldown state, and multi-auth probe visibility in `codex auth status` / `codex auth report`
+- Default-on runtime Responses proxy for live account rotation inside forwarded Codex CLI/app sessions
+- Reversible packaged Codex app bind and user-level launcher routing helpers
 - Flagged account verification and restore flow
 - Session affinity and live account sync controls
 - Proactive refresh and preemptive quota deferral controls
@@ -35,7 +39,7 @@ Codex CLI-first multi-account OAuth manager for the official Codex CLI, includin
 > [!CAUTION]
 > This project uses OAuth account credentials and is intended for personal development use.
 >
-> By using this plugin, you acknowledge:
+> By using this package, you acknowledge:
 > - This is an independent open-source project, not an official OpenAI product
 > - You are responsible for your own usage and policy compliance
 > - For production/commercial workloads, use the OpenAI Platform API
@@ -131,6 +135,7 @@ codex auth forecast --live
 ```
 
 If browser launch is blocked, use the alternate login paths in [docs/getting-started.md](docs/getting-started.md#alternate-login-paths).
+For remote or headless shells, prefer `codex auth login --device-auth`.
 
 ---
 
@@ -166,8 +171,9 @@ If browser launch is blocked, use the alternate login paths in [docs/getting-sta
 | Command | What it answers |
 | --- | --- |
 | `codex auth report --live --json` | How do I get the full machine-readable health report? |
-| `codex auth fix --live --model gpt-5-codex` | How do I run live repair probes with a chosen model? |
+| `codex auth fix --live --model gpt-5.3-codex` | How do I run live repair probes with a chosen model? |
 | `codex auth why-selected --json` | Which account does the selector pick now, and why? |
+| `codex auth rotation status` | Is live runtime account rotation enabled for forwarded Codex sessions? |
 
 ### Reliability behavior
 
@@ -212,6 +218,8 @@ If browser launch is blocked, use the alternate login paths in [docs/getting-sta
 | Flagged accounts | `~/.codex/multi-auth/openai-codex-flagged-accounts.json` |
 | Quota cache | `~/.codex/multi-auth/quota-cache.json` |
 | Runtime observability | `~/.codex/multi-auth/runtime-observability.json` |
+| Runtime app helper status | `~/.codex/multi-auth/runtime-rotation-app-helper.json` |
+| Persistent app bind state/logs | `~/.codex/multi-auth/app-bind/` |
 | Logs | `~/.codex/multi-auth/logs/codex-plugin/` |
 | Per-project accounts | `~/.codex/multi-auth/projects/<project-key>/openai-codex-accounts.json` |
 
@@ -232,6 +240,11 @@ Selected runtime/environment overrides:
 | `CODEX_MULTI_AUTH_DIR` | Override settings/accounts root |
 | `CODEX_MULTI_AUTH_CONFIG_PATH` | Alternate config file path |
 | `CODEX_MODE=0/1` | Disable/enable Codex mode |
+| `CODEX_MULTI_AUTH_RUNTIME_ROTATION_PROXY=0/1` | Opt out/in of live Responses proxy rotation for forwarded Codex CLI/app sessions |
+| `CODEX_MULTI_AUTH_APP_ROTATION_IDLE_MS=<ms>` | Override automatic Codex app helper idle shutdown |
+| `CODEX_MULTI_AUTH_APP_BIND_INSTALL=0/1` | Opt out/in of packaged Codex app bind self-heal during install/update or rotation enable |
+| `CODEX_MULTI_AUTH_APP_LAUNCHER_INSTALL=0/1` | Opt out/in of routing supported app shortcuts during install/update or rotation enable |
+| `CODEX_MULTI_AUTH_AUTO_UPDATE=0/1` | Opt out/in of best-effort global package auto-update checks |
 | `CODEX_TUI_V2=0/1` | Disable/enable TUI v2 |
 | `CODEX_TUI_COLOR_PROFILE=truecolor|ansi256|ansi16` | TUI color profile |
 | `CODEX_TUI_GLYPHS=ascii|unicode|auto` | TUI glyph style |
@@ -248,6 +261,8 @@ codex auth forecast --live
 ```
 
 Responses background mode stays opt-in. Enable `backgroundResponses` in settings or `CODEX_AUTH_BACKGROUND_RESPONSES=1` only for callers that intentionally send `background: true`, because those requests switch from stateless `store=false` routing to stateful `store=true`. See [docs/upgrade.md](docs/upgrade.md) for rollout guidance.
+
+Runtime rotation is enabled by default for request-bearing wrapper-launched Codex sessions. Global install/update self-heals supported packaged Codex app binds and user-level launcher routing when possible, while `codex auth rotation enable` remains the explicit repair command. `codex auth rotation disable` turns the setting off and removes the persistent app bind. Set `CODEX_MULTI_AUTH_RUNTIME_ROTATION_PROXY=0`, `CODEX_MULTI_AUTH_APP_BIND_INSTALL=0`, `CODEX_MULTI_AUTH_APP_LAUNCHER_INSTALL=0`, or `CODEX_MULTI_AUTH_AUTO_UPDATE=0` to opt out of the matching default behavior.
 
 ---
 
@@ -291,7 +306,7 @@ codex auth login
 - Requests fail fast after repeated upstream 5xx errors: inspect `codex auth report --json` for runtime traffic and cooldown details
 - Storage cleanup fails with `EBUSY` / `EPERM` (Windows): run `codex auth doctor --fix` to retry, or manually remove `~/.codex/multi-auth/<project-key>/` and re-login
 - OAuth callback on port `1455` fails: free the port and re-run `codex auth login`
-- Browser launch is blocked or you are in a headless shell: re-run `codex auth login --manual` or set `CODEX_AUTH_NO_BROWSER=1`
+- Browser launch is blocked or you are in a headless shell: prefer `codex auth login --device-auth`; use `codex auth login --manual` or `CODEX_AUTH_NO_BROWSER=1` only when you need the callback-paste fallback
 - `missing field id_token` / `token_expired` / `refresh_token_reused`: re-login affected account
 
 </details>
@@ -333,9 +348,10 @@ codex auth doctor --json
 
 ## Release Notes
 
-- Current stable: [docs/releases/v1.3.1.md](docs/releases/v1.3.1.md)
-- Previous stable: [docs/releases/v1.2.6.md](docs/releases/v1.2.6.md)
-- Earlier stable: [docs/releases/v1.2.5.md](docs/releases/v1.2.5.md)
+- Current stable: [docs/releases/v2.0.2.md](docs/releases/v2.0.2.md)
+- Previous stable: [docs/releases/v2.0.1.md](docs/releases/v2.0.1.md)
+- Earlier stable: [docs/releases/v1.3.2.md](docs/releases/v1.3.2.md)
+- Stable archive: [docs/releases/v1.3.1.md](docs/releases/v1.3.1.md)
 - Full release archive: [docs/README.md#release-history](docs/README.md#release-history)
 - Archived prerelease: [docs/releases/v0.1.0-beta.0.md](docs/releases/v0.1.0-beta.0.md)
 

@@ -1,115 +1,80 @@
-# Backend: Codex Sub-Agents
+# Backend: Codex Session Agents and CLI Judges
 
-Concrete tool calls for spawning agents using Codex CLI (`codex exec`). Used for `--mixed` mode cross-vendor consensus and as the primary backend when running inside a Codex session with `spawn_agent`.
+Concrete agent calls for council judges when running inside a Codex session,
+plus Codex CLI judge commands for strict `--mixed` mode.
 
 ---
 
-## Variant A: Codex CLI (from any runtime)
+## Spawn
 
-Used when `codex` CLI is available on PATH. Agents run as background shell processes.
+Spawn one judge per perspective.
 
-**When detected:** `which codex` succeeds.
+```text
+spawn_agent(message="You are judge-1.
 
-### Spawn: Background Shell Processes
+Perspective: correctness
+Task: validate the target
+Target files: ...
+
+Write your analysis to .agents/council/judge-1.md.")
+
+spawn_agent(message="You are judge-2.
+
+Perspective: completeness
+Task: validate the target
+Target files: ...
+
+Write your analysis to .agents/council/judge-2.md.")
+```
+
+## Wait
+
+Wait for the agent ids returned by `spawn_agent`.
+
+```text
+wait_agent(targets=["agent-id-1", "agent-id-2"])
+```
+
+If one judge needs a correction, use `send_input` with a short follow-up prompt.
+
+## Cleanup
+
+Use `close_agent` for any judge you no longer need.
+
+```text
+close_agent(target="agent-id-1")
+```
+
+## Mixed Mode: Codex CLI Judges
+
+For `$council --mixed`, run 3 runtime-native judges with `spawn_agent(...)`
+and 3 Codex CLI judges with `codex exec`.
+
+Pre-flight is strict:
+
+1. `command -v codex` must succeed.
+2. `codex --version` must succeed.
+3. If `COUNCIL_CODEX_MODEL` is set, a dry `codex exec` smoke call with that
+   model must succeed.
+
+If any pre-flight fails, stop before spawning any judges. Do not silently run a
+runtime-native-only council.
 
 ```bash
-# With structured output (preferred for council judges)
-Bash(
-  command='codex exec -s read-only -m gpt-5.3-codex -C "$(pwd)" --output-schema skills/council/schemas/verdict.json -o .agents/council/codex-1.json "JUDGE PROMPT HERE"',
-  run_in_background=true
-)
-
-# Without structured output (fallback)
-Bash(
-  command='codex exec --full-auto -m gpt-5.3-codex -C "$(pwd)" -o .agents/council/codex-1.md "JUDGE PROMPT HERE"',
-  run_in_background=true
-)
+mkdir -p .agents/council
+codex exec -s read-only -C "$(pwd)" --output-schema skills/council/schemas/verdict.json -o .agents/council/codex-1.json "$PACKET"
+codex exec -s read-only -C "$(pwd)" --output-schema skills/council/schemas/verdict.json -o .agents/council/codex-2.json "$PACKET"
+codex exec -s read-only -C "$(pwd)" --output-schema skills/council/schemas/verdict.json -o .agents/council/codex-3.json "$PACKET"
 ```
 
-**Flag order:** `-s`/`--full-auto` → `-m` → `-C` → `--output-schema` → `-o` → prompt
-
-**Valid flags:** `--full-auto`, `-s`, `-m`, `-C`, `--output-schema`, `-o`, `--add-dir`
-**Invalid flags:** `-q` (doesn't exist), `--quiet` (doesn't exist), `-p` as a prompt flag (in Codex CLI it means profile)
-
-### Wait: Poll Background Shell
-
-Poll the background shell handle until completion, then read the output file:
-
-```
-Read(".agents/council/codex-1.json")
-```
-
-### Limitations
-
-- No messaging — Codex CLI processes are fire-and-forget
-- No debate R2 with Codex judges — they produce one verdict only
-- `--output-schema` requires `additionalProperties: false` at all levels
-- `--output-schema` requires ALL properties in `required` array
-- `-s read-only` + `-o` works — `-o` is CLI-level post-processing, not sandbox I/O
-
----
-
-## Variant B: Codex Sub-Agents (inside Codex runtime)
-
-Used when running inside a Codex session where `spawn_agent` is available.
-
-**When detected:** `spawn_agent` tool is in your tool list.
-
-### Spawn
-
-```
-spawn_agent(message="You are judge-1.\n\nPerspective: Correctness & Completeness\n\n<PACKET>...</PACKET>\n\nWrite verdict to .agents/council/2026-02-17-auth-judge-1.md")
-# Returns: agent_id
-
-spawn_agent(message="You are worker-3.\n\nTask: Add password hashing\n...\n\nWrite result to .agents/swarm/results/3.json")
-# Returns: agent_id
-```
-
-### Wait
-
-```
-wait_agent(ids=["agent-id-1", "agent-id-2"])
-```
-
-**Timeout:** `wait()` blocks until completion. Set a timeout at the orchestration level (default: `COUNCIL_TIMEOUT=120s`). If an agent doesn't complete within the timeout, `close_agent` it and proceed with N-1 verdicts/workers.
-
-### Message (retry/follow-up)
-
-```
-send_input(id="agent-id-1", message="Validation failed: fix tests and retry")
-```
-
-### Cleanup
-
-```
-close_agent(id="agent-id-1")
-```
-
----
-
-## Mixed Mode (Council)
-
-For `--mixed` council, spawn runtime-native judges AND Codex CLI judges in parallel:
-
-```
-spawn_agent(message="You are judge-1.\n\nPerspective: Correctness & Completeness\n\n<PACKET>...</PACKET>\n\nWrite verdict to .agents/council/2026-02-17-auth-judge-1.md")
-spawn_agent(message="You are judge-2.\n\nPerspective: Completeness & Consistency\n\n<PACKET>...</PACKET>\n\nWrite verdict to .agents/council/2026-02-17-auth-judge-2.md")
-
-# Codex CLI judges (parallel background shells)
-Bash(command='codex exec -s read-only -m gpt-5.3-codex -C "$(pwd)" --output-schema skills/council/schemas/verdict.json -o .agents/council/codex-1.json "PACKET"', run_in_background=true)
-Bash(command='codex exec -s read-only -m gpt-5.3-codex -C "$(pwd)" --output-schema skills/council/schemas/verdict.json -o .agents/council/codex-2.json "PACKET"', run_in_background=true)
-```
-
-All four spawn in the **same message** — maximum parallelism.
-
-**Mixed mode quorum:** At least 1 judge from each vendor should respond for cross-vendor consensus. If all judges from one vendor fail, proceed as single-vendor council and note the degradation in the report.
-
----
+Only add `-m "$COUNCIL_CODEX_MODEL"` when the override is explicitly set. If
+`--output-schema` is unsupported, use `.md` output as an output-format fallback;
+Codex itself is still required.
 
 ## Key Rules
 
-1. **Pre-flight check:** `which codex` before attempting Codex CLI spawning
-2. **Model availability:** `gpt-5.3-codex` requires API account — fall back to `gpt-4o` if unavailable
-3. **Flag order matters** — agents copy examples exactly
-4. **`codex review` is a different command** with different flags — do not conflate with `codex exec`
-5. **No debate with Codex judges** — they produce one verdict, Codex CLI has no messaging
+1. One judge, one perspective.
+2. Keep the durable analysis in the output file.
+3. Use `send_input` only for short steering messages.
+4. In `--mixed`, require at least one responded judge from each vendor for
+   cross-vendor consensus.

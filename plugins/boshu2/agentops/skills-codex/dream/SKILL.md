@@ -17,7 +17,9 @@ Anti-goals (hard constraints):
 - NEVER invokes `$rpi` or any code-mutating flow.
 - NEVER performs git operations (no commits, branches, push, rebase, checkout).
 - NEVER creates symlinks anywhere.
-- No swarm/gc fan-out inside iterations in the first slice (serial only).
+- No swarm/gc agent fan-out inside iterations. Bounded in-process read-only
+  finding generators may run concurrently during INGEST, but REDUCE remains the
+  single serialized writer for `.agents/rpi/next-work.jsonl`.
 
 ## Execution Steps
 

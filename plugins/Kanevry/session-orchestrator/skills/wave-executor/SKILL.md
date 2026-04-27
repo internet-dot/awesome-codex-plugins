@@ -255,6 +255,33 @@ End with a single commit summarizing all housekeeping work.
 | New critical issue discovered | Inform user, add to Impl-Polish+ roles if fits scope |
 | Agent edits wrong files | Revert via git, re-dispatch with stricter scope |
 
+## Return Shape Contract (Autopilot Integration, #300)
+
+When wave-executor is invoked as `sessionRunner` from `scripts/lib/autopilot.mjs::runLoop`, the value it returns to the loop drives the post-session kill-switches (`spiral`, `failed-wave`, `carryover-too-high`). The loop reads schema-canonical fields off the returned object — absent fields are treated as "no signal" (forward-compatible: an older or partial implementation simply does not trip the post-session gates).
+
+```js
+// Returned by sessionRunner({mode, autopilotRunId}) — superset of session-record schema.
+{
+  session_id: string,                           // required (used since Phase C-1)
+
+  agent_summary?: {                             // schema-canonical (session-schema.mjs)
+    complete?: number,
+    partial?:  number,
+    failed?:   number,                          // > 0 → kill-switch: failed-wave
+    spiral?:   number,                          // > 0 → kill-switch: spiral
+  },
+
+  effectiveness?: {                             // schema-canonical (session-schema.mjs)
+    planned_issues?: number,                    // 0 → carryover gate is no-op (avoids div-by-zero)
+    carryover?:      number,                    // / planned > carryoverThreshold → carryover-too-high
+    completion_rate?: number,
+    completed_issues?: number,
+  },
+}
+```
+
+**`autopilot_run_id` propagation:** when wave-executor is invoked under autopilot, `args.autopilotRunId` is the loop-level run id. The per-iteration `sessions.jsonl` record MUST carry `autopilot_run_id: <id>` so retros can join autopilot.jsonl ↔ sessions.jsonl without schema changes. Manual sessions write `null` or omit the field — readers treat both identically per the v1 additive convention. See `skills/session-end/session-metrics-write.md`.
+
 ## Completion
 
 After the Finalization wave completes successfully:

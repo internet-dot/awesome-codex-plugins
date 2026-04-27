@@ -6,7 +6,7 @@ Manage authentication credentials for Bitbucket Data Center and Cloud hosts.
 
 Tokens are stored in the OS keychain by default. For Data Center hosts, bkt
 uses Personal Access Tokens (PATs). For Bitbucket Cloud, bkt uses Atlassian
-API tokens (app passwords).
+API tokens with scopes.
 
 Use "bkt auth login" to add a host, "bkt auth status" to inspect stored
 credentials, and "bkt auth logout" to remove them.
@@ -120,7 +120,7 @@ bkt auth login [host] [flags]
 ### Examples
 
 ```bash
-# Login to Bitbucket Cloud via OAuth (recommended)
+# Login to Bitbucket Cloud via OAuth
   bkt auth login https://bitbucket.org --kind cloud --web
 
   # Login to Bitbucket Cloud with an API token

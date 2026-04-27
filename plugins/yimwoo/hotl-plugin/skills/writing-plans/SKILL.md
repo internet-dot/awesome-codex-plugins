@@ -66,7 +66,7 @@ success_criteria: [from design's intent contract]
 risk_level: low | medium | high
 auto_approve: true | false
 # branch: custom/branch-name   # optional — execution derives hotl/<slug> if absent
-# worktree: false               # optional opt-out — default true, stays in the current checkout instead of an isolated worktree
+# worktree: host                # optional: only when a host tool already put this task on a feature-branch worktree
 # dirty_worktree: allow         # optional — proceed even if non-HOTL files are uncommitted
 ---
 
@@ -142,6 +142,7 @@ Break work into atomic steps:
 - Use `branch:` only when downstream tooling or verify logic truly depends on a specific branch name
 - Use `worktree: false` only when execution must stay in the current checkout rather than a separate worktree
 - To keep execution on the exact current branch, set both `branch: <current-branch>` and `worktree: false`
+- Use `worktree: host` when Codex or another host tool already created the execution worktree and HOTL should use the current feature branch exactly as-is
 - Avoid brittle verify steps such as `git branch --show-current | grep '^feature/'` unless the workflow pins `branch:` to match that exact convention
 - If a step must confirm the workflow file exists, use its repo-relative path; HOTL preserves that relative path inside the isolated worktree
 - If the workflow is authored on a non-`main`/`master` branch and does not pin `branch:` or `worktree:`, execution should pause and ask whether to continue on the current branch or use HOTL's isolated execution branch/worktree
@@ -151,6 +152,7 @@ Example:
 - If verify expects `pv6-ui/...`, set `branch: pv6-ui/plan-amendments`
 - If branch name does not matter, let HOTL derive `hotl/<slug>` and do not assert a custom prefix
 - If you want to keep using `pv6-ui/plan-amendments` itself, set `branch: pv6-ui/plan-amendments` and `worktree: false`
+- If Codex already opened the task in a worktree on `pv6-ui/plan-amendments`, set `worktree: host` and omit `branch:`
 
 ## Artifact Verification Rules
 
