@@ -1,0 +1,5 @@
+interface:
+  display_name: "Calle"
+  short_description: "Plan and run Call-E phone calls"
+  brand_color: "#10A37F"
+  default_prompt: "Use $calle to place or inspect a Call-E phone call."

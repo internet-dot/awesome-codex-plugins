@@ -52,7 +52,8 @@
      VM_OUTPUT=$(node "$PLUGIN_ROOT/scripts/vault-mirror.mjs" \
        --vault-dir "$VM_DIR" \
        --source .orchestrator/metrics/sessions.jsonl \
-       --kind session 2>&1)
+       --kind session \
+       --session-id "$SESSION_ID" 2>&1)
      VM_EXIT=$?
 
      # Surface script output so user can see skipped-handwritten results

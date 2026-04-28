@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
-  "last_updated": "2026-04-27",
-  "total": 51,
+  "last_updated": "2026-04-28",
+  "total": 52,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -207,7 +207,7 @@
       "description": "Local Apple Calendar and Reminders tooling for macOS with Codex plugin adapters.",
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
-      "install_url": "https://raw.githubusercontent.com/matk0shub/apple-productivity-mcp/main/.codex-plugin/plugin.json"
+      "install_url": "https://raw.githubusercontent.com/matk0shub/apple-productivity-mcp/main/plugins/apple-calendar/.codex-plugin/plugin.json"
     },
     {
       "name": "Bitbucket CLI",
@@ -218,6 +218,16 @@
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/avivsinai/bitbucket-cli/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Call-E",
+      "url": "https://github.com/CALLE-AI/call-e-integrations",
+      "owner": "CALLE-AI",
+      "repo": "call-e-integrations",
+      "description": "Plan, run, and inspect Call-E phone call workflows from Codex through the calle CLI.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/CALLE-AI/call-e-integrations/main/packages/codex-plugin/plugin/.codex-plugin/plugin.json"
     },
     {
       "name": "Chrome DevTools",
@@ -337,7 +347,7 @@
       "description": "Official Launch Fast plugin adapter for rapid SaaS deployment.",
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
-      "install_url": "https://raw.githubusercontent.com/BlockchainHB/launchfast_codex_plugin/main/.codex-plugin/plugin.json"
+      "install_url": "https://raw.githubusercontent.com/BlockchainHB/launchfast_codex_plugin/main/plugins/launchfast/.codex-plugin/plugin.json"
     },
     {
       "name": "Mobazha",
@@ -377,7 +387,7 @@
       "description": "Team collaboration via OpenProject integration.",
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
-      "install_url": "https://raw.githubusercontent.com/varaprasadreddy9676/team-codex-plugins/main/.codex-plugin/plugin.json"
+      "install_url": "https://raw.githubusercontent.com/varaprasadreddy9676/team-codex-plugins/main/plugins/openproject/.codex-plugin/plugin.json"
     },
     {
       "name": "OrgX",
@@ -397,7 +407,7 @@
       "description": "Route image-generation prompts to 30+ models (DALL-E, Stable Diffusion, Flux, Midjourney, and more) through a single MCP interface. Install: `npm install -g prompt-to-asset`.",
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
-      "install_url": "https://raw.githubusercontent.com/MohamedAbdallah-14/prompt-to-asset/main/.codex-plugin/plugin.json"
+      "install_url": "https://raw.githubusercontent.com/MohamedAbdallah-14/prompt-to-asset/main/plugins/prompt-to-asset/.codex-plugin/plugin.json"
     },
     {
       "name": "PANews Agent Toolkit",
@@ -497,7 +507,7 @@
       "description": "Strip AI writing patterns from text output — removes filler phrases, hedging language, and generic constructs to produce cleaner written content. Install: `npm install -g unslop`.",
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
-      "install_url": "https://raw.githubusercontent.com/MohamedAbdallah-14/unslop/main/.codex-plugin/plugin.json"
+      "install_url": "https://raw.githubusercontent.com/MohamedAbdallah-14/unslop/main/plugins/unslop/.codex-plugin/plugin.json"
     },
     {
       "name": "Upwork Autopilot",
@@ -517,7 +527,7 @@
       "description": "GitHub-ready Codex plugin bundle for Yandex Direct, Wordstat, Metrika, and Roistat.",
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
-      "install_url": "https://raw.githubusercontent.com/nebelov/yandex-direct-for-all/main/.codex-plugin/plugin.json"
+      "install_url": "https://raw.githubusercontent.com/nebelov/yandex-direct-for-all/main/plugins/yandex-direct-for-all/.codex-plugin/plugin.json"
     }
   ]
 }

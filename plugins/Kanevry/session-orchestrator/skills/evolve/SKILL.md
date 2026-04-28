@@ -204,7 +204,7 @@ For confirmed learnings, use atomic rewrite strategy:
    - `insight`: human-readable description of the pattern
    - `evidence`: specific data points that support the pattern
    - `confidence`: 0.5 for new learnings
-   - `source_session`: session ID from which the pattern was extracted
+   - `source_session`: **non-empty kebab-slug string** identifying the session from which the pattern was extracted (e.g. `main-2026-04-27-1942`). MUST be a string — never an object, array, number, or null. If multiple sessions contributed, use the earliest. If unknown, use `"unknown"` (the string). **Never** pass `String(<object>)` — that yields `"[object Object]"` and breaks the YAML mirror downstream (#307). Optional pre-write validation: `jq -e 'select(.source_session | type == "string" and length > 2)'`.
    - `created_at`: current ISO 8601 date
    - `expires_at`: current date + `learning-expiry-days` (default: 30) (ISO 8601)
 5. **Verify write**: Read back the first line of the written file to confirm valid JSON. If read-back fails or is not valid JSON, report error to user.
@@ -219,12 +219,14 @@ For confirmed learnings, use atomic rewrite strategy:
 
    b. Resolve the vault directory: use `$CONFIG."vault-integration"."vault-dir"` if non-null, otherwise fall back to the `$VAULT_DIR` environment variable. If neither is set, emit a warning and skip.
 
-   c. Invoke the mirror script:
+   c. Invoke the mirror script. Derive a synthetic `EVOLVE_SESSION_ID` so the vault-mirror auto-commit phase (#31) produces a traceable commit subject (`chore(vault): mirror evolve-<date> — N learnings + 0 sessions`):
       ```bash
+      EVOLVE_SESSION_ID="evolve-$(date -u +%Y-%m-%d-%H%M)"
       node "$PLUGIN_ROOT/scripts/vault-mirror.mjs" \
         --vault-dir "<vault-dir>" \
         --source .orchestrator/metrics/learnings.jsonl \
-        --kind learning
+        --kind learning \
+        --session-id "$EVOLVE_SESSION_ID"
       ```
 
    d. Handle the exit code according to `mode`:

@@ -133,6 +133,10 @@ amq drain --include-body
 amq send --to codex --body "Please pick this up" \
   --wait-for drained --wait-timeout 60s
 
+# Send between known sessions before entering coop exec
+amq send --root .agent-mail --from-session feature-a --me claude \
+  --to codex --session feature-b --body "Please review the setup"
+
 # Inspect receipts for a message later
 amq receipts list --me codex --msg-id <msg_id>
 
@@ -212,6 +216,25 @@ flags > AM_ROOT > project .amqrc > AMQ_GLOBAL_ROOT > ~/.amqrc > auto-detect
 Auto-detect covers the default `.agent-mail` layout, including `.agent-mail/<session>` session roots without `.amqrc`. Custom root names and peer config still require `.amqrc` or explicit flags/env.
 This same chain is used by `amq env`, `amq doctor`, and the integration commands, so Symphony and Kanban-launched agents can find the correct queue even when they are not started from the project directory.
 
+## Extension Metadata
+
+Higher-level layers can store launch records, role metadata, restore state, and indexes without writing into AMQ-owned mailbox directories. AMQ reserves these extension namespaces:
+
+```text
+<AM_ROOT>/extensions/<layer>/
+<AM_ROOT>/agents/<handle>/extensions/<layer>/
+```
+
+Layer names use lowercase ASCII letters, digits, hyphen, underscore, and dot; reverse-DNS names such as `io.github.omriariav.amq-squad` are supported. AMQ does not create files inside layer-owned directories, and `amq cleanup` leaves extension directories alone unless a future command explicitly targets extension metadata.
+
+Layers may publish a passive manifest at:
+
+```text
+<AM_ROOT>/extensions/<layer>/manifest.json
+```
+
+`amq doctor --json` reports valid manifests under `extension_manifests` and malformed metadata under `extension_diagnostics`. Manifests are diagnostics-only: AMQ does not execute extension code, load callbacks, or invoke hooks from them. See [docs/adr-layer-extensions.md](docs/adr-layer-extensions.md) for the full contract.
+
 ## Integrations
 
 AMQ transports **messages**, not remote task state. The integration layer is intentionally narrow: optional adapters convert external lifecycle or task events into normal AMQ messages. Integration messages are self-delivered (`from=<me>`, `to=<me>`) so an agent monitoring its own inbox can react without polling another tool directly.
@@ -262,7 +285,7 @@ Common command groups:
 | Core messaging | `init`, `send`, `list`, `read`, `drain`, `reply`, `thread`, `watch`, `monitor`, `receipts` |
 | Collaboration | `coop init`, `coop exec`, `swarm list`, `swarm join`, `swarm tasks`, `swarm bridge` |
 | Integrations | `integration symphony init`, `integration symphony emit`, `integration kanban bridge` |
-| Operations | `presence set`, `presence list`, `who`, `doctor`, `doctor --ops`, `cleanup`, `dlq *`, `upgrade`, `env`, `shell-setup` |
+| Operations | `presence set`, `presence list`, `route explain`, `who`, `doctor`, `doctor --ops`, `cleanup`, `dlq *`, `upgrade`, `env`, `shell-setup` |
 
 For the full CLI syntax, examples, and message schema, see [CLAUDE.md](CLAUDE.md).
 

@@ -10,7 +10,7 @@ check "SKILL.md has YAML frontmatter" "head -1 '$SKILL_DIR/SKILL.md' | grep -q '
 check "SKILL.md has name: pre-mortem" "grep -q '^name: pre-mortem' '$SKILL_DIR/SKILL.md'"
 check "references/ directory exists" "[ -d '$SKILL_DIR/references' ]"
 check "references/ has at least 3 files" "[ \$(ls '$SKILL_DIR/references/' | wc -l) -ge 3 ]"
-check "SKILL.md mentions /council delegation" "grep -qi '/council' '$SKILL_DIR/SKILL.md'"
+check "SKILL.md mentions council delegation" "grep -Eq '(/|\\$)council' '$SKILL_DIR/SKILL.md'"
 check "SKILL.md mentions compiled pre-mortem checks" "grep -q '\.agents/pre-mortem-checks' '$SKILL_DIR/SKILL.md'"
 check "SKILL.md mentions finding registry fallback" "grep -q 'registry.jsonl' '$SKILL_DIR/SKILL.md'"
 check "SKILL.md mentions known_risks" "grep -q 'known_risks' '$SKILL_DIR/SKILL.md'"

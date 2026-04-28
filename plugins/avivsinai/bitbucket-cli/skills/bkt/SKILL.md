@@ -1,6 +1,6 @@
 ---
 name: bkt
-version: 0.26.3
+version: 0.26.4
 description: Bitbucket CLI for Data Center and Cloud. Use when users need to manage repositories, pull requests, branches, issues, webhooks, or pipelines in Bitbucket. Triggers include "bitbucket", "bkt", "pull request", "PR", "repo list", "branch create", "Bitbucket Data Center", "Bitbucket Cloud", "keyring timeout".
 metadata:
   short-description: Bitbucket CLI for repos, PRs, branches
@@ -48,14 +48,14 @@ If not authenticated, log in:
 # Data Center (PAT-based)
 bkt auth login https://bitbucket.example.com --username alice --token <PAT>
 
-# Bitbucket Cloud — OAuth (recommended; opens browser)
+# Bitbucket Cloud — OAuth (official binaries open browser out of the box)
 bkt auth login https://bitbucket.org --kind cloud --web
 
 # Bitbucket Cloud — API token (--web-token opens Atlassian's token creation page)
 bkt auth login https://bitbucket.org --kind cloud --web-token
 ```
 
-For `go install` builds, set `BKT_OAUTH_CLIENT_ID` and `BKT_OAUTH_CLIENT_SECRET` env vars before running `--web`.
+For source and Nix builds, set `BKT_OAUTH_CLIENT_ID` and `BKT_OAUTH_CLIENT_SECRET` env vars before running `--web`.
 
 **3. Set up a context** — contexts bind a host to a project/workspace and optional default repo, so you don't repeat flags on every command:
 

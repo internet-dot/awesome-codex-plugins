@@ -96,6 +96,45 @@ extract_description_from_show_text() {
   '
 }
 
+extract_close_reason_from_show_text() {
+  awk '
+    /Close reason:/ {
+      sub(/^.*Close reason:[[:space:]]*/, "", $0)
+      print
+      exit
+    }
+  '
+}
+
+issue_audit_text() {
+  local child="$1"
+  local child_json=""
+  local human_output=""
+  local description=""
+  local close_reason=""
+
+  if child_json="$(bd_show_json "$child" 2>/dev/null)"; then
+    printf '%s\n' "$child_json" \
+      | jq -r '
+          [
+            (.title // ""),
+            (.description // ""),
+            (.acceptance_criteria // ""),
+            (.close_reason // "")
+          ]
+          | map(select(type == "string" and length > 0))
+          | join("\n\n")
+        '
+    return 0
+  fi
+
+  human_output="$(bd show "$child" 2>/dev/null || true)"
+  description="$(printf '%s\n' "$human_output" | extract_description_from_show_text)"
+  close_reason="$(printf '%s\n' "$human_output" | extract_close_reason_from_show_text)"
+
+  printf '%s\n\n%s\n' "$description" "$close_reason"
+}
+
 collect_children_from_bd_children_json() {
   local json_output
   json_output="$(bd children "$EPIC_ID" --json 2>/dev/null)" || return 1
@@ -283,19 +322,41 @@ extract_validation_command_strings_from_block() {
       ' 2>/dev/null || true
 }
 
+trim_path_punctuation() {
+  printf '%s\n' "$1" | sed -E 's@[[:punct:]]+$@@; s@/$@@'
+}
+
 normalize_command_path() {
   local raw="$1"
   local cd_dir="$2"
   local path="$raw"
+  local base=""
 
   path="${path#./}"
   path="${path%/}"
   cd_dir="${cd_dir#./}"
   cd_dir="${cd_dir%/}"
+  path="$(trim_path_punctuation "$path")"
+  cd_dir="$(trim_path_punctuation "$cd_dir")"
 
   [[ -n "$path" ]] || return 0
   if [[ -n "$cd_dir" && "$raw" == ./* ]]; then
     printf '%s/%s\n' "$cd_dir" "$path"
+  elif [[ -n "$cd_dir" && "$raw" == ../* ]]; then
+    base="$cd_dir"
+    while [[ "$path" == ../* ]]; do
+      path="${path#../}"
+      if [[ "$base" == */* ]]; then
+        base="${base%/*}"
+      else
+        base=""
+      fi
+    done
+    if [[ -n "$base" ]]; then
+      printf '%s/%s\n' "$base" "$path"
+    else
+      printf '%s\n' "$path"
+    fi
   else
     printf '%s\n' "$path"
   fi
@@ -313,7 +374,6 @@ extract_paths_from_command_string() {
     cd_dir="${cd_dir#\"}"
     cd_dir="${cd_dir%\'}"
     cd_dir="${cd_dir#\'}"
-    normalize_command_path "$cd_dir" ""
   fi
 
   {
@@ -325,6 +385,49 @@ extract_paths_from_command_string() {
       | extract_file_paths_from_stream
   } | while IFS= read -r raw_path; do
     normalize_command_path "$raw_path" "$cd_dir"
+  done
+}
+
+filter_probable_repo_paths() {
+  local path=""
+
+  while IFS= read -r path; do
+    path="$(trim_path_punctuation "$path")"
+    [[ -n "$path" ]] || continue
+    if [[ "$path" == ./* ]]; then
+      path="${path#./}"
+    fi
+    while [[ "$path" == ../* ]]; do
+      path="${path#../}"
+    done
+
+    case "$path" in
+      .agents/*|.github/*|cli/*|docs/*|schemas/*|scripts/*|skills/*|skills-codex/*|hooks/*|tests/*|evals/*|lib/*)
+        printf '%s\n' "$path"
+        continue
+        ;;
+      AGENTS.md|GOALS.md|PRODUCT.md|README.md|SKILL-TIERS.md)
+        printf '%s\n' "$path"
+        continue
+        ;;
+    esac
+
+    if [[ -e "$path" ]]; then
+      printf '%s\n' "$path"
+      continue
+    fi
+    if run_git_clean ls-files --error-unmatch -- "$path" >/dev/null 2>&1; then
+      printf '%s\n' "$path"
+    fi
+  done
+}
+
+extract_command_paths_from_text() {
+  local line=""
+
+  while IFS= read -r line; do
+    [[ -n "$line" ]] || continue
+    extract_paths_from_command_string "$line"
   done
 }
 
@@ -366,48 +469,34 @@ extract_backticked_files_from_text() {
 
 extract_scoped_files() {
   local child="$1"
-  local description=""
-  local child_json=""
-  local human_output=""
+  local audit_text=""
   local validation_block=""
 
-  if child_json="$(bd_show_json "$child" 2>/dev/null)"; then
-    description="$(printf '%s\n' "$child_json" | jq -r '.description // ""')"
-  else
-    human_output="$(bd show "$child" 2>/dev/null || true)"
-    description="$(printf '%s\n' "$human_output" | extract_description_from_show_text)"
-  fi
+  audit_text="$(issue_audit_text "$child")"
 
-  validation_block="$(printf '%s\n' "$description" | extract_validation_block_from_text)"
+  validation_block="$(printf '%s\n' "$audit_text" | extract_validation_block_from_text)"
 
   {
     extract_validation_files_from_block "$validation_block"
     extract_validation_command_paths_from_block "$validation_block"
-    printf '%s\n' "$description" | extract_labeled_files_from_text
-    printf '%s\n' "$description" | extract_files_section_from_text
-    printf '%s\n' "$description" | extract_backticked_files_from_text
-    printf '%s\n' "$description" | extract_repo_relative_paths_from_text
-    printf '%s\n' "$description" | extract_prose_file_paths_from_text
-  } | sed '/^[[:space:]]*$/d' | expand_scoped_paths_from_stream | sort -u
+    printf '%s\n' "$audit_text" | extract_labeled_files_from_text
+    printf '%s\n' "$audit_text" | extract_files_section_from_text
+    printf '%s\n' "$audit_text" | extract_backticked_files_from_text
+    printf '%s\n' "$audit_text" | extract_command_paths_from_text
+    printf '%s\n' "$audit_text" | extract_repo_relative_paths_from_text
+    printf '%s\n' "$audit_text" | extract_prose_file_paths_from_text
+  } | sed '/^[[:space:]]*$/d' | expand_scoped_paths_from_stream | filter_probable_repo_paths | sort -u
 }
 
-description_has_file_patterns() {
-  # Returns 0 (true) if the bead's description mentions file-like patterns
+issue_text_has_file_patterns() {
+  # Returns 0 (true) if the bead's own structured text mentions file-like patterns
   # (contains "/" or ".go" or ".sh" or ".md"). Used to distinguish a genuine
   # parser miss from a bead that simply has no file scope at all.
   local child="$1"
-  local description=""
-  local child_json=""
-  local human_output=""
+  local audit_text=""
 
-  if child_json="$(bd_show_json "$child" 2>/dev/null)"; then
-    description="$(printf '%s\n' "$child_json" | jq -r '.description // ""')"
-  else
-    human_output="$(bd show "$child" 2>/dev/null || true)"
-    description="$(printf '%s\n' "$human_output" | extract_description_from_show_text)"
-  fi
-
-  printf '%s\n' "$description" | grep -qE '/|\.go|\.sh|\.md'
+  audit_text="$(issue_audit_text "$child")"
+  printf '%s\n' "$audit_text" | grep -qE '/|\.go|\.sh|\.md'
 }
 
 issue_timestamp() {
@@ -773,7 +862,7 @@ classify_child() {
             build_child_result "$child" "$scoped_json" "evidence-only-packet" "matched durable closure proof packet (no commit evidence for scoped files)" "$packet_json" "pass"
           fi
         elif [[ "${#scoped_files[@]}" -eq 0 ]]; then
-          if description_has_file_patterns "$child"; then
+          if issue_text_has_file_patterns "$child"; then
             build_child_result "$child" "$scoped_json" "none" "parser_miss: description mentions file-like paths but extraction found 0 scoped files — manual review recommended" '[]' "warn"
           else
             build_child_result "$child" "$scoped_json" "none" "parser_miss: no scoped files extracted from description" '[]' "fail"
@@ -796,7 +885,7 @@ classify_child() {
       packet_json="$(packet_matches_json "$packet_path")"
       build_child_result "$child" "$scoped_json" "evidence-only-packet" "matched durable closure proof packet (no scoped files)" "$packet_json" "pass"
     else
-      if description_has_file_patterns "$child"; then
+      if issue_text_has_file_patterns "$child"; then
         build_child_result "$child" "$scoped_json" "none" "parser_miss: description mentions file-like paths but extraction found 0 scoped files — manual review recommended" '[]' "warn"
       else
         build_child_result "$child" "$scoped_json" "none" "parser_miss: no scoped files extracted from description" '[]' "fail"

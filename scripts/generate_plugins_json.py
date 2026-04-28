@@ -133,6 +133,18 @@ def load_manifest(archive: zipfile.ZipFile, plugin_root: PurePosixPath) -> dict[
     return json.loads(archive.read(manifest_name).decode("utf-8"))
 
 
+def plugin_root_relative_path(plugin_root: PurePosixPath) -> str:
+    repo_relative_parts = plugin_root.parts[1:]
+    return PurePosixPath(*repo_relative_parts).as_posix() if repo_relative_parts else ""
+
+
+def build_raw_manifest_url(plugin: dict[str, str], plugin_root_relative: str) -> str:
+    manifest_path = ".codex-plugin/plugin.json"
+    if plugin_root_relative:
+        manifest_path = f"{plugin_root_relative}/{manifest_path}"
+    return f"https://raw.githubusercontent.com/{plugin['owner']}/{plugin['repo']}/main/{manifest_path}"
+
+
 def add_recursive_selection(
     selected: set[str],
     all_names: set[str],
@@ -184,7 +196,7 @@ def collect_selected_paths(
     return selected
 
 
-def mirror_plugin_bundle(plugin: dict[str, str]) -> tuple[dict[str, object], str]:
+def mirror_plugin_bundle(plugin: dict[str, str]) -> tuple[dict[str, object], str, str]:
     owner_repo = f"{plugin['owner']}/{plugin['repo']}"
     try:
         archive = fetch_repo_archive(plugin["owner"], plugin["repo"])
@@ -207,8 +219,7 @@ def mirror_plugin_bundle(plugin: dict[str, str]) -> tuple[dict[str, object], str
         destination_path.parent.mkdir(parents=True, exist_ok=True)
         destination_path.write_bytes(archive.read(archive_name))
 
-    manifest_name = str(manifest.get("name") or "").strip() or plugin["repo"]
-    return manifest, f"./plugins/{plugin['owner']}/{plugin['repo']}"
+    return manifest, f"./plugins/{plugin['owner']}/{plugin['repo']}", plugin_root_relative_path(plugin_root)
 
 
 def build_marketplace_entry(
@@ -240,7 +251,8 @@ def main() -> None:
     plugins = parse_plugins(README)
     mirrored_entries: list[dict[str, object]] = []
     for plugin in plugins:
-        manifest, marketplace_path = mirror_plugin_bundle(plugin)
+        manifest, marketplace_path, plugin_root_relative = mirror_plugin_bundle(plugin)
+        plugin["install_url"] = build_raw_manifest_url(plugin, plugin_root_relative)
         mirrored_entries.append(build_marketplace_entry(plugin, manifest, marketplace_path))
 
     marketplace = {

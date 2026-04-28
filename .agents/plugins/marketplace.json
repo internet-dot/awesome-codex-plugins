@@ -257,6 +257,18 @@
       "category": "Tools & Integrations"
     },
     {
+      "name": "calle",
+      "source": {
+        "source": "local",
+        "path": "./plugins/CALLE-AI/call-e-integrations"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Tools & Integrations"
+    },
+    {
       "name": "chrome-devtools",
       "source": {
         "source": "local",
