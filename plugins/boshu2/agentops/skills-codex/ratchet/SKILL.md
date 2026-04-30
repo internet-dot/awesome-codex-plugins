@@ -1,6 +1,6 @@
 ---
 name: ratchet
-description: 'Record and verify Brownian Ratchet progress gates.'
+description: 'Record Brownian Ratchet gates.'
 ---
 # Ratchet Skill
 

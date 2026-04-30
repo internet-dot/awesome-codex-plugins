@@ -1,6 +1,6 @@
 ---
 name: evolve
-description: 'Run autonomous improvement: goals, planning, implementation, validation, repeat.'
+description: 'Run autonomous improvement loops.'
 ---
 # $evolve — Goal-Driven Compounding Loop
 

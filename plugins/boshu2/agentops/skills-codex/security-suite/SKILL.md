@@ -1,6 +1,6 @@
 ---
 name: security-suite
-description: 'Run composable security analysis across binaries, prompts, traces, and policies.'
+description: 'Run composable security analysis.'
 ---
 # Security Suite
 

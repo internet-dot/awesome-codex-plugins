@@ -1,6 +1,6 @@
 ---
 name: shared
-description: 'Shared reference contracts used by other AgentOps skills.'
+description: 'Shared AgentOps skill contracts.'
 ---
 # Shared References
 

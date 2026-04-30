@@ -1,6 +1,6 @@
 ---
 name: codex-team
-description: 'Coordinate 2+ Codex agents on bounded parallel tasks with file ownership.'
+description: 'Coordinate multiple Codex agents.'
 ---
 # Codex Team
 

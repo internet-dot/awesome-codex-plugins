@@ -1,6 +1,6 @@
 ---
 name: using-agentops
-description: 'Explain AgentOps operating model, lifecycle, skills, hooks, and context.'
+description: 'Explain AgentOps workflows.'
 ---
 # AgentOps Operating Model
 

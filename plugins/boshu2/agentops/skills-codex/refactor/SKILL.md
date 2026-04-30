@@ -1,6 +1,6 @@
 ---
 name: refactor
-description: 'Plan and execute safe refactors with regression checks at each step.'
+description: 'Execute safe refactors.'
 ---
 # Refactor Skill
 

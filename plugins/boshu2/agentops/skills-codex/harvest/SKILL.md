@@ -1,6 +1,6 @@
 ---
 name: harvest
-description: 'Consolidate knowledge across .agents directories and promote useful items.'
+description: 'Promote .agents knowledge.'
 ---
 # Harvest — Cross-Rig Knowledge Consolidation
 

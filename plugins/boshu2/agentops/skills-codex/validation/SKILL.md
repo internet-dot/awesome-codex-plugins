@@ -1,6 +1,6 @@
 ---
 name: validation
-description: 'Run post-implementation validation: vibe, post-mortem, retro, and forge.'
+description: 'Run post-implementation validation.'
 ---
 # $validation — Full Validation Phase Orchestrator
 

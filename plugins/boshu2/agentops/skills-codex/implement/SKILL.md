@@ -1,6 +1,6 @@
 ---
 name: implement
-description: 'Implement one tracked issue with focused edits, tests, and closure evidence.'
+description: 'Implement one tracked issue.'
 ---
 # Implement Skill
 

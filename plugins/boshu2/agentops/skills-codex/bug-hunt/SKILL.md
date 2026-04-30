@@ -1,6 +1,6 @@
 ---
 name: bug-hunt
-description: 'Investigate bugs or audit code with repro evidence, root cause analysis, and fixes.'
+description: 'Investigate bugs and root causes.'
 ---
 # Bug Hunt Skill
 

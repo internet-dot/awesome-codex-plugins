@@ -1,6 +1,6 @@
 ---
 name: pr-research
-description: 'Research an upstream repo before contributing: rules, patterns, and expectations.'
+description: 'Research an upstream repo.'
 ---
 # PR Research Skill
 

@@ -1,6 +1,6 @@
 ---
 name: crank
-description: 'Execute an epic hands-free through waves until work is done or blocked.'
+description: 'Execute epics through waves.'
 ---
 # $crank - Autonomous Epic Execution (Codex Native)
 

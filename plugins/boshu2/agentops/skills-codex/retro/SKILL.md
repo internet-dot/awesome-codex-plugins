@@ -1,6 +1,6 @@
 ---
 name: retro
-description: 'Capture a quick learning or session note for later compounding.'
+description: 'Capture a session learning.'
 ---
 # Retro Skill
 

@@ -1,6 +1,6 @@
 ---
 name: provenance
-description: 'Trace where knowledge, decisions, or artifacts came from.'
+description: 'Trace artifact provenance.'
 ---
 # Provenance Skill
 

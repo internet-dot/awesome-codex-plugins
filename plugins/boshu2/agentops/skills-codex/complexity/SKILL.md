@@ -1,6 +1,6 @@
 ---
 name: complexity
-description: 'Analyze code complexity and identify focused refactor targets.'
+description: 'Find focused refactor hotspots.'
 ---
 # Complexity Skill
 

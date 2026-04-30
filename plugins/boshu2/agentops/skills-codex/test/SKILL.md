@@ -1,6 +1,6 @@
 ---
 name: test
-description: 'Generate tests, analyze coverage, and plan TDD validation.'
+description: 'Generate tests and coverage plans.'
 ---
 # Test Skill
 

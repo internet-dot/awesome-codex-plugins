@@ -1,6 +1,6 @@
 ---
 name: readme
-description: 'Draft or improve a project README using structured evidence and review.'
+description: 'Draft or improve README docs.'
 ---
 # $readme — Gold-Standard README Generation
 

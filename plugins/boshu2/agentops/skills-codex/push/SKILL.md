@@ -1,6 +1,6 @@
 ---
 name: push
-description: 'Run gates, commit intentionally, push the branch, and confirm remote state.'
+description: 'Validate, commit, and push.'
 ---
 # Push Skill
 

@@ -1,6 +1,6 @@
 ---
 name: vibe
-description: 'Validate code readiness with complexity checks and council or inline review.'
+description: 'Validate code readiness.'
 ---
 # Vibe Skill
 

@@ -1,6 +1,6 @@
 ---
 name: standards
-description: 'Provide language and repo standards for implementation, docs, tests, and review.'
+description: 'Provide repo coding standards.'
 ---
 # Standards Skill
 

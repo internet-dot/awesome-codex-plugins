@@ -1,6 +1,6 @@
 ---
 name: forge
-description: 'Mine transcripts and artifacts into reusable learnings, decisions, and patterns.'
+description: 'Mine transcripts into learnings.'
 ---
 # Forge Skill
 

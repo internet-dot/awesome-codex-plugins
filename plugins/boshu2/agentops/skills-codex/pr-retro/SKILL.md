@@ -1,6 +1,6 @@
 ---
 name: pr-retro
-description: 'Learn from PR outcomes and update contribution lessons.'
+description: 'Learn from PR outcomes.'
 ---
 # PR Retro Skill
 

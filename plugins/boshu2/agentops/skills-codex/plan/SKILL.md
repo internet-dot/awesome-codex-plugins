@@ -1,6 +1,6 @@
 ---
 name: plan
-description: 'Decompose goals into issue-ready plans, waves, dependencies, and validation checks.'
+description: 'Decompose goals into issue plans.'
 ---
 
 # $plan - Issue-Ready Decomposition

@@ -1,6 +1,6 @@
 ---
 name: knowledge-activation
-description: 'Turn a mature .agents corpus into packets, belief books, briefings, and gaps.'
+description: 'Activate mature .agents knowledge.'
 ---
 # Knowledge Activation
 

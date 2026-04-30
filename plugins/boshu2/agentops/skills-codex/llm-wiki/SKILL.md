@@ -1,6 +1,6 @@
 ---
 name: llm-wiki
-description: 'Build an external-knowledge wiki from clipped articles, papers, and transcripts.'
+description: 'Build external-knowledge wikis.'
 ---
 # LLM Wiki Skill (proposal)
 

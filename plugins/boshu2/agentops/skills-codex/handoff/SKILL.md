@@ -1,6 +1,6 @@
 ---
 name: handoff
-description: 'Create compact session handoffs for continuation after pause or compaction.'
+description: 'Write compact session handoffs.'
 ---
 # Handoff Skill
 

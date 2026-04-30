@@ -1,6 +1,6 @@
 ---
 name: trace
-description: 'Trace decisions and concepts through history, artifacts, and git.'
+description: 'Trace decisions through artifacts.'
 ---
 # Trace Skill
 

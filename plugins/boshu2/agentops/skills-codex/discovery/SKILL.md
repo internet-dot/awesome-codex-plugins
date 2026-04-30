@@ -1,6 +1,6 @@
 ---
 name: discovery
-description: 'Orchestrate brainstorm, research, plan, and pre-mortem into an execution packet.'
+description: 'Create execution packets.'
 ---
 # $discovery — Full Discovery Phase Orchestrator
 

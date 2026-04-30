@@ -1,6 +1,6 @@
 ---
 name: pr-validate
-description: 'Validate PR scope, isolation, quality, and upstream alignment.'
+description: 'Validate PR scope and quality.'
 ---
 # PR Validate Skill
 

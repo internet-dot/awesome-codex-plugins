@@ -1,6 +1,6 @@
 ---
 name: doc
-description: 'Generate, sync, and validate docs against repo evidence.'
+description: 'Generate and validate repo docs.'
 ---
 # Doc Skill
 

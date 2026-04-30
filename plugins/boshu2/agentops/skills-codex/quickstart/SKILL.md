@@ -1,6 +1,6 @@
 ---
 name: quickstart
-description: 'Detect AgentOps setup and give one concise next action.'
+description: 'Show AgentOps next action.'
 ---
 # $quickstart
 

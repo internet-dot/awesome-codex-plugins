@@ -1,6 +1,6 @@
 ---
 name: recover
-description: 'Recover session context after compaction from RPI, evolve, and recent artifacts.'
+description: 'Recover session context.'
 ---
 # $recover — Context Recovery After Compaction
 

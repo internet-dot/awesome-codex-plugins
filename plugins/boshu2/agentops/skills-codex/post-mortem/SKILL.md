@@ -1,6 +1,6 @@
 ---
 name: post-mortem
-description: 'Review completed work, capture learnings, and feed follow-up knowledge.'
+description: 'Review completed work and learn.'
 ---
 # Post-Mortem Skill
 

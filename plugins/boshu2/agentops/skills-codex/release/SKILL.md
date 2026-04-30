@@ -1,6 +1,6 @@
 ---
 name: release
-description: 'Run release validation, changelog/version steps, tagging, and release notes.'
+description: 'Run release validation.'
 ---
 # Release Skill
 

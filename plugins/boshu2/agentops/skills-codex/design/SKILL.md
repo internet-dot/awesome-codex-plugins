@@ -1,6 +1,6 @@
 ---
 name: design
-description: 'Validate product fit before discovery using PRODUCT.md and scope checks.'
+description: 'Validate product fit before discovery.'
 ---
 # $design -- Product Validation Gate (Codex Native)
 

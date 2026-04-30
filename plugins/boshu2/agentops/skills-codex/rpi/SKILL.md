@@ -1,6 +1,6 @@
 ---
 name: rpi
-description: 'Run full lifecycle: discovery, crank implementation, validation, and report.'
+description: 'Run discovery, crank, validation.'
 ---
 
 # $rpi - Full Lifecycle Orchestrator

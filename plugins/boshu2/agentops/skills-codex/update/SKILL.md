@@ -1,6 +1,6 @@
 ---
 name: update
-description: 'Reinstall or sync AgentOps skills from the latest source.'
+description: 'Sync AgentOps skills.'
 ---
 # $update — Reinstall AgentOps Skills
 

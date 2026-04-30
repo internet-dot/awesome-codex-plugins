@@ -1,6 +1,6 @@
 ---
 name: council
-description: 'Run multi-judge consensus for validation, brainstorming, or research.'
+description: 'Run multi-judge consensus.'
 ---
 # $council — Multi-Model Consensus Council (Codex Native)
 

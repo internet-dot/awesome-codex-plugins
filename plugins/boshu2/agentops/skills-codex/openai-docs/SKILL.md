@@ -1,6 +1,6 @@
 ---
 name: openai-docs
-description: 'Use official OpenAI docs for API/product questions needing current citations.'
+description: 'Use official OpenAI docs.'
 ---
 # OpenAI Docs
 

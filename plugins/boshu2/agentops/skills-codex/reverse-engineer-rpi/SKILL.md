@@ -1,6 +1,6 @@
 ---
 name: reverse-engineer-rpi
-description: 'Reverse-engineer a product into feature catalog, code map, and specs.'
+description: 'Reverse-engineer product specs.'
 ---
 # $reverse-engineer-rpi
 

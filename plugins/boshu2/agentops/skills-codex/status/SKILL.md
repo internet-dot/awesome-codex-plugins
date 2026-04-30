@@ -1,6 +1,6 @@
 ---
 name: status
-description: 'Show current work, recent validation, flywheel health, and next action.'
+description: 'Show AgentOps work status.'
 ---
 # $status — Workflow Dashboard
 

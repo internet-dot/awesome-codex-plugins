@@ -1,6 +1,6 @@
 ---
 name: product
-description: 'Create or refine PRODUCT.md through mission, persona, and value prompts.'
+description: 'Create or refine PRODUCT.md.'
 ---
 # $product — Interactive PRODUCT.md Generation
 

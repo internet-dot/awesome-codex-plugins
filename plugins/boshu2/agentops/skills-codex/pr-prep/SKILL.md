@@ -1,6 +1,6 @@
 ---
 name: pr-prep
-description: 'Prepare PR commits, validation evidence, and review-ready PR body.'
+description: 'Prepare PR commits and body.'
 ---
 # PR Preparation Skill
 

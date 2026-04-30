@@ -1,6 +1,6 @@
 ---
 name: scenario
-description: 'Author and manage holdout behavioral validation scenarios.'
+description: 'Manage holdout scenarios.'
 ---
 # Scenario Skill
 

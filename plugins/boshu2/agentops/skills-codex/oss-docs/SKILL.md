@@ -1,6 +1,6 @@
 ---
 name: oss-docs
-description: 'Scaffold or audit open source docs such as README, CONTRIBUTING, and changelog.'
+description: 'Scaffold or audit OSS docs.'
 ---
 # OSS Documentation Skill
 

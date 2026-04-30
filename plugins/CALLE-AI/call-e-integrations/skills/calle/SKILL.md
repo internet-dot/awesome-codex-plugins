@@ -45,7 +45,7 @@ All CLI commands run from this Codex plugin must include the Call-E integration
 attribution environment:
 
 ```bash
-env CALLE_SOURCE=codex CALLE_INTEGRATION=codex_plugin CALLE_INTEGRATION_VERSION=0.1.4
+env CALLE_SOURCE=codex CALLE_INTEGRATION=codex_plugin CALLE_INTEGRATION_VERSION=0.1.6
 ```
 
 Use the first command form that works.
@@ -53,19 +53,19 @@ Use the first command form that works.
 Prefer the repository-local CLI when the current workspace contains it:
 
 ```bash
-env CALLE_SOURCE=codex CALLE_INTEGRATION=codex_plugin CALLE_INTEGRATION_VERSION=0.1.4 node packages/cli/bin/calle.js
+env CALLE_SOURCE=codex CALLE_INTEGRATION=codex_plugin CALLE_INTEGRATION_VERSION=0.1.6 node packages/cli/bin/calle.js
 ```
 
 If the repository-local CLI is unavailable, use the global command:
 
 ```bash
-env CALLE_SOURCE=codex CALLE_INTEGRATION=codex_plugin CALLE_INTEGRATION_VERSION=0.1.4 calle
+env CALLE_SOURCE=codex CALLE_INTEGRATION=codex_plugin CALLE_INTEGRATION_VERSION=0.1.6 calle
 ```
 
 If neither command works, use the pinned npm package through `npx`:
 
 ```bash
-env CALLE_SOURCE=codex CALLE_INTEGRATION=codex_plugin CALLE_INTEGRATION_VERSION=0.1.4 npx -y @call-e/cli@0.3.0
+env CALLE_SOURCE=codex CALLE_INTEGRATION=codex_plugin CALLE_INTEGRATION_VERSION=0.1.6 npx -y @call-e/cli@0.3.1
 ```
 
 Only tell the user to install the CLI globally if `npx` is unavailable,
@@ -128,6 +128,9 @@ I'll keep you updated on the phone status, call content, and summary.
 ## Call flow
 
 1. Use `call plan` first.
+   If the user has not provided enough explicit fields for `call plan`, use
+   `mcp call plan_call --args-json '{"user_input":"<latest user message verbatim>"}'`
+   so Call-E can ask for the missing details.
 2. Read the returned `plan_id` and `confirm_token`.
 3. If the user's request is to place a call, immediately use `call run` with
    the exact `plan_id` and `confirm_token` returned by planning.

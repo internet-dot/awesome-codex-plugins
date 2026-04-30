@@ -1,6 +1,6 @@
 ---
 name: flywheel
-description: 'Check knowledge flywheel health, velocity, staleness, and pool depth.'
+description: 'Check knowledge flywheel health.'
 ---
 # Flywheel Skill
 Monitor the knowledge flywheel health.

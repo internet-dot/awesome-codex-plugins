@@ -1,6 +1,6 @@
 ---
 name: autodev
-description: 'Manage PROGRAM.md/AUTODEV.md contracts for bounded autonomous development loops.'
+description: 'Manage bounded autonomous dev loops.'
 ---
 # $autodev
 

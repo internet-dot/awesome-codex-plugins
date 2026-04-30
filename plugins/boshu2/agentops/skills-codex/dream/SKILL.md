@@ -1,6 +1,6 @@
 ---
 name: dream
-description: 'Run or review private overnight AgentOps compounding sessions.'
+description: 'Run overnight compounding sessions.'
 ---
 # Dream Skill
 

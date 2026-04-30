@@ -1,6 +1,6 @@
 ---
 name: research
-description: 'Explore a codebase or question and write evidence-backed findings.'
+description: 'Explore and write findings.'
 ---
 # Research Skill
 
