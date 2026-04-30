@@ -1,0 +1,84 @@
+#!/usr/bin/env node
+'use strict';
+const path = require('path');
+const PLUGIN_ROOT = process.env.KNOX_ROOT || process.env.CLAUDE_PLUGIN_ROOT || path.resolve(__dirname, '..');
+const { runEngine, buildResponse } = require(path.join(PLUGIN_ROOT, 'lib', 'adapter-codex'));
+const { loadConfig } = require(path.join(PLUGIN_ROOT, 'lib', 'config'));
+const { writeAudit } = require(path.join(PLUGIN_ROOT, 'lib', 'audit'));
+const { incrementDenial, recordCrossDenial } = require(path.join(PLUGIN_ROOT, 'lib', 'state'));
+
+let inputData = '';
+const STDIN_CAP = 10 * 1024 * 1024;
+process.stdin.on('data', chunk => {
+  inputData += chunk;
+  if (inputData.length > STDIN_CAP) {
+    process.stderr.write('Knox: stdin exceeds 10MB cap\n');
+    process.exit(1);
+  }
+});
+process.stdin.on('end', () => {
+  let event;
+  try { event = JSON.parse(inputData); } catch { process.exit(0); }
+
+  const config = loadConfig();
+  const sessionId = event.session_id || 'unknown';
+  const project = process.env.KNOX_PROJECT_DIR ||
+                  process.env.CLAUDE_PROJECT_DIR ||
+                  event.cwd || process.cwd();
+
+  const { result, toolName, preview, eventName } = runEngine(event, config);
+
+  if (result && result.blocked) {
+    writeAudit(config.audit.path, {
+      session_id: sessionId,
+      hook_event: eventName,
+      tool_name: toolName,
+      action: 'deny',
+      operation_preview: preview || JSON.stringify(event.tool_input || {}),
+      _preview_chars: config.audit.command_preview_chars || 120,
+      rule_id: result.ruleId,
+      rule_label: result.ruleId,
+      risk: result.risk,
+      reason: result.reason,
+      policy_preset: config.preset,
+      project,
+      host: 'codex'
+    });
+
+    if (!isCheckDisabled(config, 'escalation_tracking')) {
+      incrementDenial(sessionId, config.escalation.session_threshold);
+      recordCrossDenial(sessionId, config.escalation.agent_window_hours);
+    }
+
+    const { response, exitCode, stderr } = buildResponse(eventName, result, config);
+    if (stderr) process.stderr.write(stderr + '\n');
+    if (response) process.stdout.write(JSON.stringify(response) + '\n');
+    process.exit(exitCode);
+  }
+
+  if (result && result.sanitized) {
+    const { response, exitCode } = buildResponse(eventName, result, config);
+    if (response) process.stdout.write(JSON.stringify(response) + '\n');
+    process.exit(exitCode);
+  }
+
+  if (config.audit.include_allowed && preview) {
+    writeAudit(config.audit.path, {
+      session_id: sessionId,
+      hook_event: eventName,
+      tool_name: toolName,
+      action: 'allow',
+      operation_preview: preview,
+      _preview_chars: config.audit.command_preview_chars || 120,
+      policy_preset: config.preset,
+      project,
+      host: 'codex'
+    });
+  }
+
+  process.exit(0);
+});
+
+function isCheckDisabled(config, name) {
+  return Array.isArray(config.disabled_checks) && config.disabled_checks.includes(name);
+}
