@@ -1,0 +1,43 @@
+{
+  "name": "calle",
+  "version": "0.1.4",
+  "description": "Use Call-E from Codex through the calle CLI.",
+  "author": {
+    "name": "CALLE AI",
+    "url": "https://github.com/CALLE-AI"
+  },
+  "homepage": "https://github.com/CALLE-AI/call-e-integrations/tree/main/packages/codex-plugin",
+  "repository": "https://github.com/CALLE-AI/call-e-integrations",
+  "license": "MIT",
+  "keywords": [
+    "ai-agent",
+    "call-e",
+    "calle",
+    "codex",
+    "codex-plugin",
+    "cli",
+    "mcp",
+    "openai",
+    "openai-codex",
+    "phone-call",
+    "voice-call"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Calle",
+    "shortDescription": "Use the calle CLI for Call-E workflows.",
+    "longDescription": "Plan, run, and inspect Call-E phone call workflows from Codex by reusing the installed calle CLI.",
+    "developerName": "CALLE AI",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive"
+    ],
+    "websiteURL": "https://github.com/CALLE-AI/call-e-integrations",
+    "defaultPrompt": [
+      "Use Call-E to check my CLI setup.",
+      "Use Call-E to plan a phone call.",
+      "Use Call-E to check a call run status."
+    ],
+    "brandColor": "#10A37F"
+  }
+}

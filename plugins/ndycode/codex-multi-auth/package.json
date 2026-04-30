@@ -1,6 +1,10 @@
 {
 	"name": "codex-multi-auth",
+<<<<<<< HEAD
 	"version": "2.1.3",
+=======
+	"version": "2.1.1",
+>>>>>>> pr-61
 	"description": "Multi-account OAuth manager and codex auth wrapper for the official @openai/codex CLI, with switching, health checks, and recovery tools",
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
