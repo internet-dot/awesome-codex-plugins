@@ -1,0 +1,89 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|apply_patch|Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${PLUGIN_ROOT}/bin/run-check-codex.sh",
+            "timeout": 10,
+            "statusMessage": "Knox policy check"
+          }
+        ]
+      },
+      {
+        "matcher": "^mcp__",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${PLUGIN_ROOT}/bin/run-check-codex.sh",
+            "timeout": 5,
+            "statusMessage": "Knox MCP check"
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "matcher": "Bash|apply_patch|Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${PLUGIN_ROOT}/bin/run-check-codex.sh",
+            "timeout": 5,
+            "statusMessage": "Knox permission check"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${PLUGIN_ROOT}/bin/run-check-codex.sh",
+            "timeout": 3,
+            "statusMessage": "Knox prompt scan"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${PLUGIN_ROOT}/bin/run-check-codex.sh",
+            "timeout": 3,
+            "statusMessage": "Knox session init"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${PLUGIN_ROOT}/bin/run-check-codex.sh",
+            "timeout": 5,
+            "statusMessage": "Knox audit"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${PLUGIN_ROOT}/bin/run-check-codex.sh",
+            "timeout": 3,
+            "statusMessage": "Knox session end"
+          }
+        ]
+      }
+    ]
+  }
+}

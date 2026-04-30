@@ -1,0 +1,21 @@
+{
+  "name": "knox",
+  "version": "2.2.0",
+  "description": "Security enforcement for AI coding agents. Blocks dangerous commands, audits every tool call, detects prompt injection.",
+  "author": { "name": "Qoris", "email": "apps@qoris.ai" },
+  "homepage": "https://qoris.ai/knox",
+  "repository": "https://github.com/qoris-ai/knox",
+  "license": "MIT",
+  "keywords": ["security", "enforcement", "audit", "safety", "policy"],
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
+  "interface": {
+    "displayName": "Knox Security",
+    "shortDescription": "Pre-execution policy enforcement for shell, file edits, MCP tools, and prompts",
+    "longDescription": "Knox blocks dangerous commands, miners, prompt injection, and protected-file writes before they execute. 88 blocklist patterns plus tokenized rm/find parsers, recursive bash -c unwrap, exfiltration-conjunction detection, and continuous audit logging. Same engine on Claude Code, Cursor, and Codex.",
+    "developerName": "Qoris",
+    "category": "Security",
+    "capabilities": ["hooks", "audit", "policy"],
+    "websiteURL": "https://qoris.ai/knox"
+  }
+}

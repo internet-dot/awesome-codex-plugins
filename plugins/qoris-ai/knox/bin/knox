@@ -1,0 +1,891 @@
+#!/usr/bin/env node
+'use strict';
+const fs   = require('fs');
+const path = require('path');
+const os   = require('os');
+
+// Use __dirname (real location of this file) not process.argv[1] (which
+// resolves to ~/.nvm/.../bin/knox for global npm symlinks, not the package).
+const PLUGIN_ROOT = process.env.KNOX_ROOT ||
+  process.env.CLAUDE_PLUGIN_ROOT ||
+  path.resolve(__dirname, '..');
+
+// Lazy-load lib modules (PLUGIN_ROOT must be set first)
+function lib(name) { return require(path.join(PLUGIN_ROOT, 'lib', name)); }
+
+const [,, cmd, ...rawArgs] = process.argv;
+
+// ── Argument helpers ──────────────────────────────────────────────────────────
+const args = rawArgs; // alias
+function flag(name) { return rawArgs.includes(name); }
+function opt(name) {
+  const i = rawArgs.indexOf(name);
+  return i !== -1 ? rawArgs[i + 1] : null;
+}
+function positional() { return rawArgs.filter(a => !a.startsWith('--')); }
+
+// ── Audit helpers ─────────────────────────────────────────────────────────────
+
+// Read audit JSONL files efficiently:
+// - Files are named YYYY-MM-DD.jsonl — skip files older than sinceDateMs based on filename
+// - maxEntries: stop reading once we have enough (avoids loading thousands into memory)
+// - Returns entries newest-first
+function readAuditFiles(auditDir, sinceDateMs, maxEntries) {
+  const entries = [];
+  if (!fs.existsSync(auditDir)) return entries;
+
+  const files = fs.readdirSync(auditDir)
+    .filter(f => f.endsWith('.jsonl'))
+    .sort()
+    .reverse(); // newest file first
+
+  const sinceDate = sinceDateMs ? new Date(sinceDateMs).toISOString().slice(0, 10) : null;
+
+  for (const file of files) {
+    // Skip files entirely if the date in the filename is before our since window
+    // filename format: YYYY-MM-DD.jsonl
+    const fileDate = file.slice(0, 10);
+    if (sinceDate && fileDate < sinceDate) break; // files are sorted desc, so we can stop
+
+    const content = fs.readFileSync(path.join(auditDir, file), 'utf8');
+    const lines = content.trim().split('\n').filter(Boolean);
+
+    // Read lines in reverse (newest entries first within a file)
+    for (let i = lines.length - 1; i >= 0; i--) {
+      try {
+        const e = JSON.parse(lines[i]);
+        if (sinceDateMs && new Date(e.timestamp).getTime() < sinceDateMs) continue;
+        entries.push(e);
+        if (maxEntries && entries.length >= maxEntries) return entries;
+      } catch {}
+    }
+  }
+  return entries;
+}
+
+function parseSince(since) {
+  if (!since) return 0;
+  const m = since.match(/^(\d+)([hdw])$/);
+  if (!m) return 0;
+  const [, n, unit] = m;
+  const mult = { h: 3600000, d: 86400000, w: 604800000 };
+  return Date.now() - parseInt(n) * mult[unit];
+}
+
+// ── Cursor install/uninstall helpers ──────────────────────────────────────────
+// Cursor reads ~/.cursor/hooks.json (precedence: workspace > user). We merge our
+// hook entries in by source path so multiple Knox installs don't duplicate, and
+// uninstall removes only entries that point at this plugin tree.
+function cursorHooksFile() { return path.join(os.homedir(), '.cursor', 'hooks.json'); }
+
+function installCursor() {
+  const hooksFile = cursorHooksFile();
+  const cmd = `${PLUGIN_ROOT}/bin/run-check-cursor.sh`;
+
+  // Cursor hook events Knox wires
+  const events = {
+    beforeShellExecution: { failClosed: true, timeout: 10 },
+    beforeMCPExecution:   { failClosed: true, timeout: 5 },
+    beforeReadFile:       { timeout: 5 },
+    preToolUse:           { matcher: 'Write|Edit|MultiEdit|NotebookEdit', timeout: 5 },
+    beforeSubmitPrompt:   { timeout: 3 },
+    sessionStart:         { timeout: 3 },
+    sessionEnd:           { timeout: 3 },
+    subagentStop:         { timeout: 3 },
+    stop:                 { timeout: 3 },
+    preCompact:           { timeout: 3 }
+  };
+
+  let cfg = { version: 1, hooks: {} };
+  if (fs.existsSync(hooksFile)) {
+    try { cfg = JSON.parse(fs.readFileSync(hooksFile, 'utf8')); }
+    catch { console.warn('Knox: could not parse existing ~/.cursor/hooks.json, starting fresh'); }
+  }
+  if (!cfg.hooks) cfg.hooks = {};
+
+  let wired = 0, skipped = 0;
+  for (const [event, opts] of Object.entries(events)) {
+    if (!cfg.hooks[event]) cfg.hooks[event] = [];
+    const isKnox = h => h && typeof h.command === 'string' && h.command.includes('run-check-cursor');
+    const existing = cfg.hooks[event].find(isKnox);
+    if (existing) {
+      Object.assign(existing, { command: cmd, ...opts });
+      skipped++;
+    } else {
+      cfg.hooks[event].push({ command: cmd, ...opts });
+      wired++;
+    }
+  }
+
+  fs.mkdirSync(path.dirname(hooksFile), { recursive: true });
+  const tmp = hooksFile + '.tmp';
+  fs.writeFileSync(tmp, JSON.stringify(cfg, null, 2));
+  fs.renameSync(tmp, hooksFile);
+
+  console.log(`Knox: ${wired} hook entries wired into ~/.cursor/hooks.json${skipped ? ` (${skipped} updated)` : ''}.`);
+  console.log('Knox: restart Cursor for hooks to take effect (no hot-reload).');
+}
+
+function uninstallCursor() {
+  const hooksFile = cursorHooksFile();
+  if (!fs.existsSync(hooksFile)) { console.log('No ~/.cursor/hooks.json found.'); return; }
+  let cfg;
+  try { cfg = JSON.parse(fs.readFileSync(hooksFile, 'utf8')); }
+  catch { console.error('Knox: could not parse ~/.cursor/hooks.json'); process.exit(1); }
+
+  let removed = 0;
+  if (cfg.hooks) {
+    for (const event of Object.keys(cfg.hooks)) {
+      const before = cfg.hooks[event].length;
+      cfg.hooks[event] = cfg.hooks[event].filter(
+        h => !(h && typeof h.command === 'string' && h.command.includes('run-check-cursor'))
+      );
+      removed += before - cfg.hooks[event].length;
+      if (cfg.hooks[event].length === 0) delete cfg.hooks[event];
+    }
+    if (Object.keys(cfg.hooks).length === 0) delete cfg.hooks;
+  }
+
+  const tmp = hooksFile + '.tmp';
+  fs.writeFileSync(tmp, JSON.stringify(cfg, null, 2));
+  fs.renameSync(tmp, hooksFile);
+  console.log(`Knox: removed ${removed} hook entries from ~/.cursor/hooks.json`);
+}
+
+// ── Codex install/uninstall helpers ───────────────────────────────────────────
+// Codex reads ~/.codex/hooks.json (project-level .codex/hooks.json takes precedence,
+// but for global wiring we use the user-level file). Same Claude-Code-style nested
+// structure as our own hooks/hooks.json.
+function codexHooksFile() { return path.join(os.homedir(), '.codex', 'hooks.json'); }
+
+function buildCodexEntries(root) {
+  const cmd = `${root}/bin/run-check-codex.sh`;
+  return {
+    PreToolUse: [
+      { matcher: 'Bash|apply_patch|Write|Edit',
+        hooks: [{ type: 'command', command: cmd, timeout: 10, statusMessage: 'Knox policy check' }] },
+      { matcher: '^mcp__',
+        hooks: [{ type: 'command', command: cmd, timeout: 5, statusMessage: 'Knox MCP check' }] }
+    ],
+    PermissionRequest: [
+      { matcher: 'Bash|apply_patch|Write|Edit',
+        hooks: [{ type: 'command', command: cmd, timeout: 5, statusMessage: 'Knox permission check' }] }
+    ],
+    UserPromptSubmit: [
+      { hooks: [{ type: 'command', command: cmd, timeout: 3, statusMessage: 'Knox prompt scan' }] }
+    ],
+    SessionStart: [
+      { hooks: [{ type: 'command', command: cmd, timeout: 3, statusMessage: 'Knox session init' }] }
+    ],
+    PostToolUse: [
+      { hooks: [{ type: 'command', command: cmd, timeout: 5, statusMessage: 'Knox audit' }] }
+    ],
+    Stop: [
+      { hooks: [{ type: 'command', command: cmd, timeout: 3, statusMessage: 'Knox session end' }] }
+    ]
+  };
+}
+
+function isCodexKnoxEntry(entry) {
+  return (entry.hooks || []).some(h =>
+    h && typeof h.command === 'string' && h.command.includes('run-check-codex'));
+}
+
+function installCodex() {
+  const hooksFile = codexHooksFile();
+  let cfg = { hooks: {} };
+  if (fs.existsSync(hooksFile)) {
+    try { cfg = JSON.parse(fs.readFileSync(hooksFile, 'utf8')); }
+    catch { console.warn('Knox: could not parse existing ~/.codex/hooks.json, starting fresh'); }
+  }
+  if (!cfg.hooks) cfg.hooks = {};
+
+  const entries = buildCodexEntries(PLUGIN_ROOT);
+  let wired = 0, skipped = 0;
+  for (const [event, newGroups] of Object.entries(entries)) {
+    if (!cfg.hooks[event]) cfg.hooks[event] = [];
+    for (const group of newGroups) {
+      const present = cfg.hooks[event].some(
+        e => isCodexKnoxEntry(e) && (e.matcher || '') === (group.matcher || ''));
+      if (!present) { cfg.hooks[event].push(group); wired++; }
+      else skipped++;
+    }
+  }
+
+  fs.mkdirSync(path.dirname(hooksFile), { recursive: true });
+  const tmp = hooksFile + '.tmp';
+  fs.writeFileSync(tmp, JSON.stringify(cfg, null, 2));
+  fs.renameSync(tmp, hooksFile);
+
+  console.log(`Knox: ${wired} hook entries wired into ~/.codex/hooks.json${skipped ? ` (${skipped} already present)` : ''}.`);
+  console.log('Knox: ensure [features] codex_hooks = true in ~/.codex/config.toml (stable since Codex 0.124.0).');
+  console.log('Knox: restart Codex sessions for hooks to take effect.');
+}
+
+function uninstallCodex() {
+  const hooksFile = codexHooksFile();
+  if (!fs.existsSync(hooksFile)) { console.log('No ~/.codex/hooks.json found.'); return; }
+  let cfg;
+  try { cfg = JSON.parse(fs.readFileSync(hooksFile, 'utf8')); }
+  catch { console.error('Knox: could not parse ~/.codex/hooks.json'); process.exit(1); }
+
+  let removed = 0;
+  if (cfg.hooks) {
+    for (const event of Object.keys(cfg.hooks)) {
+      const before = cfg.hooks[event].length;
+      cfg.hooks[event] = cfg.hooks[event].filter(e => !isCodexKnoxEntry(e));
+      removed += before - cfg.hooks[event].length;
+      if (cfg.hooks[event].length === 0) delete cfg.hooks[event];
+    }
+    if (Object.keys(cfg.hooks).length === 0) delete cfg.hooks;
+  }
+
+  const tmp = hooksFile + '.tmp';
+  fs.writeFileSync(tmp, JSON.stringify(cfg, null, 2));
+  fs.renameSync(tmp, hooksFile);
+  console.log(`Knox: removed ${removed} hook entries from ~/.codex/hooks.json`);
+}
+
+// ── Commands ──────────────────────────────────────────────────────────────────
+
+const COMMANDS = {
+
+  status() {
+    const { loadConfig, PLUGIN_DATA } = lib('config');
+    const config = loadConfig();
+    const { readCrossSession } = lib('state');
+    const cross = readCrossSession();
+    const auditDir = config.audit.path;
+    const today = new Date().toISOString().slice(0, 10);
+    const todayFile = path.join(auditDir, `${today}.jsonl`);
+    let todayDenials = 0;
+    if (fs.existsSync(todayFile)) {
+      const lines = fs.readFileSync(todayFile, 'utf8').trim().split('\n').filter(Boolean);
+      todayDenials = lines.filter(l => {
+        try { return JSON.parse(l).action === 'deny'; } catch { return false; }
+      }).length;
+    }
+
+    const disabledChecks = config.disabled_checks || [];
+    const disabledStr = disabledChecks.length ? disabledChecks.join(', ') : 'none';
+
+    console.log(`Knox status
+  Preset:             ${config.preset}
+  Session denials:    N/A (CLI context — session state is hook-only)
+  Cross-session:      ${(cross.denials || []).length} denial(s) / ${config.escalation.agent_threshold} threshold (${config.escalation.agent_window_hours}h window)
+  Today's denials:    ${todayDenials}
+  Audit log:          ${auditDir}
+  Plugin data:        ${PLUGIN_DATA}
+  Webhook:            ${(config.alerts && config.alerts.webhook) || '(not set)'}
+  Disabled checks:    ${disabledStr}
+`);
+  },
+
+  audit() {
+    const config = lib('config').loadConfig();
+    const since = parseSince(opt('--since') || opt('-s'));
+    const deniedOnly = flag('--denied-only');
+    const tail = flag('--tail');
+    const page = parseInt(opt('--page') || opt('-p') || '1');
+    const n = parseInt(positional()[0]) || 20;
+
+    // Read only as many entries as we need.
+    // With --since, readAuditFiles skips old files by filename date — no cap needed.
+    // Without --since: when filtering (--denied-only), denials are sparse (typically
+    // 5-20% of entries), so read 10x more than needed to ensure we have enough after
+    // filtering. Without filtering, 3x + 500 buffer is sufficient.
+    let readLimit;
+    if (!since) {
+      readLimit = deniedOnly
+        ? Math.max(n * (page + 1) * 10, 2000)   // sparse: read 10x, cap 2000
+        : Math.max(n * (page + 2), 500);          // dense: read 3x, cap 500
+    }
+    const all = readAuditFiles(config.audit.path, since, readLimit);
+    const filtered = deniedOnly ? all.filter(e => e.action === 'deny') : all;
+
+    if (filtered.length === 0) { console.log('No audit entries found.'); return; }
+
+    let display;
+    if (tail) {
+      // --tail: show last 100, oldest-first (like tail -f)
+      display = filtered.slice(0, 100).reverse();
+    } else {
+      // Pagination: page 1 = entries 0..n-1 (most recent), page 2 = n..2n-1, etc.
+      const offset = (page - 1) * n;
+      const slice = filtered.slice(offset, offset + n);
+      if (slice.length === 0) {
+        console.log(`No entries on page ${page}. Total loaded: ${filtered.length}.`);
+        return;
+      }
+      display = slice.reverse(); // newest-first → oldest-first for display
+      const totalPages = Math.ceil(filtered.length / n);
+      if (filtered.length > n) {
+        // Warn if we may have hit the read cap (only applies when --since is not set)
+        const hitCap = readLimit && all.length >= readLimit;
+        const moreNote = hitCap
+          ? ` (read cap hit — use --since to see full history)`
+          : ` (${totalPages} pages total)`;
+        console.log(`Page ${page}/${totalPages} · ${filtered.length} entries${moreNote}\n`);
+      }
+    }
+
+    for (const e of display) {
+      const mark = e.action === 'deny' ? '✗' : e.action === 'allow' ? '✓' : '~';
+      const ts = new Date(e.timestamp).toLocaleTimeString();
+      const preview = (e.operation_preview || '').slice(0, 80);
+      console.log(`${mark} [${ts}] ${e.tool_name || e.hook_event}${preview ? ` — ${preview}` : ''}`);
+      if (e.action === 'deny') {
+        console.log(`    Rule: ${e.rule_id || '?'} | Risk: ${e.risk || '?'} | ${e.reason || ''}`);
+      }
+    }
+  },
+
+  verify() {
+    const { checkCommand, checkWritePath } = lib('check');
+    const config = lib('config').loadConfig();
+    console.log('Knox verify — running test vectors...\n');
+
+    // Test vectors are loaded from an external file in the dev repo so that
+    // the distributed plugin package does not embed literal attack-pattern
+    // strings in its source (heuristic AV scanners otherwise flag the file
+    // as a shell-based downloader even though the strings are JS literals
+    // inside a user-invoked test harness).
+    let tests;
+    const vectorsPath = path.join(PLUGIN_ROOT, 'tests', 'verify-vectors.json');
+    if (fs.existsSync(vectorsPath)) {
+      try {
+        tests = JSON.parse(fs.readFileSync(vectorsPath, 'utf8'));
+      } catch (e) {
+        console.error(`Knox verify: could not parse ${vectorsPath}: ${e.message}`);
+        process.exit(1);
+      }
+    } else {
+      // Distribution fallback: minimal smoke test with no literal attack
+      // strings in source. Confirms module load, allow path, and deny path.
+      tests = [
+        { label: 'safe command allowed', cmd: 'git status',       expect: false },
+        { label: 'safe command allowed', cmd: 'npm run test',     expect: false },
+        { label: 'protected write blocked', path: '.bashrc',      expect: true  },
+        { label: 'normal write allowed',    path: 'src/index.js', expect: false },
+      ];
+    }
+
+    let passed = 0;
+    for (const t of tests) {
+      let blocked;
+      if (t.cmd !== undefined) {
+        const r = checkCommand(t.cmd, config);
+        blocked = r !== null && r.blocked;
+      } else {
+        const r = checkWritePath(t.path, config);
+        blocked = r !== null && r.blocked;
+      }
+      const ok = blocked === t.expect;
+      console.log(`  ${ok ? '✓' : '✗'} ${t.label}`);
+      if (ok) passed++;
+    }
+
+    console.log(`\n${passed}/${tests.length} passed`);
+    if (passed < tests.length) {
+      console.error('\nFAIL: some test vectors did not produce expected results');
+      process.exit(1);
+    }
+    console.log('Knox verify: all test vectors pass.');
+    console.log('\nHooks registered: check /hooks in a Claude Code session to confirm.');
+  },
+
+  test() {
+    const command = positional().join(' ');
+    if (!command) { console.error('Usage: knox test "command"'); process.exit(1); }
+    const { checkCommand } = lib('check');
+    const config = lib('config').loadConfig();
+    const result = checkCommand(command, config);
+    if (!result) {
+      console.log(`✓ ALLOW — "${command}" passes ${config.preset} policy`);
+    } else if (result.sanitized) {
+      console.log(`~ SANITIZE — "${command}"\n  → "${result.sanitizedCommand}"\n  Reason: ${result.reason}`);
+    } else {
+      console.log(`✗ BLOCK — "${command}"\n  Rule: ${result.ruleId} | Risk: ${result.risk}\n  Reason: ${result.reason}`);
+    }
+  },
+
+  // ── knox check: machine-readable policy decisions over stdin/stdout ──────────
+  // Reads a JSON event payload on stdin (same shape Claude Code / Cursor send to
+  // PreToolUse hooks) and writes a JSON decision to stdout. Exit code mirrors
+  // hook semantics: 0 = allow/sanitize/non-critical block, 2 = critical block.
+  //
+  // Usage:
+  //   echo '{"tool_name":"Bash","tool_input":{"command":"rm -rf /"}}' | knox check
+  //   echo '{"file_path":".bashrc"}' | knox check --tool Write
+  //   knox check --tool Bash --command "git status"        (no stdin needed)
+  //   knox check --tool Bash --command "..." --pretty      (human-readable)
+  //
+  // Output (JSON, one line):
+  //   { "decision": "allow" }
+  //   { "decision": "sanitize", "command": "...", "reason": "..." }
+  //   { "decision": "deny", "reason": "...", "ruleId": "...", "risk": "...", "critical": false }
+  check() {
+    const { checkCommand, checkWritePath, checkReadPath, checkInjection, isCheckDisabled } = lib('check');
+    const config = lib('config').loadConfig();
+    const pretty = flag('--pretty');
+    const explicitTool = opt('--tool');
+    const explicitCommand = opt('--command');
+    const explicitPath = opt('--path') || opt('--file-path');
+
+    // Helper: extract every string value from an object (recursive, depth 3).
+    // Used for MCP injection scanning — same logic as bin/knox-check.
+    function extractStringValues(obj, depth) {
+      if (!depth) depth = 0;
+      if (depth > 3) return [];
+      if (typeof obj === 'string') return [obj];
+      if (Array.isArray(obj)) return obj.flatMap(v => extractStringValues(v, depth + 1));
+      if (obj && typeof obj === 'object') return Object.values(obj).flatMap(v => extractStringValues(v, depth + 1));
+      return [];
+    }
+
+    function emit(result, toolName, preview) {
+      // Translate the raw lib result into a stable wire format.
+      let payload;
+      if (!result) {
+        payload = { decision: 'allow' };
+      } else if (result.sanitized) {
+        payload = {
+          decision: 'sanitize',
+          command: result.sanitizedCommand,
+          reason: result.reason,
+          ruleId: result.ruleId,
+          risk: result.risk
+        };
+      } else {
+        payload = {
+          decision: 'deny',
+          reason: result.reason,
+          ruleId: result.ruleId,
+          risk: result.risk,
+          critical: result.risk === 'critical' || result.critical === true
+        };
+      }
+      payload.tool = toolName;
+      if (preview !== undefined) payload.preview = String(preview).slice(0, 200);
+
+      if (pretty) {
+        if (payload.decision === 'allow') {
+          console.log(`✓ ALLOW — ${toolName} — passes ${config.preset} policy`);
+        } else if (payload.decision === 'sanitize') {
+          console.log(`~ SANITIZE — ${toolName}\n  → "${payload.command}"\n  Reason: ${payload.reason}`);
+        } else {
+          console.log(`✗ DENY — ${toolName}${payload.critical ? ' [CRITICAL]' : ''}\n  Rule: ${payload.ruleId} | Risk: ${payload.risk}\n  Reason: ${payload.reason}`);
+        }
+      } else {
+        process.stdout.write(JSON.stringify(payload) + '\n');
+      }
+
+      // Exit code: mirror hook semantics so callers can branch on $?.
+      if (payload.decision === 'deny' && payload.critical) process.exit(2);
+      process.exit(0);
+    }
+
+    function decide(toolName, input) {
+      let result = null;
+      if (['Bash', 'Monitor', 'PowerShell', 'Shell'].includes(toolName)) {
+        const command = input.command || '';
+        result = checkCommand(command, config);
+        emit(result, toolName, command);
+      } else if (toolName === 'Read') {
+        if (!isCheckDisabled(config, 'read_path_protection')) {
+          const filePath = input.file_path || input.path || '';
+          result = checkReadPath(filePath, config);
+          if (result) result.risk = 'high';
+        }
+        emit(result, toolName, input.file_path || input.path);
+      } else if (['Write', 'Edit', 'NotebookEdit'].includes(toolName)) {
+        const filePath = input.file_path || input.path || '';
+        result = checkWritePath(filePath, config);
+        emit(result, toolName, filePath);
+      } else if (toolName === 'MultiEdit') {
+        const paths = [input.file_path, ...((input.edits || []).map(e => e.file_path))].filter(Boolean);
+        for (const fp of paths) {
+          result = checkWritePath(fp, config);
+          if (result) break;
+        }
+        emit(result, toolName, paths.join(', '));
+      } else if (toolName.startsWith('mcp__')) {
+        if (!isCheckDisabled(config, 'mcp_inspection')) {
+          for (const v of extractStringValues(input)) {
+            const r = checkInjection(v, config);
+            if (r) { result = { blocked: true, reason: r.reason, ruleId: r.id, risk: 'high' }; break; }
+          }
+        }
+        emit(result, toolName, JSON.stringify(input).slice(0, 200));
+      } else if (toolName === 'UserPromptSubmit') {
+        // Convenience: accept prompt scanning via the same subcommand.
+        const prompt = input.prompt || input.command || '';
+        const r = checkInjection(prompt, config);
+        result = r ? { blocked: true, reason: r.reason, ruleId: r.id, risk: 'high' } : null;
+        emit(result, toolName, prompt);
+      } else {
+        // Unknown tool — allow by default, mirroring hook behavior.
+        emit(null, toolName || 'Unknown');
+      }
+    }
+
+    // ── Argv path: --tool ... --command ... or --tool ... --path ... ──
+    if (explicitTool && (explicitCommand !== null || explicitPath !== null)) {
+      const input = {};
+      if (explicitCommand !== null) input.command = explicitCommand;
+      if (explicitPath !== null) input.file_path = explicitPath;
+      return decide(explicitTool, input);
+    }
+
+    // ── Stdin path: read full event JSON ──
+    // Cap input at 10 MB so a runaway producer can't OOM us. Hook payloads are
+    // typically <10 KB; a 10 MB ceiling is generous for any realistic case.
+    const STDIN_MAX = 10 * 1024 * 1024;
+    let buf = '';
+    let truncated = false;
+    if (process.stdin.isTTY) {
+      console.error('knox check: no stdin and no --command/--path provided');
+      console.error('Usage:');
+      console.error('  echo \'{"tool_name":"Bash","tool_input":{"command":"..."}}\' | knox check');
+      console.error('  knox check --tool Bash --command "..."');
+      console.error('  knox check --tool Write --path "..."');
+      process.exit(1);
+    }
+    process.stdin.setEncoding('utf8');
+    process.stdin.on('data', chunk => {
+      if (buf.length + chunk.length > STDIN_MAX) {
+        truncated = true;
+        process.stdin.destroy();
+        return;
+      }
+      buf += chunk;
+    });
+    process.stdin.on('end', () => {
+      if (truncated) {
+        console.error(`knox check: stdin exceeded ${STDIN_MAX} bytes — refusing to parse`);
+        process.exit(1);
+      }
+      // Empty stdin + a --tool flag is the user forgetting --command/--path.
+      // Distinguish from "malformed JSON" so the message points at the real fix.
+      if (!buf.trim()) {
+        if (explicitTool) {
+          console.error(`knox check: --tool ${explicitTool} provided but no --command/--path and stdin is empty`);
+          console.error('Either pass --command "..." / --path "..." or pipe a JSON event on stdin.');
+        } else {
+          console.error('knox check: empty stdin and no --tool/--command/--path provided');
+        }
+        process.exit(1);
+      }
+      let event;
+      try { event = JSON.parse(buf); }
+      catch (e) {
+        console.error(`knox check: invalid JSON on stdin: ${e.message}`);
+        process.exit(1);
+      }
+      // Accept either Claude Code shape ({tool_name, tool_input}) or Cursor's
+      // flatter shape ({command, file_path, prompt, ...}). When --tool is set,
+      // it overrides any tool_name in the payload.
+      const toolName = explicitTool || event.tool_name || event.toolName || '';
+      const input = event.tool_input || event.toolInput || event;
+      decide(toolName, input);
+    });
+  },
+
+  policy() {
+    const sub = rawArgs[0];
+    const config = lib('config').loadConfig();
+
+    if (!sub || sub === 'list') {
+      const { getBlocklistForPreset } = lib('patterns');
+      const blocklist = getBlocklistForPreset(config.preset);
+      const customBlock = config.custom_blocklist || [];
+      const customAllow = config.custom_allowlist || [];
+      console.log(`Active policy (preset: ${config.preset}) — ${blocklist.length} default rules + ${customBlock.length} custom block + ${customAllow.length} custom allow\n`);
+      console.log('Default blocklist (first 10):');
+      blocklist.slice(0, 10).forEach(p =>
+        console.log(`  [${p.id}] ${p.label.padEnd(28)} risk:${p.risk} cat:${p.category}`)
+      );
+      if (blocklist.length > 10) console.log(`  ... ${blocklist.length - 10} more`);
+      if (customBlock.length) {
+        console.log('\nCustom blocklist:');
+        customBlock.forEach(r => console.log(`  ${r.label || r.pattern}`));
+      }
+      if (customAllow.length) {
+        console.log('\nCustom allowlist:');
+        customAllow.forEach(r => console.log(`  ${r.label || r.pattern}`));
+      }
+      return;
+    }
+
+    const localConfigPath = path.resolve('.knox.local.json');
+    function readLocal(file) {
+      try { return JSON.parse(fs.readFileSync(file || localConfigPath, 'utf8')); } catch { return {}; }
+    }
+    function writeLocalFile(file, data) {
+      const tmp = file + '.tmp';
+      fs.writeFileSync(tmp, JSON.stringify(data, null, 2));
+      fs.renameSync(tmp, file);
+    }
+    function writeLocal(data) { writeLocalFile(localConfigPath, data); }
+
+    if (sub === 'add-block') {
+      const pattern = rawArgs[1];
+      if (!pattern) { console.error('Usage: knox policy add-block "pattern" [--label x] [--risk high]'); process.exit(1); }
+      const label = opt('--label') || pattern.slice(0, 30);
+      const risk  = opt('--risk')  || 'high';
+      const local = readLocal();
+      if (!local.custom_blocklist) local.custom_blocklist = [];
+      local.custom_blocklist.push({ pattern, label, risk });
+      writeLocal(local);
+      console.log(`Added block rule: ${label}`);
+
+    } else if (sub === 'add-allow') {
+      const pattern = rawArgs[1];
+      if (!pattern) { console.error('Usage: knox policy add-allow "pattern" [--label x]'); process.exit(1); }
+      const label = opt('--label') || pattern.slice(0, 30);
+      const local = readLocal();
+      if (!local.custom_allowlist) local.custom_allowlist = [];
+      local.custom_allowlist.push({ pattern, label });
+      writeLocal(local);
+      console.log(`Added allow rule: ${label}`);
+
+    } else if (sub === 'add-package') {
+      const pkg = rawArgs[1];
+      if (!pkg) { console.error('Usage: knox policy add-package <packagename>'); process.exit(1); }
+      const local = readLocal();
+      if (!local.apt_package_extra) local.apt_package_extra = [];
+      if (!local.apt_package_extra.includes(pkg)) local.apt_package_extra.push(pkg);
+      writeLocal(local);
+      console.log(`Added package: ${pkg}`);
+
+    } else if (sub === 'remove') {
+      const id = rawArgs[1];
+      if (!id) { console.error('Usage: knox policy remove <rule-id or label>'); process.exit(1); }
+      const local = readLocal();
+      ['custom_blocklist', 'custom_allowlist'].forEach(key => {
+        if (local[key]) local[key] = local[key].filter(r => r.label !== id && r.pattern !== id);
+      });
+      writeLocal(local);
+      console.log(`Removed rule: ${id}`);
+
+    } else if (sub === 'lint') {
+      const file = rawArgs[1] || '.knox.json';
+      try {
+        const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+        ['custom_blocklist', 'custom_allowlist'].forEach(key => {
+          (data[key] || []).forEach(r => {
+            if (!r.pattern) throw new Error(`${key} entry missing 'pattern' field`);
+            new RegExp(r.pattern); // validate regex compiles
+          });
+        });
+        console.log(`✓ ${file} is valid`);
+      } catch (e) { console.error(`✗ ${file}: ${e.message}`); process.exit(1); }
+
+    } else if (sub === 'export') {
+      const fmt = opt('--format') || 'markdown';
+      const { getBlocklistForPreset } = lib('patterns');
+      const blocklist = getBlocklistForPreset(config.preset);
+      if (fmt === 'markdown') {
+        console.log(`# Knox Policy Export — preset: ${config.preset}\n\n| ID | Label | Category | Risk |\n|---|---|---|---|`);
+        blocklist.forEach(p => console.log(`| ${p.id} | ${p.label} | ${p.category} | ${p.risk} |`));
+      } else {
+        console.log(JSON.stringify({ preset: config.preset, blocklist }, null, 2));
+      }
+
+    } else if (sub === 'list-checks') {
+      const CHECKS = [
+        { name: 'read_path_protection',  description: 'Block reads to ~/.ssh/, ~/.aws/credentials, ~/.gnupg/, .env files' },
+        { name: 'write_path_protection', description: 'Block writes to shell configs, Knox files, git hooks' },
+        { name: 'script_inspection',     description: 'Recursive script content scanning (bash/python/node/ruby/perl)' },
+        { name: 'mcp_inspection',        description: 'PreToolUse interception on mcp__* tools' },
+        { name: 'sudo_sanitization',     description: 'Strip sudo + flags before allowing (standard preset only)' },
+        { name: 'injection_detection',   description: 'UserPromptSubmit + InstructionsLoaded injection scanning' },
+        { name: 'cron_inspection',       description: 'TaskCreated + CronCreate prompt injection scanning' },
+        { name: 'escalation_tracking',   description: 'Per-session and cross-session denial counters' },
+      ];
+      const disabled = config.disabled_checks || [];
+      console.log('Knox check categories (blocklist and self_protection cannot be toggled):\n');
+      CHECKS.forEach(c => {
+        const status = disabled.includes(c.name) ? '✗ disabled' : '✓ enabled ';
+        console.log(`  ${status}  ${c.name.padEnd(24)} ${c.description}`);
+      });
+
+    } else if (sub === 'disable') {
+      const check = rawArgs[1];
+      if (!check) { console.error('Usage: knox policy disable <check> [--project]'); process.exit(1); }
+      const useProject = args.includes('--project');
+      const target = useProject ? '.knox.json' : '.knox.local.json';
+      const data = readLocal(target);
+      if (!data.disabled_checks) data.disabled_checks = [];
+      if (!data.disabled_checks.includes(check)) data.disabled_checks.push(check);
+      writeLocalFile(path.resolve(target), data);
+      console.log(`Disabled check '${check}' in ${target} (live-reloaded automatically)`);
+
+    } else if (sub === 'enable') {
+      const check = rawArgs[1];
+      if (!check) { console.error('Usage: knox policy enable <check>'); process.exit(1); }
+      // Remove from both local and project files
+      ['.knox.local.json', '.knox.json'].forEach(target => {
+        const resolved = path.resolve(target);
+        if (!fs.existsSync(resolved)) return;
+        const data = JSON.parse(fs.readFileSync(resolved, 'utf8'));
+        if (!data.disabled_checks) return;
+        const before = data.disabled_checks.length;
+        data.disabled_checks = data.disabled_checks.filter(c => c !== check);
+        if (data.disabled_checks.length !== before) {
+          writeLocalFile(resolved, data);
+        }
+      });
+      console.log(`Re-enabled check '${check}'`);
+
+    } else {
+      console.error(`Unknown policy subcommand: ${sub}`);
+      process.exit(1);
+    }
+  },
+
+  report() {
+    const config = lib('config').loadConfig();
+    const sinceArg = opt('--since') || '24h';
+    const since = parseSince(sinceArg);
+    const fmt = opt('--format') || 'text';
+    const entries = readAuditFiles(config.audit.path, since);
+    const denials = entries.filter(e => e.action === 'deny');
+    const byRule = {};
+    denials.forEach(e => {
+      const key = e.rule_id || 'unknown';
+      byRule[key] = (byRule[key] || 0) + 1;
+    });
+    const topRules = Object.entries(byRule).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+    if (fmt === 'json') {
+      console.log(JSON.stringify({
+        period: sinceArg,
+        total: entries.length,
+        denials: denials.length,
+        allow_rate: entries.length ? Math.round((1 - denials.length / entries.length) * 100) : 100,
+        top_rules: topRules.map(([id, n]) => ({ id, count: n }))
+      }, null, 2));
+    } else {
+      console.log(`Knox Report (${sinceArg})\n`);
+      console.log(`  Total events:  ${entries.length}`);
+      console.log(`  Denials:       ${denials.length}`);
+      console.log(`  Allow rate:    ${entries.length ? Math.round((1 - denials.length / entries.length) * 100) : 100}%`);
+      if (topRules.length) {
+        console.log('\n  Top blocked rules:');
+        topRules.forEach(([id, n]) => console.log(`    ${id.padEnd(16)} ×${n}`));
+      }
+    }
+  },
+
+  install() {
+    const target = opt('--target') || 'claude';
+    if (target === 'cursor') return installCursor();
+    if (target === 'codex')  return installCodex();
+    if (target !== 'claude') {
+      console.error(`Unknown --target: ${target}. Supported: claude, cursor, codex`);
+      process.exit(1);
+    }
+    // Delegate to postinstall.js which wires all 11 events
+    require(path.join(PLUGIN_ROOT, 'scripts', 'postinstall'));
+  },
+
+  uninstall() {
+    const target = opt('--target') || 'claude';
+    if (target === 'cursor') return uninstallCursor();
+    if (target === 'codex')  return uninstallCodex();
+    if (target !== 'claude') {
+      console.error(`Unknown --target: ${target}. Supported: claude, cursor, codex`);
+      process.exit(1);
+    }
+    const settingsFile = path.join(os.homedir(), '.claude', 'settings.json');
+    if (!fs.existsSync(settingsFile)) { console.log('No ~/.claude/settings.json found.'); return; }
+    const settings = JSON.parse(fs.readFileSync(settingsFile, 'utf8'));
+    let removed = 0;
+    if (settings.hooks) {
+      Object.keys(settings.hooks).forEach(event => {
+        const before = (settings.hooks[event] || []).length;
+        settings.hooks[event] = (settings.hooks[event] || []).filter(
+          g => !((g.hooks || []).some(h => h.command && h.command.includes('knox')))
+        );
+        removed += before - settings.hooks[event].length;
+        // Remove the event key entirely if it's now empty — keeps settings.json clean
+        if (settings.hooks[event].length === 0) delete settings.hooks[event];
+      });
+      if (Object.keys(settings.hooks).length === 0) delete settings.hooks;
+    }
+    const tmp = settingsFile + '.tmp';
+    fs.writeFileSync(tmp, JSON.stringify(settings, null, 2));
+    fs.renameSync(tmp, settingsFile);
+    console.log(`Knox: removed ${removed} hook entries from ~/.claude/settings.json`);
+  },
+
+  upgrade() {
+    const { execSync } = require('child_process');
+    const isNpm = PLUGIN_ROOT.includes('node_modules');
+    if (isNpm) {
+      // Match the published package name; falls through to qorisai scope if
+      // someone installed from there.
+      const pkgName = require(path.join(PLUGIN_ROOT, 'package.json')).name;
+      execSync(`npm install -g ${pkgName}@latest`, { stdio: 'inherit' });
+    } else {
+      execSync('claude plugin update knox', { stdio: 'inherit' });
+    }
+  },
+
+  help() {
+    const pkg = require(path.join(PLUGIN_ROOT, 'package.json'));
+    console.log(`Knox v${pkg.version} — Security enforcement for AI coding agents
+
+Works as: a standalone CLI · a Claude Code plugin · a Cursor plugin (via third-party hooks).
+
+USAGE:
+  knox <command> [options]
+
+COMMANDS:
+  status                              Show preset, denial count, escalation state
+  audit [N] [--since 1h] [--denied-only] [--tail] [--page N]
+                                      Review audit log entries (default: 20, paginated)
+  test "command"                      Dry-run a command against active policy (human-friendly)
+  check [--tool X --command Y | --path Y] [--pretty]
+                                      Programmatic policy check. Reads JSON event
+                                      from stdin (Claude Code/Cursor hook shape) OR
+                                      uses --tool + --command/--path. Emits JSON
+                                      decision; exit 2 = critical block.
+  verify                              Run policy test vectors, confirm install
+  policy list                         Show all active rules
+  policy add-block "pat" [--label x] [--risk high]
+  policy add-allow "pat" [--label x]
+  policy add-package <name>
+  policy remove <id-or-label>
+  policy lint [.knox.json]
+  policy export [--format markdown|json]
+  policy list-checks                  List all toggleable check categories
+  policy disable <check> [--project]  Disable a check category
+  policy enable <check>               Re-enable a disabled check
+  report [--since 7d] [--format json]
+  install [--target claude|cursor|codex]
+                                      Wire hooks. Default target: claude.
+                                      claude → ~/.claude/settings.json
+                                      cursor → ~/.cursor/hooks.json
+                                      codex  → ~/.codex/hooks.json
+  uninstall [--target claude|cursor|codex]
+                                      Remove Knox hooks (default: claude)
+  upgrade                             Update to latest version
+  help                                Show this message
+
+PRESETS: minimal | standard (default) | strict | paranoid
+CONFIG:  .knox.json (project) | .knox.local.json (personal, gitignored)
+`);
+  }
+};
+
+const fn = COMMANDS[cmd];
+if (fn) {
+  try { fn(); }
+  catch (e) { console.error(`Knox error: ${e.message}`); process.exit(1); }
+} else {
+  if (cmd) console.error(`Unknown command: ${cmd}\n`);
+  COMMANDS.help();
+  process.exit(cmd ? 1 : 0);
+}

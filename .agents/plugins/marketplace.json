@@ -5,18 +5,6 @@
   },
   "plugins": [
     {
-      "name": "registry-broker-codex-plugin",
-      "source": {
-        "source": "local",
-        "path": "./plugins/hashgraph-online/registry-broker-codex-plugin"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Development & Workflow"
-    },
-    {
       "name": "agentops",
       "source": {
         "source": "local",
@@ -27,6 +15,66 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Development & Workflow"
+    },
+    {
+      "name": "amq-cli",
+      "source": {
+        "source": "local",
+        "path": "./plugins/avivsinai/agent-message-queue"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Tools & Integrations"
+    },
+    {
+      "name": "apple-calendar",
+      "source": {
+        "source": "local",
+        "path": "./plugins/matk0shub/apple-productivity-mcp"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Tools & Integrations"
+    },
+    {
+      "name": "ateam",
+      "source": {
+        "source": "local",
+        "path": "./plugins/yimwoo/codex-agenteam"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
+    },
+    {
+      "name": "be-serious",
+      "source": {
+        "source": "local",
+        "path": "./plugins/lulucatdev/codex-be-serious"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Tools & Integrations"
+    },
+    {
+      "name": "bkt",
+      "source": {
+        "source": "local",
+        "path": "./plugins/avivsinai/bitbucket-cli"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Tools & Integrations"
     },
     {
       "name": "brooks-lint",
@@ -51,6 +99,18 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Development & Workflow"
+    },
+    {
+      "name": "chrome-devtools",
+      "source": {
+        "source": "local",
+        "path": "./plugins/win4r/chrome-devtools-codex-plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Tools & Integrations"
     },
     {
       "name": "claude-code-harness",
@@ -101,10 +161,22 @@
       "category": "Development & Workflow"
     },
     {
-      "name": "ateam",
+      "name": "codex-mem",
       "source": {
         "source": "local",
-        "path": "./plugins/yimwoo/codex-agenteam"
+        "path": "./plugins/2kDarki/codex-mem"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Tools & Integrations"
+    },
+    {
+      "name": "codex-multi-auth",
+      "source": {
+        "source": "local",
+        "path": "./plugins/ndycode/codex-multi-auth"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -113,10 +185,22 @@
       "category": "Development & Workflow"
     },
     {
-      "name": "codex-multi-auth",
+      "name": "codex-obsidian",
       "source": {
         "source": "local",
-        "path": "./plugins/ndycode/codex-multi-auth"
+        "path": "./plugins/greg-asher/codex-obsidian"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Tools & Integrations"
+    },
+    {
+      "name": "codex-project-autopilot",
+      "source": {
+        "source": "local",
+        "path": "./plugins/AlexMi64/codex-project-autopilot"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -135,174 +219,6 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Development & Workflow"
-    },
-    {
-      "name": "hotl",
-      "source": {
-        "source": "local",
-        "path": "./plugins/yimwoo/hotl-plugin"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Development & Workflow"
-    },
-    {
-      "name": "codex-project-autopilot",
-      "source": {
-        "source": "local",
-        "path": "./plugins/AlexMi64/codex-project-autopilot"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Development & Workflow"
-    },
-    {
-      "name": "session-orchestrator",
-      "source": {
-        "source": "local",
-        "path": "./plugins/Kanevry/session-orchestrator"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Development & Workflow"
-    },
-    {
-      "name": "tailtest",
-      "source": {
-        "source": "local",
-        "path": "./plugins/avansaber/tailtest-codex"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Development & Workflow"
-    },
-    {
-      "name": "tartinerlabs",
-      "source": {
-        "source": "local",
-        "path": "./plugins/tartinerlabs/skills"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Development & Workflow"
-    },
-    {
-      "name": "tool-advisor",
-      "source": {
-        "source": "local",
-        "path": "./plugins/dragon1086/claude-skills"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Development & Workflow"
-    },
-    {
-      "name": "vibe-portrait",
-      "source": {
-        "source": "local",
-        "path": "./plugins/dadwadw233/VibePortrait"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Development & Workflow"
-    },
-    {
-      "name": "amq-cli",
-      "source": {
-        "source": "local",
-        "path": "./plugins/avivsinai/agent-message-queue"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Tools & Integrations"
-    },
-    {
-      "name": "apple-calendar",
-      "source": {
-        "source": "local",
-        "path": "./plugins/matk0shub/apple-productivity-mcp"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Tools & Integrations"
-    },
-    {
-      "name": "bkt",
-      "source": {
-        "source": "local",
-        "path": "./plugins/avivsinai/bitbucket-cli"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Tools & Integrations"
-    },
-    {
-      "name": "chrome-devtools",
-      "source": {
-        "source": "local",
-        "path": "./plugins/win4r/chrome-devtools-codex-plugin"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Tools & Integrations"
-    },
-    {
-      "name": "be-serious",
-      "source": {
-        "source": "local",
-        "path": "./plugins/lulucatdev/codex-be-serious"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Tools & Integrations"
-    },
-    {
-      "name": "codex-mem",
-      "source": {
-        "source": "local",
-        "path": "./plugins/2kDarki/codex-mem"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Tools & Integrations"
-    },
-    {
-      "name": "codex-obsidian",
-      "source": {
-        "source": "local",
-        "path": "./plugins/greg-asher/codex-obsidian"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Tools & Integrations"
     },
     {
       "name": "codex-seo",
@@ -341,6 +257,18 @@
       "category": "Tools & Integrations"
     },
     {
+      "name": "hotl",
+      "source": {
+        "source": "local",
+        "path": "./plugins/yimwoo/hotl-plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
+    },
+    {
       "name": "jk",
       "source": {
         "source": "local",
@@ -369,6 +297,18 @@
       "source": {
         "source": "local",
         "path": "./plugins/aklofas/kicad-happy"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Tools & Integrations"
+    },
+    {
+      "name": "knox",
+      "source": {
+        "source": "local",
+        "path": "./plugins/qoris-ai/knox"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -425,6 +365,18 @@
       "category": "Tools & Integrations"
     },
     {
+      "name": "n8n-mcp-synta-codex",
+      "source": {
+        "source": "local",
+        "path": "./plugins/Synta-ai/n8n-mcp-codex-plugin-synta"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Tools & Integrations"
+    },
+    {
       "name": "oc-codex-multi-auth",
       "source": {
         "source": "local",
@@ -461,18 +413,6 @@
       "category": "Tools & Integrations"
     },
     {
-      "name": "prompt-to-asset",
-      "source": {
-        "source": "local",
-        "path": "./plugins/MohamedAbdallah-14/prompt-to-asset"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Tools & Integrations"
-    },
-    {
       "name": "panews",
       "source": {
         "source": "local",
@@ -495,6 +435,30 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Tools & Integrations"
+    },
+    {
+      "name": "prompt-to-asset",
+      "source": {
+        "source": "local",
+        "path": "./plugins/MohamedAbdallah-14/prompt-to-asset"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Tools & Integrations"
+    },
+    {
+      "name": "registry-broker-codex-plugin",
+      "source": {
+        "source": "local",
+        "path": "./plugins/hashgraph-online/registry-broker-codex-plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
     },
     {
       "name": "remotion",
@@ -533,6 +497,18 @@
       "category": "Tools & Integrations"
     },
     {
+      "name": "session-orchestrator",
+      "source": {
+        "source": "local",
+        "path": "./plugins/Kanevry/session-orchestrator"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
+    },
+    {
       "name": "sitemd",
       "source": {
         "source": "local",
@@ -545,16 +521,28 @@
       "category": "Tools & Integrations"
     },
     {
-      "name": "n8n-mcp-synta-codex",
+      "name": "tailtest",
       "source": {
         "source": "local",
-        "path": "./plugins/Synta-ai/n8n-mcp-codex-plugin-synta"
+        "path": "./plugins/avansaber/tailtest-codex"
       },
       "policy": {
         "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"
       },
-      "category": "Tools & Integrations"
+      "category": "Development & Workflow"
+    },
+    {
+      "name": "tartinerlabs",
+      "source": {
+        "source": "local",
+        "path": "./plugins/tartinerlabs/skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
     },
     {
       "name": "task-scheduler",
@@ -581,6 +569,18 @@
       "category": "Tools & Integrations"
     },
     {
+      "name": "tool-advisor",
+      "source": {
+        "source": "local",
+        "path": "./plugins/dragon1086/claude-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
+    },
+    {
       "name": "unslop",
       "source": {
         "source": "local",
@@ -603,6 +603,18 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Tools & Integrations"
+    },
+    {
+      "name": "vibe-portrait",
+      "source": {
+        "source": "local",
+        "path": "./plugins/dadwadw233/VibePortrait"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
     },
     {
       "name": "yandex-direct-for-all",
