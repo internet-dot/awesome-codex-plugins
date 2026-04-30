@@ -5,6 +5,8 @@ description: Validates vault frontmatter (Zod schema) and wiki-link integrity. P
 
 # Vault Sync Skill
 
+> Project-instruction file resolution: `CLAUDE.md` and `AGENTS.md` (Codex CLI) are transparent aliases — see [skills/_shared/instruction-file-resolution.md](../_shared/instruction-file-resolution.md). The vault-marker check below treats either file as a valid marker (when it carries `## Session Config` + `vault-sync:`); references to `CLAUDE.md` resolve via the SSOT precedence rule.
+
 ## Status
 
 STATUS: PHASE 1 IMPLEMENTED (2026-04-13). Session-End hard gate (section 3.1) operational. Phase 2 (wave-executor incremental, 3.2) and Phase 3 (evolve advisory, 3.3) not yet implemented.
@@ -33,7 +35,7 @@ VAULT_DIR=/path/to/vault bash ~/Projects/session-orchestrator/skills/vault-sync/
 
 - Exit `0` — vault valid (or skipped because no vault exists / no .md files). Warnings may still be present in the JSON report.
 - Exit `1` — one or more validation errors. Session-end surfaces them in the quality gate report and refuses to close.
-- Exit `2` — invalid invocation or infrastructure error. Two cases: (a) `VAULT_DIR` is not set and `cwd` does not look like a Meta-Vault (no `_meta/`, no `.obsidian/`, no `CLAUDE.md` with `## Session Config` + `vault-sync:` block) — actionable error printed to stderr; (b) infrastructure error (missing `node`, missing `validator.mjs`, cannot bootstrap deps). In both cases no JSON is emitted to stdout.
+- Exit `2` — invalid invocation or infrastructure error. Two cases: (a) `VAULT_DIR` is not set and `cwd` does not look like a Meta-Vault (no `_meta/`, no `.obsidian/`, no `CLAUDE.md` or `AGENTS.md` with `## Session Config` + `vault-sync:` block) — actionable error printed to stderr; (b) infrastructure error (missing `node`, missing `validator.mjs`, cannot bootstrap deps). In both cases no JSON is emitted to stdout.
 
 JSON output shape (stdout):
 
@@ -118,7 +120,7 @@ Layer B is the continuous freshness layer. Its job is to run inside normal sessi
 
 - **Environment variable**:
   - `VAULT_DIR` — directory to scan for `.md` files. Defaults to `$PWD`. Can also be passed as the first positional argument to `validator.sh`.
-- **Session Config** — optional `vault-sync` section in `CLAUDE.md`:
+- **Session Config** — optional `vault-sync` section in `CLAUDE.md` (or `AGENTS.md` on Codex CLI):
   - `vault-sync.enabled: true|false` (default: `false`; when `false`, the gate is skipped silently)
   - `vault-sync.mode: hard|warn|off` (default: `warn` via Session Config; `hard` blocks session close on errors, `warn` reports but does not block, `off` short-circuits to `status: skipped-mode-off`. Note: `validator.sh` invoked directly without `--mode` defaults to `hard` — the `warn` default applies only when dispatched by session-end.)
   - `vault-sync.vault-dir: <path>` (default: project root `$PWD`; passed to the validator via `VAULT_DIR`)

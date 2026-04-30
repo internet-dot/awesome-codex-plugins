@@ -5,6 +5,8 @@ description: Mirrors session and learning JSONL records into the Meta-Vault as M
 
 # Vault Mirror Skill
 
+> Project-instruction file resolution: `CLAUDE.md` and `AGENTS.md` (Codex CLI) are transparent aliases — see [skills/_shared/instruction-file-resolution.md](../_shared/instruction-file-resolution.md). When this skill mentions Session Config in `CLAUDE.md`, the alias rule applies.
+
 ## Purpose
 
 vault-mirror populates the Meta-Vault with machine-generated notes derived from structured JSONL records. It converts entries from `.orchestrator/metrics/sessions.jsonl` and `.orchestrator/metrics/learnings.jsonl` into vault-conformant Markdown files under numeric-prefix subdirectories. This is distinct from vault-sync, which validates the vault — vault-sync validates the vault; vault-mirror populates it. The two skills are complementary: vault-mirror writes notes, vault-sync checks that the vault as a whole remains conformant.
@@ -122,7 +124,7 @@ node scripts/vault-mirror.mjs \
 
 ## Configuration
 
-vault-mirror respects the `vault-integration` block in the project's Session Config (`CLAUDE.md`). The script itself does not read Session Config — the calling skill (session-end, evolve) is responsible for reading the config and deciding whether to invoke vault-mirror at all.
+vault-mirror respects the `vault-integration` block in the project's Session Config (`CLAUDE.md`, or `AGENTS.md` on Codex CLI). The script itself does not read Session Config — the calling skill (session-end, evolve) is responsible for reading the config and deciding whether to invoke vault-mirror at all.
 
 | Field | Type | Default | Meaning |
 |---|---|---|---|

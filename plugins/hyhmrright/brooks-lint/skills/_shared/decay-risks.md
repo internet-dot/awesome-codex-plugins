@@ -1,10 +1,6 @@
 # Decay Risk Reference
 
-Six patterns that cause software to degrade over time.
-For each finding, identify: which risk, which symptom, which source book.
-
-Every finding must follow the Iron Law:
-Symptom → Source → Consequence → Remedy
+Six patterns that cause software to degrade. Apply the Iron Law to each finding.
 
 ---
 
@@ -12,8 +8,7 @@ Symptom → Source → Consequence → Remedy
 
 **Diagnostic question:** How much mental effort does a human need to understand this?
 
-When cognitive load exceeds working memory, developers make mistakes, avoid the code, and slow
-down. Hard-to-understand code resists the refactoring that would fix it — a compounding cycle.
+Cognitive load beyond working memory causes mistakes, avoidance, and blocks the refactoring that would fix it.
 
 ### Symptoms
 
@@ -66,9 +61,7 @@ down. Hard-to-understand code resists the refactoring that would fix it — a co
 
 **Diagnostic question:** How many unrelated things break when you change one thing?
 
-High change propagation means that a developer modifying feature A must also modify modules B,
-C, and D — even though B, C, and D have nothing conceptually to do with A. This slows velocity
-and multiplies regression risk on every change.
+Each change ripples to unrelated modules, slowing velocity and multiplying regression risk.
 
 ### Symptoms
 
@@ -121,8 +114,7 @@ and multiplies regression risk on every change.
 
 **Diagnostic question:** Is the same decision expressed in more than one place?
 
-When the same decision lives in multiple places, those copies drift apart — both pass their tests
-but disagree in edge cases. DRY is about decisions, not code lines.
+Multiple copies drift apart silently. DRY is about decisions, not code lines.
 
 ### Symptoms
 
@@ -162,10 +154,7 @@ but disagree in edge cases. DRY is about decisions, not code lines.
 
 **Diagnostic question:** Is the code more complex than the problem it solves?
 
-Every system has essential complexity (inherent to the problem) and accidental complexity
-(introduced by implementation choices). Only accidental complexity can be eliminated. Each
-addition seems justified in isolation, but the total accumulates until developers spend more time
-fighting scaffolding than solving the problem.
+Accidental complexity accumulates addition by addition until developers fight scaffolding more than solving the problem.
 
 ### Symptoms
 
@@ -212,9 +201,7 @@ fighting scaffolding than solving the problem.
 
 **Diagnostic question:** Do dependencies flow in a consistent, predictable direction?
 
-Dependency direction is the skeleton of a system. When business logic depends on infrastructure,
-every infrastructure change becomes a business logic change. Circular dependencies make it
-impossible to understand or test any component in isolation.
+When business logic depends on infrastructure, infrastructure changes cascade into domain changes. Cycles prevent isolation.
 
 ### Symptoms
 
@@ -265,10 +252,7 @@ impossible to understand or test any component in isolation.
 
 **Diagnostic question:** Does the code faithfully represent the problem it is solving?
 
-Code that does not speak the business language forces every developer to maintain a mental
-translation layer. Over time it diverges: the code models the database schema or API contract
-rather than the domain. Domain logic bleeds into service layers; domain objects become empty
-data bags.
+Code that mismatches business language forces mental translation. Over time it models schemas instead of the domain, with logic bleeding into service layers.
 
 ### Symptoms
 

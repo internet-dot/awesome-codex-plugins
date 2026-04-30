@@ -309,6 +309,18 @@ print(json.dumps(out['outputs']['body'], indent=2)[:500])
 Look for `ConnectionAuthorizationFailed` — the connection owner must match the
 service account running the flow. Cannot fix via API; fix in PA designer.
 
+### Outlook user-picker failures (`DynamicListValuesUndefinedOrInvalid`)
+Outlook actions like `GetEmailsV3` use parameters (`mailboxAddress`, `to`, `cc`,
+`from`) whose dropdown is backed by `builtInOperation:AadGraph.GetUsers` — which
+is broken at the PA listEnum layer and always returns
+`DynamicListValuesUndefinedOrInvalid`. This shows up when an agent rebuilds or
+modifies an Outlook action via `update_live_flow` and tries to resolve a user
+through dynamic options. **Don't fix it by retrying AadGraph** — switch to
+`shared_office365users.SearchUserV2` instead (returns the same AAD user shape).
+See the `power-automate-build` skill, **Step 3a — Resolving Dynamic Connector
+Values**, for the working pattern. `describe_live_connector` (v1.1.6+) returns
+this fallback as a structured `fallback` field on the affected parameter.
+
 ---
 
 ## Step 8 — Apply the Fix
@@ -377,11 +389,17 @@ For flows with a `Request` (HTTP) trigger, use `trigger_live_flow` when you
 need to send a **different** payload than the original run:
 
 ```python
-# First inspect what the trigger expects
-schema = mcp("get_live_flow_http_schema",
-    environmentName=ENV, flowName=FLOW_ID)
-print("Expected body schema:", schema.get("requestSchema"))
-print("Response schemas:", schema.get("responseSchemas"))
+# First inspect what the trigger expects — read directly from the flow definition
+defn = mcp("get_live_flow", environmentName=ENV, flowName=FLOW_ID)
+triggers = defn["properties"]["definition"]["triggers"]
+manual = next(iter(triggers.values()))   # usually the only trigger on HTTP flows
+request_schema = manual.get("inputs", {}).get("schema")
+print("Expected body schema:", request_schema)
+
+# Response schemas live on Response action(s) in the actions block
+for name, act in defn["properties"]["definition"]["actions"].items():
+    if act.get("type") == "Response":
+        print(f"Response {name}:", act.get("inputs", {}).get("schema"))
 
 # Trigger with a test payload
 result = mcp("trigger_live_flow",
@@ -421,5 +439,5 @@ print(f"Status: {result['responseStatus']}, Body: {result.get('responseBody')}")
 
 ## Related Skills
 
-- `power-automate-mcp` — Core connection setup and operation reference
+- `power-automate-mcp` — Foundation skill: connection setup, MCP helper, tool discovery
 - `power-automate-build` — Build and deploy new flows

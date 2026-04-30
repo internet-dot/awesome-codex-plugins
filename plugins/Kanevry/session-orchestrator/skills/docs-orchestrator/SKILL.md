@@ -14,6 +14,8 @@ description: >
 
 # Docs Orchestrator Skill
 
+> Project-instruction file resolution: CLAUDE.md and AGENTS.md (Codex CLI) are transparent aliases — see [skills/_shared/instruction-file-resolution.md](../_shared/instruction-file-resolution.md).
+
 docs-orchestrator coordinates the full documentation lifecycle inside a session: it
 detects which audiences (User, Dev, Vault) are touched by the agreed scope, generates
 audience-specific task definitions, threads them into the session-plan pipeline, and
@@ -22,7 +24,7 @@ default-off — when `docs-orchestrator.enabled: false`, all three hook points
 short-circuit with no output and no cost. docs-orchestrator fills the generative-content
 gap that sibling skills leave open: `vault-sync` validates but does not write, `vault-mirror`
 writes metrics-derived `_overview.md` entries but not narratives, `claude-md-drift-check`
-diagnoses CLAUDE.md drift but does not remediate it, and `daily` exclusively owns
+diagnoses CLAUDE.md (or AGENTS.md on Codex CLI) drift but does not remediate it, and `daily` exclusively owns
 `03-daily/*`. docs-orchestrator is the only skill that produces new prose grounded in
 session output.
 
@@ -306,9 +308,9 @@ The docs-writer MUST emit a brief structured output summary:
 - **vault-mirror** — writes `_overview.md` from JSONL metrics records; docs-orchestrator
   writes human-readable narratives in `context.md`, `decisions.md`, and `people.md`.
   Non-overlapping targets by design.
-- **claude-md-drift-check** — detects drift in CLAUDE.md (diagnostic only);
+- **claude-md-drift-check** — detects drift in the project-instruction file (CLAUDE.md or AGENTS.md on Codex CLI; diagnostic only);
   docs-orchestrator remediates via the Dev audience path (generative). Complementary:
-  drift-check can flag what docs-writer fixes. They must not run on CLAUDE.md in parallel
+  drift-check can flag what docs-writer fixes. They must not run on the instruction file in parallel
   within the same session.
 - **daily** — exclusively owns `<vault>/03-daily/YYYY-MM-DD.md`. This is a forbidden
   target for docs-orchestrator; the docs-writer prompt must carry this constraint

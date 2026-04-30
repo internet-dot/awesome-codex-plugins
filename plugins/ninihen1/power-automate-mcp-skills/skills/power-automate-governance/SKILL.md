@@ -26,14 +26,27 @@ Classify, tag, and govern Power Automate flows at scale through the FlowStudio
 MCP **cached store** — without Dataverse, without the CoE Starter Kit, and
 without the Power Automate portal.
 
-This skill uses `update_store_flow` to write governance metadata and the
-monitoring tools (`list_store_flows`, `get_store_flow`, `list_store_makers`,
-etc.) to read tenant state. For monitoring and health-check workflows, see
-the `power-automate-monitoring` skill.
+This skill uses the same `store_*` tool family as `power-automate-monitoring`,
+but with a different *intent*: governance writes metadata (`update_store_flow`)
+and reads for *audit and classification* outcomes. Monitoring reads the same
+tools for *operational health* outcomes. Don't try to memorize which skill
+"owns" which tool — pick by what the user is doing. For health checks and
+failure-rate dashboards, load `power-automate-monitoring` instead.
 
-> **Start every session with `tools/list`** to confirm tool names and parameters.
-> This skill covers workflows and patterns — things `tools/list` cannot tell you.
-> If this document disagrees with `tools/list` or a real API response, the API wins.
+> **⚠️ Pro+ subscription required.** This skill calls `store_*` tools that
+> only work for FlowStudio for Teams or MCP Pro+ subscribers.
+>
+> **If the user does not have Pro+ access:** the first `store_*` tool call
+> will return a 403/404 error. When that happens:
+> 1. STOP calling store tools
+> 2. Tell the user governance features require a Pro+ subscription
+> 3. Link them to https://mcp.flowstudio.app/pricing
+>
+> **Discovery:** load tool schemas via the meta-tools rather than `tools/list` —
+> call `tool_search` with `query: "skill:governance"` for the canonical bundle,
+> or `query: "select:update_store_flow"` for a single tool. This skill covers
+> workflow patterns and field semantics — things `tool_search` cannot tell you.
+> If this document disagrees with a real API response, the API wins.
 
 ---
 
@@ -166,8 +179,8 @@ Find flows owned by deleted or disabled Azure AD accounts.
 6. For each orphaned flow:
    - Reassign governance: update_store_flow(environmentName, flowName,
        ownerTeam="NewTeam", supportEmail="new-owner@contoso.com")
-   - Or decommission: set_store_flow_state(environmentName, flowName,
-       state="Stopped")
+   - Or decommission: set_live_flow_state(environmentName, flowName,
+       state="Stopped")  # cache resyncs on next daily scan
 ```
 
 > `update_store_flow` updates governance metadata in the cache only. To
@@ -208,7 +221,7 @@ candidates. Aligns with the CoE Starter Kit's archive scoring.
      update_store_flow(environmentName, flowName, tags="<existing> #archive-review")
    Score 0-2: Active, no action
 5. For user-confirmed archives:
-   set_store_flow_state(environmentName, flowName, state="Stopped")
+   set_live_flow_state(environmentName, flowName, state="Stopped")
    Read existing tags, append #archived
    update_store_flow(environmentName, flowName, tags="<existing> #archived")
 ```
@@ -351,11 +364,18 @@ Flow Studio governance contacts and notification recipients.
    - If keeping:
      update_store_flow(environmentName, flowName,
        ownerTeam="NewTeam", supportEmail="new-owner@contoso.com")
+     # If the flow is not yet in a solution, migrate it for proper ALM
+     # before the maker's account is deleted (otherwise the flow can
+     # become orphaned). Check first via get_live_flow → look for
+     # properties.solutionId; if missing, migrate:
+     add_live_flow_to_solution(environmentName, flowName,
+       solutionName="<target-unmanaged-solution>")
    - If decommissioning:
-     set_store_flow_state(environmentName, flowName, state="Stopped")
+     set_live_flow_state(environmentName, flowName, state="Stopped")
      Read existing tags, append #decommissioned
      update_store_flow(environmentName, flowName, tags="<existing> #decommissioned")
-6. Report: flows reassigned, flows stopped, apps needing manual reassignment
+6. Report: flows reassigned, flows migrated to solutions, flows stopped,
+   apps needing manual reassignment
 ```
 
 > **What "reassign" means here:** `update_store_flow` changes who Flow
@@ -499,6 +519,6 @@ Fields marked with `*` are also available on `list_store_flows` (cheaper).
 ## Related Skills
 
 - `power-automate-monitoring` — Health checks, failure rates, inventory (read-only)
-- `power-automate-mcp` — Core connection setup, live tool reference
+- `power-automate-mcp` — Foundation skill: connection setup, MCP helper, tool discovery
 - `power-automate-debug` — Deep diagnosis with action-level inputs/outputs
 - `power-automate-build` — Build and deploy flow definitions

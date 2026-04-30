@@ -11,29 +11,25 @@ Every finding must follow the Iron Law: Symptom → Source → Consequence → R
 
 For each dimension, run an abbreviated scan using the decay-risks definitions
 from `_shared/`. Do NOT read the individual mode guide files — use the abbreviated
-checklists below instead.
+checklists below. Cap each dimension at 3 findings; for Debt: cap at 2 per risk code and 3 across all risk codes.
 
 **PR dimension (if changes exist):**
 - Apply Auto Scope Detection (common.md)
 - Scan for R2 (Change Propagation) and R1 (Cognitive Overload) in the diff
-- Cap at top 3 findings
 
 **Architecture dimension:**
 - Gather codebase context: read top-level structure, entry points, import statements
 - Draw a Mermaid dependency graph (follow standard graph rules from common.md)
 - Scan for R5 (Dependency Disorder): circular deps, upward flows, fan-out > 5
-- Cap at top 3 findings
 - INCLUDE the Mermaid graph in output
 
 **Debt dimension:**
 - Scan for all six decay risks (R1-R6) across the codebase
-- Cap at 2 findings per risk, 3 findings total
 - Skip Pain × Spread scoring (use severity tier only)
 
 **Test dimension:**
 - Build the Test Suite Map (unit/integration/E2E counts)
 - Scan for T1 (Test Obscurity) and T2 (Test Brittleness) in test files
-- Cap at top 3 findings
 
 ### Step 2: Compute Dashboard Scores
 

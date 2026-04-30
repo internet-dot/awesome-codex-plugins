@@ -48,6 +48,10 @@ AI_ISMS = (
     r"\bleverage\b", r"\bleverag(?:es|ed|ing)\b",
     r"\bcutting-edge\b", r"\bstate-of-the-art\b",
     r"\bcomprehensive(?:ly)?\b",
+    r"\baligns?\s+with\b", r"\baligned\s+with\b", r"\baligning\s+with\b",
+    r"\bfoster(?:s|ed|ing)?\b",
+    r"\bshowcas(?:e|es|ed|ing)\b",
+    r"\bfast-paced\b", r"\bgroundbreaking\b", r"\bwell-rounded\b",
     # Expanded vocabulary (2026-04 sync with blader/unslop and
     # Wikipedia:Signs_of_AI_writing). Each entry mirrors a rule in
     # humanize.py's STOCK_VOCAB so the residual check can detect when a
@@ -96,6 +100,16 @@ AI_ISMS = (
     r"\bhere'?s what you need to know\b",
     r"\bwithout further ado\b",
     r"\bbuckle up\b",
+    # Knowledge-cutoff / model-limitation disclaimers.
+    r"\bas of my (?:last update|knowledge cutoff)\b",
+    r"\bi do not have access to real-time information\b",
+    r"\bmy training data only goes up to\b",
+    # Vague attribution.
+    r"\bobservers (?:say|note|suggest)\b",
+    r"\bexperts (?:argue|believe|maintain)\b",
+    r"\bindustry reports\b",
+    r"\bscholarship (?:has|shows|suggests)\b",
+    r"\bmany (?:believe|argue|maintain)\b",
     # Filler phrases (blader/unslop #23). These are the strongest signals;
     # we keep the list short and conservative. More verbose expansions can
     # occasionally appear in legitimate prose (e.g. legal boilerplate).
@@ -131,6 +145,24 @@ AI_ISMS = (
     r",\s+(?:highlighting|underscoring|emphasizing|illustrating|reflecting|showcasing)\s+(?:the|its|their|his|her|a|an)\s+(?:importance|significance|role|impact|value|need|necessity|relevance|nature)\b",
     # Copula avoidance (", being a/an/the X,")
     r",\s+being\s+(?:a|an|the)\s+[a-z]",
+    # 2026-04-28 Tier 1 gap-fill: full copula avoidance set, canonical
+    # negative parallelism, additional promotional register. Each pattern
+    # mirrors a humanize.py rule so the residual check refuses to let an
+    # LLM rewrite reintroduce them.
+    #
+    # Promotional copula avoidance — mirrors humanize.py COPULA_AVOIDANCE.
+    r"\bserves?\s+as\s+(?:a|an|the)\s+(?:reliable|powerful|leading|prominent|key|major|prime|cornerstone|hub|center|centre|foundation|backbone|gateway|model|standard|benchmark|symbol|reminder|catalyst|beacon)\b",
+    r"\bserved\s+as\s+(?:a|an|the)\s+(?:reliable|powerful|leading|prominent|key|major|prime|cornerstone|hub|center|centre|foundation|backbone|gateway|model|standard|benchmark|symbol|reminder|catalyst|beacon)\b",
+    r"\bboast(?:s|ed|ing)?\s+(?:a|an)\s+[a-z]",
+    r"\bfeatures\s+(?:a|an)\s+(?:stunning|beautiful|breathtaking|impressive|elegant|sleek|innovative|intuitive|seamless|cutting-edge|state-of-the-art|world-class|industry-leading|best-in-class|revolutionary|groundbreaking)\b",
+    # Negative parallelism (canonical) — "Not just/only X, but Y" and
+    # "It's not X — it's Y". Mirrors humanize.py NEGATIVE_PARALLELISM.
+    r"(?:^|(?<=[.!?]\s))Not (?:just|only) [^,.!?\n]{1,80},\s*but(?:\s+also)?\b",
+    r"(?:^|(?<=[.!?]\s))It'?s not [^—.!?\n]{1,80}\s+[—–]\s+it'?s ",
+    # Promotional register (Wikipedia #4) — mirrors STOCK_VOCAB additions.
+    r"\bnestled\s+(?:in|between|amongst|among|within|by)\b",
+    r"\b(?:rich|deep)\s+heritage\b",
+    r"\bsteeped\s+in\s+(?:rich\s+)?(?:tradition|history|heritage)\b",
 )
 
 # FALSE_RANGES — "from X to Y" clichés where the range is formulaic rather than
@@ -181,6 +213,12 @@ class ValidationResult:
     synonym_cycling_after: int = 0
     contraction_rate_before: float = 0.0
     contraction_rate_after: float = 0.0
+    curly_quotes_before: int = 0
+    curly_quotes_after: int = 0
+    title_case_headings: int = 0
+    inline_header_lists: int = 0
+    generic_positive_conclusions: int = 0
+    outline_conclusions: int = 0
 
     def to_dict(self) -> dict:
         return {
@@ -200,6 +238,12 @@ class ValidationResult:
             "synonym_cycling_after": self.synonym_cycling_after,
             "contraction_rate_before": round(self.contraction_rate_before, 3),
             "contraction_rate_after": round(self.contraction_rate_after, 3),
+            "curly_quotes_before": self.curly_quotes_before,
+            "curly_quotes_after": self.curly_quotes_after,
+            "title_case_headings": self.title_case_headings,
+            "inline_header_lists": self.inline_header_lists,
+            "generic_positive_conclusions": self.generic_positive_conclusions,
+            "outline_conclusions": self.outline_conclusions,
         }
 
 
@@ -313,9 +357,9 @@ def _count_false_ranges(text: str) -> int:
 
 _WORD_RE = re.compile(r"[A-Za-z]+")
 
-# Contraction detection — AI text typically has 0.00 contractions per chunk
-# vs human ~0.17 (Kalemaj et al. arXiv 2604.11687). Low contraction rate is
-# a distributional fingerprint that token-level detectors read.
+# Contraction detection — AI text typically has near-zero contractions per word
+# vs human ~0.17 (empirical; source citation pending re-verification). Low
+# contraction rate is a distributional fingerprint that token-level detectors read.
 _CONTRACTION_RE = re.compile(
     r"\b(?:don|doesn|didn|won|wouldn|shouldn|couldn|mightn|mustn|isn|aren|"
     r"wasn|weren|hasn|haven|hadn|can)'t\b|"
@@ -354,6 +398,112 @@ def _count_synonym_cycling(text: str) -> int:
                 flagged += 1
                 break  # count once per paragraph
     return flagged
+
+
+_CURLY_QUOTE = re.compile(r"[\u2018\u2019\u201c\u201d]")
+_CONTENT_WORD = re.compile(r"[A-Za-z][A-Za-z'-]*")
+_TITLE_CASE_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "as",
+    "at",
+    "by",
+    "for",
+    "from",
+    "in",
+    "into",
+    "of",
+    "on",
+    "or",
+    "the",
+    "to",
+    "vs",
+    "with",
+}
+_INLINE_HEADER_ITEM = re.compile(r"^[ \t]*[-*+]\s+\*\*[^*\n]+:\*\*", re.MULTILINE)
+_GENERIC_POSITIVE_FINAL = re.compile(
+    r"(?:^|(?<=[.!?]\s))[^.!?\n]*\b(?:remains|stands as|continues to be) "
+    r"(?:a|an) (?:fascinating|important|powerful|essential|critical) [a-z]+\b[^.!?\n]*[.!?](?=\s*$)",
+    re.IGNORECASE,
+)
+_GENERIC_POSITIVE_SUMMARY = re.compile(
+    r"(?:^|(?<=[.!?]\s))In (?:summary|conclusion), [^.?!]*"
+    r"(?:fascinating|important|powerful|remarkable)[^.?!]*[.!?]",
+    re.IGNORECASE,
+)
+
+# Outline-like-conclusion (Wikipedia "Signs of AI writing" #6, blader/unslop
+# #6). Encyclopedic AI-essay closer that pairs a "Despite X" concession with
+# a "Y faces (significant) challenges" forecast. The structure is the tell;
+# the words inside it can be plausible. Validator-only — auto-rewriting risks
+# destroying real concession + forecast prose. Surface as a warning so the
+# user can hand-edit or run LLM mode.
+_OUTLINE_CONCLUSION = re.compile(
+    # Anchor at start of a line (MULTILINE) or after a sentence terminator.
+    # MULTILINE matters because paragraph breaks are `\n\n`, and the lookbehind
+    # would otherwise see only the trailing `\n` and fail.
+    r"(?:^|(?<=[.!?]\s))Despite\s+[^,.!?\n]{3,120},\s+"
+    # Optional subject clause: zero-or-more non-sentence-terminator chars
+    # followed by required whitespace. Bounded by `[^.!?\n]` so the regex
+    # can never overrun into the next sentence.
+    r"(?:[A-Za-z][^.!?\n]{0,80}?\s+)?"
+    r"(?:faces?|will\s+face|continues?\s+to\s+face|must\s+(?:overcome|address|navigate|confront))\s+"
+    r"(?:significant|major|numerous|various|several|many|ongoing|continuing|persistent|considerable)?\s*"
+    r"(?:challenges|hurdles|obstacles|difficulties|headwinds|barriers)\b",
+    re.IGNORECASE | re.MULTILINE,
+)
+
+
+def _count_curly_quotes(text: str) -> int:
+    return len(_CURLY_QUOTE.findall(_strip_code_for_prose(text)))
+
+
+def _count_title_case_headings(text: str) -> int:
+    count = 0
+    for _level, heading in MD_HEADING.findall(text):
+        words = [w for w in _CONTENT_WORD.findall(heading) if w.lower() not in _TITLE_CASE_STOPWORDS]
+        if len(words) < 3:
+            continue
+        capped = sum(1 for w in words if w[:1].isupper())
+        if capped / len(words) >= 0.8:
+            count += 1
+    return count
+
+
+def _count_inline_header_lists(text: str) -> int:
+    prose = _strip_code_for_prose(text)
+    count = 0
+    streak = 0
+    for line in prose.splitlines():
+        if _INLINE_HEADER_ITEM.match(line):
+            streak += 1
+            continue
+        if streak >= 3:
+            count += 1
+        streak = 0
+    if streak >= 3:
+        count += 1
+    return count
+
+
+def _count_generic_positive_conclusions(text: str) -> int:
+    prose = _strip_code_for_prose(text)
+    count = 0
+    for paragraph in re.split(r"\n\s*\n", prose):
+        paragraph = paragraph.strip()
+        if not paragraph:
+            continue
+        if _GENERIC_POSITIVE_FINAL.search(paragraph):
+            count += 1
+        count += len(_GENERIC_POSITIVE_SUMMARY.findall(paragraph))
+    return count
+
+
+def _count_outline_conclusions(text: str) -> int:
+    """Count "Despite X, Y faces (significant) challenges" closers in prose."""
+    prose = _strip_code_for_prose(text)
+    return len(_OUTLINE_CONCLUSION.findall(prose))
 
 
 def validate(original: str, humanized: str) -> ValidationResult:
@@ -522,6 +672,39 @@ def validate(original: str, humanized: str) -> ValidationResult:
             "Human writing uses ~17 contractions per 1k words; zero contractions is a detector signal."
         )
 
+    cq_before = _count_curly_quotes(original)
+    cq_after = _count_curly_quotes(humanized)
+    if cq_after > 0:
+        warnings.append(
+            f"Curly quotes present ({cq_after}). Normalize to straight quotes unless house style requires them."
+        )
+
+    title_case_headings = _count_title_case_headings(humanized)
+    if title_case_headings:
+        warnings.append(
+            f"Title-case heading(s) present ({title_case_headings}). Sentence-case headings usually read less generated."
+        )
+
+    inline_header_lists = _count_inline_header_lists(humanized)
+    if inline_header_lists:
+        warnings.append(
+            f"Inline-header list cluster(s) present ({inline_header_lists}). Repeating '- **X:**' bullets read as templated."
+        )
+
+    generic_positive_conclusions = _count_generic_positive_conclusions(humanized)
+    if generic_positive_conclusions:
+        warnings.append(
+            f"Generic positive conclusion(s) present ({generic_positive_conclusions}). Replace with a concrete closing claim."
+        )
+
+    outline_conclusions = _count_outline_conclusions(humanized)
+    if outline_conclusions:
+        warnings.append(
+            f"Outline-like conclusion(s) present ({outline_conclusions}). "
+            "'Despite X, Y faces challenges' is the canonical encyclopedic AI closer; "
+            "rewrite with a concrete next step or hand-edit."
+        )
+
     return ValidationResult(
         ok=len(errors) == 0,
         errors=errors,
@@ -539,6 +722,12 @@ def validate(original: str, humanized: str) -> ValidationResult:
         synonym_cycling_after=sc_after,
         contraction_rate_before=cr_before,
         contraction_rate_after=cr_after,
+        curly_quotes_before=cq_before,
+        curly_quotes_after=cq_after,
+        title_case_headings=title_case_headings,
+        inline_header_lists=inline_header_lists,
+        generic_positive_conclusions=generic_positive_conclusions,
+        outline_conclusions=outline_conclusions,
     )
 
 

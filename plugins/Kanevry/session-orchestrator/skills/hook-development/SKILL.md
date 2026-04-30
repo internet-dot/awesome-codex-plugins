@@ -315,6 +315,85 @@ enabled=$(jq -r '.strictMode // false' "$CONFIG_FILE" 2>/dev/null)
 - Mutate global state
 - Log sensitive data to stdout/stderr
 
+## Runtime Profile Control (#211)
+
+All hook handlers support runtime opt-out via two environment variables without any settings-file changes. This is implemented in `hooks/_lib/profile-gate.mjs`.
+
+### Env vars
+
+| Variable | Values | Behaviour |
+|----------|--------|-----------|
+| `SO_HOOK_PROFILE` | `full` \| `minimal` \| `off` | Preset bundle (default `full` = all on). |
+| `SO_DISABLED_HOOKS` | Comma-separated names | Disable individual hooks; overrides profile. |
+
+### Profile bundles
+
+- **`full`** (default): all hooks run — identical to pre-#211 behaviour when env is unset.
+- **`minimal`**: only `on-session-start` + `pre-bash-destructive-guard`.
+- **`off`**: no hooks run.
+
+### Wiring a new hook into the gate
+
+Every new hook handler **must** add the gate call as the very first executable statement after imports. The pattern is two lines at the top of the file, immediately after the import block:
+
+```js
+import { shouldRunHook } from './_lib/profile-gate.mjs';
+if (!shouldRunHook('your-hook-name')) process.exit(0);
+```
+
+Use the kebab-case file stem without the `.mjs` extension as the hook name (e.g. `my-hook` for `hooks/my-hook.mjs`). When the hook exits 0 here it is **silent** — no stdout, no stderr — so Claude Code sees a clean allow.
+
+### Failure modes
+
+- Unknown `SO_HOOK_PROFILE` value → falls back to `full` + single stderr warning.
+- `SO_DISABLED_HOOKS` with extra whitespace or mixed case is normalised automatically.
+- `defaultEnabled` param of `shouldRunHook` is for future opt-in hooks; pass `false` for any handler that should be off by default in `full` profile.
+
+### Tests
+
+`tests/hooks/profile-gate.test.mjs` (10 tests) covers: full/minimal/off profiles, disabled-list override, unknown-profile fallback + warning, defaultEnabled=false, whitespace normalisation, empty disabled-list.
+
+## Robust Plugin Root Resolution (#212)
+
+Hook handlers and scripts that need the plugin directory must NOT read
+`process.env.CLAUDE_PLUGIN_ROOT` directly. Use `resolvePluginRoot()` from
+`scripts/lib/plugin-root.mjs` instead, which implements a 4-level fallback
+so manual installs (where the env var is absent) still work.
+
+### Fallback order
+
+| Level | Source | Condition |
+|-------|--------|-----------|
+| 1 | `CLAUDE_PLUGIN_ROOT` env var | Returned immediately when set and is a directory |
+| 2 | `CODEX_PLUGIN_ROOT` env var | Returned immediately when set and is a directory |
+| 3 | Walk up from `import.meta.url` | Looks for `package.json` with `name: "session-orchestrator"` |
+| 4 | Walk up from `process.cwd()` | Same marker; catches manual install paths outside the repo tree |
+
+Levels 1 and 2 are **fast paths** — no filesystem walk is performed when either
+env var is set. This preserves backward compat with all existing deployments.
+
+When all four levels fail a `PluginRootResolutionError` is thrown with a
+`triedPaths` array listing what was attempted.
+
+### Usage in hook handlers
+
+```js
+import { resolvePluginRoot, PluginRootResolutionError } from '../scripts/lib/plugin-root.mjs';
+
+// Throws on failure — handle or let it bubble (hooks have top-level catch)
+const pluginRoot = resolvePluginRoot();
+```
+
+`scripts/lib/platform.mjs`'s `resolvePluginRoot()` delegates to this helper
+internally, so any caller already using the platform module gets the 4-level
+fallback transparently.
+
+### Tests
+
+`tests/lib/plugin-root.test.mjs` (10 tests) covers: env-claude, env-codex,
+walk-from-import-meta, walk-from-cwd, all-fail-throws-named-error,
+env-precedence, PluginRootResolutionError class shape.
+
 ## Implementation checklist
 
 - [ ] Event chosen (PreToolUse / Stop / …) matches intent

@@ -8,9 +8,6 @@ description: >
   codebase?", "run all the checks", "give me a big-picture quality report", "I need a
   health score before the release", "what's the overall state of our code?", or wants
   to onboard a new team with a quality overview.
-  Use this skill proactively when the user wants breadth over depth — a unified view
-  across all quality dimensions — even if they just say "check the code quality" or
-  "how are we doing overall?".
   Do NOT trigger for: server health checks, HTTP health endpoints, Kubernetes
   liveness/readiness probes, database health, or application uptime. Also do not
   trigger when the user specifically requests only one dimension — use the

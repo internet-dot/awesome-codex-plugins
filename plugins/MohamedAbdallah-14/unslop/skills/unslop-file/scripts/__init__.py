@@ -17,4 +17,4 @@ __all__ = [
     "style_memory",
     "detector",
 ]
-__version__ = "0.5.6"
+__version__ = "0.6.2"

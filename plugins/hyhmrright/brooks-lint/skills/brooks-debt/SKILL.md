@@ -8,11 +8,6 @@ description: >
   first, or asks "why is this so hard to change?", "where's the most painful part?",
   "what should we fix first?", "how do I justify refactoring to management?",
   "why is our velocity dropping?".
-  Also triggers when user asks: why the codebase is hard to maintain, why complexity
-  keeps growing, why adding developers isn't helping, what a realistic refactoring
-  roadmap looks like, which legacy modules are most risky.
-  Use this skill proactively when maintainability, refactoring priorities, or legacy
-  code problems come up — even if "tech debt" isn't mentioned explicitly.
   Do NOT trigger for: server health checks, HTTP /health endpoints, Kubernetes probes,
   database health, or application uptime — "health" in those contexts is infrastructure,
   not code quality. Also not for single-function refactoring questions.

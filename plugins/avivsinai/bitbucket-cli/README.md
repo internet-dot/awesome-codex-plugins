@@ -60,7 +60,7 @@ Don't have Nix yet? See [nixos.asia/en/install](https://nixos.asia/en/install) f
 Download pre-built binaries for your platform from the [releases page](https://github.com/avivsinai/bitbucket-cli/releases/latest).
 The `.tar.gz` and `.zip` release archives also include `skills/bkt/`, so the CLI and canonical skill files stay in sync when you install from a release artifact.
 
-For Bitbucket Cloud OAuth (`bkt auth login --kind cloud --web`), set `BKT_OAUTH_CLIENT_ID` and `BKT_OAUTH_CLIENT_SECRET` in your environment. Official binaries, source installs, and Nix builds do not embed Cloud OAuth consumer credentials. API-token login via `--web-token` works without that extra setup.
+Official binaries support Bitbucket Cloud OAuth (`bkt auth login --kind cloud --web`) out of the box. Source and Nix builds can use the same flow by setting `BKT_OAUTH_CLIENT_ID` and `BKT_OAUTH_CLIENT_SECRET` in the environment. API-token login via `--web-token` works without that extra setup.
 
 ### Bitbucket Pipelines
 

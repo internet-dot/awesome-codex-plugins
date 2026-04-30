@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
-  "last_updated": "2026-04-26",
-  "total": 48,
+  "last_updated": "2026-04-30",
+  "total": 51,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -78,6 +78,16 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/nyldn/claude-octopus/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Codebase Recon",
+      "url": "https://github.com/yujiachen-y/codebase-recon-skill",
+      "owner": "yujiachen-y",
+      "repo": "codebase-recon-skill",
+      "description": "Analyze git history to understand a codebase before reading any code — auto-scales by repo size and cross-references hotspots with bug magnets to surface high-risk files, bus factor, and team momentum.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/yujiachen-y/codebase-recon-skill/main/.codex-plugin/plugin.json"
     },
     {
       "name": "Codex Agenteam",
@@ -380,6 +390,16 @@
       "install_url": "https://raw.githubusercontent.com/useorgx/orgx-codex-plugin/main/.codex-plugin/plugin.json"
     },
     {
+      "name": "prompt-to-asset",
+      "url": "https://github.com/MohamedAbdallah-14/prompt-to-asset",
+      "owner": "MohamedAbdallah-14",
+      "repo": "prompt-to-asset",
+      "description": "Route image-generation prompts to 30+ models (DALL-E, Stable Diffusion, Flux, Midjourney, and more) through a single MCP interface. Install: `npm install -g prompt-to-asset`.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/MohamedAbdallah-14/prompt-to-asset/main/.codex-plugin/plugin.json"
+    },
+    {
       "name": "PANews Agent Toolkit",
       "url": "https://github.com/panewslab/skills",
       "owner": "panewslab",
@@ -468,6 +488,16 @@
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/henu-wang/tokrepo-codex-plugin/main/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "unslop",
+      "url": "https://github.com/MohamedAbdallah-14/unslop",
+      "owner": "MohamedAbdallah-14",
+      "repo": "unslop",
+      "description": "Strip AI writing patterns from text output — removes filler phrases, hedging language, and generic constructs to produce cleaner written content. Install: `npm install -g unslop`.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/MohamedAbdallah-14/unslop/main/.codex-plugin/plugin.json"
     },
     {
       "name": "Upwork Autopilot",

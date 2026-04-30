@@ -26,7 +26,7 @@ Quality-gate commands are resolved in this priority order:
 2. **Session Config** `test-command` / `typecheck-command` / `lint-command` in CLAUDE.md (Claude Code / Cursor) or AGENTS.md (Codex CLI) — fallback.
 3. **Hardcoded defaults** — last resort: `pnpm test --run`, `tsgo --noEmit`, `pnpm lint`.
 
-Loader: `scripts/lib/quality-gates-policy.mjs` exports `loadQualityGatesPolicy(repoRoot)` and `resolveCommand(policy, key, fallback)`. The Bash-side runner `scripts/run-quality-gate.sh` performs the same resolution inline inside `extract_command()`.
+Loader: `scripts/lib/quality-gates-policy.mjs` exports `loadQualityGatesPolicy(repoRoot)` and `resolveCommand(policy, key, fallback)`. The Node runner `scripts/run-quality-gate.mjs` performs the same resolution inline.
 
 If any resolved command is set to the literal string `skip`, skip that check entirely.
 
@@ -147,20 +147,20 @@ Replace the bracketed variant name with the specific variant required by that ph
 
 ## Script Alternative
 
-Prefer `scripts/run-quality-gate.sh` for deterministic execution with structured JSON output. The inline command approach is supported but produces unstructured output that downstream consumers cannot reliably parse.
+Prefer `scripts/run-quality-gate.mjs` for deterministic execution with structured JSON output. The inline command approach is supported but produces unstructured output that downstream consumers cannot reliably parse.
 
 ```bash
 # Baseline (session-start)
-bash "${CLAUDE_PLUGIN_ROOT:-${CODEX_PLUGIN_ROOT:-$PLUGIN_ROOT}}/scripts/run-quality-gate.sh" --variant baseline --config "$CONFIG"
+node "${CLAUDE_PLUGIN_ROOT:-${CODEX_PLUGIN_ROOT:-$PLUGIN_ROOT}}/scripts/run-quality-gate.mjs" --variant baseline --config "$CONFIG"
 
 # Incremental (wave-executor)
-bash "${CLAUDE_PLUGIN_ROOT:-${CODEX_PLUGIN_ROOT:-$PLUGIN_ROOT}}/scripts/run-quality-gate.sh" --variant incremental --config "$CONFIG" --files changed-file1.ts,changed-file2.ts
+node "${CLAUDE_PLUGIN_ROOT:-${CODEX_PLUGIN_ROOT:-$PLUGIN_ROOT}}/scripts/run-quality-gate.mjs" --variant incremental --config "$CONFIG" --files changed-file1.ts,changed-file2.ts
 
 # Full Gate (session-end)
-bash "${CLAUDE_PLUGIN_ROOT:-${CODEX_PLUGIN_ROOT:-$PLUGIN_ROOT}}/scripts/run-quality-gate.sh" --variant full-gate --config "$CONFIG" --session-start-ref "$SESSION_START_REF"
+node "${CLAUDE_PLUGIN_ROOT:-${CODEX_PLUGIN_ROOT:-$PLUGIN_ROOT}}/scripts/run-quality-gate.mjs" --variant full-gate --config "$CONFIG" --session-start-ref "$SESSION_START_REF"
 
 # Per-File (session-reviewer)
-bash "${CLAUDE_PLUGIN_ROOT:-${CODEX_PLUGIN_ROOT:-$PLUGIN_ROOT}}/scripts/run-quality-gate.sh" --variant per-file --config "$CONFIG" --files specific-file.ts
+node "${CLAUDE_PLUGIN_ROOT:-${CODEX_PLUGIN_ROOT:-$PLUGIN_ROOT}}/scripts/run-quality-gate.mjs" --variant per-file --config "$CONFIG" --files specific-file.ts
 ```
 
 The script handles graceful degradation (missing tools → skip), structured JSON output matching the schemas above, and proper exit codes (0=pass, 1=error, 2=gate-failed).
@@ -189,3 +189,5 @@ Invalid reason codes: `no-record` | `session-ref-mismatch` | `dependency-changed
 **INVARIANT — Full Gate at session-end is NEVER skipped**, regardless of cache state. The cache only short-circuits Incremental in wave-executor. Full Gate remains the close-safety gate and always runs the complete typecheck + test + lint + debug-artifact scan. This is intentional and non-configurable.
 
 **Implementation:** `scripts/lib/quality-gates-cache.mjs` exports `computeDependencyHash`, `saveBaselineResult`, `loadLatestBaselineResult`, `isCacheValid`, `shouldSkipIncremental`. Stdlib-only (`node:fs`, `node:path`, `node:crypto`, `node:child_process`).
+
+**Validation (#266):** Effectiveness confirmed under the Claude Code subprocess-per-call hook model. The JSONL file-based design persists across subprocess boundaries — 100% hit-rate across 8 independent Node.js processes in benchmarks. Median call latency: 0.45 ms (subprocess) / 0.07 ms (in-process warm). The cache is NOT in-process memory; hooks do not call this module directly. See `docs/policy-cache-validation-2026-04-28.md` for full findings and `scripts/measure-policy-cache-effectiveness.mjs` for the instrumentation script.

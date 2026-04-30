@@ -30,8 +30,8 @@ Response: direct array of environments.
 ```json
 [
   {
-    "id": "Default-26e65220-5561-46ef-9783-ce5f20489241",
-    "displayName": "FlowStudio (default)",
+    "id": "Default-aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+    "displayName": "Contoso (default)",
     "sku": "Production",
     "location": "australia",
     "state": "Enabled",
@@ -60,7 +60,7 @@ Response: wrapper object with `connections` array.
 {
   "connections": [
     {
-      "id": "shared-office365-9f9d2c8e-55f1-49c9-9f9c-1c45d1fbbdce",
+      "id": "shared-office365-ffffffff-ffff-ffff-ffff-ffffffffffff",
       "displayName": "user@contoso.com",
       "connectorName": "shared_office365",
       "createdBy": "User Name",
@@ -100,7 +100,7 @@ Response: wrapper object with `flows` array.
   "mode": "owner",
   "flows": [
     {
-      "id": "0757041a-8ef2-cf74-ef06-06881916f371",
+      "id": "cccccccc-cccc-cccc-cccc-cccccccccccc",
       "displayName": "My Flow",
       "state": "Started",
       "triggerType": "Request",
@@ -126,11 +126,11 @@ Response: **direct array** (no wrapper).
 ```json
 [
   {
-    "id": "3991358a-f603-e49d-b1ed-a9e4f72e2dcb.0757041a-8ef2-cf74-ef06-06881916f371",
+    "id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb.cccccccc-cccc-cccc-cccc-cccccccccccc",
     "displayName": "Admin | Sync Template v3 (Solutions)",
     "state": "Started",
     "triggerType": "OpenApiConnectionWebhook",
-    "environmentName": "3991358a-f603-e49d-b1ed-a9e4f72e2dcb",
+    "environmentName": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
     "runPeriodTotal": 100,
     "createdTime": "2023-08-18T01:18:17Z",
     "lastModifiedTime": "2023-08-18T12:47:42Z"
@@ -322,29 +322,26 @@ Cancels a `Running` flow run.
 
 ## HTTP Trigger Tools
 
-### `get_live_flow_http_schema`
+### Reading the request schema and trigger URL
 
-Response keys:
+Both pieces of metadata live inside the flow definition — call `get_live_flow`
+and read them directly:
+
+```python
+defn = mcp("get_live_flow", {"environmentName": ENV, "flowName": FLOW})
+trigger_name, trigger = next(iter(defn["properties"]["definition"]["triggers"].items()))
+request_schema = trigger.get("inputs", {}).get("schema")
+callback_url   = trigger.get("metadata", {}).get("callbackUrl")  # null for non-HTTP
+
+# Response action schemas
+for name, act in defn["properties"]["definition"]["actions"].items():
+    if act.get("type") == "Response":
+        print(name, act.get("inputs", {}).get("schema"))
 ```
-flowKey            - Flow GUID
-displayName        - Flow display name
-triggerName        - Trigger action name (e.g. "manual")
-triggerType        - Trigger type (e.g. "Request")
-triggerKind        - Trigger kind (e.g. "Http")
-requestMethod      - HTTP method (e.g. "POST")
-relativePath       - Relative path configured on the trigger (if any)
-requestSchema      - JSON schema the trigger expects as POST body
-requestHeaders     - Headers the trigger expects
-responseSchemas    - Array of JSON schemas defined on Response action(s)
-responseSchemaCount - Number of Response actions that define output schemas
-```
 
-> The request body schema is in `requestSchema` (not `triggerSchema`).
-
-### `get_live_flow_trigger_url`
-
-Returns the signed callback URL for HTTP-triggered flows. Response includes
-`flowKey`, `triggerName`, `triggerType`, `triggerKind`, `triggerMethod`, `triggerUrl`.
+> Previous wrappers `get_live_flow_http_schema`, `get_live_flow_trigger_url`,
+> and `get_store_flow_trigger_url` are deprecated. The cached version is
+> available as the `triggerUrl` field on `get_store_flow`.
 
 ### `trigger_live_flow`
 
@@ -382,8 +379,8 @@ Parameters: `environmentName`, `flowName`, `state` (`"Started"` | `"Stopped"`) �
 Response:
 ```json
 {
-  "flowName": "6321ab25-7eb0-42df-b977-e97d34bcb272",
-  "environmentName": "Default-26e65220-...",
+  "flowName": "dddddddd-dddd-dddd-dddd-dddddddddddd",
+  "environmentName": "Default-aaaaaaaa-...",
   "requestedState": "Started",
   "actualState": "Started"
 }
@@ -392,30 +389,11 @@ Response:
 > **Use this tool** — not `update_live_flow` — to start or stop a flow.
 > `update_live_flow` only changes displayName/definition; the PA API ignores
 > state passed through that endpoint.
-
-### `set_store_flow_state`
-
-Start or stop a flow via the live PA API **and** persist the updated state back
-to the Power Clarity cache. Same parameters as `set_live_flow_state` but requires
-a Power Clarity workspace.
-
-Response (different shape from `set_live_flow_state`):
-```json
-{
-  "flowKey": "<environmentId>.<flowId>",
-  "requestedState": "Stopped",
-  "currentState": "Stopped",
-  "flow": { /* full gFlows record, same shape as get_store_flow */ }
-}
-```
-
-> Prefer `set_live_flow_state` when you only need to toggle state — it's
-> simpler and has no subscription requirement.
 >
-> Use `set_store_flow_state` when you need the cache updated immediately
-> (without waiting for the next daily scan) AND want the full updated
-> governance record back in the same call — useful for workflows that
-> stop a flow and immediately tag or inspect it.
+> The previous `set_store_flow_state` wrapper (which also synced state back
+> to the cache) is deprecated. The cache will catch up on the next daily
+> scan; if you need cache freshness sooner, call `get_live_flow` after the
+> state change to verify and let the next scan sync.
 
 ---
 
@@ -438,14 +416,8 @@ Response: aggregated run statistics.
 ### `get_store_flow_runs`
 
 Cached run history for the last N days with duration and remediation hints.
-
-### `get_store_flow_errors`
-
-Cached failed-only runs with failed action names and remediation hints.
-
-### `get_store_flow_trigger_url`
-
-Trigger URL from cache (instant, no PA API call).
+Pass `status=["Failed"]` for an errors-only view (replaces the deprecated
+`get_store_flow_errors` wrapper).
 
 ### `update_store_flow`
 

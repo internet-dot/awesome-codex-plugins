@@ -455,24 +455,17 @@ If the call fails, log the structured message above and continue. Raw API respon
 
 ---
 
+<!-- @include _shared-template.md#parallel-sessions-rule -->
 ## Step 3a: Install Parallel-Sessions Rule
 
-Write the vendored rule from `$PLUGIN_ROOT/templates/_shared/rules/parallel-sessions.md` to `$REPO_ROOT/.claude/rules/parallel-sessions.md`.
+Canonical implementation in [`_shared-template.md#parallel-sessions-rule`](_shared-template.md).
 
-Idempotency:
-- Missing → create
-- Exists and byte-identical → skip silently
-- Exists and differs → overwrite (vendored is canonical)
+Write the vendored rule from `$PLUGIN_ROOT/templates/_shared/rules/parallel-sessions.md` to
+`$REPO_ROOT/.claude/rules/parallel-sessions.md` (idempotent: missing→create, identical→skip,
+differs→overwrite). See shared partial for full shell command. Issue #155.
 
-Shell:
-```bash
-mkdir -p "$REPO_ROOT/.claude/rules"
-cp "$PLUGIN_ROOT/templates/_shared/rules/parallel-sessions.md" "$REPO_ROOT/.claude/rules/parallel-sessions.md"
-```
-
-Why: PSA-003 destructive-command safeguards require every consumer repo to carry the rule. See issue #155.
-
-Note: This step runs before D99. If D99 (via inherited S99) executes and fetches a newer version of `parallel-sessions.md` from the baseline, the baseline version wins (S99 overwrites by design — acceptable).
+Note: Runs before D99. If D99 (via inherited S99) fetches a newer `parallel-sessions.md` from
+the baseline, the baseline version wins (acceptable — S99 is canonical).
 
 ## Step 3b: Initialize .orchestrator/metrics/ (Deep) (#185)
 
@@ -505,80 +498,52 @@ README
 
 **Gitignore guidance:** same as Standard — `.orchestrator/metrics/*.jsonl` MUST remain tracked.
 
+> Note: Standard tier (Step 3b) only creates `learnings.jsonl`. Deep adds `sessions.jsonl` + the `README.md`. This step is NOT a shared partial because the Deep variant is a superset, not identical.
+
+<!-- @include _shared-template.md#baseline-fetch -->
 ## Step D99: (Optional) Baseline Fetch — Inherited from Standard
 
-Standard-template Step S99 already executed as part of "Step 1–8: Execute Standard Tier" above. No additional fetch action is needed here.
+Canonical implementation in [`_shared-template.md#baseline-fetch`](_shared-template.md).
 
-If S99 ran successfully, `.claude/rules/*.md` and `.claude/.baseline-fetch.lock` are already written to `$REPO_ROOT`. These files are included in the Deep commit at Step D8 via the `.claude/` entry in `BOOTSTRAP_FILES`.
+Standard-template Step S99 already executed as part of "Step 1–8: Execute Standard Tier" above.
+No additional fetch action is needed here.
 
-If S99 was skipped (no `baseline-ref` or no `GITLAB_TOKEN`), that skip state is already logged; rules will arrive via the legacy Clank weekly sync MR path.
+If S99 ran successfully, `.claude/rules/*.md` and `.claude/.baseline-fetch.lock` are already written
+to `$REPO_ROOT`. These files are included in the Deep commit at Step D8 via the `.claude/` entry
+in `BOOTSTRAP_FILES`. If S99 was skipped, rules arrive via the legacy Clank weekly sync MR path.
 
 ---
 
+<!-- @include _shared-template.md#agents-scaffold -->
 ## Step D6.5: .claude/agents/ Scaffold (#189)
 
-Copy the opinionated agent templates into the consumer repo:
+Canonical implementation in [`_shared-template.md#agents-scaffold`](_shared-template.md).
 
-```bash
-mkdir -p "$REPO_ROOT/.claude/agents"
-cp "$PLUGIN_ROOT/skills/bootstrap/templates/agents/"*.md "$REPO_ROOT/.claude/agents/"
-```
-
-This scaffolds 3 opinionated agents (`project-discovery`, `project-code-review`, `project-quality-gate`) following CLAUDE.md Agent Authoring Rules. Consumer repos should edit descriptions/bodies to match project specifics — but keep the frontmatter structure intact (validated by `agent-frontmatter-invalid` probe).
-
-**Idempotency:** Existing files under `.claude/agents/` are not overwritten — skip any file that already exists.
+Copy 3 opinionated agent templates (`project-discovery`, `project-code-review`,
+`project-quality-gate`) into `$REPO_ROOT/.claude/agents/`. Idempotent: skip existing files.
+See shared partial for full shell command. Issue #189.
 
 ---
 
+<!-- @include _shared-template.md#vault-registration -->
 ## Step D6.6: Vault-Registration Prompt (Product Repos) (#190)
 
-If this repo shows product-repo signals (framework dep + personas/content dir + product env vars), offer to register a vault entry in Session Config. This step mirrors standard-template Step 5.5 — if the standard tier already ran it and the user accepted, `hasVaultConfig` will return true and this step is a no-op.
+Canonical implementation in [`_shared-template.md#vault-registration`](_shared-template.md).
 
-**Detection (via `scripts/lib/product-repo-detect.mjs`):**
-
-```bash
-node --input-type=module -e "
-import { detectProductRepo, hasVaultConfig } from '${PLUGIN_ROOT}/scripts/lib/product-repo-detect.mjs';
-const result = detectProductRepo({ repoRoot: process.cwd() });
-const already = hasVaultConfig('$REPO_ROOT/CLAUDE.md') || hasVaultConfig('$REPO_ROOT/AGENTS.md');
-if (!result.isProductRepo || already) process.exit(0);
-process.stdout.write(JSON.stringify(result, null, 2));
-process.exit(10);  // signal: prompt user
-"
-```
-
-When the script exits 10 (product signals detected, no vault yet): prompt the user:
-
-> Repo appears to carry product data (framework: \<detected>, signals: \<list>). Create vault registration in Session Config? [Y/n]
-
-**On Y (default):** Append the following block to the `## Session Config` section of CLAUDE.md:
-
-```yaml
-vault:
-  path: ${VAULT_PATH:-$HOME/Projects/vault}
-  product-domain: <prompt user for a short domain tag, e.g. "buchhaltung", "lead-gen">
-  persona-db: <optional: path to persona data file, blank if N/A>
-```
-
-**On N:** skip silently. The detection may re-run on next bootstrap; idempotency comes from `hasVaultConfig` — once `vault:` exists in Session Config, the prompt is skipped.
-
-**Examples from real repos:**
-
-| Repo | Framework | Signals | Vault Entry |
-|------|-----------|---------|-------------|
-| BuchhaltGenie | Next.js | supabase, stripe, personas/ | `product-domain: buchhaltung` |
-| LeadPipeDACH | Next.js | stripe, posthog | `product-domain: lead-gen` |
-| GotzendorferAT | Nuxt | postgres, sentry | `product-domain: portfolio` |
-
-**Idempotent.** If CLAUDE.md already has a `vault:` key inside Session Config, the prompt is skipped.
+Mirrors standard-template Step 5.5. If standard already ran it and the user accepted,
+`hasVaultConfig` returns true and this step is a no-op. See shared partial for full detection
+script, prompt text, YAML block, and examples. Issue #190.
 
 ---
 
 ## Step D7: Write bootstrap.lock (Deep)
 
-Write `.orchestrator/bootstrap.lock`:
+Write `.orchestrator/bootstrap.lock` **atomically** (mktemp + mv prevents a corrupt lock if the
+process is interrupted mid-write):
 
-```yaml
+```bash
+_LOCK_TMP=$(mktemp "$REPO_ROOT/.orchestrator/bootstrap.lock.XXXXXX")
+cat > "$_LOCK_TMP" << LOCK
 # .orchestrator/bootstrap.lock
 version: 1
 tier: deep
@@ -587,6 +552,8 @@ timestamp: <current ISO 8601 UTC — e.g., 2026-04-16T09:30:00Z>
 source: <claude-init | plugin-template | projects-baseline>
 plugin-version: <session-orchestrator plugin version — read from $PLUGIN_ROOT/package.json .version field>
 bootstrapped-at: <current ISO 8601 UTC — same value as timestamp; distinct field for age-validation probe>
+LOCK
+mv "$_LOCK_TMP" "$REPO_ROOT/.orchestrator/bootstrap.lock"
 ```
 
 Set `source` using the same logic as fast-template Step 5.

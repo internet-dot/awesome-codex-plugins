@@ -357,17 +357,18 @@ bd migrate --dry-run                                   # Preview migration
 bd migrate --cleanup --yes                             # Migrate and remove old files
 
 # AI-supervised migration (check before running bd migrate)
-bd migrate --inspect --json                            # Show migration plan for AI agents
-bd info --schema --json                                # Get schema, tables, config, sample IDs
+bd migrate --inspect                                   # Show migration plan for AI agents (human-readable)
+bd upgrade status --json                               # Get current bd and schema version as JSON
+bd status --json                                       # Get issue database summary as JSON
 ```
 
 **Migration workflow for AI agents:**
 
-1. Run `--inspect` to see pending migrations and warnings
-2. Check for `missing_config` (like issue_prefix)
-3. Review `invariants_to_check` for safety guarantees
-4. If warnings exist, fix config issues first
-5. Then run `bd migrate` safely
+1. Run `bd upgrade status --json` and `bd status --json` for machine-readable version and database health.
+2. Run `bd migrate --inspect` to see pending migrations and warnings. Treat this output as human-readable unless the installed `bd` help proves otherwise.
+3. Check for `missing_config` (like issue_prefix).
+4. Review migration safety invariants before applying migrations.
+5. If warnings exist, fix config issues first, then run `bd migrate` safely.
 
 **Migration safety invariants:**
 

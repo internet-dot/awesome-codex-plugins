@@ -1,11 +1,12 @@
-# Phase 2.2: CLAUDE.md Drift Check
+# Phase 2.2: CLAUDE.md (or AGENTS.md) Drift Check
 
 > Sub-file of the session-end skill. Executed as part of Phase 2 (Quality Gate) when `drift-check.enabled` is `true`.
 > For the full session close-out flow, see `SKILL.md`. For validator contract, see `skills/claude-md-drift-check/SKILL.md`.
+> Project-instruction file resolution: `CLAUDE.md` and `AGENTS.md` (Codex CLI) are transparent aliases — see [skills/_shared/instruction-file-resolution.md](../_shared/instruction-file-resolution.md). All references to `CLAUDE.md` below resolve via that precedence rule; the drift checker accepts either filename.
 
-### 2.2 CLAUDE.md Drift Check (if configured)
+### 2.2 CLAUDE.md (or AGENTS.md) Drift Check (if configured)
 
-Projects can opt-in to a narrative-drift gate at session close. This is gated on the `drift-check.enabled` config flag (default `false`) — projects without CLAUDE.md or `_meta/` narrative are unaffected. When enabled, the gate reads the `drift-check.mode`, `drift-check.include-paths`, and four `drift-check.check-*` flags and invokes the `claude-md-drift-check` validator. See `docs/session-config-reference.md` for field semantics, and `skills/claude-md-drift-check/SKILL.md` for the validator contract.
+Projects can opt-in to a narrative-drift gate at session close. This is gated on the `drift-check.enabled` config flag (default `false`) — projects without `CLAUDE.md`/`AGENTS.md` or `_meta/` narrative are unaffected. When enabled, the gate reads the `drift-check.mode`, `drift-check.include-paths`, and four `drift-check.check-*` flags and invokes the `claude-md-drift-check` validator. See `docs/session-config-reference.md` for field semantics, and `skills/claude-md-drift-check/SKILL.md` for the validator contract.
 
 The four checks are complementary to `vault-sync` (Phase 2.1): vault-sync validates frontmatter and wiki-links inside the vault tree; drift-check validates narrative claims (paths, counts, issue refs, session-file refs) in top-level repo docs.
 
@@ -49,7 +50,7 @@ fi
 
 - **`mode: off`** — checker reports `status: skipped-mode-off`; include a single line "CLAUDE.md drift: skipped (mode=off)" in the quality gate report. Never blocks.
 - **`mode: warn`** — checker always exits 0. If `.errors | length > 0`, surface the list in the report under "CLAUDE.md drift warnings (mode=warn)" with check + file:line + message for each entry. Also list any `.warnings` (e.g. `#NN` the checker could not resolve via glab). Never blocks close, but remind the user that flipping to `mode: hard` would have blocked on N items.
-- **`mode: hard`** — checker exits 1 on errors. On exit 1: BLOCK session close, surface the full error list, and instruct the user to (a) fix the drift directly in `CLAUDE.md` / `_meta/`, or (b) temporarily set `mode: warn` while backfilling, or (c) disable a specific check via its `check-*` flag if it reports false positives on this codebase.
+- **`mode: hard`** — checker exits 1 on errors. On exit 1: BLOCK session close, surface the full error list, and instruct the user to (a) fix the drift directly in `CLAUDE.md` (or `AGENTS.md` on Codex CLI) / `_meta/`, or (b) temporarily set `mode: warn` while backfilling, or (c) disable a specific check via its `check-*` flag if it reports false positives on this codebase.
 - **Exit 2** (infra error — missing `node`, unreadable `VAULT_DIR`, malformed args) — treat as a skipped gate with a loud warning ("CLAUDE.md drift: infrastructure error — <reason>"). Do NOT block the session close on infra failures.
 
 **Exit-code dispatch:** The checker writes infra-error JSON to stderr (suppressed by `2>/dev/null` above), so `DC_JSON` is empty when `DC_EXIT == 2`. Always branch on `DC_EXIT` first, then `DC_STATUS`:

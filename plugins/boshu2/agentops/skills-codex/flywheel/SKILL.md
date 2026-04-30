@@ -220,6 +220,16 @@ Tell the user:
 
 ## Cache Eviction
 Read `references/cache-eviction.md` for the full eviction pipeline (passive tracking → confidence decay → maturity scan → archive).
+
+## Hub Budget & Phase 4 Hardening
+
+Phase 4 (soc-ytpq) governance for `~/.agents/learnings/` — all advisory, none block by default. Full details in `references/hub-budget.md`.
+
+- **Size budget:** target ≤ 250 MB / ≤ 5,000 files. Restore via `ao maturity --evict --target-size=250M` (lowest-utility-first; respects `lifecycle.IsEvictionEligible` so canonical / high-confidence files are protected).
+- **Volume gate:** `ao harvest` WARNs when promotions exceed `--max-promotions=N` (default 500; `AO_MAX_PROMOTIONS=N` env as fallback; ≤0 disables). WARN-only — the 2,638-promotion `soc-ujls` drain proves a hard gate would falsely block legitimate runs.
+- **Provenance:** every promoted file carries `source_rig:` in its frontmatter (empty writers serialize as `source_rig: unknown`). Both `harvest.Promote` and `pool.(*Pool).Promote` content-dedup against the same hub via `~/.agents/pool/promoted-index.jsonl`.
+- **Re-bloat triage:** check `SkipGlobalHub` defaults to `true` (the agentops-b3v / soc-ujls fix), then `grep -h '^source_rig:' ~/.agents/learnings/*.md | sort | uniq -c | sort -rn` to identify the regressed writer. Use `--target-size`, never raw `rm`.
+
 ## Key Rules
 - **Monitor regularly** - flywheel needs attention
 - **Address friction** - bottlenecks slow compounding
@@ -245,6 +255,8 @@ Read `references/cache-eviction.md` for the full eviction pipeline (passive trac
 
 - [references/artifact-consistency.md](references/artifact-consistency.md)
 - [references/promotion-tiers.md](references/promotion-tiers.md)
+- [references/hub-budget.md](references/hub-budget.md)
+- [references/cache-eviction.md](references/cache-eviction.md)
 
 ## Local Resources
 
@@ -253,6 +265,7 @@ Read `references/cache-eviction.md` for the full eviction pipeline (passive trac
 - [references/artifact-consistency-allowlist.txt](references/artifact-consistency-allowlist.txt)
 - [references/artifact-consistency.md](references/artifact-consistency.md)
 - [references/cache-eviction.md](references/cache-eviction.md)
+- [references/hub-budget.md](references/hub-budget.md)
 - [references/promotion-tiers.md](references/promotion-tiers.md)
 
 ### scripts/

@@ -14,6 +14,8 @@ description: >
 
 # Session Start Skill
 
+> Project-instruction file resolution: `CLAUDE.md` and `AGENTS.md` (Codex CLI) are transparent aliases — see [skills/_shared/instruction-file-resolution.md](../_shared/instruction-file-resolution.md). All references to `CLAUDE.md` in this skill resolve via that precedence rule.
+
 ## Soul
 
 Before anything else, read and internalize `soul.md` in this skill directory. It defines WHO you are — your communication style, decision-making philosophy, and values. Every interaction in this session should reflect this identity. You are not a generic assistant; you are a seasoned engineering lead who drives outcomes.
@@ -249,119 +251,9 @@ Checks to run (derived from the collected output):
 
 > Skip this phase if `docs-orchestrator.enabled` config is not `true` (default: `false`).
 
-### Step 1: Read Docs-Orchestrator Config
+Reads the `docs-orchestrator` config fields, auto-detects which audiences (user/dev/vault) are affected by the current scope using signals from Phases 2–5, confirms the selection with the user via AskUserQuestion, and emits a `### Docs Planning Result (Phase 2.5)` block into the conversation context. That block is the **MANDATORY contract** consumed by session-plan Step 1.8 to seed Docs-role tasks. Audience → file-pattern mapping is the authoritative source at `skills/docs-orchestrator/audience-mapping.md`. Contains non-overlap discipline rules (paths owned by `vault-mirror` and `daily` are off-limits).
 
-Read the three controlling fields from `$CONFIG` using the canonical `jq` accessor pattern:
-
-```bash
-DOCS_ENABLED=$(echo "$CONFIG" | jq -r '."docs-orchestrator".enabled // false')
-DOCS_AUDIENCES=$(echo "$CONFIG" | jq -r '."docs-orchestrator".audiences // ["user","dev","vault"] | join(",")')
-DOCS_MODE=$(echo "$CONFIG" | jq -r '."docs-orchestrator".mode // "warn"')
-```
-
-Valid values for `mode`: `warn` | `strict` | `off`. Never use `hard`.
-
-If `DOCS_ENABLED` is not `true`, skip all remaining steps in this phase and proceed directly to Phase 3.
-
-### Step 2: Audience Auto-Detection
-
-Using signals already gathered in Phases 2–5 (git analysis, VCS issues, branch state, SSOT checks), apply the following heuristic to determine which audiences are likely affected. Record each match with its triggering signal for inclusion in the output block.
-
-**User audience** — flag as likely when any of the following are true:
-- Affected files include `README.md`, `docs/user/**/*.md`, `docs/getting-started.md`, or `examples/**/*.md`
-- Open or recently closed issues reference CLI UX changes, new user-facing commands, or a breaking API change
-- New public commands are introduced (e.g. changes to `commands/` directory)
-- Install flow or setup instructions are modified
-
-**Dev audience** — flag as likely when any of the following are true:
-- Affected files include `CLAUDE.md`, `docs/dev/**/*.md`, or `docs/adr/**/*.md`
-- Issues describe an architecture decision, major refactor, new module or subsystem, test-coverage shift, dependency upgrade, or an ADR-worthy choice
-- New `.mjs` scripts, skill files (`skills/**`), hook files (`hooks/**`), or agent definitions (`agents/**`) are added or substantially changed
-
-**Vault audience** — flag as likely when ALL of the following are true:
-- `vault-integration.enabled: true` is present in `$CONFIG`
-- Issues involve project-status change, ownership transition, stack/infra decision, cross-project dependency, migration, or archival event
-
-After detection, intersect the detected set with the audiences listed in `DOCS_AUDIENCES` (the user may have narrowed the allowed set in config). If the intersection is empty, proceed to Step 3 without pre-selecting any option as "Recommended" and add a note that no audiences were auto-detected.
-
-See `skills/docs-orchestrator/audience-mapping.md` for the authoritative audience → file-pattern and trigger table.
-
-### Step 3: Confirm Audiences with User
-
-Present the audience confirmation using the platform-appropriate interaction pattern.
-
-**Claude Code (AskUserQuestion):**
-
-Mark the auto-detected primary audience (or audiences, if multiple) with `(Recommended)`. `multiSelect: true` because a single change commonly touches more than one audience.
-
-```js
-AskUserQuestion({
-  questions: [{
-    question: "Welche Audiences berührt dieser Scope? (Mehrfachauswahl möglich)",
-    header: "Audiences",
-    multiSelect: true,
-    options: [
-      {
-        label: "Dev (Recommended)",   // add "(Recommended)" to each detected audience
-        description: "Architektur-, Modul- oder Refactoring-Änderungen — aktualisiert CLAUDE.md, docs/dev/**, docs/adr/**."
-      },
-      {
-        label: "User",
-        description: "Öffentlich sichtbare Änderungen — aktualisiert README.md, docs/user/**, examples/**."
-      },
-      {
-        label: "Vault",
-        description: "Strategische oder Status-Änderungen — aktualisiert <vault>/01-projects/<slug>/context.md, decisions.md, people.md."
-      }
-    ]
-  }]
-})
-```
-
-**Codex CLI / Cursor IDE fallback (numbered Markdown list):**
-
-```markdown
-Welche Audiences berührt dieser Scope? (Mehrfachauswahl möglich)
-
-Auto-detected: [dev]  ← list detected audiences here, or "none" if empty intersection
-
-1. **Dev (Recommended)** — Architektur-, Modul- oder Refactoring-Änderungen. Targets: CLAUDE.md, docs/dev/**, docs/adr/**.
-2. **User** — Öffentlich sichtbare Änderungen. Targets: README.md, docs/user/**, examples/**.
-3. **Vault** — Strategische oder Status-Änderungen. Targets: <vault>/01-projects/<slug>/context.md, decisions.md, people.md.
-
-Enter one or more numbers (comma-separated), or press Enter to accept the recommended default.
-```
-
-Store the confirmed audience list as `CONFIRMED_AUDIENCES`.
-
-### Step 4: Emit Docs Planning Result Block
-
-After the user confirms (or defaults are accepted), emit the following delimited block verbatim into the conversation context. This block is the **contract between Phase 2.5 and session-plan Step 1.8** — session-plan MUST parse it to classify tasks as `Docs` role and route them to the `docs-writer` agent.
-
-```markdown
-### Docs Planning Result (Phase 2.5)
-Audiences: [<comma-separated confirmed audiences, e.g. dev, user>]
-Detected-from: [<comma-separated detection signals, e.g. affected-files, issue-labels>]
-Mode: <warn|strict|off>
-Docs-tasks-seed:
-  - audience: "dev"
-    rationale: "<one-line reason derived from detection signal, e.g. 'new skill scaffolded in skills/docs-orchestrator'>"
-  - audience: "user"
-    rationale: "<one-line reason, or omit entry if audience not confirmed>"
-```
-
-Session-plan Step 1.8 identifies this block by the exact heading `### Docs Planning Result (Phase 2.5)` and reads `Audiences:` and `Docs-tasks-seed:` to seed the Docs role task list. **Parse rule for `Docs-tasks-seed:`:** each top-level `- audience:` bullet is exactly one seed task; parse all entries in document order; the following indented `rationale:` key binds to the most recent `- audience:`. If this block is absent (phase was skipped), session-plan MUST NOT create any Docs role tasks.
-
-### Step 5: Non-Overlap Discipline
-
-`docs-orchestrator` MUST NOT write to the following paths — they are owned by sibling skills:
-
-- `<vault>/01-projects/*/_overview.md` — owned by `vault-mirror` (regenerated from JSONL on every session-end)
-- `<vault>/03-daily/*` — owned by `daily` (idempotent day-level notes; a second writer would corrupt the file)
-
-See `skills/docs-orchestrator/audience-mapping.md` (Non-Overlap with Sibling Skills table) for the complete ownership list and source-citation rules.
-
-Proceed to Phase 3.
+**See `phase-2-5-docs-planning.md` for full details.**
 
 ## Phase 3: VCS Deep Dive (parallel)
 
@@ -392,61 +284,27 @@ Group issues by:
 3. **Pencil design status**: if `pencil` is configured, verify the `.pen` file exists at the configured path. Report: "Pencil design configured at [path] — design-code alignment reviews will run after Impl-Core and Impl-Polish waves." If file not found, warn: "Pencil path configured but file not found at [path]."
 4. **Plugin freshness**: Determine the session-orchestrator plugin directory (navigate up from this skill's base directory to the plugin root). Run `git -C <plugin-dir> log -1 --format="%ci"` to get the last commit date. If older than `plugin-freshness-days` (default: 30) days, flag a warning in the Session Overview: `"⚠ Session Orchestrator plugin last updated [N] days ago — consider pulling the latest version."` Non-blocking — present in overview, don't halt.
 
-   Additionally, if `.orchestrator/bootstrap.lock` exists in the current repo, invoke the bootstrap-lock-freshness probe (`scripts/lib/bootstrap-lock-freshness.mjs`) to check lock age and plugin-version drift. When severity is `warn` or `alert`, render an additional banner alongside the plugin-freshness warning:
-   - **warn** (age 30–89d or version mismatch): `"⚠ bootstrap.lock: age=<N>d, plugin-version=<lock-ver> (current=<plugin-ver>) — consider re-running /bootstrap --retroactive to refresh."`
-   - **alert** (age ≥90d, unparseable, or missing): `"⚠ bootstrap.lock: <message> — re-run /bootstrap --retroactive is strongly recommended."`
+   Additionally, if `.orchestrator/bootstrap.lock` exists in the current repo, invoke the bootstrap-lock-freshness probe (`scripts/lib/bootstrap-lock-freshness.mjs`) to check lock age and plugin-version drift. Pass `currentPluginVersion` read from `$PLUGIN_ROOT/package.json` so version comparison is live. When severity is `warn` or `alert`, render an additional banner alongside the plugin-freshness warning:
+   - **warn** (age 30–89d or non-parseable version mismatch): `"⚠ bootstrap.lock: age=<N>d, plugin-version=<lock-ver> (current=<plugin-ver>) — consider re-running /bootstrap --retroactive to refresh."`
+   - **alert** (age ≥90d, unparseable, missing, or major plugin-version mismatch): `"⚠ bootstrap.lock: <message> — re-run /bootstrap --retroactive is strongly recommended."`
+   - **info-only version mismatch** (patch or minor version only): `"ℹ bootstrap.lock: plugin-version=<lock-ver> (current=<plugin-ver>) — minor drift only, no action required."`
+   - **legacy lock without plugin-version** (soft signal only): `"ℹ bootstrap.lock: lock predates plugin-version field; consider /bootstrap --retroactive to refresh."`
 
-   Both banners are non-blocking — display in the Session Overview, do not halt the session. If `bootstrap-lock-freshness.mjs` is absent (pre-#186 plugin install), skip silently.
+   Additionally, if `.orchestrator/metrics/vault-staleness.jsonl` exists in the current repo (vault-integration enabled), read the most recent line via `scripts/lib/vault-staleness-banner.mjs` (`checkVaultStaleness({repoRoot})`). When `stale_count > 0`, render a banner alongside the bootstrap-lock warning:
+   - **warn** (`stale_count > 0`, max `delta_hours <= 48`): `"⚠ vault-staleness: <N> projects stale (max delta: <X>h) — last run <timestamp>."`
+   - **alert** (`stale_count > 0`, max `delta_hours > 48`): `"⚠ vault-staleness: <N> projects stale (max delta: <X>h) — Clank-Vault-Sync cron likely broken, see agents/vault#70 fix pattern."`
+
+   The helper returns `null` (silent no-op) when the JSONL is absent, malformed, or `stale_count === 0`. Skip silently in those cases — do not block the session.
+
+   All banners are non-blocking — display in the Session Overview, do not halt the session. If `bootstrap-lock-freshness.mjs` is absent (pre-#186 plugin install), skip silently.
 
 ## Phase 4.5: Resource Health (v3.1.0)
 
 > Skip this phase if `resource-awareness: false` in Session Config.
 
-Read `.orchestrator/host.json` (written by `hooks/on-session-start.mjs`) and run a live resource snapshot. Compare against `resource-thresholds` from Session Config to derive an adaptive wave-sizing recommendation before session-plan runs.
+Reads `.orchestrator/host.json` and runs a live resource snapshot via `resource-probe.mjs`. Computes a `green`/`warn`/`critical` verdict against configurable thresholds (RAM, CPU, concurrent Claude processes, SSH). On `warn`/`critical`, presents an AskUserQuestion prompt to apply the recommended `agents-per-wave` cap or proceed at the user's own risk. The cap is forwarded to session-plan as an in-session override.
 
-### Probe + Evaluate
-
-```js
-// Conceptual — the wave-executor and session-plan skills call these directly.
-import { probe, evaluate } from '$PLUGIN_ROOT/scripts/lib/resource-probe.mjs';
-const snapshot = await probe();
-const verdict = evaluate(snapshot, config['resource-thresholds']);
-```
-
-The `evaluate()` result has three fields:
-- `verdict`: `green` | `warn` | `critical`
-- `reasons`: array of human-readable explanations
-- `recommended_agents_per_wave_cap`: integer cap (0 = coordinator-direct) or null
-
-### Adaptive Rules (default thresholds; configurable via `resource-thresholds`)
-
-| Signal | Threshold | Action |
-|--------|-----------|--------|
-| RAM free below `ram-free-min-gb` (default 4) | warn | Cap `agents-per-wave` at 2 |
-| RAM free below `ram-free-critical-gb` (default 2) | critical | Recommend coordinator-direct (0 agents) |
-| CPU load above `cpu-load-max-pct` (default 80) sustained | warn | Cap `agents-per-wave` at 2 |
-| Claude processes ≥ `concurrent-sessions-warn` (default 5) | warn | Warn; suggest sequencing or waiting |
-| SSH session detected AND `ssh-no-docker: true` | info | Append note: host is SSH-attached, Docker-dependent steps should run on a local dev host |
-
-### Presentation
-
-Print a one-line Resource Health verdict immediately after Phase 4's output:
-
-```
-Resource Health: ⚠ warn — RAM free 3.1 GB below threshold 4 GB; capping agents-per-wave at 2.
-```
-
-When verdict is `warn` or `critical`, use the AskUserQuestion tool to present:
-1. **Proceed as recommended** (apply the cap) — Recommended
-2. **Proceed as originally planned** (user accepts the risk)
-3. **Abort** (no wave planning runs; user closes or investigates)
-
-When SSH is detected and the session type is `deep`, auto-append this note to the plan handoff to session-plan (no user prompt needed):
-> Host is SSH-attached — Docker-dependent wave steps should run on a local dev host.
-
-### Integration with session-plan
-
-When Phase 4.5 recommends a cap, pass that cap into the session-plan handoff. session-plan honors the cap by reducing `agents-per-wave` for the upcoming plan, regardless of what the Session Config default says. This is an in-session override, not a config mutation.
+**See `phase-4-5-resource-health.md` for full details.**
 
 ## Phase 5: Cross-Repo Status (if configured)
 
@@ -576,207 +434,9 @@ Present a Surface Health block immediately after the per-type grouping, before t
 
 Run immediately before Phase 8 so the Mode-Selector recommendation can influence the AUQ option ordering.
 
-### Distinction from Phase 1.5 Recommendations Banner
+Invokes `buildLiveSignals` (single SSOT for the signals shape) then `selectMode(signals)` (pure function, never throws). Renders a `📊` banner when confidence ≥ 0.5, an informational banner when < 0.5, and no banner when confidence = 0.0. High-confidence output pre-selects an AUQ option in Phase 8 — see Step 4 AUQ Option Ordering Protocol. After Phase 8 collects the user's mode choice, writes a `mode-selector-accuracy` learning to `learnings.jsonl` (Step 6, Phase B-4). All failure paths are graceful no-ops logged to `sweep.log`.
 
-Phase 1.5 renders a `📋` banner that reads the **previous** session's archived Recommendation fields from STATE.md (`recommended-mode`, `rationale`, `completion-rate`, etc., written by session-end Phase 3.7a). It is a backward-looking handoff signal.
-
-Phase 7.5 runs `selectMode(signals)` — a **forward-looking** computation over live signals gathered this session (current carryover ratios, recent sessions trend, learnings, bootstrap tier). It emits a `📊` banner.
-
-Both banners may render in the same session-start run. That is intentional: the `📋` banner tells you what the last session recommended; the `📊` banner tells you what the selector computes from all available data right now. They should usually agree. When they diverge, the `📊` signal is more current and should be treated as authoritative.
-
-### Step 1: Build Signals
-
-Invoke `buildLiveSignals` from `scripts/lib/build-live-signals.mjs` to assemble the `signals` object. The helper composes all six source modules (state-md, sessions.jsonl, bootstrap.lock, scanBacklog, learnings, vaultStaleness reserved) with graceful-null on every failure. Pure async, never throws.
-
-```js
-import { buildLiveSignals } from '$PLUGIN_ROOT/scripts/lib/build-live-signals.mjs';
-
-// Pass the surfaced top-N learnings (already computed in Phase 6.6) to avoid
-// re-reading learnings.jsonl. Other paths default to canonical locations
-// (.claude/STATE.md, .orchestrator/metrics/sessions.jsonl, .orchestrator/bootstrap.lock).
-const signals = await buildLiveSignals({
-  learnings: surfacedTopLearnings,   // array, may be empty
-  backlogLimit: 50,
-});
-```
-
-`buildLiveSignals` is the single SSOT for the Signals shape consumed by `selectMode` and by the autopilot driver protocol (see `skills/autopilot/SKILL.md § Production Wiring`). Phase 7.5 here and the autopilot in-process driver MUST go through this helper — do not inline the recipe in either call site.
-
-**Key source bindings (Phase → field):**
-
-| `signals` field | Populated from | Phase |
-|---|---|---|
-| `recommendedMode` | `parseRecommendations(frontmatter).mode` | Phase 1.5 |
-| `carryoverRatio` | `parseRecommendations(frontmatter).carryoverRatio` | Phase 1.5 |
-| `completionRate` | `parseRecommendations(frontmatter).completionRate` | Phase 1.5 |
-| `previousRationale` | `parseRecommendations(frontmatter).rationale` | Phase 1.5 |
-| `topPriorities` | `parseRecommendations(frontmatter).priorities` | Phase 1.5 |
-| `recentSessions` | tail-10 of `.orchestrator/metrics/sessions.jsonl` | Phase 6.6 |
-| `bootstrapLock` | `.orchestrator/bootstrap.lock` via `parseBootstrapLock` | Phase 4 |
-| `learnings` | surfaced top-N learnings (confidence > 0.3) | Phase 6.6 |
-| `backlog` | `scanBacklog({limit: 50})` from `backlog-scan.mjs` (live VCS scan) | Phase 7.5 Step 1 |
-
-### Step 2: Invoke selectMode
-
-Wrap the call in a try/catch. `selectMode` is a pure function with a defensive null-guard and should never throw, but if it does the session must not be blocked.
-
-```js
-let recommendation = null;
-
-try {
-  recommendation = selectMode(signals);
-} catch (err) {
-  // Log to sweep.log as mode-selector-error — no banner, continue to Phase 8.
-  try {
-    const { appendFileSync, mkdirSync } = await import('node:fs');
-    mkdirSync('.orchestrator/metrics', { recursive: true });
-    appendFileSync(
-      '.orchestrator/metrics/sweep.log',
-      JSON.stringify({
-        timestamp: new Date().toISOString(),
-        event: 'mode-selector-error',
-        detail: String(err?.message ?? err),
-      }) + '\n',
-    );
-  } catch {}
-  // Fall through: recommendation stays null → no banner, Phase 8 uses default AUQ ordering.
-}
-```
-
-### Step 3: Render the 📊 Banner (conditional)
-
-```js
-const pct = (x) => Math.round(x * 100) + '%';
-
-if (!recommendation || recommendation.confidence === 0.0) {
-  // No banner. Fall through to Phase 8 with default (unmodified) AUQ ordering.
-
-} else if (recommendation.confidence < 0.5) {
-  // Low-confidence suggestion — informational banner only.
-  // Do NOT pre-select this mode as the AUQ "Recommended" option.
-  console.log(
-    `📊 Mode-Selector suggests: ${recommendation.mode}` +
-    ` (confidence: ${pct(recommendation.confidence)}) — ${recommendation.rationale}`
-  );
-  // Phase 8 AUQ ordering: unchanged from default. The banner is purely informational.
-
-} else {
-  // confidence >= 0.5 — pre-select as AUQ option 1 with "(Recommended by Mode-Selector)" label.
-  console.log(
-    `📊 Mode-Selector recommends: ${recommendation.mode}` +
-    ` (confidence: ${pct(recommendation.confidence)}) — ${recommendation.rationale}`
-  );
-  // Phase 8 AUQ ordering: modified — see Step 4.
-}
-```
-
-### Step 4: AUQ Option Ordering Protocol (Phase 8 integration)
-
-Phase 8 reads `presentation-format.md` for the AUQ structure. The Mode-Selector output modifies option ordering **only when `recommendation.confidence >= 0.5`**. Do not modify `presentation-format.md` — the ordering adjustment is a runtime protocol applied at the call site in Phase 8.
-
-**When `recommendation.confidence >= 0.5`:**
-
-1. AUQ option 1 label: `"<recommendation.mode> (Recommended by Mode-Selector)"`.  
-   AUQ option 1 description: `recommendation.rationale` + any relevant focus issues from Phase 3/6.
-2. `recommendation.alternatives` (when non-empty, may have up to 3 entries) become options 2..N.  
-   Each alternative label: `"<alt.mode> (confidence: <pct(alt.confidence)>%)"`.  
-   Each alternative description: a brief label derived from the mode name (e.g. "housekeeping → cleanup cycle", "feature → standard incremental delivery").
-3. Total AUQ options ≤ 4 (AUQ tool cap). If `alternatives.length >= 3`, show the first 2 and add a final option: `"Other (specify)"` with description `"Enter a custom mode or focus not listed above."`.
-4. Any previously-computed focus recommendations from the Session Overview (Phase 8's ## Recommended Focus section) are folded into the descriptions of whichever option matches that mode. They are NOT added as separate AUQ options.
-
-**When `recommendation.confidence < 0.5` (including `0.0`):**
-
-AUQ option ordering is **unchanged** from the existing `presentation-format.md` default. The `📊` banner (if rendered) is informational only and does not influence option ordering.
-
-**Codex CLI / Cursor IDE fallback (no AUQ tool):**
-
-When operating on Codex CLI or Cursor IDE, apply the same ordering logic but render as a numbered Markdown list (per `presentation-format.md` Codex fallback section). When `confidence >= 0.5`, prefix option 1 with `(Recommended by Mode-Selector)`.
-
-### Step 5: Graceful No-Op Rules
-
-All of the following result in **no banner and default AUQ ordering** — they are silent no-ops that do not block session startup:
-
-| Condition | Why | Behaviour |
-|---|---|---|
-| `persistence: false` | Phase 6.6 skipped, no learnings/sessions data | Phase 7.5 skipped entirely |
-| STATE.md absent | `rec === null`, all Phase-A `signals.*` are null | `selectMode` returns `confidence: 0.0` → no banner |
-| Pre-v1.1 STATE.md (no Phase A fields) | `parseRecommendations` returns `null` → `rec === null` | Same as above |
-| `selectMode` throws (should never happen) | Pure function contract violation | `mode-selector-error` logged to sweep.log, no banner |
-| `recommendation.confidence === 0.0` | Default fallback branch in selector | No banner, default ordering |
-| `recommendation === null` (catch path) | Error during invocation | No banner, default ordering |
-| `.orchestrator/bootstrap.lock` absent | `bootstrapLockObj === null` | Signals still valid; lock contributes 0 delta |
-| `sessions.jsonl` absent or < 1 entry | `recentSessions: []` | Signals still valid; trend contributes 0 delta |
-| `glab`/`gh` CLI missing or non-zero exit | `scanBacklog` returns null | `signals.backlog: null`; backlog signal contributes 0 delta. Phase B-3 (#293). |
-| no git origin | `detectVcs()` returns null → `scanBacklog` short-circuits | Same as above |
-
-Note: `selectMode` is designed to NEVER throw (pure function, defensive null-guard). The try/catch in Step 2 is belt-and-suspenders. If it does throw, the `mode-selector-error` breadcrumb in sweep.log is the observable signal for debugging without blocking the session.
-
-### Step 6: Record Mode-Selector Accuracy Learning (post-AUQ, Phase B-4)
-
-Runs **after Phase 8 collects the user's mode choice** (or skip on Codex/Cursor numbered-list response). This step writes a `mode-selector-accuracy` learning to `.orchestrator/metrics/learnings.jsonl` so future Mode-Selector heuristic tuning has feedback data. Phase B-4 (#294).
-
-**Trigger conditions (ALL must be true):**
-
-1. Phase 7.5 produced a non-null `recommendation` (banner rendered — Step 3 was either the `< 0.5` or `>= 0.5` branch).
-2. The user actively confirmed or overrode via AUQ (or numbered-list reply on Codex/Cursor). Timeouts and aborts do NOT trigger a write.
-3. `recommendation.mode` and the user's chosen mode are both valid `isValidMode` values from `recommendations-v0.mjs`.
-
-**Skip silently when:**
-
-- Phase 7.5 was skipped (`persistence: false` or Phase 6.6 skipped).
-- `recommendation === null` or `recommendation.confidence === 0.0` (no banner rendered).
-- The chosen mode does not parse cleanly (e.g., custom "Other" free-text response).
-
-**Write contract (delegated to `recordAccuracy` in `mode-selector-accuracy.mjs`):**
-
-```js
-import { recordAccuracy } from '$PLUGIN_ROOT/scripts/lib/mode-selector-accuracy.mjs';
-
-// After Phase 8 AUQ resolves with the user's choice:
-const result = await recordAccuracy({
-  recommended: recommendation.mode,   // from Phase 7.5 Step 2
-  chosen:      userChosenMode,        // from Phase 8 AUQ answer, normalized to canonical mode
-  sessionId:   `${branch}-${ymd}-${hhmm}`, // matches the wave-executor session_id format
-});
-
-if (!result.ok) {
-  // Log to sweep.log as mode-selector-accuracy-skip; never block session-start.
-  appendFileSync(
-    '.orchestrator/metrics/sweep.log',
-    JSON.stringify({
-      timestamp: new Date().toISOString(),
-      event: 'mode-selector-accuracy-skip',
-      detail: result.reason, // 'no-recommendation' | 'unknown-mode' | 'missing-session-id' | 'append-failed: ...'
-    }) + '\n',
-  );
-}
-```
-
-**Lifecycle handling (NOT this step's job):**
-
-The helper writes a fresh entry at `confidence: 0.5`. The +0.15 confirm / -0.20 contradict semantics are applied later by `evolve` and `session-end` when the same `(type, subject)` pair recurs across sessions. Subject pattern: `<recommended>-selected-vs-<chosen>` — agreement and override outcomes land at distinct subjects so they accumulate independently.
-
-**Graceful no-op rules** (none of these block session-start):
-
-| Condition | Behaviour |
-|---|---|
-| recommendation is null | helper returns `{ok: false, reason: 'no-recommendation'}` |
-| chosen mode unparsable | helper returns `{ok: false, reason: 'unknown-mode'}` |
-| `appendLearning` validation fails | helper returns `{ok: false, reason: 'append-failed: ...'}` |
-| learnings.jsonl write I/O error | same as above; sweep.log captures detail |
-
-### References
-
-- Implementation: `scripts/lib/mode-selector.mjs::selectMode`
-- Skill contract: `skills/mode-selector/SKILL.md`
-- Phase A parser: `scripts/lib/state-md.mjs::parseRecommendations`
-- Phase A writer: `skills/session-end/SKILL.md` Phase 3.7a
-- Bootstrap lock reader: `scripts/lib/bootstrap-lock-freshness.mjs::parseBootstrapLock`
-- Session normalizer: `scripts/lib/session-schema.mjs::normalizeSession`
-- Backlog signal: `scripts/lib/backlog-scan.mjs::scanBacklog` (Phase B-3, #293)
-- Accuracy helper: `scripts/lib/mode-selector-accuracy.mjs::recordAccuracy` (Phase B-4, #294)
-- PRD: `docs/prd/2026-04-25-mode-selector.md`
-- Issues: [#292 Phase B-2 integration](https://gitlab.gotzendorfer.at/infrastructure/session-orchestrator/-/issues/292), [#293 Phase B-3 backlog signal](https://gitlab.gotzendorfer.at/infrastructure/session-orchestrator/-/issues/293), [#294 Phase B-4 accuracy feedback](https://gitlab.gotzendorfer.at/infrastructure/session-orchestrator/-/issues/294)
+**See `phase-7-5-mode-selector.md` for full details.**
 
 ## Phase 8: Structured Presentation & Q&A
 
@@ -785,6 +445,18 @@ Read `presentation-format.md` in this skill directory for the output structure, 
 Present your findings following that structure. Key rules:
 - **MANDATORY: Use a structured choice flow** — AskUserQuestion on Claude Code, numbered Markdown options on Codex/Cursor
 - Always include your recommendation as the first option with "(Recommended)" in the label
+
+### Phase 8.5: Express Path Evaluation (#214)
+
+After the user confirms session type and scope, evaluate whether the Express Path applies. Activation requires ALL three: `express-path.enabled: true` in Session Config (default: `true` — when `express-path.enabled: false`, this evaluation is skipped entirely and the normal 5-wave session-plan flow runs), session type `housekeeping`, and scope ≤ 3 sequential issues. The 13 prior coordinator-direct sessions in `CLAUDE.md` (or `AGENTS.md` on Codex CLI; 2026-04 series) were all running this pattern implicitly — this phase codifies what was already proven to work.
+
+When all conditions are met, emits the banner:
+```
+Express path activated — <N> tasks, coordinator-direct, no inter-wave checks.
+```
+Then executes tasks coordinator-direct (bypassing session-plan and wave-executor) and logs a Deviations entry in STATE.md. Silent no-op when any condition fails — proceeds normally to Phase 9.
+
+**See `phase-8-5-express-path.md` for full details.**
 
 ## Phase 9: Handoff to Session Plan
 
@@ -815,4 +487,8 @@ After user alignment:
 | File | Purpose |
 |------|---------|
 | `soul.md` | Identity and communication principles |
-| `presentation-format.md` | Phase 7 output templates and AskUserQuestion examples |
+| `presentation-format.md` | Phase 8 output templates and AskUserQuestion examples |
+| `phase-2-5-docs-planning.md` | Phase 2.5 full procedural body — docs-orchestrator config, audience detection, AUQ confirmation, result block emission, non-overlap rules |
+| `phase-4-5-resource-health.md` | Phase 4.5 full procedural body — resource probe, adaptive thresholds table, AUQ presentation, session-plan cap handoff |
+| `phase-7-5-mode-selector.md` | Phase 7.5 full procedural body — buildLiveSignals, selectMode invocation, banner rendering, AUQ ordering protocol, graceful no-op rules, accuracy learning write |
+| `phase-8-5-express-path.md` | Phase 8.5 full procedural body — activation conditions, banner, coordinator-direct execution, STATE.md logging, condition examples table |

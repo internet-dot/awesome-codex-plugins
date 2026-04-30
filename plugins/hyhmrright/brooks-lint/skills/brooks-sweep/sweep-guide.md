@@ -1,14 +1,10 @@
 # Brooks-Lint — Full Sweep Guide
 
-Sequential, autonomous audit-and-fix pipeline. The pipeline walks four analysis
-dimensions in a fixed order — **review → test → debt → audit** — fixes every
-finding it can, iterates until the codebase is clean or a cap is hit, and
-reports residual items at the end. No user interaction during execution.
+Sequential autonomous pipeline: **review → test → debt → audit**. Fixes findings
+in place, iterates until clean or capped, reports residuals. One interaction point:
+Step 0 (pre-flight consent) — after approval the pipeline runs hands-free until Step 8.
 
 Every finding follows the Iron Law: **Symptom → Source → Consequence → Remedy**.
-
-The single user-interaction point is **Step 0 (Pre-flight consent)**. After
-the user approves, the pipeline runs hands-free until Step 8.
 
 ---
 
@@ -73,19 +69,11 @@ once so later steps never have to ask.
    applied config values and reuse them across all iteration rounds — do not
    re-read the file in Step 6 even if files were modified.
 
-1c. Initialize three pieces of pipeline state (persist across all rounds):
+1c. Initialize pipeline state (persists across all rounds):
 
-   - **`unresolvable`** (set): findings retired after 3 failed fix attempts.
-     Each entry is `(file, line_range, risk_code, signature)`. Matching uses
-     `(file, line_range, risk_code)` as the primary key; `signature` is a
-     tie-breaker for the rare case of two distinct findings sharing the same
-     triple. Entries here are NEVER re-queued even if re-detected.
-   - **`non_critical_rounds`** (int, starts at 0): number of consecutive rounds
-     that produced any Warning or Suggestion. Incremented in Step 6; reset only
-     on a clean round.
-   - **`fix_log`** (list): every applied or attempted fix with file, line range,
-     risk code, one-line description, and outcome (`applied` / `reverted` /
-     `retired`).
+   - **`unresolvable`** (set): findings retired after 3 failed attempts — keyed by `(file, line_range, risk_code)`; `signature` breaks ties. Never re-queued.
+   - **`non_critical_rounds`** (int, 0): incremented each round producing Warning/Suggestion; reset on clean round.
+   - **`fix_log`** (list): each fix with file, line range, risk code, description, and outcome (`applied` / `reverted` / `retired`).
 
 1d. Record the final scope file list in the Fix Report output buffer for Step 8.
 
@@ -144,14 +132,7 @@ record as T2 (Missing Tests). A test scaffold that adds a pure-function test is
 
 ### Step 4 — brooks-debt pass (tech debt accumulation)
 
-Re-classify R-findings that slipped past Step 2 through a tech-debt lens — the
-same symptoms seen through accumulation scale (not one occurrence, but a
-pattern): repeated duplication across modules, layered workarounds, drifted
-invariants, stale `TODO`/`FIXME` clusters, dead flags. See
-`../brooks-debt/debt-guide.md` for the full debt-classification rubric if it
-exists; otherwise reuse R-code definitions with an "accumulated impact"
-severity bump (e.g. isolated duplication = Suggestion → repeated duplication
-across 4+ modules = Warning).
+Re-classify R-findings through a debt lens — same symptoms at accumulation scale: repeated duplication, layered workarounds, stale `TODO`/`FIXME` clusters, dead flags. See `../brooks-debt/debt-guide.md` for the rubric; otherwise apply a severity bump for pattern-level occurrences (isolated Suggestion → 4+ modules Warning).
 
 Follow the same sub-steps as Step 2. Debt findings often span multiple files
 and are more likely to land in Extended-Safe or Residual than Safe.

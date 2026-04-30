@@ -2,6 +2,7 @@
 
 > Reference file for the plan skill. Read by SKILL.md when mode is `new`.
 > Covers: requirement gathering (3 waves) → PRD generation → repo setup → issue creation.
+> Project-instruction file resolution: `CLAUDE.md` and `AGENTS.md` (Codex CLI) are transparent aliases — see [skills/_shared/instruction-file-resolution.md](../_shared/instruction-file-resolution.md). New repos pick the file appropriate to the platform that will operate them.
 
 ---
 
@@ -75,7 +76,7 @@ Agent({ subagent_type: "Explore", description: "Analyze archetype failure modes"
 
 Agent({ subagent_type: "Explore", description: "Check ecosystem dependency compatibility",
   prompt: "For each ecosystem repo mentioned by the user as a dependency,
-  read its package.json/go.mod/pyproject.toml and CLAUDE.md.
+  read its package.json/go.mod/pyproject.toml and CLAUDE.md (or AGENTS.md on Codex CLI).
   Report: version constraints, API contracts, integration patterns." })
 
 Agent({ subagent_type: "Explore", description: "Research success benchmarks",
@@ -162,9 +163,9 @@ glab api -X PUT projects/:id/protected_branches \
   -f merge_access_level=30
 ```
 
-### Step 5: Populate CLAUDE.md
+### Step 5: Populate CLAUDE.md (or AGENTS.md on Codex CLI)
 
-Add `## Session Config` section with fields derived from the planning session. Include at minimum:
+Choose the project-instruction file appropriate to the platform that will operate the repo: `CLAUDE.md` for Claude Code / Cursor IDE, `AGENTS.md` for Codex CLI. Pick exactly one — never both. Add `## Session Config` section with fields derived from the planning session. Include at minimum:
 
 - `plan-baseline-path`
 - `plan-default-visibility`

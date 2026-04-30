@@ -30,6 +30,10 @@ fi
 
 Defer entirely to `skills/bootstrap/public-fallback.md` — "Public Path — Fast Tier" section. That file is the single source of truth for Public-path CLAUDE.md generation (claude init path for Claude Code; `_minimal` template synthesis for Codex/Cursor; Session Config injection). Do not duplicate its logic here.
 
+**`claude init` overwrite guard:** `public-fallback.md` Fast Tier runs `claude init` only when
+`CLAUDE.md` does not already exist (`[[ ! -f "$REPO_ROOT/CLAUDE.md" ]]`). This prevents
+overwriting project-specific customisations on re-runs (issue #108).
+
 After `public-fallback.md` completes CLAUDE.md generation, continue to Step 2b to verify the Session Config block.
 
 **If `PATH_TYPE = private`:**
@@ -170,9 +174,12 @@ Keep it minimal. One heading, one sentence. The feature that follows will expand
 mkdir -p "$REPO_ROOT/.orchestrator"
 ```
 
-Write `.orchestrator/bootstrap.lock`:
+Write `.orchestrator/bootstrap.lock` **atomically** (mktemp + mv prevents a corrupt lock if the
+process is interrupted mid-write):
 
-```yaml
+```bash
+_LOCK_TMP=$(mktemp "$REPO_ROOT/.orchestrator/bootstrap.lock.XXXXXX")
+cat > "$_LOCK_TMP" << LOCK
 # .orchestrator/bootstrap.lock
 version: 1
 tier: fast
@@ -181,6 +188,8 @@ timestamp: <current ISO 8601 UTC — e.g., 2026-04-16T09:30:00Z>
 source: <claude-init | plugin-template>
 plugin-version: <session-orchestrator plugin version — read from $PLUGIN_ROOT/package.json .version field>
 bootstrapped-at: <current ISO 8601 UTC — same value as timestamp; distinct field for age-validation probe>
+LOCK
+mv "$_LOCK_TMP" "$REPO_ROOT/.orchestrator/bootstrap.lock"
 ```
 
 Set `source`:

@@ -16,6 +16,8 @@ description: >
 
 # Plan Skill
 
+> Project-instruction file resolution: CLAUDE.md and AGENTS.md (Codex CLI) are transparent aliases — see [skills/_shared/instruction-file-resolution.md](../_shared/instruction-file-resolution.md). All references below to `CLAUDE.md` resolve via that precedence rule.
+
 ## File Structure
 
 - `SKILL.md` — Core framework: mode router, Q&A engine, shared phases
@@ -40,7 +42,7 @@ Do NOT proceed past Phase 0 if GATE_CLOSED. There is no bypass. Refer to `skills
 
 Read and parse Session Config per `skills/_shared/config-reading.md`. Store result as `$CONFIG`.
 
-After parsing, verify that `plan-baseline-path` is not null: `echo "$CONFIG" | jq -e '."plan-baseline-path"'`. If null, stop with: "Error: `plan-baseline-path` is not configured in Session Config. Add it to your CLAUDE.md under `## Session Config`. Example: `plan-baseline-path: ~/Projects/projects-baseline`"
+After parsing, verify that `plan-baseline-path` is not null: `echo "$CONFIG" | jq -e '."plan-baseline-path"'`. If null, stop with: "Error: `plan-baseline-path` is not configured in Session Config. Add it to your CLAUDE.md (or AGENTS.md on Codex CLI) under `## Session Config`. Example: `plan-baseline-path: ~/Projects/projects-baseline`"
 
 Plan-specific fields (also parse these): `plan-default-visibility`, `plan-prd-location`, `plan-retro-location`, `vcs`
 
@@ -48,7 +50,7 @@ Store all values for use in subsequent phases.
 
 **Path expansion:** Expand `~` to `$HOME` in `plan-baseline-path`, `plan-prd-location`, and `plan-retro-location`. Verify expanded paths exist. If `plan-baseline-path` doesn't exist, warn: "Baseline path not found at [path]. `/plan new` repo scaffolding will be unavailable."
 
-If no `## Session Config` section exists at all, stop and report: "Error: No Session Config section found in CLAUDE.md. The `/plan` skill requires at minimum `plan-baseline-path` to be configured."
+If no `## Session Config` section exists at all, stop and report: "Error: No Session Config section found in CLAUDE.md (or AGENTS.md on Codex CLI). The `/plan` skill requires at minimum `plan-baseline-path` to be configured."
 
 > **Platform Note:** This skill uses `AskUserQuestion` extensively. On Codex CLI where this tool is unavailable, present all choices as numbered Markdown lists with "(Recommended)" on the first option. The user responds with their choice number. See `skills/_shared/platform-tools.md`.
 

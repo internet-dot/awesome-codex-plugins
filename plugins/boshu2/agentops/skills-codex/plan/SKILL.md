@@ -35,8 +35,9 @@ If bd is unavailable, still write the markdown plan in `.agents/plans/`.
 2. **Set up artifacts.** Create `.agents/plans/` and locate prior research,
    handoffs, findings, planning rules, and relevant `.agents/` history.
 3. **Load prevention context.** Prefer `.agents/planning-rules/*.md`; fall back
-   to `.agents/findings/registry.jsonl`. Record applied finding IDs in the
-   plan, even when the value is `none`.
+   to `.agents/findings/registry.jsonl`. Treat active findings as hard
+   planning context. Record applied finding IDs in the plan with an
+   `Applied findings:` line, even when the value is `none`.
 4. **Explore only as needed.** If prior research does not provide enough file
    and symbol detail, inspect the codebase or dispatch a bounded explorer.
    Demand file inventory, symbol names, reuse points with `file:line`, test
@@ -53,6 +54,11 @@ If bd is unavailable, still write the markdown plan in `.agents/plans/`.
 8. **Compute waves.** Group independent issues by dependency. Serialize or
    merge same-file writes. Include generated artifacts, docs, schemas, fixtures,
    Codex companions, manifests, and hash markers in ownership.
+   Generated Artifact Companion Scope is mandatory: list every touched file,
+   including tests, docs, schemas, fixtures, runtime copies, parity manifests, hash markers,
+   and generated Codex artifacts. If skill behavior or runtime UX
+   changes, include `bash scripts/refresh-codex-artifacts.sh --scope worktree`
+   in verification.
 9. **Write the plan.** Use `.agents/plans/YYYY-MM-DD-<goal-slug>.md` and the
    template in [references/plan-document-template.md](references/plan-document-template.md).
 10. **Create tracking tasks.** Prefer bd issues with validation blocks and

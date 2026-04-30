@@ -96,6 +96,17 @@ _FIRST_PERSON_OTHER = re.compile(
 _SECOND_PERSON = re.compile(
     r"\b(?:you|your|yours|yourself|yourselves)\b", re.IGNORECASE
 )
+_FUNCTION_WORDS = frozenset(
+    {
+        "a", "an", "and", "are", "as", "at", "be", "because", "been", "but",
+        "by", "can", "could", "do", "does", "for", "from", "had", "has",
+        "have", "he", "her", "him", "his", "if", "in", "is", "it", "its",
+        "may", "might", "not", "of", "on", "or", "our", "she", "should",
+        "so", "that", "the", "their", "them", "then", "there", "these",
+        "they", "this", "those", "to", "was", "we", "were", "what", "when",
+        "where", "which", "who", "will", "with", "would", "you", "your",
+    }
+)
 
 # Passive-voice approximation: an auxiliary 'be' form followed, within 3 words,
 # by a -ed or irregular past participle. This misses many cases and flags
@@ -163,6 +174,7 @@ class StyleProfile:
     colon_rate: float = 0.0
     parenthetical_rate: float = 0.0
     type_token_ratio: float = 0.0
+    function_word_rate: float = 0.0
     avg_commas_per_sentence: float = 0.0
     latinate_ratio: float = 0.0
     first_person_rate: float = 0.0
@@ -249,6 +261,8 @@ def analyze(text: str) -> StyleProfile:
 
     unique_tokens = {t.lower() for t in word_tokens}
     type_token_ratio = len(unique_tokens) / total_words if total_words else 0.0
+    function_words = sum(1 for token in word_tokens if token.lower() in _FUNCTION_WORDS)
+    function_word_rate = function_words / total_words if total_words else 0.0
 
     commas_total = prose.count(",")
     avg_commas = commas_total / len(sentences) if sentences else 0.0
@@ -280,6 +294,7 @@ def analyze(text: str) -> StyleProfile:
         colon_rate=round(colon_count * per_k, 2),
         parenthetical_rate=round(parenthetical_count * per_k, 2),
         type_token_ratio=round(type_token_ratio, 3),
+        function_word_rate=round(function_word_rate, 3),
         avg_commas_per_sentence=round(avg_commas, 2),
         latinate_ratio=round(latinate / total_words, 3),
         first_person_rate=round(first_person * per_k, 2),

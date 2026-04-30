@@ -1,10 +1,6 @@
 # Test Decay Risk Reference
 
-Six patterns that cause test suites to degrade over time.
-For each finding, identify: which risk, which symptom, which source book.
-
-Every finding must follow the Iron Law:
-Symptom → Source → Consequence → Remedy
+Six patterns that cause test suites to degrade. Apply the Iron Law to each finding.
 
 ---
 
@@ -12,8 +8,7 @@ Symptom → Source → Consequence → Remedy
 
 **Diagnostic question:** How much effort does it take to understand what this test verifies?
 
-When test intent is unclear, developers distrust the suite, skip reading failures carefully,
-and add duplicates without knowing it. An obscure test suite is one step from an abandoned one.
+Unclear test intent breeds distrust, missed failures, and duplicates — one step from an abandoned suite.
 
 ### Symptoms
 
@@ -54,8 +49,7 @@ and add duplicates without knowing it. An obscure test suite is one step from an
 
 **Diagnostic question:** Do tests break when you refactor without changing behavior?
 
-Brittle tests punish refactoring. When tests fail on every refactor, developers stop refactoring.
-The codebase stagnates to protect the test suite — the opposite of what tests are for.
+Brittle tests punish refactoring — eventually developers stop refactoring and the codebase stagnates to protect the suite.
 
 ### Symptoms
 
@@ -97,8 +91,7 @@ The codebase stagnates to protect the test suite — the opposite of what tests 
 
 **Diagnostic question:** Is the same test scenario expressed in more than one place?
 
-When behavior changes, duplicated tests must be updated in multiple places. Worse, they create
-false confidence — the scenario passes in three places, but none tests distinct behavior.
+Duplicated tests must change in multiple places and create false confidence without testing distinct behavior.
 
 ### Symptoms
 
@@ -136,9 +129,7 @@ false confidence — the scenario passes in three places, but none tests distinc
 
 **Diagnostic question:** Is the test more complex than the behavior it tests?
 
-Mock abuse produces tests that pass confidently while verifying nothing real. Production code can
-be completely broken as long as the mocks are set up correctly — and they always are, because
-the developer wrote both.
+Mock abuse produces tests that pass while verifying nothing — production code can be fully broken as long as the mocks are wired up.
 
 ### Symptoms
 
@@ -179,9 +170,7 @@ the developer wrote both.
 
 **Diagnostic question:** Does the test suite actually protect against the failures that matter?
 
-Coverage percentage measures what was executed, not what was verified. A suite can achieve 90%
-line coverage while allowing every critical failure mode through. The illusion is more dangerous
-than acknowledged ignorance — teams stop looking for gaps because the number says "covered."
+Coverage measures execution, not verification. 90% line coverage can still miss every critical failure mode — teams stop looking because the number says "covered."
 
 ### Symptoms
 
@@ -220,9 +209,7 @@ than acknowledged ignorance — teams stop looking for gaps because the number s
 
 **Diagnostic question:** Does the test suite structure reflect the system's actual risk profile?
 
-A suite with the wrong shape is slow, unreliable, and expensive to maintain — not because tests
-are badly written, but because the wrong type is used for the wrong purpose. An inverted pyramid
-runs the most tests at the slowest, most environment-dependent, hardest-to-debug level.
+Wrong suite shape is slow and expensive — not from bad tests, but from using the wrong type at the wrong layer.
 
 ### Symptoms
 

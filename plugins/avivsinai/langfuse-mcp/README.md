@@ -169,6 +169,12 @@ docker run --rm -i \
   ghcr.io/avivsinai/langfuse-mcp:latest
 ```
 
+### Optional environment variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `LANGFUSE_MAX_AGE_DAYS` | `7` | Caps the lookback window for time-based tools (`fetch_traces`, `fetch_observations`, etc.). Set to match your Langfuse instance's data retention — e.g. `30` if your retention is 30 days. |
+
 ## Development
 
 ```bash

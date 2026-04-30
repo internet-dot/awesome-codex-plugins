@@ -1,10 +1,10 @@
 # ru-text
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-blue?logo=anthropic)](https://claude.com/plugins) [![GitHub Sponsors](https://img.shields.io/badge/Sponsor-30363D?logo=GitHub-Sponsors&logoColor=EA4AAA)](https://github.com/sponsors/talkstream) [![Last Updated](https://img.shields.io/github/last-commit/talkstream/ru-text/main?label=updated)](https://github.com/talkstream/ru-text)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-blue?logo=anthropic)](https://github.com/anthropics/claude-plugins-community) [![GitHub Sponsors](https://img.shields.io/badge/Sponsor-30363D?logo=GitHub-Sponsors&logoColor=EA4AAA)](https://github.com/sponsors/talkstream) [![Last Updated](https://img.shields.io/github/last-commit/talkstream/ru-text/main?label=updated)](https://github.com/talkstream/ru-text)
 
 **Languages:** English | [Русский](README.ru.md)
 
-**Russian text quality plugin for Claude Code, GitHub Copilot, Windsurf, Cursor, JetBrains, and [6 more platforms](#quick-start)** — typography, information style, editorial standards, UX writing, and business correspondence.
+**Russian text quality plugin for Claude Code, Codex, Notion, Cursor, GitHub Copilot, and [7 more platforms](#quick-start)** — typography, information style, editorial standards, UX writing, and business correspondence.
 
 ~1,044 independently formulated rules informed by 16 canonical Russian-language sources. All formulations are original — no verbatim quotes, full attribution.
 
@@ -17,7 +17,7 @@ This plugin exists because a handful of people decided that Russian text on the 
 
 ru-text gives your AI coding assistant a deep understanding of Russian text quality. It auto-activates when the assistant produces or edits Russian text, applying typography rules instantly and loading domain-specific knowledge on demand.
 
-Works with Claude Code, GitHub Copilot, Windsurf, Cursor, Cline, JetBrains (Junie), Continue.dev, Codex CLI, Gemini CLI, OpenClaw, and Notion.
+Works with Claude Code (CLI and Desktop), Codex CLI, Notion, Cursor, GitHub Copilot, Gemini CLI, Windsurf, Continue.dev, Cline, JetBrains (Junie), and OpenClaw.
 
 - **~1,044 rules** across 7 domains, packed into 9 reference files + addenda
 - **Auto-activation** — no need to remember to turn it on
@@ -42,7 +42,9 @@ Works with Claude Code, GitHub Copilot, Windsurf, Cursor, Cline, JetBrains (Juni
 
 ## Quick start
 
-### Claude Code
+Sections are ordered by April 2026 platform popularity among developers using AI assistants.
+
+### Claude Code (CLI)
 
 ```bash
 # Add the community marketplace (one-time setup)
@@ -52,7 +54,11 @@ Works with Claude Code, GitHub Copilot, Windsurf, Cursor, Cline, JetBrains (Juni
 /plugin install ru-text@claude-community
 ```
 
-Available in the [Anthropic plugin marketplace](https://claude.com/plugins). Works in Claude Code CLI, VS Code, JetBrains, Web, and Desktop.
+Listed in the [Claude Code community marketplace](https://github.com/anthropics/claude-plugins-community). A listing in the [official Anthropic marketplace](https://claude.com/plugins) is planned.
+
+### Claude Code (Desktop)
+
+Same install commands as the CLI — open the in-app `/plugin` prompt in the Claude Desktop app and run the two commands above. A single install is shared across CLI, Desktop, VS Code, JetBrains, and Web.
 
 ### Codex CLI
 
@@ -62,13 +68,21 @@ Inside a Codex session, use the interactive plugin browser:
 /plugins
 ```
 
-Search for "ru-text" and install. Alternatively, use the universal skills CLI (see below).
+Search for “ru-text” and install. Alternatively, use the universal skills CLI (see below).
 
-### Gemini CLI
+### Notion
 
-```bash
-gemini extensions install https://github.com/talkstream/ru-text
-```
+Two integration paths — see [notion/README.md](notion/README.md) for details:
+
+**Notion AI Custom Skill** (standalone, Business/Enterprise plan):
+1. Copy [the template page](notion/ru-text-notion-skill.md) into a Notion page
+2. Designate the page as an AI skill
+3. Select text and invoke “ru-text” from the AI menu
+
+**Notion via MCP** (with Claude Code, any plan):
+1. Install ru-text in Claude Code
+2. Connect the [Notion MCP server](https://developers.notion.com/guides/mcp/get-started-with-mcp)
+3. Ask Claude Code to read, check, and update your Notion pages
 
 ### Cursor
 
@@ -78,7 +92,7 @@ Use the plugin command in Cursor Agent chat:
 /add-plugin
 ```
 
-Search for "ru-text" and install. If not listed in the marketplace, copy manually:
+Search for “ru-text” and install. If not listed in the marketplace, copy manually:
 
 ```bash
 git clone https://github.com/talkstream/ru-text.git
@@ -109,6 +123,12 @@ cp -r ru-text/skills/ru-text .github/skills/ru-text
 
 Works in VS Code, Visual Studio, and JetBrains IDEs with Copilot.
 
+### Gemini CLI
+
+```bash
+gemini extensions install https://github.com/talkstream/ru-text
+```
+
 ### Windsurf
 
 ```bash
@@ -123,6 +143,23 @@ cp -r ru-text/skills/ru-text .windsurf/skills/ru-text
 ```
 
 Invoke with `@ru-text` in Cascade chat. Also available via Cascade panel > Customizations > Skills.
+
+### Continue.dev
+
+If ru-text is already installed for Claude Code in your project, Continue detects it automatically. Otherwise:
+
+```bash
+npx skills add talkstream/ru-text
+```
+
+Or copy manually:
+
+```bash
+git clone https://github.com/talkstream/ru-text.git
+cp -r ru-text/skills/ru-text .continue/skills/ru-text
+```
+
+Works in both VS Code and JetBrains extensions.
 
 ### Cline
 
@@ -156,23 +193,6 @@ cp -r ru-text/skills/ru-text .junie/skills/ru-text
 
 Works in IntelliJ IDEA, PyCharm, WebStorm, GoLand, PhpStorm, RubyMine, RustRover, Rider, CLion, and Android Studio.
 
-### Continue
-
-If ru-text is already installed for Claude Code in your project, Continue detects it automatically. Otherwise:
-
-```bash
-npx skills add talkstream/ru-text
-```
-
-Or copy manually:
-
-```bash
-git clone https://github.com/talkstream/ru-text.git
-cp -r ru-text/skills/ru-text .continue/skills/ru-text
-```
-
-Works in both VS Code and JetBrains extensions.
-
 ### OpenClaw
 
 ```bash
@@ -180,20 +200,6 @@ openclaw skills install ru-text
 ```
 
 Available on [ClawHub](https://clawhub.ai/talkstream/ru-text). Works with any LLM provider and messaging channel OpenClaw supports.
-
-### Notion
-
-Two integration paths — see [notion/README.md](notion/README.md) for details:
-
-**Notion AI Custom Skill** (standalone, Business/Enterprise plan):
-1. Copy [the template page](notion/ru-text-notion-skill.md) into a Notion page
-2. Designate the page as an AI skill
-3. Select text and invoke "ru-text" from the AI menu
-
-**Notion via MCP** (with Claude Code, any plan):
-1. Install ru-text in Claude Code
-2. Connect the [Notion MCP server](https://developers.notion.com/guides/mcp/get-started-with-mcp)
-3. Ask Claude Code to read, check, and update your Notion pages
 
 ### Any platform via skills CLI
 

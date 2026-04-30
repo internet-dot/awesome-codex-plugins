@@ -9,7 +9,7 @@ if ! grep -q '^name: update' "$SKILL_DIR/SKILL.md"; then
   exit 1
 fi
 
-if ! grep -q '^[[:space:]]*tier:[[:space:]]*meta' "$SKILL_DIR/SKILL.md"; then
+if grep -q '^metadata:' "$SKILL_DIR/SKILL.md" && ! grep -q '^[[:space:]]*tier:[[:space:]]*meta' "$SKILL_DIR/SKILL.md"; then
   echo "FAIL: missing tier in frontmatter"
   exit 1
 fi

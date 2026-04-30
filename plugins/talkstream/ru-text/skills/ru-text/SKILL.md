@@ -15,7 +15,7 @@ metadata:
 
 Independent Russian text quality reference by Arseniy Kamyshev.
 With gratitude to the authors whose work shaped modern Russian text standards.
-Credits and recommended reading: `${CLAUDE_PLUGIN_ROOT}/skills/ru-text/references/sources.md`
+Credits and recommended reading: `references/sources.md`
 
 **Style priority**: if the user explicitly requests a specific style (casual, academic, SEO, literary, etc.), their prompt overrides these default rules where they conflict. These rules are defaults, not mandates.
 
@@ -38,7 +38,7 @@ Apply these rules to ALL Russian text output without exception.
 | Abbreviations with NBSP | т.д., т.е. | т. д., т. е. |
 | Ruble symbol after number | 1500 руб | 1 500 ₽ |
 
-Full typography reference: `${CLAUDE_PLUGIN_ROOT}/skills/ru-text/references/typography.md`
+Full typography reference: `references/typography.md`
 
 `/ru-text:ru-score` — text quality score (0–10, 5 dimensions).
 
@@ -57,11 +57,11 @@ Full typography reference: `${CLAUDE_PLUGIN_ROOT}/skills/ru-text/references/typo
 | на сегодняшний день | сегодня |
 | в целях | чтобы |
 
-Full stop-word catalog (97 entries): `${CLAUDE_PLUGIN_ROOT}/skills/ru-text/references/info-style.md`
+Full stop-word catalog (97 entries): `references/info-style.md`
 
 ## When to Load Reference Files
 
-Reference files: `${CLAUDE_PLUGIN_ROOT}/skills/ru-text/references/<filename>`
+Reference files (paths are relative to this SKILL.md): `references/<filename>`
 If the path is not resolved, search: `Glob("**/ru-text/references/scoring.md")` and use the parent directory.
 
 | Task | File |

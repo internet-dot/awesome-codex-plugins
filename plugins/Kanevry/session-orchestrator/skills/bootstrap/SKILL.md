@@ -145,7 +145,7 @@ Entered when `$ARGUMENTS` contains `--upgrade <tier>`. No scaffolding questions 
 
 6. **Apply delta files.** Execute only the relevant template steps for the missing files. Read the appropriate template (`standard-template.md` and/or `deep-template.md`) and execute ONLY the steps that produce the delta files. Do NOT re-run already-completed steps.
 
-7. **Update bootstrap.lock atomically.** Overwrite `.orchestrator/bootstrap.lock` with `tier: <TARGET_TIER>`. Preserve `archetype`, `timestamp` (update to now), and `source` from the existing lock.
+7. **Update bootstrap.lock atomically.** Overwrite `.orchestrator/bootstrap.lock` with `tier: <TARGET_TIER>`. Preserve `archetype`, `timestamp` (update to now), and `source` from the existing lock. Write `plugin-version` from `$PLUGIN_ROOT/package.json` (current plugin version at upgrade time).
 
 8. **Commit.** Stage only the delta files that were just written and commit:
    ```bash
@@ -198,6 +198,7 @@ Entered when `$ARGUMENTS` contains `--retroactive`. Writes the lock file and, pe
    archetype: <INFERRED_ARCHETYPE or null>
    timestamp: <current ISO 8601 UTC>
    source: retroactive
+   plugin-version: <current plugin version from $PLUGIN_ROOT/package.json>
    ```
 
 6. **Patch Session Config (#182).** Run the validator against the current `## Session Config` block; append any missing mandatory fields with defaults. The 7 mandatory fields (per `scripts/lib/config-schema.mjs`) are: `test-command`, `typecheck-command`, `lint-command`, `agents-per-wave`, `waves`, `persistence`, `enforcement`.
@@ -321,7 +322,37 @@ When `PATH_TYPE = public`, read `skills/bootstrap/public-fallback.md` for the fu
 
 Standard and Deep tier templates include Step 5.5 (standard) / D6.6 (deep) which runs `scripts/lib/product-repo-detect.mjs` to check for product-repo signals (framework dep, content dir, product env vars). When signals are detected and no `vault:` key exists in Session Config, the template prompts the user to register a vault entry. Idempotency via `hasVaultConfig`. Fast tier skips this step.
 
-## Phase 3.5: (Optional) Rules-Fetch Bridge
+## Phase 3.5: Owner Persona Interview (first-run only)
+
+> Closes session-orchestrator issues #175 (D2 owner interview) + #173 (C4 hardware-sharing consent).
+
+**WHEN:** Runs after Phase 3.4 when `~/.config/session-orchestrator/owner.yaml` is absent AND `--no-interview` was NOT passed. Skipped entirely on `--upgrade`, `--retroactive`, `--sync-rules`, and `--ecosystem-health` flows.
+
+**WHAT:** The coordinator dispatches 5 `AskUserQuestion` calls using definitions from `scripts/lib/owner-interview.mjs`:
+
+1. **Language** — `de` | `en` | other (free text)
+2. **Tone style** — `direct` (recommended) | `neutral` | `friendly`
+3. **Output level** — `lite` (verbose) | `full` (default) | `ultra` (telegraphic)
+4. **Preamble** — `minimal` (one-line updates) | `verbose` (explain before action)
+5. **Hardware-sharing consent (C4)** — `No` (default) | `Yes` (generates random `hash-salt`) | `Preview`
+
+**HOW (coordinator steps):**
+
+```js
+import { runOwnerInterview, getInterviewQuestions, applyInterviewAnswers } from '$PLUGIN_ROOT/scripts/lib/owner-interview.mjs';
+const probe = runOwnerInterview({ skipIfExists: true });
+if (probe.status === 'pending') {
+  // dispatch AskUserQuestion for each of probe.questions, collect answers[]
+  const result = applyInterviewAnswers(answers, { path: probe.path });
+  // result: { ok, path, errors }
+}
+```
+
+**WHERE:** Written to `~/.config/session-orchestrator/owner.yaml` (user-global, never committed).
+
+**RE-TRIGGER:** `/bootstrap --owner-reset` sets `force: true` in `runOwnerInterview`, archives the existing yaml to `owner.yaml.bak-<timestamp>`, and re-runs the 5 questions.
+
+## Phase 3.6: (Optional) Rules-Fetch Bridge
 
 > Closes session-orchestrator issue #110.
 
@@ -417,7 +448,7 @@ See `skills/ecosystem-health/wizard.md` for the full prompt spec and schema deta
 
 ## Phase 4: Write bootstrap.lock
 
-After all template files are written and committed, write `.orchestrator/bootstrap.lock` (and, if the rules-fetch bridge ran, also `.claude/.baseline-fetch.lock` — see Phase 3.5):
+After all template files are written and committed, write `.orchestrator/bootstrap.lock` (and, if the rules-fetch bridge ran, also `.claude/.baseline-fetch.lock` — see Phase 3.6):
 
 ```yaml
 # .orchestrator/bootstrap.lock
@@ -426,12 +457,19 @@ tier: <CONFIRMED_TIER>
 archetype: <CONFIRMED_ARCHETYPE or null>
 timestamp: <current ISO 8601 UTC timestamp>
 source: <projects-baseline | plugin-template | claude-init>
+plugin-version: <current plugin version from package.json>
 ```
 
 Determine `source`:
 - `projects-baseline` if `PATH_TYPE = private` and baseline scripts were used
 - `claude-init` if `claude init` was used successfully on Claude Code
 - `plugin-template` otherwise
+
+Read `plugin-version` from the session-orchestrator plugin's `package.json` (`$PLUGIN_ROOT/package.json`, field `version`). This enables the freshness probe (#290) to detect plugin upgrades that need re-bootstrap. Example:
+
+```bash
+PLUGIN_VERSION="$(node -e "const p=require('$PLUGIN_ROOT/package.json');console.log(p.version);" 2>/dev/null || node --input-type=module -e "import pkg from '$PLUGIN_ROOT/package.json' assert {type:'json'}; console.log(pkg.version);")"
+```
 
 The template's initial git commit includes `bootstrap.lock`. If the template already wrote the lock file (as `fast-template.md` does), skip this step — the lock is already committed.
 

@@ -76,11 +76,11 @@ Access Token (PAT). The token needs Repository Read/Write and Project Read
 permissions. Use --web-token to open the PAT management page in your browser.
 
 For Bitbucket Cloud (--kind cloud), the simplest method is --web-token, which
-opens the Atlassian API token page and prompts for the token locally. If you
-prefer browser-based OAuth, use --web with BKT_OAUTH_CLIENT_ID and
-BKT_OAUTH_CLIENT_SECRET set in your environment. The CLI receives a short-lived
-access token that is automatically refreshed while those environment variables
-remain available.
+opens the Atlassian API token page and prompts for the token locally.
+Browser-based OAuth via --web works out of the box in official release
+binaries. For source and Nix builds, set BKT_OAUTH_CLIENT_ID and
+BKT_OAUTH_CLIENT_SECRET before running --web. The CLI receives a short-lived
+access token that is automatically refreshed.
 
 Credentials are verified against the remote host before being stored. If no
 OS keychain is available, pass --allow-insecure-store to use encrypted file

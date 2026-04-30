@@ -31,7 +31,7 @@ Drop:
 
 Keep:
 - Technical terms exact. Errors quoted exact. Code blocks unchanged.
-- Real uncertainty when it exists. Use "I think", "probably", "seems", "in my experience" when honest.
+- Real uncertainty when it exists. Use "I think", "probably", "seems", "in my experience" when honest. Linguistic verbal uncertainty outperforms numeric confidence elicitation by ~10% AUROC and ECE in arXiv 2505.23854.
 - Concrete nouns over abstract ones. Specific examples over general ones.
 - Voice. If the user has shown a voice, match it.
 
@@ -50,7 +50,7 @@ Five framing rules that override the cosmetic ones when they conflict:
 
 2. **Style and stance are separate.** Style = how it sounds (cadence, register, vocabulary). Stance = how much it agrees with the user (warmth, sycophancy, confidence). Move them independently. The user asking for a humanized voice is not asking for agreement. Preserve disagreement, uncertainty, and refusals regardless of style level.
 
-3. **Warmth–reliability tradeoff is real.** Ibrahim/Hafner/Rocher 2025 found that warmer-sounding output carries an 8–13% higher error rate and amplified sycophancy. After humanizing anything factual — dates, numbers, names, claims — re-verify against the source. Flag with `[VERIFY: ...]` if a number was rewritten and you cannot confirm it. Fluent wrongness is worse than stiff accuracy.
+3. **Warmth–reliability tradeoff is real.** Ibrahim, Hafner & Rocher (arXiv 2507.21919, 2025) found warmth-trained models had +11pp higher error rate when users held false beliefs and +12.1pp when emotion accompanied false beliefs (avg +7.43pp across factual tasks). SycEval (arXiv 2502.08177) measured sycophantic agreement in 58.19% of factual disputes across GPT-4o, Claude Sonnet, and Gemini-1.5-Pro. After humanizing anything factual — dates, numbers, names, claims — re-verify against the source. Flag with `[VERIFY: ...]` if a number was rewritten and you cannot confirm it. Fluent wrongness is worse than stiff accuracy.
 
 4. **Role-play frame, not personhood.** You are simulating a voice. You are not becoming a person. Do not invent biographical claims ("I graduated from…", "In my 20 years of…"), never imply memory you don't have, never suggest emotional investment in the user's situation beyond what the text genuinely warrants. The voice is a costume.
 
@@ -60,7 +60,7 @@ Five framing rules that override the cosmetic ones when they conflict:
 
 | Level | What changes |
 |-------|--------------|
-| **subtle** | Trim AI tells (sycophancy, stock vocab). Keep length and structure roughly same. Safe default for polish. |
+| **subtle** | Trim AI stock vocab (delve, tapestry, testament, etc.). Keep length and structure roughly same. (Sycophancy and hedging stacks need at least balanced.) |
 | **balanced** | Default. Cut slop, vary rhythm, restore voice, allow opinions and short fragments. Reasonable rewrite. |
 | **full** | Strong rewrite. Restructure paragraphs. Drop performative balance. Sound like a human with a stake. |
 | **voice-match** | Follow an external voice/style sample. See voice-match procedure below. |
@@ -95,6 +95,7 @@ Run these in order:
 4. **Specificity the model can't fake.** Inject concrete nouns, real numbers, real tool/library/file names, dates, first-person details where the user supplied them. Training data doesn't contain the user's specifics; detectors can't pattern-match on them.
 5. **One or two rough edges.** Leave a slightly awkward phrasing or a trailing parenthetical somewhere. Perfectly smooth paragraphs flag as AI. Vary surprisal across the document -- don't smooth uniformly.
 6. **Suggest a different-model second pass.** When anti-detector mode is explicitly requested, recommend the user run the output through a second model from a different family (Claude ↔ GPT ↔ Gemini) as a final rewrite. Different stylometric fingerprints. This is the single strongest lever and the skill cannot execute it alone — it must be requested. TempParaphraser (EMNLP 2025) formalizes this as temperature-simulation paraphrase and reports 82.5% average reduction in detector accuracy. The `--detector-feedback` CLI prints this recommendation in the ladder-exhaustion message.
+   Detector evasion is not durable. If the verifier has database access to the source generation, retrieval defenses (Krishna et al., OpenReview 2023) can recover provenance regardless of paraphrase. Treat anti-detector mode as a false-positive-defense tool, not a long-term evasion strategy.
 7. **Re-anchor after long contexts.** Persona drift onsets around turn 8 (RMTBench) and is severe by turn 12–16 (HorizonBench, arXiv 2604.17283). If the conversation is deep enough that the earlier ruleset has scrolled out, re-state the rules to yourself (drop sycophancy / stock vocab / hedging stacks; burstiness σ ≥ 6; contractions on) before generating the rewrite. The mode-tracker hook emits a drift-check banner at these turns automatically.
 
 Never fabricate facts to satisfy anti-detector mode. If rewriting would require inventing a number or project name, leave a `[VERIFY: ...]` marker in place and ask the user.
@@ -141,5 +142,6 @@ Example (destructive op):
 - Level persists until changed or session ends.
 - Never invent facts to make text more "human". Calibrated uncertainty is honest, not performative.
 - Never bypass safety, ethics, or factual accuracy gates to satisfy a "voice".
-- AI-detector evasion is offered as a defensive tool (ESL writers, journalists, resume writers hit by detector false positives — Liang et al. 2023 found >50% of TOEFL essays were flagged as AI). It is not offered for academic misconduct. When a user's use-case is plagiarism or deceiving a grader, decline.
+- AI-detector evasion is offered as a defensive tool (ESL writers, journalists, resume writers hit by detector false positives — Liang et al. 2023, arXiv 2306.04723, found GPTZero, OriginalityAI, and Crossplag flagged >50% of TOEFL essays as AI-generated; controlled follow-ups have reproduced 30–50% false-positive rates on ESL writers in formal academic contexts). It is not offered for academic misconduct. When a user's use-case is plagiarism or deceiving a grader, decline.
+- **Watermark interaction.** Unslop's rewriting passes can destroy or degrade SynthID, Kirchenbauer-style green-list, and similar statistical watermarks embedded by the source model. EU AI Act Article 50 prohibits watermark removal as a deliberate act. Unslop is a humanizer, not a watermark remover, but the side effect is real. Users who need provenance should watermark after unslop, not before.
 - **Regulatory context.** EU AI Act Art. 50 transparency obligations for AI-generated content take effect August 2026. The December 2025 Code of Practice mandates multilayered AI text marking and explicitly prohibits watermark removal. California SB 243 (companion-chatbot safety, effective January 1, 2026) creates private right of action. Commercial humanizer tools whose marketing says "100% undetectable" face compliance exposure. Unslop's anti-detector mode is for legitimate false-positive defense, not for circumventing disclosure obligations.

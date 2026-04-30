@@ -15,6 +15,8 @@ description: >
 
 # Session Plan Skill
 
+> Project-instruction file resolution: `CLAUDE.md` and `AGENTS.md` (Codex CLI) are transparent aliases — see [skills/_shared/instruction-file-resolution.md](../_shared/instruction-file-resolution.md). Wherever this skill mentions `CLAUDE.md`, the alias rule applies.
+
 ## Purpose
 
 Transform the agreed session scope (from session-start Q&A) into an executable wave plan (using role-based assignment) with specific agent assignments, file scopes, and acceptance criteria per task.
@@ -26,8 +28,42 @@ This skill receives the agreed session scope from session-start. The scope inclu
 - **Session type**: housekeeping, feature, or deep
 - **Recommended focus**: the option the user selected in session-start Phase 7
 - **Session Config**: parsed JSON from `parse-config.mjs`
+- **Express-path signal** (optional): session-start Phase 8.5 may set `EXPRESS_PATH=true` in the handoff context when the activation conditions are met.
 
 These are passed via the conversation context (not a file). Parse the preceding session-start output to extract the agreed scope.
+
+## Express Path Short-Circuit (#214)
+
+> Check this **before Step 0**. If the express path is active, this skill emits a minimal 1-wave plan and exits — no role decomposition, no wave splitting, no agent count computation.
+
+**Detect express-path activation:** Search the conversation context for the banner line:
+
+```
+Express path activated — <N> tasks, coordinator-direct, no inter-wave checks.
+```
+
+If found AND `express-path.enabled` is `true` in Session Config (read via Step 0 below — skip only that field check if config read is needed):
+
+Emit this 1-wave plan and exit the skill immediately (do not continue to Step 1 or beyond):
+
+```
+## Wave Plan (Session: housekeeping, 1 wave, isolation: none) [Express Path]
+
+### Wave 1: Coordinator-Direct (<N> tasks)
+- All agreed tasks executed sequentially by the coordinator — no subagents dispatched.
+- Tasks: [list agreed issues/tasks]
+- Isolation: none (coord-direct)
+- Max-turns: N/A (coordinator executes directly)
+
+### Execution Config
+- Waves: 1 | Agents-per-wave: 0 (coordinator-direct) | Isolation: none
+- Express path: active (housekeeping + scope ≤ 3 + no parallel agents needed)
+- Total agents planned: 0
+
+Express path — no inter-wave checks. Use /go to begin.
+```
+
+**When express-path banner is absent or `express-path.enabled: false`:** Proceed to Step 0 and the full planning flow as normal.
 
 ## Step 0: Read Session Config
 
@@ -111,7 +147,7 @@ For each task from Step 1, assign exactly one role. Use these signal-to-role map
 | Needs codebase understanding before changes; audit, explore, verify assumptions, check existing coverage | **Discovery** | "Audit auth flow", "Check test coverage for module X", "Identify affected modules" |
 | New feature code, new API endpoints, DB schema changes, primary UI components, new modules | **Impl-Core** | "Add /api/users endpoint", "Create migration for invoices table", "Implement auth middleware" |
 | Bug fixes from prior waves, secondary features, integration work, edge cases, polish of existing code | **Impl-Polish** | "Fix pagination edge case", "Integrate payment with billing", "Handle error states in form" |
-| Documentation updates — new/changed README sections, CLAUDE.md updates, vault context.md/decisions.md narratives, ADR edits. Audience-aware (User/Dev/Vault). Gated on `docs-orchestrator.enabled` | **Docs** | "Update README for new --no-vault flag", "Write CLAUDE.md section for new hook", "Append vault decisions.md entry for architecture change" |
+| Documentation updates — new/changed README sections, CLAUDE.md (or AGENTS.md on Codex CLI) updates, vault context.md/decisions.md narratives, ADR edits. Audience-aware (User/Dev/Vault). Gated on `docs-orchestrator.enabled` | **Docs** | "Update README for new --no-vault flag", "Write CLAUDE.md section for new hook (or AGENTS.md on Codex CLI)", "Append vault decisions.md entry for architecture change" |
 | Write/update tests, lint fixes, security review, code simplification, type errors | **Quality** | "Add tests for auth module", "Fix TypeScript errors", "Security audit of new API" |
 | Documentation updates, issue cleanup, commit preparation, SSOT refresh, changelog | **Finalization** | "Update README", "Close resolved issues", "Write session handover notes" |
 

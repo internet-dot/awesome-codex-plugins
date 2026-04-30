@@ -5,7 +5,16 @@
 
 ### 1.5 Discovery Scan (if enabled)
 
-Check if `discovery-on-close` is `true` in Session Config. If not configured or `false`, skip this section.
+Resolve the effective `discovery-on-close` value:
+
+```
+effectiveDiscoveryOnClose = config.discoveryOnClose ?? (sessionType === 'housekeeping' ? false : true)
+```
+
+- If the user has set `discovery-on-close` explicitly in Session Config, that value always wins (backward compatible).
+- If the field is absent (not configured), the default is **session-type aware**: `false` for `housekeeping`, `true` for `feature` and `deep`.
+
+If `effectiveDiscoveryOnClose` is `false`, skip this section.
 
 When enabled, invoke the discovery skill in **embedded mode** by dispatching an Explore agent:
 ```

@@ -2,6 +2,7 @@
 
 > Sub-file of the wave-executor skill. Read by the coordinator during wave dispatch.
 > For pre-execution setup, session type behavior, and error recovery, see `SKILL.md`.
+> Project-instruction file resolution: `CLAUDE.md` and `AGENTS.md` (Codex CLI) are transparent aliases — see [skills/_shared/instruction-file-resolution.md](../_shared/instruction-file-resolution.md). Wherever this loop mentions a project's `CLAUDE.md`, the alias rule applies.
 
 ## Wave Execution Loop
 
@@ -378,7 +379,7 @@ Log every non-`pass` result as an event to `.orchestrator/metrics/events.jsonl` 
         - Changed file list (production files only — exclude `*.test.*`, `*.spec.*`, `__tests__/`)
         - Reference: `slop-patterns.md` from the discovery skill directory — include the actual patterns in the agent prompt
         To include the patterns: read `skills/discovery/slop-patterns.md` and paste the full content into the agent prompt under a "## Slop Patterns Reference" heading. Do NOT ask the agent to read the file itself — include it inline so the agent has zero-dependency context.
-        - Reference: project's CLAUDE.md conventions
+        - Reference: project's CLAUDE.md (or AGENTS.md on Codex CLI) conventions
         - Instruction: "Review each changed file for AI-generated code patterns. Apply targeted simplifications: remove unnecessary try-catch around non-throwing operations, delete over-documentation (params that repeat the name, returns that say 'the result'), replace re-implemented stdlib functions with standard alternatives, simplify redundant boolean logic (if/else returning true/false, double negation, explicit boolean comparisons). Do NOT change functionality. Do NOT touch files you weren't given. Do NOT commit."
         - Tools: Read, Edit, Grep, Glob
         - Model: sonnet

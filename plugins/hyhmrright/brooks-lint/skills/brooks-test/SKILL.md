@@ -10,11 +10,6 @@ description: >
   expresses frustration: "tests keep breaking whenever I change anything", "our tests
   take forever", "I can't understand what this test is doing", "tests pass but bugs
   still reach production", "we have too many mocks".
-  Also triggers when user mentions: test smells / characterization tests / test pyramid /
-  over-mocking / brittle tests / flaky tests / tests break on refactoring / slow test
-  suite / mystery guest / test duplication / tests don't catch bugs.
-  Use this skill proactively whenever test files are shared or the user complains about
-  their test suite — even without using technical terminology.
   Do NOT trigger for: writing new tests from scratch (use the regular test-writing
   workflow) or testing framework/syntax questions — this skill reviews an existing
   suite for structural quality problems, not individual test authoring.

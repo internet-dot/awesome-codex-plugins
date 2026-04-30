@@ -84,7 +84,7 @@ Extract learnings from session history.
 
 ### Step 3.2: Pattern Extraction
 
-For each of the 6 learning types, apply these heuristics:
+For each of the 8 learning types, apply these heuristics:
 
 #### 1. fragile-file (type: `fragile-file`)
 
@@ -147,9 +147,21 @@ For each of the 6 learning types, apply these heuristics:
 - Confidence starts at 0.5 like other learning types, but decay is slower in practice: hardware stays the same longer than code. This is an emergent property of the existing expire-after-N-days policy applied to a mostly-stable `host_class` — no special-casing needed.
 - **Presentation in step 3.5** (see below): render hardware-patterns in a dedicated section titled `## Hardware Patterns (keyed on host_class)` after the project-keyed patterns. This makes the source of the learning obvious to the user at confirmation time.
 
+#### 8. autopilot-effectiveness (type: `autopilot-effectiveness`)
+
+> **v3.2 Autopilot / Sub-Epic #271 (issue #298).** Compares manual vs. autopilot session outcomes per mode (housekeeping, feature, deep) so the loop can learn whether walk-away runs preserve quality. Complements the project-keyed and hardware-keyed types above.
+
+- Read `.orchestrator/metrics/autopilot.jsonl` (one record per autopilot loop run) **and** `.orchestrator/metrics/sessions.jsonl` (manual + autopilot session outcomes). Both are optional — missing files produce no candidates.
+- Invoke `scripts/lib/evolve/autopilot-effectiveness.mjs` → `analyze(autopilotRuns, sessions)`. The module pairs records by `mode` and compares completion-rate, carryover-rate, kill-switch frequency, and quality-gate pass-rate between the two populations.
+- **Data-gating contract:** the analyzer requires **≥20 paired manual+autopilot runs per mode** before emitting any candidates. Below that threshold the function returns `[]` (empty input contract) — evolve simply skips this type for that mode and reports nothing. This prevents premature conclusions from small samples (#297 calibration depends on the same threshold).
+- Subject convention: `<mode>-manual-vs-autopilot` (e.g., `housekeeping-manual-vs-autopilot`, `feature-manual-vs-autopilot`, `deep-manual-vs-autopilot`). One subject per mode that crosses threshold.
+- Insight = "Autopilot <mode> sessions complete at <X>% vs. manual <Y>% (Δ <Z>pp across N pairs)" or analogous carryover/kill-switch framing when those signals dominate.
+- Confidence starts at 0.5 like other learning types; lifecycle ±0.15 / -0.20 via the existing dedupe-and-update infrastructure in Step 3.3 — no special-casing.
+- Each candidate is piped through `candidateToLearning()` → `validateLearning()` exactly like the other types. Default `scope` is `private` (autopilot RUN data is per-host until the user opts in to share). (refs #298)
+
 ### Step 3.2b: Zero Patterns Check
 
-If no patterns were extracted across all 6 types, report: "No patterns found in session history. This can happen with very few sessions or sessions that lack detailed wave/agent data." and skip to end (do not proceed to AskUserQuestion).
+If no patterns were extracted across all 8 types, report: "No patterns found in session history. This can happen with very few sessions or sessions that lack detailed wave/agent data." and skip to end (do not proceed to AskUserQuestion).
 
 ### Step 3.3: Deduplicate Against Existing Learnings
 
@@ -197,14 +209,15 @@ For confirmed learnings, use atomic rewrite strategy:
    - Cap at 1.0
    - Reset `expires_at` to current date + `learning-expiry-days` (default: 30)
 3. Apply confidence decrements for contradicted learnings (-0.2) — do NOT reset `expires_at` for contradicted learnings (let them decay naturally)
-4. Append new learnings with:
-   - `id`: generate a uuid-v4 (use `uuidgen` or equivalent)
-   - `type`: one of `fragile-file`, `effective-sizing`, `recurring-issue`, `scope-guidance`, `deviation-pattern`, `stagnation-class-frequency`
+4. Append new learnings with the **canonical schema_version:1 shape** — every field is required (#303):
+   - `schema_version`: **1** (integer, ALWAYS — never omit)
+   - `id`: UUID v4 string generated via `node -e "const {randomUUID}=require('crypto');process.stdout.write(randomUUID())"` or `uuidgen | tr '[:upper:]' '[:lower:]'`. MUST be a non-empty UUID string. **Never omit** — missing `id` causes 100% mirror-skip (#303).
+   - `type`: one of `fragile-file`, `effective-sizing`, `recurring-issue`, `scope-guidance`, `deviation-pattern`, `stagnation-class-frequency`, `hardware-pattern`, `autopilot-effectiveness`
    - `subject`: the pattern subject
-   - `insight`: human-readable description of the pattern
+   - `insight`: human-readable description of the pattern. **MUST be `insight`** — do NOT use `description` or `recommendation` (legacy alias keys that vault-mirror cannot read; see #303).
    - `evidence`: specific data points that support the pattern
    - `confidence`: 0.5 for new learnings
-   - `source_session`: session ID from which the pattern was extracted
+   - `source_session`: **non-empty kebab-slug string** identifying the session from which the pattern was extracted (e.g. `main-2026-04-27-1942`). MUST be a string — never an object, array, number, or null. If multiple sessions contributed, use the earliest. If unknown, use `"unknown"` (the string). **Never** pass `String(<object>)` — that yields `"[object Object]"` and breaks the YAML mirror downstream (#307). Optional pre-write validation: `jq -e 'select(.source_session | type == "string" and length > 2)'`.
    - `created_at`: current ISO 8601 date
    - `expires_at`: current date + `learning-expiry-days` (default: 30) (ISO 8601)
 5. **Verify write**: Read back the first line of the written file to confirm valid JSON. If read-back fails or is not valid JSON, report error to user.
@@ -219,12 +232,14 @@ For confirmed learnings, use atomic rewrite strategy:
 
    b. Resolve the vault directory: use `$CONFIG."vault-integration"."vault-dir"` if non-null, otherwise fall back to the `$VAULT_DIR` environment variable. If neither is set, emit a warning and skip.
 
-   c. Invoke the mirror script:
+   c. Invoke the mirror script. Derive a synthetic `EVOLVE_SESSION_ID` so the vault-mirror auto-commit phase (#31) produces a traceable commit subject (`chore(vault): mirror evolve-<date> — N learnings + 0 sessions`):
       ```bash
+      EVOLVE_SESSION_ID="evolve-$(date -u +%Y-%m-%d-%H%M)"
       node "$PLUGIN_ROOT/scripts/vault-mirror.mjs" \
         --vault-dir "<vault-dir>" \
         --source .orchestrator/metrics/learnings.jsonl \
-        --kind learning
+        --kind learning \
+        --session-id "$EVOLVE_SESSION_ID"
       ```
 
    d. Handle the exit code according to `mode`:

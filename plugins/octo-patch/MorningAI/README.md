@@ -158,6 +158,10 @@ Create a config file at `~/.config/morning-ai/.env`:
 GITHUB_TOKEN=gh_xxx               # GitHub (optional, higher rate limits)
 MESSAGE_ENABLED=true               # Message digest (optional, for messaging platforms)
 
+# Collector tuning (optional)
+ARXIV_LOOKBACK_DAYS=3              # arXiv window in days; default 3 (today + 2 prior)
+                                   # — most days arXiv has no fresh papers in a strict 24h window
+
 # Email subscription (optional — push the digest to your inbox / team)
 EMAIL_ENABLED=true
 EMAIL_RECIPIENTS=you@example.com,teammate@example.com

@@ -1,7 +1,7 @@
 {
   "name": "unslop",
   "displayName": "Unslop",
-  "version": "0.5.6",
+  "version": "0.6.2",
   "description": "Make Codex output sound like a careful human wrote it. Strip AI-isms, engineer burstiness, preserve every code block and technical term.",
   "author": "Mohamed Abdallah",
   "license": "MIT",

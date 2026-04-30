@@ -33,8 +33,13 @@ from .validate import ValidationResult, validate
 
 MAX_RETRIES = 2
 
-Intensity = Literal["subtle", "balanced", "full"]
-VALID_INTENSITIES: tuple[Intensity, ...] = ("subtle", "balanced", "full")
+Intensity = Literal["subtle", "balanced", "full", "anti-detector"]
+VALID_INTENSITIES: tuple[Intensity, ...] = (
+    "subtle",
+    "balanced",
+    "full",
+    "anti-detector",
+)
 
 
 @dataclass
@@ -135,6 +140,27 @@ TABLE_BLOCK = re.compile(
 QUOTED_PROSE = re.compile(
     r'(?:"[^"\n]{1,160}"|\u201c[^\u201d\n]{1,160}\u201d)'
 )
+
+_CURLY_QUOTE_TRANSLATION = str.maketrans(
+    {
+        "\u201c": '"',
+        "\u201d": '"',
+        "\u2018": "'",
+        "\u2019": "'",
+    }
+)
+
+
+def _normalize_quotes(text: str) -> str:
+    """Normalize curly prose quotes to plain ASCII quotes."""
+    return text.translate(_CURLY_QUOTE_TRANSLATION)
+
+
+def _normalize_quoted_placeholders(table: dict[str, str]) -> None:
+    """Normalize quote marks in protected quoted prose, but not code/URLs."""
+    for placeholder, original in list(table.items()):
+        if "\x00QUOTED#" in placeholder:
+            table[placeholder] = _normalize_quotes(original)
 
 
 def _placeholder(idx: int, kind: str) -> str:
@@ -312,6 +338,20 @@ STOCK_VOCAB = [
     (re.compile(r"\bcomprehensively\b", re.IGNORECASE), "thoroughly"),
     (re.compile(r"\bcomprehensive\b", re.IGNORECASE), "broad"),
     (re.compile(r"\brobust(?=\s+(?:and|solution|implementation|approach|system|architecture|framework|platform|infrastructure|backend|frontend|foundation|delivery|automation|CI/CD|pipeline|tooling|mechanism|strategy))\b", re.IGNORECASE), "reliable"),
+    (re.compile(r"\baligns?\s+with\b", re.IGNORECASE), "matches"),
+    (re.compile(r"\baligned\s+with\b", re.IGNORECASE), "matched"),
+    (re.compile(r"\baligning\s+with\b", re.IGNORECASE), "matching"),
+    (re.compile(r"\bfostering\b", re.IGNORECASE), "building"),
+    (re.compile(r"\bfosters\b", re.IGNORECASE), "builds"),
+    (re.compile(r"\bfostered\b", re.IGNORECASE), "built"),
+    (re.compile(r"\bfoster\b", re.IGNORECASE), "build"),
+    (re.compile(r"\bshowcasing\b", re.IGNORECASE), "showing"),
+    (re.compile(r"\bshowcases\b", re.IGNORECASE), "shows"),
+    (re.compile(r"\bshowcased\b", re.IGNORECASE), "showed"),
+    (re.compile(r"\bshowcase\b", re.IGNORECASE), "show"),
+    (re.compile(r"\bfast-paced\b", re.IGNORECASE), "fast"),
+    (re.compile(r"\bgroundbreaking\b", re.IGNORECASE), "new"),
+    (re.compile(r"\bwell-rounded\b", re.IGNORECASE), "rounded"),
     # Expanded vocabulary (blader/unslop + Wikipedia:Signs_of_AI_writing).
     (re.compile(r"\binterplay\s+(?:between|of)\b", re.IGNORECASE), "link between"),
     (re.compile(r"\bintricate\b", re.IGNORECASE), "detailed"),
@@ -382,6 +422,24 @@ STOCK_VOCAB = [
     (re.compile(r"\bsynergiz(?:es|ed|ing)\b", re.IGNORECASE),
      lambda m: {"synergizes": "works well with", "synergized": "worked well with", "synergizing": "working well with"}.get(m.group(0).lower(), "works well with")),
     (re.compile(r"\bsynergize\b", re.IGNORECASE), "work well with"),
+    # 2026-04-28 promotional-register additions (Wikipedia "Signs of AI writing"
+    # + blader/unslop #4 promotional language). These are the postcard-and-
+    # press-release adjectives that flag a paragraph as marketing-AI even when
+    # the rest of the prose is clean.
+    #
+    # `nestled` (in/between/amongst/among/within/by) — travel-guide cliché.
+    # The word adds nothing factual; the preposition does the work.
+    (re.compile(r"\bnestled\s+(in|between|amongst|among|within|by)\b", re.IGNORECASE), r"\1"),
+    # "rich heritage" / "deep heritage" — promotional puffery. "history" is
+    # the literal word.
+    (re.compile(r"\b(?:a\s+)?(?:rich|deep)\s+heritage\b", re.IGNORECASE), "history"),
+    # "steeped in (rich) tradition/history/heritage" — same family. Collapse
+    # to "rooted in tradition" which makes the same claim without the
+    # brochure stylization.
+    (
+        re.compile(r"\bsteeped\s+in\s+(?:rich\s+)?(?:tradition|history|heritage)\b", re.IGNORECASE),
+        "rooted in tradition",
+    ),
 ]
 
 # Authority tropes (blader/unslop #27). Persuasive framing that signals
@@ -414,6 +472,28 @@ SIGNPOSTING = [
     re.compile(r"(^|(?<=[.!?]\s))Buckle up[.!]?[ \t]*", re.MULTILINE | re.IGNORECASE),
 ]
 
+KNOWLEDGE_CUTOFF = [
+    re.compile(
+        r"(^|(?<=[.!?]\s))As of my (?:last update|knowledge cutoff)[,;]?[ \t]*",
+        re.MULTILINE | re.IGNORECASE,
+    ),
+    re.compile(
+        r"(^|(?<=[.!?]\s))I do not have access to real-time information[,;]?[ \t]*",
+        re.MULTILINE | re.IGNORECASE,
+    ),
+    re.compile(
+        r"(^|(?<=[.!?]\s))My training data only goes up to [^,.;\n]+[,;]?[ \t]*",
+        re.MULTILINE | re.IGNORECASE,
+    ),
+]
+
+VAGUE_ATTRIBUTION = [
+    re.compile(
+        r"(^|(?<=[.!?]\s))Observers (?:say|note|suggest)(?: that)?[ \t]+",
+        re.MULTILINE | re.IGNORECASE,
+    ),
+]
+
 # Filler phrases (blader/unslop #23). Wordy constructions that collapse to
 # one or two words with no loss of meaning. Applied only at `full` intensity:
 # `due to the fact that` is occasionally justified in legal/technical text.
@@ -441,6 +521,27 @@ NEGATIVE_PARALLELISM = [
     # "No guesswork, no bloat, no surprises." — three-clause tricolon of negations
     re.compile(
         r"(^|(?<=[.!?]\s))No [A-Za-z][A-Za-z -]{1,20}(?:, no [A-Za-z][A-Za-z -]{1,20}){2,}[.!]",
+        re.MULTILINE,
+    ),
+    # "Not just X, but (also) Y" / "Not only X, but (also) Y" — canonical
+    # negative parallelism (Wikipedia "Signs of AI writing" + blader/unslop
+    # #9). The framing is rhetorical filler; Y carries the actual claim. We
+    # strip the "Not just/only X, but (also) " lead-in and let Y stand alone.
+    # Bound by the next clause boundary so multi-sentence overrun is impossible.
+    re.compile(
+        r"(^|(?<=[.!?]\s))Not (?:just|only) [^,.!?\n]{1,80},\s*but (?:also )?",
+        re.MULTILINE | re.IGNORECASE,
+    ),
+    # "It's not X — it's Y" — em-dash contrast form. Strip "It's not X — "
+    # so "it's Y" carries the sentence.
+    re.compile(
+        r"(^|(?<=[.!?]\s))It'?s not [^—.!?\n]{1,80}\s+[—–]\s+(?=[Ii]t'?s )",
+        re.MULTILINE,
+    ),
+    # "It's not X. It's Y." — period-break contrast form. Strip the negation
+    # half; the affirmation half remains as its own sentence.
+    re.compile(
+        r"(^|(?<=[.!?]\s))It'?s not [^.!?\n]{1,80}[.!]\s+(?=[Ii]t'?s )",
         re.MULTILINE,
     ),
 ]
@@ -598,6 +699,54 @@ COPULA_AVOIDANCE = [
             r",\s+being\s+(?=(?:a|an|the)\s+[a-z])", re.IGNORECASE
         ),
         ", ",
+    ),
+    # 2026-04-28: full copula-avoidance set (Wikipedia "Signs of AI writing":
+    # "Avoidance of copulas"). Each pattern fires only when the verb is
+    # followed by a clearly promotional/positional noun phrase, so legit
+    # uses like "the function serves as a callback" or "features include
+    # caching" survive untouched.
+    #
+    # "X serves as a/an Y" → "X is a/an Y" — only when Y is in the
+    # promotional/positional noun set. Verb tense preserved across forms.
+    (
+        re.compile(
+            r"\bserves\s+as\s+(?=(?:a|an|the)\s+(?:reliable|powerful|leading|prominent|key|major|prime|cornerstone|hub|center|centre|foundation|backbone|gateway|model|standard|benchmark|symbol|reminder|catalyst|beacon|cornerstone)\b)",
+            re.IGNORECASE,
+        ),
+        "is ",
+    ),
+    (
+        re.compile(
+            r"\bserved\s+as\s+(?=(?:a|an|the)\s+(?:reliable|powerful|leading|prominent|key|major|prime|cornerstone|hub|center|centre|foundation|backbone|gateway|model|standard|benchmark|symbol|reminder|catalyst|beacon)\b)",
+            re.IGNORECASE,
+        ),
+        "was ",
+    ),
+    (
+        re.compile(
+            r"\bserve\s+as\s+(?=(?:a|an|the)\s+(?:reliable|powerful|leading|prominent|key|major|prime|cornerstone|hub|center|centre|foundation|backbone|gateway|model|standard|benchmark|symbol|reminder|catalyst|beacon)\b)",
+            re.IGNORECASE,
+        ),
+        "are ",
+    ),
+    # "boasts a/an X" — promotional copula. Drop to "has". Verb tense
+    # preserved across forms. Guards: only `(?:a|an)` continuation, so
+    # "He boasts about Python" / "boasts of his work" / "boasts that ..."
+    # are not touched (the AI tell is specifically `boasts a/an <noun>`).
+    (re.compile(r"\bboasts\s+(?=(?:a|an)\s+[a-z])", re.IGNORECASE), "has "),
+    (re.compile(r"\bboasted\s+(?=(?:a|an)\s+[a-z])", re.IGNORECASE), "had "),
+    (re.compile(r"\bboasting\s+(?=(?:a|an)\s+[a-z])", re.IGNORECASE), "with "),
+    (re.compile(r"\bboast\s+(?=(?:a|an)\s+[a-z])", re.IGNORECASE), "have "),
+    # "features a/an Y" — promotional copula avoidance. Strict guard: only
+    # when followed by an unambiguously promotional adjective. Avoids
+    # collapsing "features include", "features of X", "feature-list", or
+    # technical product-feature prose.
+    (
+        re.compile(
+            r"\bfeatures\s+(?=(?:a|an)\s+(?:stunning|beautiful|breathtaking|impressive|elegant|sleek|innovative|intuitive|seamless|cutting-edge|state-of-the-art|world-class|industry-leading|best-in-class|revolutionary|groundbreaking)\b)",
+            re.IGNORECASE,
+        ),
+        "has ",
     ),
 ]
 
@@ -773,7 +922,7 @@ def _resolve_toggles(
     Explicit True/False overrides the intensity default. `None` falls back
     to the intensity-driven value.
     """
-    intensity_wants_them = intensity in ("balanced", "full")
+    intensity_wants_them = intensity in ("balanced", "full", "anti-detector")
     resolved_structural = intensity_wants_them if structural is None else structural
     resolved_soul = intensity_wants_them if soul is None else soul
     return resolved_structural, resolved_soul
@@ -797,6 +946,7 @@ def humanize_deterministic(
                   copula-avoidance, plus Phase 1 structural and Phase 5 soul.
       - full:     everything balanced does, plus filler phrases,
                   negative-parallelism, superficial-ing.
+      - anti-detector: full plus detector-oriented target nudges.
 
     `structural` and `soul` default to None and are resolved by intensity
     (on for balanced/full, off for subtle). Pass True/False to override.
@@ -857,19 +1007,26 @@ def humanize_deterministic_with_report(
     # Sycophancy stacks ("Great question! I'd be happy to help.") need multiple passes
     # because each strip can expose a new line-start pattern. Cap at 5 to avoid
     # pathological loops on adversarial input.
-    run_sycophancy = intensity in ("balanced", "full")
-    run_hedging = intensity in ("balanced", "full")
-    run_transitions = intensity in ("balanced", "full")
-    run_performative = intensity in ("balanced", "full")
-    run_authority = intensity in ("balanced", "full")
-    run_signposting = intensity in ("balanced", "full")
-    run_em_dash_cap = intensity in ("balanced", "full")
-    run_significance_inflation = intensity in ("balanced", "full")
-    run_notability_namedropping = intensity in ("balanced", "full")
-    run_copula_avoidance = intensity in ("balanced", "full")
-    run_superficial_ing = intensity == "full"
-    run_filler = intensity == "full"
-    run_negative_parallelism = intensity == "full"
+    run_balanced = intensity in ("balanced", "full", "anti-detector")
+    run_full = intensity in ("full", "anti-detector")
+    run_sycophancy = run_balanced
+    run_hedging = run_balanced
+    run_transitions = run_balanced
+    run_performative = run_balanced
+    run_authority = run_balanced
+    run_signposting = run_balanced
+    run_knowledge_cutoff = run_balanced
+    run_vague_attribution = run_balanced
+    run_em_dash_cap = run_balanced
+    run_significance_inflation = run_balanced
+    run_notability_namedropping = run_balanced
+    run_copula_avoidance = run_balanced
+    run_superficial_ing = run_full
+    run_filler = run_full
+    run_negative_parallelism = run_full
+
+    protected = _normalize_quotes(protected)
+    _normalize_quoted_placeholders(table)
 
     if run_sycophancy:
         for _ in range(5):
@@ -896,6 +1053,18 @@ def humanize_deterministic_with_report(
     if run_signposting:
         for pattern in SIGNPOSTING:
             protected = _tracking_sub(pattern, r"\1", protected, rule="signposting", log=log)
+
+    if run_knowledge_cutoff:
+        for pattern in KNOWLEDGE_CUTOFF:
+            protected = _tracking_sub(
+                pattern, r"\1", protected, rule="knowledge_cutoff", log=log
+            )
+
+    if run_vague_attribution:
+        for pattern in VAGUE_ATTRIBUTION:
+            protected = _tracking_sub(
+                pattern, r"\1", protected, rule="vague_attribution", log=log
+            )
 
     # Stock vocab runs at every intensity, including `subtle`.
     for pattern, repl in STOCK_VOCAB:
@@ -946,6 +1115,15 @@ def humanize_deterministic_with_report(
     # where it's no longer an offender. Gated off by default — see flag doc.
     if structural:
         protected = humanize_structural(protected, report=report.structural)
+
+    if intensity in ("full", "anti-detector"):
+        from .lexical_targets import apply_targeted_pass, measure_gaps
+
+        protected = apply_targeted_pass(
+            protected,
+            measure_gaps(_restore(protected, table)),
+            intensity=intensity,
+        )
 
     # Phase 5 soul-injection pass — contraction lift. Token-distribution lever
     # for detector resistance. Runs after lexical + structural so the
@@ -1035,6 +1213,11 @@ _INTENSITY_PROMPT_GUIDANCE: dict[str, str] = {
         "performative balance. Merge bullet-soup. Collapse filler phrases "
         "(\"in order to\" → \"to\", \"due to the fact that\" → \"because\"). Use "
         "contractions. Sound like a human with a stake."
+    ),
+    "anti-detector": (
+        "INTENSITY: anti-detector. Use the full rewrite rules, then break uniform "
+        "sentence shapes, add grounded specificity only when the user supplied it, "
+        "and leave code, URLs, headings, quoted content, paths, and commands intact."
     ),
 }
 
@@ -1153,6 +1336,36 @@ Return ONLY the corrected humanized markdown. Restore every code block, URL, and
 """
 
 
+def _build_audit_prompt(humanized: str, original: str | None = None) -> str:
+    original_block = f"\n## Original text\n{original}\n" if original is not None else ""
+    return f"""You are reviewing a piece of writing for residual AI-generated patterns.
+
+Be specific. Cite phrases and structural tells. Do not rewrite. Diagnose only.
+{original_block}
+## Text to audit
+{humanized}
+
+## Question
+What makes the text above read as AI-generated? List specific phrases, sentence shapes, structural patterns, and rhetorical moves. If nothing reads as AI, say so explicitly.
+"""
+
+
+def _build_audit_rewrite_prompt(audit_findings: str, current: str) -> str:
+    return f"""You are rewriting a text to fix specific AI-generated patterns.
+
+Apply only the fixes listed. Preserve all code, URLs, paths, headings, and quoted content byte-identical. Do not introduce new patterns.
+
+## Findings to fix
+{audit_findings}
+
+## Current text
+{current}
+
+## Instruction
+Rewrite the current text addressing only the findings above. Output the rewritten text only, no preamble.
+"""
+
+
 def _call_anthropic_sdk(prompt: str) -> str | None:
     try:
         from anthropic import Anthropic
@@ -1186,12 +1399,21 @@ def _call_claude_cli(prompt: str) -> str | None:
     return proc.stdout.strip()
 
 
+def _call_llm(prompt: str) -> str | None:
+    return _call_anthropic_sdk(prompt) or _call_claude_cli(prompt)
+
+
+def _word_count_for_audit(text: str) -> int:
+    return len(re.findall(r"\b\w+\b", text))
+
+
 def humanize_llm(
     text: str,
     *,
     intensity: Intensity = "balanced",
     voice_sample: str | None = None,
     voice_profile=None,
+    audit: bool | None = None,
 ) -> str:
     from .detect import has_sensitive_content
 
@@ -1207,13 +1429,31 @@ def humanize_llm(
         voice_sample=voice_sample,
         voice_profile=voice_profile,
     )
-    result = _call_anthropic_sdk(prompt) or _call_claude_cli(prompt)
+    result = _call_llm(prompt)
     if result is None:
         raise RuntimeError(
             "LLM mode requires either ANTHROPIC_API_KEY (with `anthropic` package) "
             "or the `claude` CLI on PATH. Use --deterministic for offline use."
         )
-    return _strip_outer_fence(result)
+    pass1 = _strip_outer_fence(result)
+
+    if audit is None:
+        audit = intensity in ("full", "anti-detector")
+    if not audit or _word_count_for_audit(pass1) < 100:
+        return pass1
+
+    findings = _call_llm(_build_audit_prompt(pass1, text))
+    if findings is None:
+        return pass1
+    pass2_raw = _call_llm(_build_audit_rewrite_prompt(findings, pass1))
+    if pass2_raw is None:
+        return pass1
+    pass2 = _strip_outer_fence(pass2_raw)
+    result2 = validate(text, pass2)
+    if not result2.ok:
+        sys.stderr.write("audit rewrite failed preservation; using first-pass output\n")
+        return pass1
+    return pass2
 
 
 def _strip_outer_fence(text: str) -> str:
@@ -1227,7 +1467,7 @@ def _strip_outer_fence(text: str) -> str:
 
 def _llm_fix(original: str, broken: str, errors: list[str]) -> str | None:
     prompt = _build_fix_prompt(original, broken, errors)
-    result = _call_anthropic_sdk(prompt) or _call_claude_cli(prompt)
+    result = _call_llm(prompt)
     if result is None:
         return None
     return _strip_outer_fence(result)
@@ -1280,6 +1520,7 @@ def humanize_file_ex(
     voice_sample: str | None = None,
     voice_profile=None,
     strip_reasoning: bool = False,
+    audit: bool | None = None,
 ) -> HumanizeOutcome:
     """Rich entry point. Returns the full outcome (humanized text, report,
     validation) regardless of whether we actually wrote to disk. The CLI uses
@@ -1375,6 +1616,8 @@ def humanize_file_ex(
             llm_kwargs["voice_sample"] = voice_sample
         if voice_profile is not None:
             llm_kwargs["voice_profile"] = voice_profile
+        if audit is not None:
+            llm_kwargs["audit"] = audit
         humanized = humanize_llm(original_text, **llm_kwargs)
     except RuntimeError as exc:
         if backup and write:

@@ -1,5 +1,7 @@
 # Audience Mapping
 
+> Project-instruction file resolution: `CLAUDE.md` and `AGENTS.md` (Codex CLI) are transparent aliases — see [skills/_shared/instruction-file-resolution.md](../_shared/instruction-file-resolution.md). When the Dev audience target is listed as `CLAUDE.md`, docs-writer resolves the actual file via the SSOT precedence rule.
+
 Rules for mapping session scope to target audiences, content sources, and documentation ownership.
 
 ## Audiences & File Patterns
@@ -7,7 +9,7 @@ Rules for mapping session scope to target audiences, content sources, and docume
 | Audience | Target files (globs) | Typical update triggers |
 |----------|----------------------|-------------------------|
 | User | `README.md`, `docs/user/**/*.md`, `docs/getting-started.md`, `examples/**/*.md` | new CLI command, breaking API change, install flow change, new user-facing feature, changed example output |
-| Dev | `CLAUDE.md`, `docs/dev/**/*.md`, `docs/adr/**/*.md` | architecture decision, major refactor, new module/subsystem, test coverage change, dependency upgrade, ADR-worthy choice |
+| Dev | `CLAUDE.md` (or `AGENTS.md` on Codex CLI), `docs/dev/**/*.md`, `docs/adr/**/*.md` | architecture decision, major refactor, new module/subsystem, test coverage change, dependency upgrade, ADR-worthy choice |
 | Vault/Ops | `<vault>/01-projects/<slug>/context.md`, `<vault>/01-projects/<slug>/decisions.md`, `<vault>/01-projects/<slug>/people.md` | project status change, ownership transition, stack/infra decision, cross-project dependency, migration, archival event |
 
 ## Source Rules
@@ -58,7 +60,7 @@ to target a forbidden path aborts the task at SKILL.md Phase 3.
 |---------------|--------------------|---------------------------------------|
 | vault-mirror | `<vault>/01-projects/*/_overview.md` | vault-mirror regenerates this file from JSONL metrics on every session-end. A second writer would corrupt the metrics-derived content or introduce human prose that vault-mirror's next run overwrites silently. |
 | daily | `<vault>/03-daily/YYYY-MM-DD.md` | daily owns this path exclusively and is idempotent-by-design; a second writer (docs-writer) would corrupt the day's scratch notes and create conflicts on the next daily run. |
-| claude-md-drift-check | CLAUDE.md (diagnostic path — read-only quality gate) | drift-check diagnoses CLAUDE.md divergence but does not edit it. docs-orchestrator may remediate CLAUDE.md via the Dev audience path, but they MUST NOT run on CLAUDE.md in parallel within the same session wave to avoid concurrent edit conflicts. |
+| claude-md-drift-check | CLAUDE.md / AGENTS.md (diagnostic path — read-only quality gate) | drift-check diagnoses divergence in the project-instruction file but does not edit it. docs-orchestrator may remediate CLAUDE.md (or AGENTS.md on Codex CLI) via the Dev audience path, but they MUST NOT run on the instruction file in parallel within the same session wave to avoid concurrent edit conflicts. |
 | vault-sync | Frontmatter validation + wiki-link integrity on all `<vault>/**/*.md` (read-only quality gate) | vault-sync never edits files; it is a validation pass. docs-writer writes first; vault-sync validates after. No path conflict, but vault-sync runs must complete after docs-writer to detect drift introduced by new content. |
 
 **Forbidden targets (hard rules — abort on match):**
@@ -81,7 +83,7 @@ session output.
 
 ## Task
 Audience: Dev
-File-pattern target: docs/dev/**/*.md, CLAUDE.md
+File-pattern target: docs/dev/**/*.md, CLAUDE.md (or AGENTS.md on Codex CLI)
 Trigger: New `coordinator-snapshot.mjs` module added; CWD-drift guard introduced
   in wave-executor (issues #196, #219).
 

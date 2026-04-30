@@ -44,10 +44,6 @@ It exists to prevent shallow "book-name citation" reviews.
 - Large systems are not automatically second systems
 - Multi-module designs are acceptable when they preserve conceptual integrity
 
-**Questions to ask**
-- Does this design make the team coordinate more than the feature deserves?
-- Does one coherent policy drive the structure, or did modules accrete independently?
-
 ---
 
 ## Steve McConnell — *Code Complete*
@@ -65,10 +61,6 @@ It exists to prevent shallow "book-name citation" reviews.
 **Do not over-flag**
 - Small, explicit guard clauses are not cognitive overload
 - A long routine may be acceptable when it is linear, well-named, and single-purpose
-
-**Questions to ask**
-- Would a maintainer understand the happy path and failure path without tracing every branch?
-- Are constants and names carrying their share of the explanatory load?
 
 ---
 
@@ -89,10 +81,6 @@ It exists to prevent shallow "book-name citation" reviews.
 - Temporary duplication during an active extraction is not always debt
 - A data-focused structure is acceptable when it is intentionally a DTO or boundary record
 
-**Questions to ask**
-- What specific refactoring would reduce the risk here?
-- Is the smell a stable design problem or a short-lived transition state?
-
 ---
 
 ## Robert C. Martin — *Clean Architecture*
@@ -112,10 +100,6 @@ It exists to prevent shallow "book-name citation" reviews.
 - Composition roots may depend on concrete infrastructure by design
 - Thin adapter layers can import both directions when they are explicitly boundary glue
 
-**Questions to ask**
-- Is business policy insulated from framework and infrastructure details?
-- Is this dependency a boundary violation or an intentional assembly point?
-
 ---
 
 ## Andrew Hunt & David Thomas — *The Pragmatic Programmer*
@@ -132,10 +116,6 @@ It exists to prevent shallow "book-name citation" reviews.
 **Do not over-flag**
 - Similar code in different bounded contexts is not automatically a DRY violation
 - Direct object access inside a cohesive aggregate is not always a Demeter problem
-
-**Questions to ask**
-- If one rule changes, how many places must a human remember to edit?
-- Does this dependency leak knowledge across an unnecessary boundary?
 
 ---
 
@@ -157,10 +137,6 @@ It exists to prevent shallow "book-name citation" reviews.
 - CRUD-heavy workflows may legitimately use transaction scripts
 - Thin entities are acceptable when the domain itself is simple
 
-**Questions to ask**
-- Where do the business invariants live today?
-- Are cross-context translations explicit, or is foreign terminology leaking inward?
-
 ---
 
 ## John Ousterhout — *A Philosophy of Software Design*
@@ -179,10 +155,6 @@ It exists to prevent shallow "book-name citation" reviews.
 **Do not over-flag**
 - Internal implementation complexity is fine when the interface stays simple
 - A small wrapper is acceptable when it meaningfully absorbs volatility
-
-**Questions to ask**
-- Is this module buying simplicity for its callers?
-- Are we paying complexity now to avoid repeating it everywhere else later?
 
 ---
 
@@ -205,10 +177,6 @@ It exists to prevent shallow "book-name citation" reviews.
 - A stable public API is not a liability if it is intentionally supported
 - Fan-out alone is not disorder when dependency policy is explicit and governed
 
-**Questions to ask**
-- What behavior are callers relying on beyond the declared contract?
-- Will this dependency choice make future upgrades or migrations organizationally expensive?
-
 ---
 
 ## Gerard Meszaros — *xUnit Test Patterns*
@@ -226,10 +194,6 @@ It exists to prevent shallow "book-name citation" reviews.
 **Do not over-flag**
 - Multiple assertions are acceptable when they express one behavior with one failure story
 - Shared fixtures are acceptable when every field is relevant to the scenario
-
-**Questions to ask**
-- Would a failing assertion tell the reader what behavior regressed?
-- Is the test pattern clarifying the behavior or obscuring it?
 
 ---
 
@@ -249,10 +213,6 @@ It exists to prevent shallow "book-name citation" reviews.
 - A mock is acceptable when the dependency is nondeterministic and the assertion still verifies behavior
 - Naming conventions are guidance; clarity is the goal
 
-**Questions to ask**
-- Does this test fail only when behavior breaks?
-- Are mocks serving the test, or is the test serving the mocks?
-
 ---
 
 ## Michael Feathers — *Working Effectively with Legacy Code*
@@ -271,10 +231,6 @@ It exists to prevent shallow "book-name citation" reviews.
 - Untested code is not automatically legacy if it is stable and not under active change
 - Characterization tests are most important before modifying unclear existing behavior
 
-**Questions to ask**
-- If this module changed tomorrow, how would the team prove it still works?
-- What seam could be introduced with the lowest risk?
-
 ---
 
 ## Google Engineering — *How Google Tests Software*
@@ -290,7 +246,3 @@ It exists to prevent shallow "book-name citation" reviews.
 **Do not over-flag**
 - A non-70:20:10 ratio can be healthy when justified by platform constraints or product risk
 - High coverage is useful when paired with meaningful branch and change protection
-
-**Questions to ask**
-- Does this suite spend effort where failures are most expensive?
-- Are coverage numbers hiding important untested change paths?

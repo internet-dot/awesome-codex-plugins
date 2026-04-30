@@ -37,6 +37,7 @@ import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { join, relative, resolve, dirname, basename } from 'node:path';
 import { z } from 'zod';
 import YAML from 'yaml';
+import { resolveInstructionFile } from '../../scripts/lib/common.mjs';
 
 // ── Inline vendored schema (mirrors projects-baseline vault-frontmatter.ts) ──
 // ── BEGIN GENERATED SCHEMA (sync-vault-schema.mjs) — do not edit between sentinels ──
@@ -190,18 +191,21 @@ function isExcluded(relPath) {
 // ── Vault marker detection ──────────────────────────────────────────────────
 // Returns true if dir contains at least one recognized vault marker:
 //   1. _meta/ directory
-//   2. CLAUDE.md containing both "## Session Config" and "vault-sync:"
+//   2. CLAUDE.md or AGENTS.md (alias — see skills/_shared/instruction-file-resolution.md)
+//      containing both "## Session Config" and "vault-sync:". The instruction
+//      file is resolved via resolveInstructionFile() so CLAUDE.md wins ties and
+//      AGENTS.md is accepted on Codex CLI repos.
 //   3. .obsidian/ directory
 function isVaultDir(dir) {
   if (existsSync(join(dir, '_meta')) && statSync(join(dir, '_meta')).isDirectory()) return true;
   if (existsSync(join(dir, '.obsidian')) && statSync(join(dir, '.obsidian')).isDirectory()) return true;
-  const claudeMd = join(dir, 'CLAUDE.md');
-  if (existsSync(claudeMd)) {
+  const instr = resolveInstructionFile(dir);
+  if (instr) {
     try {
-      const content = readFileSync(claudeMd, 'utf8');
+      const content = readFileSync(instr.path, 'utf8');
       if (content.includes('## Session Config') && content.includes('vault-sync:')) return true;
     } catch {
-      // unreadable CLAUDE.md — not a vault marker
+      // unreadable instruction file — not a vault marker
     }
   }
   return false;
@@ -215,7 +219,7 @@ if (process.env.VAULT_DIR) {
   // Non-existent dirs are handled further down by the existsSync guard (status: skipped).
   if (existsSync(vaultDir) && statSync(vaultDir).isDirectory() && !isVaultDir(vaultDir)) {
     process.stderr.write(
-      'vault-sync: warning: VAULT_DIR set but directory lacks vault markers (_meta/, CLAUDE.md with vault-sync, or .obsidian/)\n',
+      'vault-sync: warning: VAULT_DIR set but directory lacks vault markers (_meta/, CLAUDE.md or AGENTS.md with vault-sync, or .obsidian/)\n',
     );
   }
 } else {
@@ -229,7 +233,7 @@ if (process.env.VAULT_DIR) {
         '',
         'Expected one of the following in cwd:',
         '  - _meta/ directory',
-        "  - CLAUDE.md with a '## Session Config' and 'vault-sync:' block",
+        "  - CLAUDE.md (or AGENTS.md on Codex CLI) with a '## Session Config' and 'vault-sync:' block",
         '  - .obsidian/ directory',
         '',
         'Fix: set VAULT_DIR to the vault root, or cd into the vault before running.',

@@ -1,7 +1,7 @@
 # Session Orchestrator
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.0.0--dev-orange.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.2.0-blue.svg)](CHANGELOG.md)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-blueviolet.svg)](https://docs.anthropic.com/en/docs/claude-code)
 [![Codex](https://img.shields.io/badge/Codex-Compatible-green.svg)](https://developers.openai.com/codex/)
 [![Cursor IDE](https://img.shields.io/badge/Cursor_IDE-Compatible-blue.svg)](https://cursor.com)
@@ -9,6 +9,8 @@
 Session orchestration plugin for Claude Code, Codex, and Cursor IDE. Covers project planning, wave execution, VCS integration, and quality gates.
 
 > [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Codex](https://developers.openai.com/codex/), and [Cursor IDE](https://cursor.com) are agentic coding tools. This plugin adds structured session management on top, turning ad-hoc agent interactions into repeatable, quality-gated engineering workflows. No runtime code. Pure Markdown.
+
+> **Project-instruction file:** the per-repo config host is `CLAUDE.md (or AGENTS.md on Codex CLI)`. Both files are transparent aliases — pick one, never both. Resolution rule: [skills/_shared/instruction-file-resolution.md](skills/_shared/instruction-file-resolution.md).
 
 ## Install
 
@@ -45,7 +47,7 @@ Prefer installing from a local clone? Use an absolute path instead of the `owner
 git clone https://github.com/Kanevry/session-orchestrator.git ~/Projects/session-orchestrator
 cd ~/Projects/session-orchestrator
 npm install
-bash scripts/codex-install.sh
+node scripts/codex-install.mjs
 ```
 
 ### Cursor IDE
@@ -57,16 +59,16 @@ cd ~/Projects/session-orchestrator
 npm install
 
 # 2. Install Cursor rules into your project
-bash scripts/cursor-install.sh /path/to/your/project
+node scripts/cursor-install.mjs /path/to/your/project
 
-# Session Config goes in CLAUDE.md (Cursor reads it natively)
+# Session Config goes in CLAUDE.md (or AGENTS.md on Codex CLI; Cursor reads CLAUDE.md natively)
 ```
 
 ## Quick Start
 
 ### Claude Code
 
-After installing the plugin (see [Install](#install)), add a `## Session Config` section to your project's `CLAUDE.md`, then run:
+After installing the plugin (see [Install](#install)), add a `## Session Config` section to your project's `CLAUDE.md (or AGENTS.md on Codex CLI)`, then run:
 
 ```text
 /session feature
@@ -78,10 +80,10 @@ After installing the plugin (see [Install](#install)), add a `## Session Config`
 
 ```bash
 git clone https://github.com/Kanevry/session-orchestrator.git ~/Projects/session-orchestrator
-bash ~/Projects/session-orchestrator/scripts/codex-install.sh
+node ~/Projects/session-orchestrator/scripts/codex-install.mjs
 ```
 
-Add Session Config to `AGENTS.md`, restart Codex, then run:
+Add Session Config to `AGENTS.md` (the Codex CLI alias for `CLAUDE.md` — see [skills/_shared/instruction-file-resolution.md](skills/_shared/instruction-file-resolution.md)), restart Codex, then run:
 
 ```text
 /session feature
@@ -89,7 +91,7 @@ Add Session Config to `AGENTS.md`, restart Codex, then run:
 /close
 ```
 
-See [Usage](#usage) for all 8 commands and [User Guide](docs/USER-GUIDE.md) for the full walkthrough.
+See [Usage](#usage) for all 10 commands and [User Guide](docs/USER-GUIDE.md) for the full walkthrough.
 
 ## Prerequisites
 
@@ -103,7 +105,7 @@ See [Usage](#usage) for all 8 commands and [User Guide](docs/USER-GUIDE.md) for 
 | Feature | Claude Code | Codex | Cursor IDE |
 |---------|------------|-----------|------------|
 | OS | macOS, Linux, **Windows (native)** | macOS, Linux, **Windows (native)** | macOS, Linux, **Windows (native)** |
-| All 8 commands | Native slash commands | Native plugin commands | Rules-based (.mdc) |
+| All 10 commands | Native slash commands | Native plugin commands | Rules-based (.mdc) |
 | Parallel agents | Agent tool | Multi-agent roles | Sequential only |
 | Session persistence | .claude/STATE.md | .codex/STATE.md | .cursor/STATE.md |
 | Shared knowledge | .orchestrator/metrics/ | .orchestrator/metrics/ | .orchestrator/metrics/ |
@@ -140,7 +142,7 @@ Back up any uncommitted work first.
 
 ### macOS / Linux: `Permission denied` on a hook
 
-v3 hooks are `.mjs` files invoked via `node <path>` — the executable bit is not required. If your editor reports `Permission denied`, it is still pointing at a stale `.sh` path. Re-run the platform install script (`scripts/codex-install.sh`, `scripts/cursor-install.sh`) or re-add the plugin in Claude Code.
+v3 hooks are `.mjs` files invoked via `node <path>` — the executable bit is not required. If your editor reports `Permission denied`, it is still pointing at a stale `.sh` path. Re-run the platform install script (`scripts/codex-install.mjs`, `scripts/cursor-install.mjs`) or re-add the plugin in Claude Code.
 
 ### `SyntaxError` in hooks
 
@@ -198,7 +200,7 @@ A complexity scoring formula (files x modules x issues) determines agent counts 
 
 ### Comparison
 
-| Feature | Session Orchestrator | Manual CLAUDE.md | Other Orchestrators |
+| Feature | Session Orchestrator | Manual CLAUDE.md | Other Orchestrators | <!-- consistency:exempt: column label, not a per-platform file reference -->
 |---------|---------------------|------------------|-------------------|
 | Session lifecycle (start → plan → execute → close) | Full, automated | Manual | Partial |
 | Typed waves with quality gates | 5 roles, progressive verification | None | Batch execution |
@@ -224,6 +226,9 @@ The design goal is engineering quality: every wave exits verified, every unfinis
 | `/plan [mode]` | Plan a project, feature, or retrospective |
 | `/evolve [mode]` | Extract, review, or list cross-session learnings |
 | `/bootstrap` | Scaffold required repo structure for session-orchestrator |
+| `/harness-audit` | Score the harness against the deterministic 7-category rubric |
+| `/autopilot` | Headless walk-away CLI driver for chained sessions |
+| `/repo-audit` | One-shot repo-level audit |
 
 ## Workflow
 
@@ -295,30 +300,23 @@ Run `/session` to **implement** existing issues across structured waves:
 
 ## Repo Session Config
 
-Add to each repo's `CLAUDE.md`:
+Add a `## Session Config` section to each repo's `CLAUDE.md (or AGENTS.md on Codex CLI)`. The smallest valid config:
 
-```markdown
+```yaml
 ## Session Config
 
-- **agents-per-wave:** 6
-- **waves:** 5
-- **pencil:** path/to/design.pen
-- **cross-repos:** [related-repo-1, related-repo-2]
-- **ssot-files:** [.claude/STATUS.md]
-- **mirror:** github
-- **ecosystem-health:** true
-- **vcs:** github|gitlab (default: auto-detect)
-- **gitlab-host:** custom-gitlab.example.com
-- **health-endpoints:** [{name: "API", url: "https://api.example.com/health"}]
-- **special:** "any repo-specific instructions"
-- **persistence:** true
-- **enforcement:** warn (strict|warn|off)
-- **isolation:** worktree (worktree|none|auto)
-- **max-turns:** auto (housekeeping=8, feature=15, deep=25)
-- **learning-expiry-days:** 30
-- **discovery-on-close:** true
-- **agent-mapping:** { impl: code-editor, test: test-specialist, db: database-architect }
+test-command: npm test
+typecheck-command: npm run typecheck
+lint-command: npm run lint
+agents-per-wave: 6
+waves: 5
+persistence: true
+enforcement: warn
 ```
+
+Those seven mandatory fields are schema-validated by `scripts/lib/config-schema.mjs`. Everything else is opt-in (env-aware sizing, vault sync, drift checks, docs orchestrator, webhooks, agent mapping, …).
+
+For the full template — minimal baseline, opt-in baseline, and per-section walk-through of every field — see [`docs/session-config-template.md`](docs/session-config-template.md). For the canonical type/default/edge-case reference, see [`docs/session-config-reference.md`](docs/session-config-reference.md).
 
 ### Intelligent Agent Dispatch
 
@@ -357,14 +355,50 @@ Superpowers handles the **task layer** (TDD, debugging, brainstorming per featur
 
 ## Components
 
-- **16 Skills**: session-start, session-plan, wave-executor, session-end, claude-md-drift-check, ecosystem-health, gitlab-ops, quality-gates, discovery, plan, evolve, vault-sync, vault-mirror, bootstrap, daily, docs-orchestrator
-- **8 Commands**: /session, /go, /close, /discovery, /plan, /evolve, /bootstrap, /harness-audit
-- **7 Agents**: code-implementer, test-writer, ui-developer, db-specialist, security-reviewer, docs-writer (generic base agents) + session-reviewer (inter-wave quality gate)
-- **Hooks**: SessionStart notification + Clank Event Bus integration + PreToolUse enforcement (scope + commands)
+- **26 Skills**: bootstrap, session-start, session-plan, wave-executor, session-end, claude-md-drift-check, ecosystem-health, gitlab-ops, quality-gates, discovery, plan, evolve, vault-sync, vault-mirror, daily, docs-orchestrator, skill-creator, mcp-builder, hook-development, **architecture**, **domain-model**, **ubiquitous-language**, autopilot, mode-selector, repo-audit, convergence-monitoring
+- **10 Commands**: /session, /go, /close, /discovery, /plan, /evolve, /bootstrap, /harness-audit, /autopilot, /repo-audit
+- **7 Agents**: code-implementer, test-writer, ui-developer, db-specialist, security-reviewer, session-reviewer, docs-writer
+- **Hooks**: 6 event matchers covering 6 hook handlers — SessionStart (banner + init), PreToolUse/Edit\|Write (scope enforcement), PreToolUse/Bash (destructive-command guard + enforce-commands), PostToolUse (edit validation), Stop (session events), SubagentStop (agent events). Plus the Clank Event Bus integration (`hooks/_lib/events.mjs`).
 - **Output Styles**: 3 styles (session-report, wave-summary, finding-report) for consistent reporting
+- `.orchestrator/policy/` — runtime policy files (e.g. `blocked-commands.json`, 13 rules consumed by the destructive-command guard)
+- `.claude/rules/` — always-on contributor rules (e.g. `parallel-sessions.md`)
 - `.codex-plugin/`: Codex plugin manifest (`plugin.json`) + compatibility config + 3 agent role definitions
-- `scripts/codex-install.sh`: installs into the active Codex desktop plugin catalog or falls back to a local marketplace
-- `scripts/`: deterministic scripts (parse-config, run-quality-gate, validate-wave-scope, validate-plugin, token-audit) + shared lib (`scripts/lib/*.mjs`) + vitest suite (533+ tests)
+- `scripts/codex-install.mjs`: installs into the active Codex desktop plugin catalog or falls back to a local marketplace
+- `scripts/`: deterministic scripts (parse-config, run-quality-gate, validate-wave-scope, validate-plugin, token-audit, autopilot) + shared lib (`scripts/lib/*.mjs`) + vitest suite (2623+ tests)
+
+## Destructive-Command Guard
+
+`hooks/pre-bash-destructive-guard.mjs` blocks destructive shell commands in the main session (alongside subagent waves). Policy lives in `.orchestrator/policy/blocked-commands.json` (13 rules covering `git reset --hard`, `rm -rf`, `git push --force`, etc.).
+
+Bypass per-session by adding to your Session Config:
+
+```yaml
+allow-destructive-ops: true
+```
+
+Set this for intentional maintenance sessions only. The rule source of truth is [`.claude/rules/parallel-sessions.md`](.claude/rules/parallel-sessions.md) (PSA-003), which is vendored to all consumer repos via `/bootstrap`. See issue #155 for the codification narrative.
+
+## Agent Authoring Rules
+
+Custom agents live in `agents/` (plugin) or `.claude/agents/` (project) as Markdown with YAML frontmatter. The frontmatter contract is strict — Claude Code emits `agents: Invalid input` and silently drops the agent on any deviation. Required fields:
+
+```yaml
+---
+name: kebab-case-name          # 3-50 chars, lowercase + hyphens only
+description: Use this agent when [conditions]. <example>Context: ... user: "..." assistant: "..." <commentary>Why this agent is appropriate</commentary></example>
+model: inherit                 # inherit | sonnet | opus | haiku
+color: blue                    # blue | cyan | green | yellow | magenta | red
+tools: Read, Grep, Glob, Bash  # COMMA-SEPARATED STRING, not JSON array!
+---
+```
+
+**Critical pitfalls** (cause `agents: Invalid input` validation failure):
+
+- `tools` MUST be a comma-separated string (`Read, Edit, Write`), NOT a JSON array (`["Read", "Edit"]`).
+- `description` MUST be a single-line inline string, NOT a YAML block scalar (`>` or `|`). Put `<example>` blocks inline.
+- All four fields (`name`, `description`, `model`, `color`) are required. `tools` is optional.
+
+Reference: [Anthropic agent-development SKILL.md](https://github.com/anthropics/claude-code/blob/main/plugins/plugin-dev/skills/agent-development/SKILL.md).
 
 ## Development
 
@@ -402,7 +436,8 @@ For contributor-facing architecture, hook authoring, and the `zx`-vs-stdlib heur
 
 ## Weiterführend
 
-- **Agent-Kontext & Internals:** Siehe [`CLAUDE.md`](./CLAUDE.md) für Plugin-Architektur, Skills, Hooks und Entwicklungs-Konventionen.
+- **Project state & runtime SSOT:** Siehe [`CLAUDE.md`](./CLAUDE.md) für den `## Current State`-Block (was läuft gerade, welche Tests, welcher Backlog) und den live `## Session Config`-Block, den `skills/_shared/config-reading.md` zur Laufzeit liest.
+- **Codex CLI:** Auf Codex CLI heißt die gleiche Datei `AGENTS.md`. Auflösungs-Regel: [skills/_shared/instruction-file-resolution.md](skills/_shared/instruction-file-resolution.md).
 
 ## License
 

@@ -61,11 +61,15 @@ fi
 
 #### If `PLATFORM = claude`
 
-Run `claude init` to generate `CLAUDE.md`:
+Run `claude init` to generate `CLAUDE.md`, **but only if `CLAUDE.md` does not already exist**.
+Skipping when the file is present prevents `claude init` from overwriting project-specific
+customisations on bootstrap re-runs or Upgrade Flow passes (issue #108):
 
 ```bash
 cd "$REPO_ROOT"
-claude init 2>/dev/null
+if [[ ! -f "$REPO_ROOT/CLAUDE.md" ]]; then
+  claude init 2>/dev/null
+fi
 CLAUDE_INIT_STATUS=$?
 ```
 
@@ -160,10 +164,16 @@ Also substitute README and gitignore from `_minimal` templates:
 
 2. **Copy all files** from the template directory to `$REPO_ROOT`:
 
+   Use `cp -rP` (no-dereference) so that symlinks inside the template directory are copied **as
+   symlinks** rather than followed. This prevents a maliciously crafted or accidentally
+   misconfigured template from writing files outside `$REPO_ROOT` via absolute-target symlinks
+   (issue #108 — CWE-22 symlink traversal):
+
    ```bash
    PLUGIN_ROOT="$(dirname "$(dirname "$(dirname "$0")")")"  # resolve plugin root
    TMPL_DIR="$PLUGIN_ROOT/templates/$CONFIRMED_ARCHETYPE"
-   cp -r "$TMPL_DIR/." "$REPO_ROOT/"
+   # -P: copy symlinks as symlinks (no-dereference) — prevents symlink-traversal outside $REPO_ROOT
+   cp -rP "$TMPL_DIR/." "$REPO_ROOT/"
    ```
 
    Preserve directory structure. Do not overwrite files that already exist (from Fast tier steps) unless explicitly noted.

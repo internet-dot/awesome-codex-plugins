@@ -10,7 +10,7 @@ check "SKILL.md has YAML frontmatter" "head -1 '$SKILL_DIR/SKILL.md' | grep -q '
 check "SKILL.md has name: recover" "grep -q '^name: recover' '$SKILL_DIR/SKILL.md'"
 check "SKILL.md mentions compaction" "grep -qi 'compaction' '$SKILL_DIR/SKILL.md'"
 check "SKILL.md mentions context recovery" "grep -qi 'context.*recovery\|recovery.*context\|recover.*context' '$SKILL_DIR/SKILL.md'"
-check "SKILL.md has tier: session" "grep -q '^[[:space:]]*tier:[[:space:]]*session' '$SKILL_DIR/SKILL.md'"
+check "SKILL.md has tier: session when metadata is present" "! grep -q '^metadata:' '$SKILL_DIR/SKILL.md' || grep -q '^[[:space:]]*tier:[[:space:]]*session' '$SKILL_DIR/SKILL.md'"
 
 echo ""; echo "Results: $PASS passed, $FAIL failed"
 [ $FAIL -eq 0 ] && exit 0 || exit 1

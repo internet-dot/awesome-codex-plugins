@@ -2,6 +2,7 @@
 
 > Reference file for the plan skill. Read by SKILL.md when mode is `feature`.
 > Covers: feature discovery (1-2 waves) → compact PRD → issue creation.
+> Project-instruction file resolution: `CLAUDE.md` and `AGENTS.md` (Codex CLI) are transparent aliases — see [skills/_shared/instruction-file-resolution.md](../_shared/instruction-file-resolution.md).
 
 ---
 
@@ -86,7 +87,7 @@ Agent({ subagent_type: "Explore", description: "Research technical approach",
 | 4. Technical Notes | Wave 2 findings if it ran (architecture, affected files, data model). If Wave 2 was skipped, populate from Wave 1 Explore agent findings. |
 | 5. Risks & Dependencies | Wave 1 Q5 (dependencies) + Wave 2 Q4-Q5 (edge cases, performance) if available. |
 
-3. Save to `{plan-prd-location}/YYYY-MM-DD-{feature-slug}.md`. Read `plan-prd-location` from Session Config in CLAUDE.md (default: `docs/prd/`).
+3. Save to `{plan-prd-location}/YYYY-MM-DD-{feature-slug}.md`. Read `plan-prd-location` from Session Config in CLAUDE.md (or AGENTS.md on Codex CLI) (default: `docs/prd/`).
 4. Dispatch PRD reviewer subagent per `prd-reviewer-prompt.md`. Max 3 iterations. Surface unresolved issues to user.
 
 ---

@@ -9,6 +9,14 @@
 >
 > This step writes the session JSONL entry, verifies it, then optionally mirrors the session summary to the configured Obsidian vault via `scripts/vault-mirror.mjs`.
 
+> **MANDATORY WRITE PATH (#400):** ALL session closes — including coord-direct sessions, housekeeping, express-path, and autopilot runs — MUST write the JSONL metrics entry exclusively via `node scripts/emit-session.mjs`. **Hand-composing JSON and appending it directly to `sessions.jsonl` is forbidden.** `emit-session.mjs` calls `validateSession` from `scripts/lib/session-schema.mjs` (the schema authority) before appending and stamps `schema_version: 1`. Entries that bypass this path skip validation and produce malformed records with missing required fields (`waves[]`, `agent_summary`) or unresolved legacy field names (`waves_completed`, `files_changed`, `planned_issues` at top-level instead of under `effectiveness`).
+>
+> Minimal invocation:
+> ```bash
+> printf '%s' "$METRICS_ENTRY" | node "$PLUGIN_ROOT/scripts/emit-session.mjs" --file .orchestrator/metrics/sessions.jsonl
+> ```
+> See step 2 below for the full invocation including exit-code handling.
+
 1. Ensure `.orchestrator/metrics/` directory exists: `mkdir -p .orchestrator/metrics`
 2. Append the prepared JSONL entry (from Phase 1.7) via the validating writer `scripts/emit-session.mjs` (issue #249):
    ```bash
@@ -52,7 +60,8 @@
      VM_OUTPUT=$(node "$PLUGIN_ROOT/scripts/vault-mirror.mjs" \
        --vault-dir "$VM_DIR" \
        --source .orchestrator/metrics/sessions.jsonl \
-       --kind session 2>&1)
+       --kind session \
+       --session-id "$SESSION_ID" 2>&1)
      VM_EXIT=$?
 
      # Surface script output so user can see skipped-handwritten results

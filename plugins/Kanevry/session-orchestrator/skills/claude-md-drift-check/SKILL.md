@@ -1,9 +1,16 @@
 ---
 name: claude-md-drift-check
-description: Detects drift between CLAUDE.md / _meta narrative and live repository state. Four checks: absolute-path resolution, 01-projects/ count claims, issue-reference freshness (closed refs in forward-looking sections), session-file existence. Invoked as an opt-in session-end phase; mirrors vault-sync's lean JSON+exit-code contract.
+description: Detects drift between CLAUDE.md (or AGENTS.md, the Codex CLI alias) / _meta narrative and live repository state. Six checks: absolute-path resolution, 01-projects/ count claims, issue-reference freshness (closed refs in forward-looking sections), session-file existence, command-count sync (claimed "N commands" vs actual commands/*.md), and session-config-parity (top-level keys diffed against docs/session-config-template.md). Invoked as an opt-in session-end phase; mirrors vault-sync's lean JSON+exit-code contract.
 ---
 
 # CLAUDE.md Drift-Check Skill
+
+> The instruction file is alias-resolved per
+> [`skills/_shared/instruction-file-resolution.md`](../_shared/instruction-file-resolution.md):
+> `CLAUDE.md` (Claude Code / Cursor IDE) wins ties; `AGENTS.md` (Codex CLI) is
+> picked up as a transparent alias when `CLAUDE.md` is absent. The resolved
+> path and kind are surfaced in the JSON output (`resolved_path`,
+> `resolved_kind`).
 
 ## Status
 
@@ -21,8 +28,14 @@ PHASE 1 IMPLEMENTED (2026-04-19). Session-end opt-in quality gate. Upstream of `
 | 2 | `project-count-sync` | Hardcoded "N registered" / "N projects" claims next to `01-projects/` | compare to `ls -d 01-projects/*/` |
 | 3 | `issue-reference-freshness` | `#NN` in forward-looking sections (What's Next, Backlog, Open Issues, Offene Themen, Todo, Next Steps) | `glab issue view NN --repo <origin>` |
 | 4 | `session-file-existence` | `50-sessions/YYYY-MM-DD-*.md` references anywhere in scope | `existsSync(vault/50-sessions/<file>)` |
+| 5 | `command-count` | "N commands" / "N /commands" claims in prose | compare to `ls commands/*.md \| wc -l`; skipped if no `commands/` dir |
+| 6 | `session-config-parity` | Top-level keys under `## Session Config` in `CLAUDE.md` / `AGENTS.md` | diff against `docs/session-config-template.md`; missing keys flagged as errors |
 
 Check 3 deliberately scopes to forward-looking sections. Mentions inside "Recently Closed", "Decisions", "Archive", etc. describe history and must not be flagged.
+
+Check 5 counts `*.md` files directly inside `commands/` (non-recursive, non-hidden). The `commands/` directory is resolved relative to `VAULT_DIR` by default; use `--commands-dir <path>` to override.
+
+Check 6 (issue #30) extracts the YAML block under `## Session Config` from both the canonical template (`docs/session-config-template.md` by default, override with `--config-template`) and the resolved local instruction file. Top-level keys present in the template but missing locally surface as `session-config-parity` errors. Both fenced YAML (```` ```yaml ... ``` ````) and raw YAML body (up to next `## ` heading) are accepted. The check skips gracefully when the template file is absent, when no instruction file is detected, or when explicitly disabled via `--skip-session-config-parity`.
 
 ## Files
 
@@ -43,11 +56,15 @@ CLI flags (all optional):
 |------|---------|--------|
 | `--mode <hard\|warn\|off>` | `warn` | `hard` → exit 1 on errors; `warn` → exit 0, errors in JSON; `off` → short-circuit to `status: skipped-mode-off` |
 | `--repo <owner/name>` | derived from `git remote get-url origin` | Override for Check 3's `glab issue view --repo` |
-| `--include-path <glob>` | `CLAUDE.md`, `_meta/**/*.md` | Repeatable. Scope files, relative to `VAULT_DIR` |
+| `--include-path <glob>` | resolved instruction file (`CLAUDE.md` or `AGENTS.md` per alias rule), `_meta/**/*.md` | Repeatable. Scope files, relative to `VAULT_DIR`. Defaults are seeded post-resolution so Codex-only repos (`AGENTS.md`) are scanned out of the box. |
 | `--skip-path-resolver` | off | Disable Check 1 |
 | `--skip-project-count` | off | Disable Check 2 |
 | `--skip-issue-refs` | off | Disable Check 3 (also auto-skipped if `glab` not on PATH) |
 | `--skip-session-files` | off | Disable Check 4 |
+| `--skip-command-count` | off | Disable Check 5 |
+| `--skip-session-config-parity` | off | Disable Check 6 |
+| `--commands-dir <path>` | `<VAULT_DIR>/commands` | Override path to `commands/` directory for Check 5 |
+| `--config-template <path>` | `<VAULT_DIR>/docs/session-config-template.md` | Override path to the canonical Session Config template for Check 6 |
 
 Environment:
 
@@ -60,17 +77,24 @@ Environment:
   "status": "ok|invalid|skipped|skipped-mode-off",
   "mode": "hard|warn|off",
   "vault_dir": "<absolute path>",
+  "resolved_path": "<absolute path to CLAUDE.md or AGENTS.md, or null>",
+  "resolved_kind": "claude|agents|null",
   "files_scanned": N,
-  "checks_run": ["path-resolver", "project-count-sync", "issue-reference-freshness", "session-file-existence"],
+  "checks_run": ["path-resolver", "project-count-sync", "issue-reference-freshness", "session-file-existence", "command-count", "session-config-parity"],
   "checks_skipped": ["<name>: <reason>"],
   "errors": [
     { "check": "<name>", "file": "<relative path>", "line": N, "message": "<human>", "extracted": "<raw text>" }
   ],
   "warnings": [
     { "check": "<name>", "file": "<relative path>", "line": N, "message": "<human>", "extracted": "<raw text>" }
-  ]
+  ],
+  "command_count": { "actual": N }
 }
 ```
+
+The `resolved_path` / `resolved_kind` pair surfaces the alias resolution outcome (issue #33 AC2) so users on either platform can audit which instruction file the checker scanned. `kind: 'claude'` for `CLAUDE.md`, `kind: 'agents'` for `AGENTS.md`, `null` when neither was found.
+
+When `command-count` fires a drift error, the error object also carries `"command_count": { "actual": N, "claimed": M }` for easy programmatic diffing.
 
 Exit codes:
 
@@ -93,6 +117,7 @@ drift-check:
   check-project-count-sync: true
   check-issue-reference-freshness: true
   check-session-file-existence: true
+  check-command-count: true
 ```
 
 When `drift-check.enabled` is `false` or the block is absent, the session-end phase is a no-op.

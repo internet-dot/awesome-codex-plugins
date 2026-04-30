@@ -45,7 +45,7 @@ bkt pr list
 | `BKT_CONFIG_DIR` | Config directory override. |
 | `BKT_ALLOW_INSECURE_STORE` | Allow file-based credential storage. |
 | `BKT_KEYRING_TIMEOUT` | Keyring operation timeout (e.g. `2m`). |
-| `BKT_OAUTH_CLIENT_ID` | OAuth consumer key. Used at runtime when not embedded via ldflags (e.g. `go install` builds). |
+| `BKT_OAUTH_CLIENT_ID` | OAuth consumer key. Used at runtime when not embedded via ldflags (e.g. source and Nix builds). |
 | `BKT_OAUTH_CLIENT_SECRET` | OAuth consumer secret. Same fallback logic as `BKT_OAUTH_CLIENT_ID`. |
 
 ## Saved-host behaviour

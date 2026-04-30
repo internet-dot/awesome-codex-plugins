@@ -119,3 +119,117 @@ Fix Available: <fixed_version or NONE>
 **Default Severity:** Critical (critical CVEs), High (high CVEs).
 
 ---
+
+### Probe: architectural-friction
+
+**Activation:** Any project with TypeScript, JavaScript, Python, Go, or Rust source files. Targets structural design issues — shallow modules, pass-through adapters, and hypothetical seams — that indicate low leverage and poor locality in the codebase's interface design.
+
+**Detection Method:**
+
+Three heuristics are applied independently. Each produces its own findings.
+
+---
+
+**Heuristic A: shallow-module**
+
+A module exposes a large interface relative to its implementation size — it is a pass-through with little leverage. Callers pay the full interface cost but get minimal depth in return.
+
+```bash
+# Step 1: Count exported symbols per file (TypeScript/JavaScript)
+Grep pattern: ^\s*export\s+(default\s+)?(function|const|class|interface|type|enum)\s+\w+
+  --glob "*.{ts,tsx,js,jsx}"
+
+# Step 1b: Count exported symbols (Python)
+Grep pattern: ^def\s+\w+
+  --glob "*.py"
+
+# Step 1c: Count exported symbols (Go)
+Grep pattern: ^func\s+[A-Z]\w+
+  --glob "*.go"
+
+# Step 1d: Count exported symbols (Rust)
+Grep pattern: ^pub fn\s+\w+|^pub struct\s+\w+|^pub enum\s+\w+|^pub trait\s+\w+
+  --glob "*.rs"
+
+# Step 2: Count non-comment, non-blank implementation lines (LOC approximation)
+grep -cvE '^\s*(//|#|/\*|\*|$)' <file>
+
+# Flag condition: (exported_symbols / LOC) >= 0.5  AND  exported_symbols >= 3
+# The exported_symbols >= 3 guard avoids false positives on single-export utility files.
+```
+
+---
+
+**Heuristic B: pass-through-adapter**
+
+A class or module where most methods are 1–2 line delegations to a single dependency — it adds no leverage. The deletion test (LANGUAGE.md) reveals the module hides nothing; complexity would be identical across callers if it were removed.
+
+```bash
+# Detect single-line delegation methods in TypeScript/JavaScript classes
+Grep pattern: ^\s+\w+\s*\([^)]*\)\s*\{\s*return\s+this\.\w+\.\w+\(.*\)\s*;?\s*\}
+  --glob "*.{ts,tsx,js,jsx}"
+
+# Detect single-line delegation methods in Python classes (two-line form)
+# Match def line followed by a return self.<dep>.<method>(...) line
+Grep pattern: ^\s+def\s+\w+\(self[^)]*\):\s*$
+  --glob "*.py"
+# Then verify next non-blank line matches: ^\s+return\s+self\.\w+\.\w+\(.*\)$
+
+# Flag condition: (delegation_methods / total_methods) >= 0.7  AND  total_methods >= 3
+# Count total_methods per file with:
+Grep pattern: ^\s+(public\s+|private\s+|protected\s+|async\s+)*\w+\s*\([^)]*\)\s*\{
+  --glob "*.{ts,tsx,js,jsx}"
+```
+
+---
+
+**Heuristic C: one-adapter-seam**
+
+A TypeScript `interface` or `abstract class` with exactly one concrete implementation — a hypothetical seam, not a real one (Ousterhout, LANGUAGE.md: "One adapter means a hypothetical seam. Two adapters means a real one."). The seam pays an interface-learning cost that no second adapter ever amortises.
+
+```bash
+# Step 1: Enumerate all interface and abstract class names in the codebase
+Grep pattern: ^(export\s+)?(interface|abstract\s+class)\s+(\w+)
+  --glob "*.{ts,tsx}"
+
+# Step 2: For each name <N> found, count concrete implementations
+grep -rE 'implements\s+\b<N>\b|extends\s+\b<N>\b' src/ --include="*.ts" --include="*.tsx" \
+  | grep -v 'abstract class'
+
+# Step 3: Count method signatures within the interface/abstract class body
+Grep pattern: ^\s+\w+\s*\([^)]*\)\s*[:;]
+  within the block following the interface/abstract class declaration
+
+# Flag condition: implementation_count == 1  AND  method_signature_count >= 2
+# The method_signature_count >= 2 guard avoids flagging trivial marker interfaces.
+
+# Batch approximation when AST tooling is unavailable:
+# Enumerate all interface names first, then:
+grep -rE 'implements\s+(InterfaceName1|InterfaceName2|...)' src/ \
+  --include="*.{ts,tsx}" | sort | uniq -c | awk '$1 == 1 {print $0}'
+```
+
+**Evidence Format:**
+
+```
+File: <file_path> Line: <line_number>
+Probe: architectural-friction
+Category: arch
+Severity: medium
+Pattern: shallow-module | pass-through-adapter | one-adapter-seam
+Matched text: <relevant snippet>
+Title: <short description — e.g. "Shallow module exposes 8 symbols across 16 LOC">
+Description: <2-3 lines on why this is friction, using LANGUAGE.md vocabulary —
+             reference depth, leverage, locality, seam, adapter as appropriate>
+Recommended fix: invoke the `architecture` skill on this cluster (see skills/architecture/SKILL.md)
+```
+
+For `shallow-module`: describe the interface-to-depth ratio and what leverage is missing.
+For `pass-through-adapter`: describe which dependency is being delegated to and what the module fails to hide.
+For `one-adapter-seam`: name the interface and its single implementation; note that the seam cost has no second adapter to amortise it.
+
+Severity may be raised to **High** when: a shallow module has `exported_symbols >= 10`; a pass-through adapter wraps a high-fan-out dependency (>5 dependents); or a one-adapter seam sits on a hot import path (imported by ≥10 files). Note the raise condition in the Description field — do not auto-promote.
+
+**Default Severity:** Medium.
+
+---

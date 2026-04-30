@@ -9,11 +9,6 @@ description: >
   "are our layers correct?", "where should this code live?".
   Also triggers for onboarding requests: "explain this codebase to a new developer"
   or "give me a codebase tour" (use onboarding mode).
-  Also triggers when user mentions: dependency inversion / hexagonal architecture /
-  bounded contexts / circular imports / tangled dependencies / module coupling /
-  package structure / spaghetti code / directory layout.
-  Use this skill proactively when project structure, module boundaries, or architectural
-  decisions are discussed — even without the word "audit".
   Do NOT trigger for: PR-level code review (use brooks-review) or line-level refactoring
   questions — this skill analyzes structural/module-level concerns, not individual functions.
 ---

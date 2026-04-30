@@ -1,6 +1,6 @@
 ---
 name: langfuse
-version: 0.7.0
+version: 0.9.0
 description: Debug AI traces, find exceptions, analyze sessions, and manage prompts via Langfuse MCP. Use when debugging AI pipelines, investigating errors, analyzing latency, managing prompt versions, or setting up Langfuse. Triggers on "langfuse", "traces", "debug AI", "find exceptions", "what went wrong", "why is it slow", "datasets", "evaluation sets".
 metadata:
   short-description: Langfuse observability via MCP

@@ -43,14 +43,25 @@ Otherwise, for each configured endpoint, run a health check:
 #       url: http://localhost:3000/api/health
 
 # For EACH endpoint in health-endpoints, run:
-curl -sf <url> 2>/dev/null && echo "<name>: OK" || echo "<name>: unreachable"
-
-# If the endpoint returns JSON with a "status" field, extract it:
-curl -sf <url> 2>/dev/null | python3 -c "
-import json,sys
-d=json.load(sys.stdin)
-print(f'<name>: {d.get(\"status\",\"OK\")}')
-" 2>/dev/null || echo "<name>: unreachable"
+# NAME=<name> URL=<url>
+curl -s --max-time 6 -w '\nHTTP_STATUS:%{http_code}' "$URL" 2>/dev/null \
+  | python3 -c "
+import sys, json
+raw = sys.stdin.read()
+body, _, status_line = raw.rpartition('\nHTTP_STATUS:')
+http_code = int(status_line.strip() or '0')
+status = None
+try:
+    d = json.loads(body)
+    if isinstance(d, dict) and 'status' in d:
+        bs = str(d['status']).lower()
+        status = 'DEGRADED' if bs == 'degraded' else ('OK' if bs in ('ok', 'healthy', 'up') else 'DOWN')
+except Exception:
+    pass
+if status is None:
+    status = 'OK' if 200 <= http_code < 400 else 'DOWN'
+print(f'\$NAME: {status}')
+" 2>/dev/null || echo "\$NAME: unreachable"
 ```
 
 Generate the check commands dynamically from the config — do not hardcode any service names or URLs.
@@ -88,7 +99,7 @@ Present as a compact health dashboard. Build the table dynamically from whicheve
 ## Ecosystem Health
 | Service       | Status            |
 |---------------|-------------------|
-| <name>        | [OK/unreachable]  |
+| <name>        | [OK/DEGRADED/DOWN/unreachable]  |
 | ...           | ...               |
 
 Critical issues: [N total across cross-repos]
@@ -98,4 +109,4 @@ CI: [green/red/pending]
 If no health endpoints are configured, omit the service table entirely.
 If no cross-repos are configured, omit the critical issues line.
 
-Flag any service that is DOWN or any critical issue count > 0 as requiring attention.
+Flag any service that is DOWN or DEGRADED, or any critical issue count > 0 as requiring attention.

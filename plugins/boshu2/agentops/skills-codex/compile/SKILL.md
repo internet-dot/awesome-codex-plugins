@@ -361,7 +361,7 @@ For unattended runs, `bash skills-codex/compile/scripts/compile.sh` supports:
 | No orphaned research | All research already referenced | Skip 2b, proceed to synthesis |
 | Empty mine output | No recent activity | Widen `--since` window |
 | Oscillation sweep empty | No oscillating goals | Healthy state — no action needed |
-| Ollama connection refused | Tunnel not running or wrong host | Run `bushido tunnel ollama` or check `OLLAMA_HOST` |
+| Ollama connection refused | Tunnel not running or wrong host | Run `ssh -L 11435:localhost:11435 bushido-windows` or check `OLLAMA_HOST` |
 | Compilation too slow | Large corpus on small model | Use `--incremental` or switch to larger model |
 
 ## Reference Documents

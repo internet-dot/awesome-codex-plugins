@@ -15,6 +15,8 @@ description: >
 
 > **Platform Note:** State files (STATE.md, wave-scope.json) live in the platform's native directory: `.claude/` (Claude Code), `.codex/` (Codex CLI), or `.cursor/` (Cursor IDE). All references to `.claude/` below should use the platform's state directory. Shared metrics live in `.orchestrator/metrics/`. See `skills/_shared/platform-tools.md`.
 
+> **Project-instruction file:** `CLAUDE.md` and `AGENTS.md` (Codex CLI) are transparent aliases — see [skills/_shared/instruction-file-resolution.md](../_shared/instruction-file-resolution.md). All references to `CLAUDE.md` in this skill resolve via that precedence rule.
+
 ## Phase 0: Bootstrap Gate
 
 Read `skills/_shared/bootstrap-gate.md` and execute the gate check. If the gate is CLOSED, invoke `skills/bootstrap/SKILL.md` and wait for completion before proceeding. If the gate is OPEN, continue to Phase 1.
@@ -120,7 +122,7 @@ Run ALL checks listed in the verification checklist. If any check fails: fix if 
 
 Read `skills/session-end/vault-operations.md` for validator bash contract and reporting matrix.
 
-### 2.2 CLAUDE.md Drift Check (if configured)
+### 2.2 CLAUDE.md (or AGENTS.md) Drift Check (if configured)
 
 Read `skills/session-end/drift-operations.md` for checker bash contract and reporting matrix. Complements 2.1: vault-sync validates frontmatter inside the vault tree; drift-check validates narrative claims (paths, counts, issue refs, session-file refs) in top-level repo docs.
 
@@ -183,158 +185,16 @@ This should have been cleaned up by wave-executor after the final wave, but cras
 
 ### 3.1 SSOT Files
 - Update `STATUS.md` / `STATE.md` if they exist (metrics, dates, status)
-- Update `CLAUDE.md` if patterns or conventions changed during this session
+- Update `CLAUDE.md` (or `AGENTS.md` on Codex CLI) if patterns or conventions changed during this session
 - Check `<state-dir>/rules/` — if a new pattern was established, suggest a new rule file
 
 ### 3.2 Docs Verification (docs-orchestrator integration)
 
 > Skip this subsection if `docs-orchestrator.enabled` config is not `true` (default: `false`). Also skip entirely if `docs-orchestrator.mode` is `off`.
 
-#### Step 1 — Load docs-tasks SSOT
+Reads `docs-tasks` from STATE.md frontmatter (written by wave-executor Pre-Wave 1b), computes `CHANGED_FILES` via `git diff --name-only "$SESSION_START_REF..HEAD"`, and runs a per-task verification loop (outcome: `ok`/`partial`/`gap`). In `warn` mode logs results non-blocking; in `strict` mode blocks on any gap and presents an AskUserQuestion override prompt. Emits a `### Documentation Coverage (docs-orchestrator)` block for inclusion in the Phase 6 Final Report.
 
-Read `docs-tasks` from STATE.md frontmatter. This field is written by wave-executor Pre-Wave 1b when `docs-orchestrator.enabled: true` and session-plan emitted a `### Docs Tasks (machine-readable)` block.
-
-Use `scripts/lib/state-md.mjs` to parse the frontmatter safely — do NOT re-implement YAML parsing inline. Example accessor:
-
-```bash
-node --input-type=module -e "
-import {readFileSync} from 'node:fs';
-import {parseFrontmatter} from '${PLUGIN_ROOT}/scripts/lib/state-md.mjs';
-const raw = readFileSync('<state-dir>/STATE.md', 'utf8');
-const fm = parseFrontmatter(raw);
-const tasks = fm['docs-tasks'];
-if (!Array.isArray(tasks)) { process.stdout.write('ABSENT'); process.exit(0); }
-process.stdout.write(JSON.stringify(tasks));
-"
-```
-
-**Fallback — missing field:** If `docs-tasks` is absent from frontmatter, attempt to re-parse the session-plan output's `### Docs Tasks (machine-readable)` YAML fenced block from conversation context. This is degraded but functional.
-
-**No tasks found at all:** Log `"ℹ docs-orchestrator enabled but no docs-tasks persisted — skipping verification"` in the session report and skip Phase 3.2 entirely. This is NOT an error.
-
-**Silent-failure guard:** If STATE.md is unreadable, if frontmatter YAML is malformed, or if `docs-tasks` is present but not a list — these MUST produce an explicit error entry in the session final report. Do NOT skip silently:
-```
-⚠ Phase 3.2: docs-tasks parse error — <reason>. Manual docs verification required.
-```
-
-#### Step 2 — Read SESSION_START_REF
-
-Read `session-start-ref` from STATE.md frontmatter. Full accessor and fallback chain are documented in `plan-verification.md § SESSION_START_REF accessor`. Summary:
-- Primary: `session-start-ref` field in STATE.md frontmatter.
-- Fallback: `git diff --name-only origin/main...HEAD` (no specific base SHA).
-
-If `git diff` itself fails (network issue, corrupt repo), log:
-```
-⚠ Phase 3.2: git diff failed — <stderr>. Docs verification skipped.
-```
-and skip Phase 3.2. This is an explicit error, not a silent skip.
-
-#### Step 3 — Compute changed files
-
-```bash
-CHANGED_FILES=$(git diff --name-only "$SESSION_START_REF..HEAD")
-```
-
-Cache this list for the per-task loop below. If the command exits non-zero, surface the error per the guard above and skip Phase 3.2.
-
-#### Step 4 — Audience → file-pattern reference
-
-The following mini-table mirrors `skills/docs-orchestrator/audience-mapping.md` (authoritative source — consult it for updates):
-
-| Audience | Target file patterns |
-|----------|----------------------|
-| `user` | `README.md`, `docs/user/**/*.md`, `docs/getting-started.md`, `examples/**/*.md` |
-| `dev` | `CLAUDE.md`, `docs/dev/**/*.md`, `docs/adr/**/*.md` |
-| `vault` | `<vault>/01-projects/<slug>/context.md`, `<vault>/01-projects/<slug>/decisions.md`, `<vault>/01-projects/<slug>/people.md` |
-
-Each `docs-task` carries its own `target-pattern` field (set during session-plan Step 1.8, derived from the audience-mapping table above). Use `task.target-pattern` as the primary match target; the table above is for human reference and fallback when `target-pattern` is absent.
-
-#### Step 5 — Per-task verification loop
-
-For each `task` in `docs-tasks`:
-
-1. **Resolve target:** glob-match `task.target-pattern` against the cached `CHANGED_FILES` list.
-
-2. **Not matched → GAP:**
-   - No file matching `task.target-pattern` appears in the diff.
-   - Record outcome: `gap`.
-
-3. **Matched → inspect diff:**
-   ```bash
-   git diff "$SESSION_START_REF..HEAD" -- <matched-file>
-   ```
-   - **Substantive content change** (non-whitespace, non-comment-only lines added/removed): outcome `ok`.
-   - **Whitespace-only or structural-only diff** (no prose or code content changed): outcome `gap`.
-   - **File contains `<!-- REVIEW: source needed -->` markers within changed regions:** outcome `partial`. This means content was written but requires human review before release. `partial` does NOT block in strict mode — it is always a warning, by policy choice. Document both the `ok` content and the markers in the report.
-
-4. Record `{id, audience, target-pattern, wave, status: ok|partial|gap}` for the aggregate report.
-
-#### Step 6 — Aggregate and report per mode
-
-Read `docs-orchestrator.mode` from Session Config (default: `warn`).
-
-**`mode: warn`** (default, non-blocking):
-- Append a subsection to the Phase 6 Final Report (see below).
-- `/close` proceeds regardless of gap count.
-
-**`mode: strict`** (blocking on any gap):
-- If ALL tasks are `ok` or `partial`: proceed — append report, continue close.
-- If ANY task is `gap`:
-  - **Claude Code:** use `AskUserQuestion` with these options (mark Recommended):
-    ```
-    Phase 3.2 found documentation gaps. How would you like to proceed?
-    1. Address gaps and retry Phase 3.2 (Recommended)
-    2. Override — close session with gaps (deviations logged)
-    3. Abort close
-    ```
-  - **Codex CLI / Cursor fallback:** render a numbered Markdown list:
-    ```markdown
-    ## Phase 3.2: Documentation Gaps Detected (mode=strict)
-
-    Choose one:
-    1. **Address gaps and retry Phase 3.2** *(Recommended)*
-    2. Override — close session with gaps (deviations will be logged)
-    3. Abort close
-
-    Gap tasks: <list task IDs and target-patterns>
-    ```
-  - On "Address and retry": pause close, allow user to dispatch docs-writer manually or fix docs directly, then re-run Phase 3.2 from Step 3.
-  - On "Override": log a deviation in the `## Deviations` section of STATE.md:
-    ```
-    - [Phase 3.2] docs-orchestrator strict-mode gaps overridden by user. Tasks: <ids>. Timestamp: <ISO 8601>.
-    ```
-    Then append the report and proceed with close.
-  - On "Abort": stop `/close` entirely. User must re-invoke.
-
-**`mode: off`:** This path is not reached because the Phase gate at the top of 3.2 exits early for `mode: off`. Documented here for completeness.
-
-#### Step 7 — Documentation Coverage report block
-
-Emit the following block to be included in Phase 6 Final Report under `### Documentation Coverage (docs-orchestrator)`:
-
-```
-### Documentation Coverage (docs-orchestrator)
-
-Mode: <warn|strict>
-Tasks verified: <total>
-
-| Task ID | Audience | Target pattern | Wave | Status |
-|---------|----------|----------------|------|--------|
-| <id>    | <user|dev|vault> | <pattern> | <N> | ✅ ok / ⚠ partial / ❌ gap |
-...
-
-Summary: <N> ok, <N> partial (REVIEW markers present — human review needed before release), <N> gap
-```
-
-For `partial` tasks, append a note per task:
-```
-⚠ <target-pattern>: contains <!-- REVIEW: source needed --> markers — content written but not fully source-cited. Review before release.
-```
-
-For `gap` tasks in warn mode, append:
-```
-ℹ Gap tasks were not addressed. No docs-writer output found for these patterns. Consider scheduling in a follow-up session.
-```
+**See `phase-3-2-docs-verification.md` for full details.**
 
 ### 3.2a Session Handover (for significant sessions)
 If this session made substantial changes, create or update:
@@ -427,59 +287,9 @@ Read `skills/session-end/session-metrics-write.md` for JSONL append, vault-mirro
 
 > **Ordering:** Runs AFTER Phase 3.7 (sessions.jsonl is just-written — reads in-memory session metrics, NOT JSONL) and BEFORE Phase 3.4 `status: completed` setting. See the Phase 3.4 Runtime Ordering Note for rationale.
 
-Compute the v0 recommendation from in-memory session metrics and additively write 5 fields to STATE.md frontmatter:
+Calls `computeV0Recommendation({completionRate, carryoverRatio, carryoverIssues})` from in-memory session metrics and writes 5 fields to STATE.md frontmatter via `updateFrontmatterFields`. Inputs MUST come from in-memory metrics, NOT re-read from `sessions.jsonl`. On any exception writes `recommendation-compute-failed` to `sweep.log` and does NOT block Phase 3.4.
 
-```bash
-node --input-type=module -e "
-import {readFileSync, writeFileSync, appendFileSync, mkdirSync} from 'node:fs';
-import {updateFrontmatterFields} from '${PLUGIN_ROOT}/scripts/lib/state-md.mjs';
-import {computeV0Recommendation} from '${PLUGIN_ROOT}/scripts/lib/recommendations-v0.mjs';
-
-const STATE_PATH = '<state-dir>/STATE.md';
-const SWEEP_LOG = '.orchestrator/metrics/sweep.log';
-
-try {
-  // In-memory session metrics — pulled from the session's running state,
-  // NOT re-read from sessions.jsonl (which was just-written in Phase 3.7).
-  const completionRate = <number from session metrics: completed_issues / planned_issues>;
-  const carryoverRatio = <number: carryover_count / planned_issues (0 when planned=0)>;
-  const carryoverIssues = [<priority-sorted carryover issue IIDs, critical/high first, FIFO tiebreak>];
-
-  const rec = computeV0Recommendation({completionRate, carryoverRatio, carryoverIssues});
-
-  const fields = {
-    'recommended-mode': rec.mode,
-    'top-priorities': rec.priorities,
-    'carryover-ratio': Number(carryoverRatio.toFixed(2)),
-    'completion-rate': Number(completionRate.toFixed(2)),
-    'rationale': rec.rationale,
-  };
-
-  const contents = readFileSync(STATE_PATH, 'utf8');
-  writeFileSync(STATE_PATH, updateFrontmatterFields(contents, fields));
-  console.log('Recommendations written: ' + rec.mode + ' (' + rec.rationale + ')');
-} catch (err) {
-  // AC3: defensive — exception must NOT block Phase 3.4 status: completed.
-  mkdirSync('.orchestrator/metrics', {recursive: true});
-  const evt = {
-    timestamp: new Date().toISOString(),
-    event: 'recommendation-compute-failed',
-    error: String(err && err.message ? err.message : err),
-  };
-  appendFileSync(SWEEP_LOG, JSON.stringify(evt) + '\n');
-  console.error('⚠ Phase 3.7a: recommendation compute failed — fields omitted, sweep.log entry written. Continuing.');
-}
-"
-```
-
-**Data source guarantee:** The three inputs (`completionRate`, `carryoverRatio`, `carryoverIssues`) MUST come from the in-memory session metrics object built in Phase 1.7, NOT from a re-read of `.orchestrator/metrics/sessions.jsonl`. Reading the just-written JSONL would introduce a circular dependency and risk reading a truncated line if Phase 3.7's `appendJsonl` was mid-flush.
-
-**Field precision:**
-- `carryover-ratio` and `completion-rate` are rounded to 2 decimal places.
-- `top-priorities` contains 0–5 integer issue IIDs, already priority-sorted by the Phase 1.1 carryover loop.
-- `rationale` is a ≤ 120-char single-line string (v0 produces ≤ 40 chars).
-
-**Error mode (AC3):** On any exception from `computeV0Recommendation` or the file I/O, the catch block writes a `recommendation-compute-failed` event to `.orchestrator/metrics/sweep.log` and returns without touching STATE.md. Phase 3.4 then proceeds as normal, setting `status: completed` without Recommendation fields. The Reader (session-start Phase 1.5) handles the absent-fields case via graceful-no-banner fallback.
+**See `phase-3-7a-recommendations.md` for full details.**
 
 ## Phase 4: Commit & Push
 
@@ -521,7 +331,23 @@ git remote get-url github 2>/dev/null && git push github HEAD 2>/dev/null || ech
 
 > **VCS Reference:** Use CLI commands per the "Common CLI Commands" section of the gitlab-ops skill.
 
-1. **Close resolved issues**: Use the issue close and note commands per the "Common CLI Commands" section of the gitlab-ops skill. Note: some VCS platforms require separate note and close commands.
+1. **Close resolved issues**: Before closing each issue, strip `status:*` workflow labels using `stripStatusLabels` from `scripts/lib/issue-close-strip-labels.mjs` (#308). A closed issue carrying `status:in-progress` or `status:ready` skews dashboard filters and discovery heuristics. Then close and add a note using the issue close and note commands per the "Common CLI Commands" section of the gitlab-ops skill. Note: some VCS platforms require separate note and close commands.
+
+   ```js
+   import { stripStatusLabels } from '${PLUGIN_ROOT}/scripts/lib/issue-close-strip-labels.mjs';
+
+   // For each resolved issue IID:
+   const { stripped, error } = await stripStatusLabels({ issueId: iid, vcs: '<from Session Config>' });
+   if (error) {
+     console.warn(`⚠ label strip failed for #${iid}: ${error} — proceeding with close`);
+   } else if (stripped.length) {
+     console.log(`Stripped ${stripped.join(', ')} from #${iid}`);
+   }
+   // then: glab issue close <iid> / gh issue close <iid>
+   ```
+
+   The call is idempotent: if the issue has no `status:*` labels, no update CLI call is made. Failures from `stripStatusLabels` are non-fatal — log and proceed with close.
+
 2. **Update in-progress issues**: ensure labels reflect actual state using the issue update command
 3. **Create carryover issues**: for partially-done work (from Phase 1.2), use the issue create command with appropriate labels
 
@@ -597,8 +423,10 @@ Present to the user:
 | `metrics-collection.md` | Phase 1.7 JSONL schema and conditional field rules |
 | `vault-operations.md` | Phase 2.1 validator bash contract and reporting matrix |
 | `drift-operations.md` | Phase 2.2 drift-checker bash contract and reporting matrix |
+| `phase-3-2-docs-verification.md` | Phase 3.2 full procedural body — docs-tasks load, SESSION_START_REF, per-task loop, mode-gated report, Documentation Coverage block |
 | `learning-patterns.md` | Phases 3.5a + 3.6 extraction heuristics, confidence updates, passive decay, and JSONL write procedure |
 | `session-metrics-write.md` | Phase 3.7 JSONL append, vault-mirror invocation, and behavior matrix |
+| `phase-3-7a-recommendations.md` | Phase 3.7a full procedural body — computeV0Recommendation call, STATE.md field write, data source guarantee, error mode |
 
 ## Anti-Patterns
 

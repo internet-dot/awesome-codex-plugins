@@ -38,6 +38,8 @@ Intensity (--mode):
             authority tropes, signposting, em-dash pileups.
   full      Strong rewrite. Everything balanced does, plus filler phrases
             and negative-parallelism knockouts.
+  anti-detector
+            Full rewrite plus detector-oriented structural nudges.
 
 Input:
   <file>...         One or more paths. Glob expansion is done by your shell.
@@ -52,6 +54,8 @@ Output:
   --no-backup       Skip the <stem>.original.md backup.
   --json            Emit machine-readable JSON per file.
   --report PATH     Write full replacement audit trail to PATH as JSON.
+  --report-stylometric-gaps
+                    Print measured gaps against stylometric baseline bands.
   --quiet / -q      Suppress progress lines on stdout.
 """
 
@@ -92,7 +96,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--mode",
         "-m",
-        choices=("subtle", "balanced", "full"),
+        choices=("subtle", "balanced", "full", "anti-detector"),
         default="balanced",
         help="Intensity level. Default: balanced.",
     )
@@ -139,6 +143,14 @@ def _build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--report-stylometric-gaps",
+        action="store_true",
+        help=(
+            "Print stylometric target gaps against "
+            "benchmarks/results/stylometric_baseline.json when present."
+        ),
+    )
+    parser.add_argument(
         "--structural",
         action=argparse.BooleanOptionalAction,
         default=None,
@@ -167,6 +179,14 @@ def _build_parser() -> argparse.ArgumentParser:
             "sections) before humanization. Destructive; default off. Stripped "
             "content is written to <stem>.reasoning.md for audit. Research: "
             "'reason privately, humanize publicly' (Category 06)."
+        ),
+    )
+    parser.add_argument(
+        "--no-audit",
+        action="store_true",
+        help=(
+            "Skip the LLM audit pass that normally runs at --mode full and "
+            "--mode anti-detector. Faster, but leaves more residual AI tells."
         ),
     )
     parser.add_argument(
@@ -215,6 +235,14 @@ def _build_parser() -> argparse.ArgumentParser:
             "escalating intensity until the score falls below target. Opt-in; "
             "first run downloads ~500MB of HF weights (or run `python3 -m "
             "unslop.scripts.fetch_detectors` ahead of time)."
+        ),
+    )
+    parser.add_argument(
+        "--detector-loop-aggressive",
+        action="store_true",
+        help=(
+            "Use the 5-step detector-feedback ladder instead of the default "
+            "3-step ladder."
         ),
     )
     parser.add_argument(
@@ -289,13 +317,20 @@ def _process_stdin(args: argparse.Namespace) -> int:
         text, _ = strip_reasoning_traces(text)
 
     if args.detector_feedback:
-        from .detector import DetectorUnavailable, feedback_loop
+        from .detector import DetectorUnavailable, feedback_loop, feedback_loop_aggressive
 
         try:
-            outcome = feedback_loop(
+            loop = feedback_loop_aggressive if args.detector_loop_aggressive else feedback_loop
+            max_iterations = (
+                5
+                if args.detector_loop_aggressive
+                and args.detector_max_iterations == 3
+                else args.detector_max_iterations
+            )
+            outcome = loop(
                 text,
                 target_probability=args.detector_target,
-                max_iterations=args.detector_max_iterations,
+                max_iterations=max_iterations,
                 detector=args.detector_model,
             )
         except DetectorUnavailable as exc:
@@ -319,6 +354,8 @@ def _process_stdin(args: argparse.Namespace) -> int:
             llm_kwargs["voice_sample"] = voice_sample
         if voice_profile is not None:
             llm_kwargs["voice_profile"] = voice_profile
+        if args.no_audit:
+            llm_kwargs["audit"] = False
         try:
             humanized = humanize_llm(text, **llm_kwargs)
         except RuntimeError as exc:
@@ -366,6 +403,8 @@ def _process_stdin(args: argparse.Namespace) -> int:
             f"{feedback.final_probability:.1%} "
             f"({feedback.reason_stopped})\n"
         )
+    if args.report_stylometric_gaps and not args.quiet:
+        _emit_stylometric_gaps(sys.stderr, humanized)
 
     return 0 if result.ok else 2
 
@@ -386,6 +425,21 @@ def _emit_diff(out, label: str, before: str, after: str) -> None:
     out.writelines(diff)
 
 
+def _emit_stylometric_gaps(out, text: str) -> None:
+    from .lexical_targets import measure_gaps
+
+    gaps = measure_gaps(text)
+    if not gaps:
+        out.write("stylometric gaps: none (or no baseline file)\n")
+        return
+    out.write("stylometric gaps:\n")
+    for gap in gaps:
+        out.write(
+            f"  {gap.field}: {gap.current:.3f} outside "
+            f"{gap.target_low:.3f}-{gap.target_high:.3f} (delta {gap.delta:+.3f})\n"
+        )
+
+
 def _process_file_detector_feedback(
     path: Path,
     args: argparse.Namespace,
@@ -395,15 +449,22 @@ def _process_file_detector_feedback(
     """File-mode detector feedback loop. Separate path because the backup +
     validate + write sequence differs from humanize_file_ex — we validate
     the FINAL humanized text against the original, not an intermediate."""
-    from .detector import DetectorUnavailable, feedback_loop
+    from .detector import DetectorUnavailable, feedback_loop, feedback_loop_aggressive
     from .validate import format_report, validate
 
     original = path.read_text(encoding="utf-8")
     try:
-        outcome = feedback_loop(
+        loop = feedback_loop_aggressive if args.detector_loop_aggressive else feedback_loop
+        max_iterations = (
+            5
+            if args.detector_loop_aggressive
+            and args.detector_max_iterations == 3
+            else args.detector_max_iterations
+        )
+        outcome = loop(
             original,
             target_probability=args.detector_target,
-            max_iterations=args.detector_max_iterations,
+            max_iterations=max_iterations,
             detector=args.detector_model,
         )
     except DetectorUnavailable as exc:
@@ -445,6 +506,8 @@ def _process_file_detector_feedback(
         report_accumulator.append(
             {"path": str(path), "detector_feedback": outcome.to_dict()}
         )
+    if args.report_stylometric_gaps and not args.quiet:
+        _emit_stylometric_gaps(sys.stdout, humanized)
 
     return 0 if result.ok else 2
 
@@ -500,6 +563,7 @@ def _process_file(
         voice_sample=voice_sample_text,
         voice_profile=voice_profile,
         strip_reasoning=args.strip_reasoning,
+        audit=False if args.no_audit else None,
     )
 
     if args.diff:
@@ -542,6 +606,8 @@ def _process_file(
                 )
         if outcome.error:
             sys.stderr.write(f"[{path.name}] {outcome.error}\n")
+        if args.report_stylometric_gaps and outcome.ok:
+            _emit_stylometric_gaps(sys.stdout, outcome.humanized)
 
     if args.report is not None and outcome.report is not None:
         report_accumulator.append({"path": str(path), "report": outcome.report.to_dict()})

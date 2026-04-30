@@ -270,6 +270,14 @@ for task in wave_tasks:
 
 Display an ownership table before spawning workers. If conflicts exist, split into sub-waves and keep file ownership disjoint.
 
+#### 4c.1: Parallel-Wave Isolation (wave size ≥ 2)
+
+For waves with 2+ workers, three tiers prevent sibling-worker clobber without re-introducing worktree sprawl. Read [references/parallel-wave-isolation.md](references/parallel-wave-isolation.md) for the full tier definitions, the worker prompt template, the `preflight-swarm.sh` escalation criterion, and the `check-worktree-disposition.sh` cleanup gate.
+
+Tier 1 (always): inject the branch-isolation prompt rule (worker's first git op = `git checkout -b feat/<epic>-<slug> origin/main`; never `git switch`, `stash pop`, `reset --hard`).
+Tier 2 (escalate on `preflight-swarm.sh` non-zero): ephemeral per-worker worktree.
+Tier 3 (wave-end): `scripts/check-worktree-disposition.sh` flags stragglers.
+
 #### 4d: Spawn Workers
 
 Spawn one agent per issue. Prefer `worker` roles for implementation and `explorer` roles for file discovery when the runtime exposes `agent_type`.
@@ -511,6 +519,7 @@ fi
 ## Reference Documents
 
 - [references/de-sloppify.md](references/de-sloppify.md) - cleanup pass after implementation waves
+- [references/parallel-wave-isolation.md](references/parallel-wave-isolation.md) - branch-isolation rule + conditional ephemeral worktrees + cleanup gate for parallel waves
 - [references/plan-mutations.md](references/plan-mutations.md) - plan mutation audit trail for drift analysis
 - [references/shared-task-notes.md](references/shared-task-notes.md) - cross-wave context persistence
 - [references/commit-strategies.md](references/commit-strategies.md) - per-task vs wave-batch commits
