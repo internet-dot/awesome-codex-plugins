@@ -73,7 +73,7 @@ After every wave (Tier 1 OR Tier 2), run:
 bash scripts/check-worktree-disposition.sh
 ```
 
-This catches stragglers — worktrees that should have been removed but weren't. Output is advisory; the orchestrator MUST surface flagged worktrees in the wave summary. If more than 2 are leftover after a Tier 2 wave, the cleanup loop is broken — STOP and report.
+This catches stragglers — worktrees that should have been removed but weren't. **The script is a blocking gate**: it exits non-zero on *any* unexpected branch-attached worktree, dirty canonical-root status, or missing preserved ref. The orchestrator MUST treat a non-zero exit as a wave failure and surface the flagged worktrees in the wave summary before halting. There is no "advisory" or ">N stragglers" threshold — zero tolerance.
 
 ## Why this layering
 

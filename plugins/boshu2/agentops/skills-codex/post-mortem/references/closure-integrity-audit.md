@@ -23,6 +23,16 @@ Only fall back to a weaker source when the stronger source has no qualifying evi
 
 The allowed evidence modes in audit output are: `commit`, `staged`, `worktree`, `evidence-only-packet`, `grace-window`, and the warn-only mode `discovery-seed-missing`. No catch-all or wildcard modes are accepted.
 
+### Task-Queue Closure Mode
+
+Most audits run against epics and their child beads. A post-mortem can also close a queue-drain task that intentionally has no child beads, such as a PR queue cleanup. In that case, `closure-integrity-audit.sh` may accept the closed non-epic target itself as `closure_mode=task-queue` instead of failing collection, but only when it finds one of these replayable proof surfaces:
+
+- a valid durable evidence-only closure packet for the target id
+- a commit message that references the target id
+- a PR reference in the target text (`#123`, `PR #123`, `pull/123`, etc.) whose matching PR merge/squash commit exists in git history
+
+No-child epics still fail collection. Closed no-child task targets without the proof above also fail with a detail explaining that task-queue fallback requires merge evidence or a durable packet.
+
 ### Discovery-phase seed artifacts (WARN-only, never FAIL)
 
 Discovery-phase beads — the brainstorm / research / discovery children an epic spawns during the Research phase — commonly cite seed artifacts (`.agents/brainstorm/...`, `.agents/research/...`, `.agents/discovery/...`) that are ephemeral working notes, not durable proof surfaces. These seeds are often never persisted and cannot be replayed by later audits.
@@ -119,6 +129,8 @@ When a child resolves on staged or worktree evidence instead of commit evidence,
 - `worktree` — neither commit nor staged evidence exists, but the scoped files are present in unstaged or untracked working-tree state
 - `evidence-only-packet` — no scoped files extractable, but a valid durable closure proof packet exists
 - `grace-window` — commit evidence found within the grace window after bead close
+
+When the audit accepts a no-child queue-drain task, it keeps the evidence mode as `commit` or `evidence-only-packet` and reports the shape separately under `summary.closure_modes["task-queue"]`.
 
 Use `auto` only for audit selection logic, never as the final reported evidence mode.
 

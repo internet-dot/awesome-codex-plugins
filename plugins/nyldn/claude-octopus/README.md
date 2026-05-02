@@ -47,7 +47,7 @@ Every AI model has blind spots. Claude Octopus puts up to eight of them on every
 
 ```bash
 # Terminal (not inside a Claude Code session):
-claude plugin marketplace add https://github.com/nyldn/claude-octopus.git
+claude plugin marketplace add https://github.com/nyldn/plugins.git
 claude plugin install octo@nyldn-plugins
 
 # Then inside Claude Code:
@@ -154,15 +154,15 @@ droid plugin install octo@nyldn-plugins
 
 ```bash
 # Update
-claude plugin marketplace update https://github.com/nyldn/claude-octopus.git
-claude plugin update octo
+claude plugin marketplace update nyldn-plugins
+claude plugin update octo@nyldn-plugins
 
 # Clean reinstall (if update fails)
 claude plugin uninstall claude-octopus 2>/dev/null
 claude plugin uninstall octo 2>/dev/null
-rm -rf ~/.claude/plugins/cache/nyldn-plugins/claude-octopus
-claude plugin marketplace remove https://github.com/nyldn/claude-octopus.git
-claude plugin marketplace add https://github.com/nyldn/claude-octopus.git
+rm -rf ~/.claude/plugins/cache/nyldn-plugins/octo
+claude plugin marketplace remove nyldn-plugins
+claude plugin marketplace add https://github.com/nyldn/plugins.git
 claude plugin install octo@nyldn-plugins
 ```
 </details>

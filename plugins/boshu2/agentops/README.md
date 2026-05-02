@@ -6,11 +6,17 @@
 [![Nightly](https://github.com/boshu2/agentops/actions/workflows/nightly.yml/badge.svg)](https://github.com/boshu2/agentops/actions/workflows/nightly.yml)
 [![GitHub stars](https://img.shields.io/github/stars/boshu2/agentops?style=social)](https://github.com/boshu2/agentops/stargazers)
 
-### Coding agents don't do their own bookkeeping.
+### Operational discipline for coding agents.
 
-AgentOps is the operational layer for coding agents. It adds bookkeeping, validation, primitives, and flows so every session starts where the last one left off.
+Ship reliable code with unreliable agents.
 
-[Install](#install) · [Quick Start](#quick-start) · [Skills](#skills) · [CLI](#the-ao-cli) · [Doctrine](https://12factoragentops.com) · [Docs](docs/documentation-index.md)
+**AgentOps is source control for what your agents have learned.**
+
+Every coding session reads from the corpus on the way in and writes back on the way out — typed, versioned, validated, decay-ranked. Your agent's context is now an engineering artifact, not chat history. Vendor memory follows the chat. The corpus follows the team.
+
+**The moat is the context you, your team, and your business have earned. AgentOps is how it compounds.**
+
+[Install](#install) · [Quick Start](#quick-start) · [Why DevOps?](#why-devops) · [Skills](#skills) · [CLI](#the-ao-cli) · [Doctrine](https://12factoragentops.com) · [Docs](docs/documentation-index.md)
 
 </div>
 
@@ -22,26 +28,68 @@ AgentOps gives your coding agent four things it does not have by default:
 
 | Layer | What changes |
 |-------|--------------|
-| **Bookkeeping** | Learnings, findings, handoffs, and reusable context land in local `.agents/` files |
-| **Validation** | `/pre-mortem`, `/vibe`, and `/council` challenge plans and code before they ship |
-| **Primitives** | Skills, hooks, and the `ao` CLI give agents reusable building blocks |
-| **Flows** | `/research`, `/implement`, `/validation`, and `/rpi` compose those primitives end to end |
+| **Bookkeeping** | Learnings, findings, handoffs, and reusable context land in `.agents/` — the corpus. `ao compile`, `ao maturity --evict`, decay, and lint keep it from rotting. *Removes the toil of re-explaining context every session.* |
+| **Validation** | `/pre-mortem`, `/vibe`, and `/council` challenge plans and code before they ship. *Removes the toil of catching the same mistake twice.* |
+| **Primitives** | Skills, hooks, and the `ao` CLI give agents reusable building blocks. *Removes the toil of re-implementing the same flow per agent.* |
+| **Flows** | `/research`, `/implement`, `/validation`, and `/rpi` compose those primitives end to end. *Removes the toil of running the same multi-step process by hand.* |
 
 Session 1, your agent spends two hours debugging a timeout bug. Session 15, a new agent finds the lesson in seconds because the repo kept it.
-
-Under the hood, AgentOps acts as a context compiler: raw session signal becomes reusable knowledge, compiled prevention, and better next work.
 
 ```mermaid
 flowchart LR
     S[Session work] --> B[Bookkeeping]
     S --> V[Validation]
-    B --> F[Knowledge flywheel]
-    V --> F
-    F --> N[Next session]
+    B --> C[The corpus]
+    V --> C
+    C --> N[Next session]
     N --> S
 ```
 
-Local and auditable: `.agents/` is plain text you can grep, diff, review, and commit when you choose. There is no telemetry or cloud service requirement.
+All state lives in local `.agents/` — auditable, versionable, yours. Plain text you can grep, diff, review, and commit. Zero telemetry. Zero cloud dependency.
+
+### Proof: the three-gap contract
+
+AgentOps closes three failure modes most agent setups don't even name:
+
+| Gap | What fails without it | Closed by |
+|-----|-----------------------|-----------|
+| **Judgment** | Plan looks coherent. Code passes tests. Both miss the edge case. No one challenged either. | `/pre-mortem` · `/vibe` · `/council` |
+| **Durable Learning** | Auth bug fixed Monday. Same auth bug returns Wednesday. The lesson lived in a chat transcript. | `/retro` · `/forge` · `ao lookup` |
+| **Loop Closure** | Code diff lands. No lesson extracted. No constraint hardened. Next session re-learns from scratch. | `/post-mortem` · finding compiler · `/evolve` |
+
+Each factor in the [12-factor doctrine](https://12factoragentops.com) closes one or more of these. Full contract: [docs/context-lifecycle.md](docs/context-lifecycle.md).
+
+---
+
+## Why DevOps?
+
+DevOps changed how we ship software by closing three loops: **flow** (work moves forward), **feedback** (work that breaks comes back fast), and **continual learning** (the system gets smarter with every cycle). The Three Ways. They are not metaphors. They are the architecture of every team that ships reliably under pressure.
+
+Coding agents need the same architecture. They have prompts and weights — neither of which is an operations layer. Run an agent against a real codebase and you'll feel the gap immediately: no flow control between sessions, no feedback that survives compaction, no learning that compounds. Each session starts where every prior session started: zero.
+
+AgentOps applies the Three Ways to coding agents:
+
+| DevOps Three Ways | AgentOps surface | What it means in practice |
+|-------------------|------------------|---------------------------|
+| **Flow** | Primitives + Flows (`/research` → `/plan` → `/implement` → `/validation` → `/rpi`) | Work moves through scoped, auditable phases. No phase compresses into another. |
+| **Feedback** | Validation gates that block, not advise (`/pre-mortem`, `/vibe`, `/council`) | Multi-model consensus catches errors before they propagate. Verdicts are recorded, not assumed. |
+| **Continual Learning** | Bookkeeping + the knowledge flywheel (`/retro` → `/forge` → `ao inject` → next session) | Every session emits learnings. Learnings get scored, promoted, and decayed. Next session starts loaded. |
+
+Theoretical foundation lives in [docs/the-science.md](docs/the-science.md) (Meadows' leverage points + DevOps Three Ways) and [docs/brownian-ratchet.md](docs/brownian-ratchet.md) (chaos + filter + one-way gate = net forward progress).
+
+The lineage is direct: DevOps is what made software ship. AgentOps is what makes coding agents compound. Same shape, new substrate.
+
+> AgentOps and every harness like it gets absorbed into the model layer over time. Memory primitives, learning loops, even validation gates — frontier vendors will ship them natively. What stays yours is the corpus. AgentOps is the bridge tool that helps you build the moat *now*, before the harness layer commoditizes. See [PRODUCT.md](PRODUCT.md) for the full thesis.
+
+---
+
+## The lineage
+
+Software shipped because we codified the work. Iteration. Test discipline. Pipelines. Toil reduction. Flow and waste. Each generation gave teams an artifact: the wiki (Ward Cunningham, 1995, in the same circle as XP), the runbook, the postmortem, the toil budget.
+
+AgentOps gives your agents the same kind of artifact: **the corpus** — a typed, versioned, agent-readable wiki maintained alongside the code. Same lineage. New substrate.
+
+The pattern is broader than code; the product is focused on coding agents.
 
 ---
 
@@ -223,9 +271,9 @@ Full reference: [docs/SKILLS.md](docs/SKILLS.md)
 <details>
 <summary><b>Cross-runtime orchestration</b> - mix Claude, Codex, Cursor, and OpenCode</summary>
 
-AgentOps keeps the workflow shape consistent across runtimes. Use the same validation, research, delivery, and bookkeeping flows whether the active worker is Claude Code, Codex, Cursor, or OpenCode.
+Multi-runtime, one workflow. The same validation, research, delivery, and bookkeeping flows run whether the active worker is Claude Code, Codex, Cursor, or OpenCode.
 
-That lets one runtime lead a session, another review the result, and a third handle focused implementation. The exact adapter is runtime-specific; the product contract is the same: independent context, auditable files, and explicit validation before promotion.
+One runtime leads a session. Another reviews the result. A third handles focused implementation. Adapters are runtime-specific. The contract is constant: independent context, auditable files, validation before promotion.
 
 </details>
 
@@ -283,14 +331,16 @@ Run Dream overnight, then run Evolve in the morning against a fresher corpus. Th
 
 ---
 
-## How AgentOps Fits With Other Tools
+## Competitive Positioning
+
+Most tools optimize work *within* a session. AgentOps compounds across them. The bookkeeping and validation layer is the gap.
 
 | Tool | What it does well | What AgentOps adds |
 |------|-------------------|--------------------|
-| **[GSD](https://github.com/glittercowboy/get-shit-done)** | Fresh-context phased execution, recovery loops, runtime breadth | Cross-session bookkeeping, pre-build validation, and the knowledge flywheel |
-| **[Compound Engineer](https://github.com/EveryInc/compound-engineering-plugin)** | Ideation, configurable reviewers, cross-runtime conversion | Automatic capture/scoring/injection, council validation, and repo-native `ao` workflows |
-| **[Spec Kit](https://github.com/github/spec-kit) / [Kiro](https://kiro.dev/)** | Spec-driven development and executable planning artifacts | Learning beyond specs: failures, decisions, retros, and prevention rules |
-| **[Superpowers](https://github.com/obra/superpowers)** | TDD discipline and autonomous work patterns | Memory, pre-mortems, and validation across repeated sessions |
+| **[GSD](https://github.com/glittercowboy/get-shit-done)** | Fresh-context phased execution, recovery loops, runtime breadth | Cross-session bookkeeping, pre-build validation, the knowledge flywheel |
+| **[Compound Engineer](https://github.com/EveryInc/compound-engineering-plugin)** | Ideation, configurable reviewers, cross-runtime conversion | Automatic capture/scoring/injection, council validation, repo-native `ao` workflows |
+| **[Spec Kit](https://github.com/github/spec-kit) / [Kiro](https://kiro.dev/)** | Spec-driven development and executable planning artifacts | Learning beyond specs: failures, decisions, retros, prevention rules |
+| **[Superpowers](https://github.com/obra/superpowers)** | TDD discipline and autonomous work patterns | Memory, pre-mortems, validation across repeated sessions |
 | **[Ruflo / Claude-Flow](https://github.com/ruvnet/ruflo)** | High-scale swarm orchestration and MCP-heavy coordination | Local, auditable compounding around whatever executes the work |
 
 [Detailed comparisons](docs/comparisons/) · [Competitive radar](docs/comparisons/competitive-radar.md)
@@ -335,6 +385,20 @@ AgentOps is shaped by a set of public principles — the 12 factors of agent ope
 | **Scale (X-XII)** | Isolate Workers · Supervise Hierarchically · Harvest Failures as Wisdom |
 
 The AgentOps product implements these principles through skills, the `ao` CLI, and local bookkeeping in `.agents/`. See each factor page at [12factoragentops.com/factors](https://12factoragentops.com/factors) for the doctrine behind the mechanism.
+
+---
+
+## Ready?
+
+```bash
+# 1. Install (pick your runtime above)
+# 2. Run in your repo
+ao quick-start
+# 3. Validate from your agent chat
+/council validate this PR
+```
+
+Then explore the [skills catalog](docs/SKILLS.md), the [`ao` CLI reference](cli/docs/COMMANDS.md), and the [12-factor doctrine](https://12factoragentops.com).
 
 ---
 

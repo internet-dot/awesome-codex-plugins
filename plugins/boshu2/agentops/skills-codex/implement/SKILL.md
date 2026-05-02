@@ -302,6 +302,43 @@ ls *test* tests/ test/ __tests__/ 2>/dev/null | head -5
 
 **If verification fails:** Do NOT proceed to Step 5a. Fix the issue first.
 
+### Step 5.5: Binary-Deployment Gate (CLI/Hook Bug Fixes) — MANDATORY
+
+**For the full gate spec (rationale, mtime check, plugin-cache check, remediation), read `references/binary-deployment-gate.md`.**
+
+**This gate BLOCKS declaring "done" when the diff touches CLI/hook surfaces.** It is not a warning. Council finding (`.agents/council/2026-05-01-evolution-cycle-council.md`, finding 1, action item A; 6/6 judges): a fix shipped to source while the deployed runtime is pre-fix keeps reproducing the bug during its own post-mortem. Captured failure mode: `.agents/learnings/2026-05-01-fix-shipped-binary-stale.md`.
+
+**Trigger** — gate fires if the diff touches `cli/cmd/**`, `hooks/**`, or `cli/embedded/hooks/**`:
+
+```bash
+CHANGED=$(git diff --name-only HEAD~1 2>/dev/null; git diff --name-only --cached; git diff --name-only)
+TRIGGERS=$(printf '%s\n' "$CHANGED" | grep -E '^(cli/cmd/|hooks/|cli/embedded/hooks/)' | sort -u)
+[ -z "$TRIGGERS" ] && echo "Binary-deployment gate: no CLI/hook surfaces touched, skipping" || echo "Binary-deployment gate FIRES on: $TRIGGERS"
+```
+
+**When fired, both checks below MUST pass before Step 5a.**
+
+**Check A — deployed binary mtime ≥ source-fix commit timestamp** (per binary under `cli/cmd/<bin>/`):
+
+```bash
+BIN=<binary-name>            # e.g., ao
+DEPLOYED=$(command -v "$BIN") || { echo "BLOCK: $BIN not on PATH"; exit 1; }
+DEPLOYED_MTIME=$(stat -c %Y "$DEPLOYED" 2>/dev/null || stat -f %m "$DEPLOYED")  # Linux | macOS
+SOURCE_MTIME=$(git log -1 --format=%ct -- "cli/cmd/$BIN/")
+[ "$DEPLOYED_MTIME" -lt "$SOURCE_MTIME" ] && { echo "BLOCK: deployed $BIN is pre-fix — rebuild & redeploy"; exit 1; }
+```
+
+**Check B — plugin-cache hook copies reflect the fix** (for any `hooks/` or `cli/embedded/hooks/` change, substitute the marker string introduced by the fix, e.g., `AGENTOPS_STARTUP_CLOSE_LOOP`):
+
+```bash
+STALE=$(find ~/.codex/plugins/cache \
+    -name '<hook-name>.sh' -path '*agentops*' \
+    -exec grep -L "<MARKER>" {} \; 2>/dev/null)
+[ -n "$STALE" ] && { echo "BLOCK: stale plugin-cache hook copies: $STALE"; exit 1; }
+```
+
+**Pass criteria:** both checks clean (or trigger is empty). Only then proceed to Step 5a. Failure modes, fallbacks, and remediation steps are in the references doc.
+
 ### Step 5a: Verification Gate (MANDATORY)
 
 **THE IRON LAW:** NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE
@@ -609,6 +646,7 @@ If bd CLI not available:
 
 ## Reference Documents
 
+- [references/binary-deployment-gate.md](references/binary-deployment-gate.md)
 - [references/gate-checks.md](references/gate-checks.md)
 - [references/resume-protocol.md](references/resume-protocol.md)
 
@@ -616,6 +654,7 @@ If bd CLI not available:
 
 ### references/
 
+- [references/binary-deployment-gate.md](references/binary-deployment-gate.md)
 - [references/gate-checks.md](references/gate-checks.md)
 - [references/resume-protocol.md](references/resume-protocol.md)
 

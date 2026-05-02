@@ -82,6 +82,31 @@ result, err := doSomething()
 _, err := doSomething()
 ```
 
+**Cobra command global state** -- `cobra.Command` instances retain flag/arg state across calls. Re-using the same command object in tests bleeds state between test cases.
+```go
+// BROKEN: cmd is package-level; each test sees prior test's args
+var cmd = &cobra.Command{...}
+func TestA(t *testing.T) { cmd.Execute() }
+func TestB(t *testing.T) { cmd.Execute() }  // sees TestA's flag values
+
+// FIX: construct a fresh command per test, or call cmd.ResetFlags() between
+func newCmd() *cobra.Command { return &cobra.Command{...} }
+```
+
+**os.Chdir is process-global** -- `os.Chdir` mutates the process working directory, breaking `t.Parallel()` and any concurrent goroutine relying on relative paths.
+```go
+// BROKEN: blocks t.Parallel; siblings see whatever dir this test left behind
+func TestX(t *testing.T) {
+    os.Chdir(tmp); defer os.Chdir(prev)
+    runThing()  // uses relative paths
+}
+// FIX: pass dir as a parameter; never mutate cwd in tests
+func TestX(t *testing.T) {
+    t.Parallel()
+    runThing(tmp)
+}
+```
+
 ---
 
 ## Git
@@ -100,7 +125,7 @@ _, err := doSomething()
 
 ## Skills / Docs
 
-**Source of truth** -- Edit skills in `skills/` in this repo, NOT `~/.agents/skills/` (installed copies are overwritten on update).
+**Source of truth** -- Edit skills in `skills/` in this repo, NOT `~/.claude/skills/` (installed copies are overwritten on update).
 
 **Reference linkage** -- Every file under `skills/<name>/references/` must be linked from that skill's SKILL.md. `heal.sh --strict` enforces this.
 

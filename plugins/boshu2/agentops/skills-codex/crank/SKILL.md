@@ -169,6 +169,10 @@ log_plan_mutation() {
 - If `epic_id` is absent, keep the packet `objective` as the execution spine and continue in file-backed mode instead of inventing an epic ID
 - For other plan files, read the plan file and extract tasks
 
+### Step 1.5: Branch Isolation Gate
+
+Before wave-1 commit, refuse to crank on `main`/`master`. Cut `crank/<epic-id>` to prevent parallel-session reset clobbers. See [references/branch-isolation.md](references/branch-isolation.md) for the gate script and override flag.
+
 ### Step 2: Load Execution Details
 
 **Beads mode:**

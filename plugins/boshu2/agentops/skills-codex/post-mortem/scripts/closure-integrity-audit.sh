@@ -515,6 +515,62 @@ commit_ref_exists() {
   run_git_clean log -n 1 --format='%H' --all --extended-regexp --grep="$pattern" 2>/dev/null | grep -q .
 }
 
+target_is_closed_non_epic() {
+  local target_id="$1"
+  local target_json=""
+  local issue_type=""
+  local human_output=""
+
+  if target_json="$(bd_show_json "$target_id" 2>/dev/null)"; then
+    child_is_closed "$target_json" || return 1
+    issue_type="$(
+      printf '%s\n' "$target_json" \
+        | jq -r '(.issue_type // .type // "") | ascii_downcase'
+    )"
+    [[ "$issue_type" == "epic" ]] && return 1
+    [[ -n "$issue_type" ]] && return 0
+  fi
+
+  human_output="$(bd show "$target_id" 2>/dev/null || true)"
+  [[ "$human_output" == *"CLOSED"* ]] || return 1
+  [[ "$human_output" == *"[EPIC]"* ]] && return 1
+  [[ "$human_output" =~ \[(TASK|BUG|FEATURE|CHORE|ISSUE|DECISION)\] ]] || return 1
+  return 0
+}
+
+extract_pr_numbers_from_text() {
+  grep -Eio '((pull[ -]?request|pr)[[:space:]#:]*[0-9]+|pull/[0-9]+|#[0-9]+)' \
+    | grep -oE '[0-9]+' \
+    | sort -u || true
+}
+
+task_queue_pr_merge_matches_json() {
+  local target_id="$1"
+  local audit_text=""
+  local pr_number=""
+  local commit_sha=""
+  local -a matches=()
+
+  audit_text="$(issue_audit_text "$target_id")"
+  while IFS= read -r pr_number; do
+    [[ -n "$pr_number" ]] || continue
+    commit_sha="$(
+      run_git_clean log -n 1 --format='%H' --all --fixed-strings --grep="#${pr_number}" 2>/dev/null \
+        | head -n 1
+    )"
+    if [[ -n "$commit_sha" ]]; then
+      matches+=("#${pr_number} ${commit_sha}")
+    fi
+  done < <(printf '%s\n' "$audit_text" | extract_pr_numbers_from_text)
+
+  if [[ "${#matches[@]}" -eq 0 ]]; then
+    printf '[]\n'
+    return 0
+  fi
+
+  printf '%s\n' "${matches[@]}" | json_array_from_stream
+}
+
 commit_matches_json() {
   local since="$1"
   local until="$2"
@@ -764,12 +820,14 @@ build_child_result() {
   local detail="$4"
   local matches_json="$5"
   local status="$6"
+  local closure_mode="${7:-}"
 
   jq -n \
     --arg child_id "$child" \
     --arg status "$status" \
     --arg evidence_mode "$mode" \
     --arg detail "$detail" \
+    --arg closure_mode "$closure_mode" \
     --argjson scoped_files "$scoped_json" \
     --argjson matched_files "$matches_json" \
     '{
@@ -779,7 +837,37 @@ build_child_result() {
       detail: $detail,
       scoped_files: $scoped_files,
       matched_files: $matched_files
-    }'
+    }
+    + (if ($closure_mode | length) > 0 then {closure_mode: $closure_mode} else {} end)'
+}
+
+classify_task_queue_target() {
+  local target_id="$1"
+  local packet_path=""
+  local packet_json=""
+  local pr_merge_json=""
+
+  target_is_closed_non_epic "$target_id" || return 1
+  COLLECTION_DETAIL="${COLLECTION_DETAIL:-no child issues discovered from bd children/show output}; task-queue fallback requires PR merge evidence in git history or a valid evidence-only closure packet"
+
+  if packet_path="$(durable_packet_path_for_child "$target_id")" && packet_is_valid_for_child "$packet_path" "$target_id"; then
+    packet_json="$(packet_matches_json "$packet_path")"
+    build_child_result "$target_id" '[]' "evidence-only-packet" "task_queue_closure: matched durable closure proof packet for no-child target" "$packet_json" "pass" "task-queue"
+    return 0
+  fi
+
+  if commit_ref_exists "$target_id"; then
+    build_child_result "$target_id" '[]' "commit" "task_queue_closure: matched target id in git history for no-child target" '[]' "pass" "task-queue"
+    return 0
+  fi
+
+  pr_merge_json="$(task_queue_pr_merge_matches_json "$target_id")"
+  if echo "$pr_merge_json" | jq -e 'length > 0' >/dev/null 2>&1; then
+    build_child_result "$target_id" '[]' "commit" "task_queue_closure: matched PR merge evidence in git history for no-child target" "$pr_merge_json" "pass" "task-queue"
+    return 0
+  fi
+
+  return 1
 }
 
 classify_child() {
@@ -939,11 +1027,52 @@ classify_child() {
   build_child_result "$child" "$scoped_json" "none" "timing_miss: scoped files found but no evidence in any scope (commit/grace/staged/worktree/packet)" '[]' "fail"
 }
 
+emit_results_summary() {
+  local results_file="$1"
+
+  jq -s \
+    --arg epic_id "$EPIC_ID" \
+    --arg scope "$SCOPE" \
+    '{
+      epic_id: $epic_id,
+      scope: $scope,
+      summary: {
+        checked_children: length,
+        passed: ([.[] | select(.status == "pass")] | length),
+        warned: ([.[] | select(.status == "warn")] | length),
+        failed: ([.[] | select(.status == "fail")] | length),
+        evidence_modes: {
+          commit: ([.[] | select(.status == "pass" and .evidence_mode == "commit") | .child_id] | sort),
+          staged: ([.[] | select(.status == "pass" and .evidence_mode == "staged") | .child_id] | sort),
+          worktree: ([.[] | select(.status == "pass" and .evidence_mode == "worktree") | .child_id] | sort),
+          "evidence-only-packet": ([.[] | select(.status == "pass" and .evidence_mode == "evidence-only-packet") | .child_id] | sort),
+          "grace-window": ([.[] | select(.status == "pass" and .evidence_mode == "grace-window") | .child_id] | sort),
+          "discovery-seed-missing": ([.[] | select(.status == "warn" and .evidence_mode == "discovery-seed-missing") | .child_id] | sort)
+        },
+        closure_modes: {
+          "task-queue": ([.[] | select(.closure_mode == "task-queue") | .child_id] | sort)
+        }
+      },
+      children: .,
+      warnings: [.[] | select(.status == "warn") | {child_id, detail, warning_type: (if (.detail | startswith("parser_miss")) then "parser_miss" elif (.detail | startswith("discovery_miss")) then "discovery_miss" else "unknown" end)}],
+      failures: [.[] | select(.status == "fail") | {child_id, detail, failure_type: (if (.detail | startswith("parser_miss")) then "parser_miss" elif (.detail | startswith("timing_miss")) then "timing_miss" elif (.detail | startswith("discovery_miss")) then "discovery_miss" else "unknown" end)}]
+    }' "$results_file"
+}
+
 tmp_results="$(mktemp)"
 children_file="$(mktemp)"
 trap 'rm -f "$tmp_results" "$children_file"' EXIT
 
 if ! collect_children >"$children_file"; then
+  if target_is_closed_non_epic "$EPIC_ID"; then
+    COLLECTION_DETAIL="${COLLECTION_DETAIL:-no child issues discovered from bd children/show output}; task-queue fallback requires PR merge evidence in git history or a valid evidence-only closure packet"
+    if task_result="$(classify_task_queue_target "$EPIC_ID")" && [[ -n "$task_result" ]]; then
+      printf '%s\n' "$task_result" > "$tmp_results"
+      emit_results_summary "$tmp_results"
+      exit 0
+    fi
+  fi
+
   jq -n \
     --arg epic_id "$EPIC_ID" \
     --arg scope "$SCOPE" \
@@ -976,27 +1105,4 @@ while IFS= read -r child; do
   printf '%s\n' "$child_result" >> "$tmp_results"
 done <<< "$children_output"
 
-jq -s \
-  --arg epic_id "$EPIC_ID" \
-  --arg scope "$SCOPE" \
-  '{
-    epic_id: $epic_id,
-    scope: $scope,
-    summary: {
-      checked_children: length,
-      passed: ([.[] | select(.status == "pass")] | length),
-      warned: ([.[] | select(.status == "warn")] | length),
-      failed: ([.[] | select(.status == "fail")] | length),
-      evidence_modes: {
-        commit: ([.[] | select(.status == "pass" and .evidence_mode == "commit") | .child_id] | sort),
-        staged: ([.[] | select(.status == "pass" and .evidence_mode == "staged") | .child_id] | sort),
-        worktree: ([.[] | select(.status == "pass" and .evidence_mode == "worktree") | .child_id] | sort),
-        "evidence-only-packet": ([.[] | select(.status == "pass" and .evidence_mode == "evidence-only-packet") | .child_id] | sort),
-        "grace-window": ([.[] | select(.status == "pass" and .evidence_mode == "grace-window") | .child_id] | sort),
-        "discovery-seed-missing": ([.[] | select(.status == "warn" and .evidence_mode == "discovery-seed-missing") | .child_id] | sort)
-      }
-    },
-    children: .,
-    warnings: [.[] | select(.status == "warn") | {child_id, detail, warning_type: (if (.detail | startswith("parser_miss")) then "parser_miss" elif (.detail | startswith("discovery_miss")) then "discovery_miss" else "unknown" end)}],
-    failures: [.[] | select(.status == "fail") | {child_id, detail, failure_type: (if (.detail | startswith("parser_miss")) then "parser_miss" elif (.detail | startswith("timing_miss")) then "timing_miss" elif (.detail | startswith("discovery_miss")) then "discovery_miss" else "unknown" end)}]
-  }' "$tmp_results"
+emit_results_summary "$tmp_results"
