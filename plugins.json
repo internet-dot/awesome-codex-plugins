@@ -3,7 +3,7 @@
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
   "last_updated": "2026-05-02",
-  "total": 52,
+  "total": 53,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -518,6 +518,16 @@
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/klajdikkolaj/upwork-autopilot/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Writer's Loop",
+      "url": "https://github.com/xxsang/writers-loop",
+      "owner": "xxsang",
+      "repo": "writers-loop",
+      "description": "Portable writing workflow for planning, critique, revision, style distillation, translation, and local preference learning.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/xxsang/writers-loop/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "Yandex Direct",
