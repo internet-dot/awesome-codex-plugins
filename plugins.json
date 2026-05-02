@@ -30,7 +30,7 @@
       "install_url": "https://raw.githubusercontent.com/boshu2/agentops/HEAD/.codex-plugin/plugin.json"
     },
     {
-      "name": "agenttrace",
+      "name": "AgentTrace",
       "url": "https://github.com/luoyuctl/agenttrace",
       "owner": "luoyuctl",
       "repo": "agenttrace",
