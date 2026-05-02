@@ -56,12 +56,12 @@ Install plugins directly from this curated list by pointing Codex at the repo ma
 **CLI:**
 ```bash
 # Add this repo as a marketplace source (one-time setup)
-codex config set plugin.marketplaces.awesome \
+codex plugin marketplace add \
   "https://raw.githubusercontent.com/hashgraph-online/awesome-codex-plugins/main/.agents/plugins/marketplace.json"
 
-# Then browse and install
-codex plugin list --source awesome
-codex plugin install <plugin-name> --source awesome
+# Then browse and install (the marketplace name is derived from the repo name)
+codex plugin list --source awesome-codex-plugins
+codex plugin install <plugin-name> --source awesome-codex-plugins
 ```
 
 **Desktop App / IDE Extension:**
