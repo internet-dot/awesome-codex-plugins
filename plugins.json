@@ -3,7 +3,7 @@
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
   "last_updated": "2026-05-02",
-  "total": 53,
+  "total": 54,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -178,6 +178,16 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/dragon1086/claude-skills/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Universal Design Principles",
+      "url": "https://github.com/HDeibler/universal-design-principles",
+      "owner": "HDeibler",
+      "repo": "universal-design-principles",
+      "description": "Cross-agent UX and product-design marketplace with a root Codex collection plugin, five focused plugin bundles, and 137 Agent Skills for design review, accessibility, layout, interaction, cognition, and product polish.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/HDeibler/universal-design-principles/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "VibePortrait",

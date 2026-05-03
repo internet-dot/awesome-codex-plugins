@@ -209,6 +209,18 @@
       "category": "Development & Workflow"
     },
     {
+      "name": "universal-design-principles",
+      "source": {
+        "source": "local",
+        "path": "./plugins/HDeibler/universal-design-principles"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
+    },
+    {
       "name": "vibe-portrait",
       "source": {
         "source": "local",
