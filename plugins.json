@@ -3,7 +3,7 @@
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
   "last_updated": "2026-05-02",
-  "total": 53,
+  "total": 54,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -148,6 +148,16 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/Kanevry/session-orchestrator/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Spec-Driven Development",
+      "url": "https://github.com/Habib0x0/spec-driven-plugin",
+      "owner": "Habib0x0",
+      "repo": "spec-driven-plugin",
+      "description": "Three-phase Requirements → Design → Tasks workflow for Claude Code and Codex — EARS notation acceptance criteria, autonomous execution loop, cross-spec dependencies, and post-implementation acceptance testing.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/Habib0x0/spec-driven-plugin/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "tailtest",
