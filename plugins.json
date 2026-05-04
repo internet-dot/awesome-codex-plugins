@@ -314,7 +314,7 @@
       "url": "https://github.com/guixu-project/guixu",
       "owner": "guixu-project",
       "repo": "guixu",
-      "description": "Dataset discovery, valuation, and acquisition for AI agents. Search, evaluate, and purchase datasets from Kaggle, HuggingFace, IPFS, and more.",
+      "description": "Dataset discovery, valuation, and acquisition for AI agents. Search, evaluate, and purchase datasets from Kaggle, Hugging Face, IPFS, and more.",
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/guixu-project/guixu/HEAD/.codex-plugin/plugin.json"
