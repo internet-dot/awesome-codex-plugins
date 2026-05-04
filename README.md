@@ -103,6 +103,7 @@ Third-party plugins built by the community. [PRs welcome](#contributing)!
 <!-- pinned -->
 - [Registry Broker](https://github.com/hashgraph-online/registry-broker-codex-plugin) - Delegate tasks to specialist AI agents via the HOL Registry, plan, find, summon, and recover sessions.
 - [AgentOps](https://github.com/boshu2/agentops) - DevOps layer for coding agents with flow, feedback, and memory that compounds between sessions.
+- [agenttrace](https://github.com/luoyuctl/agenttrace) - Local TUI observability for AI coding-agent sessions: inspect cost, tokens, tool failures, latency, anomalies, health, and CI-ready reports.
 - [Brooks Lint](https://github.com/hyhmrright/brooks-lint) - AI code reviews grounded in six classic engineering books — decay risk diagnostics with book citations, severity labels, and four analysis modes (PR review, architecture audit, tech debt, test quality).
 - [Canvas-Apps-Plugin-Codex](https://github.com/Ratnam-Mishra/canvas-apps-plugin-codex) - Build and edit Power Apps Canvas Apps from natural language using Codex and the Canvas Authoring MCP server.
 - [Claude Code for Codex](https://github.com/sendbird/cc-plugin-codex) - Reverse of OpenAI's official Claude-hosted plugin: use Claude Code from Codex for reviews, rescue tasks, tracked background jobs, and hook-powered review gates.
