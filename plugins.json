@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
-  "last_updated": "2026-05-04",
+  "last_updated": "2026-05-02",
   "total": 54,
   "categories": [
     "Development & Workflow",
@@ -180,6 +180,16 @@
       "install_url": "https://raw.githubusercontent.com/dragon1086/claude-skills/HEAD/.codex-plugin/plugin.json"
     },
     {
+      "name": "Universal Design Principles",
+      "url": "https://github.com/HDeibler/universal-design-principles",
+      "owner": "HDeibler",
+      "repo": "universal-design-principles",
+      "description": "Cross-agent UX and product-design marketplace with a root Codex collection plugin, five focused plugin bundles, and 137 Agent Skills for design review, accessibility, layout, interaction, cognition, and product polish.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/HDeibler/universal-design-principles/HEAD/.codex-plugin/plugin.json"
+    },
+    {
       "name": "VibePortrait",
       "url": "https://github.com/dadwadw233/VibePortrait",
       "owner": "dadwadw233",
@@ -308,16 +318,6 @@
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/ninihen1/power-automate-mcp-skills/HEAD/.codex-plugin/plugin.json"
-    },
-    {
-      "name": "Guixu",
-      "url": "https://github.com/guixu-project/guixu",
-      "owner": "guixu-project",
-      "repo": "guixu",
-      "description": "Dataset discovery, valuation, and acquisition for AI agents. Search, evaluate, and purchase datasets from Kaggle, Hugging Face, IPFS, and more.",
-      "category": "Tools & Integrations",
-      "source": "awesome-codex-plugins",
-      "install_url": "https://raw.githubusercontent.com/guixu-project/guixu/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "Jenkins CLI",
