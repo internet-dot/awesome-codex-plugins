@@ -548,6 +548,7 @@ $pre-mortem                    ← You are here
 - [references/prediction-tracking.md](references/prediction-tracking.md)
 - [references/spec-verification-checklist.md](references/spec-verification-checklist.md)
 - [references/temporal-interrogation.md](references/temporal-interrogation.md)
+- [references/scope-predicate-positive-negative-cases.md](references/scope-predicate-positive-negative-cases.md)
 
 ## Local Resources
 
@@ -558,6 +559,7 @@ $pre-mortem                    ← You are here
 - [references/error-rescue-map-template.md](references/error-rescue-map-template.md)
 - [references/failure-taxonomy.md](references/failure-taxonomy.md)
 - [references/prediction-tracking.md](references/prediction-tracking.md)
+- [references/scope-predicate-positive-negative-cases.md](references/scope-predicate-positive-negative-cases.md)
 - [references/simulation-prompts.md](references/simulation-prompts.md)
 - [references/spec-verification-checklist.md](references/spec-verification-checklist.md)
 - [references/temporal-interrogation.md](references/temporal-interrogation.md)

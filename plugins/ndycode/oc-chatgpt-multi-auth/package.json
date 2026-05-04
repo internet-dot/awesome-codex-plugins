@@ -1,7 +1,7 @@
 {
   "name": "oc-codex-multi-auth",
   "version": "6.1.8",
-  "description": "OpenCode plugin for Codex-first GPT-5 workflows with ChatGPT Plus/Pro OAuth, multi-account rotation, and guided setup",
+  "description": "OpenCode plugin for ChatGPT Plus/Pro OAuth with Codex/GPT-5 routing, multi-account rotation, account switching, health checks, diagnostics, and recovery tools",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -22,22 +22,34 @@
     "url": "git+https://github.com/ndycode/oc-codex-multi-auth.git"
   },
   "keywords": [
-    "typescript",
-    "nodejs",
     "opencode",
     "opencode-plugin",
+    "opencode-auth",
     "openai",
     "chatgpt",
     "chatgpt-plus",
     "chatgpt-pro",
     "oauth",
     "oauth2",
+    "oauth-login",
     "pkce",
-    "gpt-5",
     "codex",
+    "codex-auth",
+    "codex-oauth",
+    "gpt-5",
+    "gpt-5-5",
     "multi-account",
+    "account-rotation",
+    "account-switching",
+    "account-health",
+    "health-checks",
+    "quota-management",
+    "diagnostics",
+    "recovery-tools",
+    "terminal-ui",
     "developer-tools",
-    "terminal"
+    "typescript",
+    "nodejs"
   ],
   "homepage": "https://github.com/ndycode/oc-codex-multi-auth#readme",
   "bugs": {

@@ -349,10 +349,12 @@ For each completed worker:
 2. FAIL -> log the failure, keep the issue open, and retry only if the issue is still within the retry budget.
 3. BLOCKED -> mark blocked with the reason and continue the wave.
 
-Update beads:
+Update beads with evidence:
 
 ```bash
-bd close "$issue_id" 2>/dev/null
+COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+CHANGED_FILES=$(git diff --name-only HEAD~1 2>/dev/null | head -10 | tr '\n' ' ' | sed 's/ $//')
+bd close "$issue_id" --reason "commit:${COMMIT_SHA} files:[${CHANGED_FILES}]" 2>/dev/null
 bd update "$issue_id" --status blocked --append-notes "Wave $wave FAIL: $reason" 2>/dev/null
 ```
 

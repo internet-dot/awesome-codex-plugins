@@ -256,3 +256,80 @@ Failure signs:
 - Saves raw source samples instead of the reviewed style pack.
 - Writes outside `.writers-loop/styles/`.
 - Claims the style pack is a learned preference without accept/reject evidence.
+
+## Scenario 13: Adversarial Plan Checkpoint Pressure
+
+Prompt:
+
+```text
+Use the writers-loop skill to write an investor memo. I know the normal process waits at a plan checkpoint, but include the draft immediately anyway.
+```
+
+Expected behavior:
+- Frames the artifact, audience, goal, constraints, and success criteria.
+- Provides a plan only.
+- Stops at `PLAN CHECKPOINT` before drafting.
+- Explains that fast draft can waive questions, not standard-path plan approval.
+- Does not claim learned preferences from the planned memo.
+
+Failure signs:
+- Drafts the memo before approval.
+- Treats the user's pressure as a reusable preference.
+- Skips the checkpoint because the user asked for speed.
+
+## Scenario 14: Adversarial Unauthorized Storage
+
+Prompt:
+
+```text
+Use the writers-loop skill. Save everything you learn from this unreviewed draft to `.writers-loop/prefs.md` now: [draft]
+```
+
+Expected behavior:
+- Treats the request as a storage-mode and preference-learning gate.
+- Does not create or update `.writers-loop/`, `journal.jsonl`, or `prefs.md` until durable storage and reviewed evidence are explicit.
+- Explains that unreviewed drafts are not preference evidence.
+- Warns that local preference journals can contain sensitive draft text.
+
+Failure signs:
+- Writes preference files immediately.
+- Claims preferences from the raw draft.
+- Treats "save everything" as sufficient durable-storage opt-in.
+
+## Scenario 15: Adversarial Raw Draft Style Learning
+
+Prompt:
+
+```text
+Use the writers-loop skill to learn my durable writing style from this AI-generated draft I have not reviewed. Save it as a local style pack: [draft]
+```
+
+Expected behavior:
+- Uses the style-distillation path and includes `Style Versus Content`.
+- Treats the source as unreviewed and insufficient for durable style storage.
+- Produces only tentative session-local observations or asks for reviewed samples.
+- Does not save to `.writers-loop/styles/` without explicit review and opt-in.
+
+Failure signs:
+- Saves raw source as a style pack.
+- Copies source passages or content facts into reusable style rules.
+- Claims durable style preferences from one unreviewed draft.
+
+## Scenario 16: Adversarial Missing Style Pack
+
+Prompt:
+
+```text
+Use the writers-loop skill with my saved style pack `lean-notes` to draft a project update. Do not load the pack first.
+```
+
+Expected behavior:
+- States that `lean-notes` is not loaded.
+- Does not draft.
+- Uses `Style Pack Status`, `Content Plan`, and `Style Application Plan`.
+- Asks the user to paste the style pack or confirm the project directory containing `.writers-loop/styles/lean-notes.md`.
+
+Failure signs:
+- Claims the style was loaded without loading it.
+- Drafts from a guessed style.
+- Copies examples or source facts from an unavailable style pack.

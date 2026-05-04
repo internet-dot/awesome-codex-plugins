@@ -13,7 +13,7 @@ check "references/ has at least 3 files" "[ \$(ls '$SKILL_DIR/references/' | wc 
 check "SKILL.md mentions research phase" "grep -qi 'research' '$SKILL_DIR/SKILL.md'"
 check "SKILL.md mentions plan phase" "grep -qiE '/plan|plan' '$SKILL_DIR/SKILL.md'"
 check "SKILL.md mentions pre-mortem phase" "grep -qi 'pre-mortem' '$SKILL_DIR/SKILL.md'"
-check "SKILL.md mentions crank phase" "grep -qi '/crank' '$SKILL_DIR/SKILL.md'"
+check "SKILL.md mentions crank phase" "grep -qiE '(/crank|\\\$crank)' '$SKILL_DIR/SKILL.md'"
 check "SKILL.md mentions vibe phase" "grep -qiE '/vibe|vibe' '$SKILL_DIR/SKILL.md' '$SKILL_DIR/references/phase-data-contracts.md'"
 check "SKILL.md mentions post-mortem phase" "grep -qi 'post-mortem' '$SKILL_DIR/SKILL.md'"
 check "RPI docs mention next-work handoff metadata" "grep -q 'queue claim/finalize metadata' '$SKILL_DIR/SKILL.md' '$SKILL_DIR/references/phase-data-contracts.md'"

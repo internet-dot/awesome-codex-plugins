@@ -6,90 +6,13 @@
 [![Nightly](https://github.com/boshu2/agentops/actions/workflows/nightly.yml/badge.svg)](https://github.com/boshu2/agentops/actions/workflows/nightly.yml)
 [![GitHub stars](https://img.shields.io/github/stars/boshu2/agentops?style=social)](https://github.com/boshu2/agentops/stargazers)
 
-### Operational discipline for coding agents.
+**Context compiler for coding agents. Assembles, tests, and delivers the right context across Claude, Codex, Cursor, and OpenCode.**
 
-Ship reliable code with unreliable agents.
+AgentOps gives agents a shared `ao` control plane, lifecycle hooks, validation gates, and a repo-owned `.agents/` corpus so work survives chat windows and vendor boundaries.
 
-**AgentOps is source control for what your agents have learned.**
-
-Every coding session reads from the corpus on the way in and writes back on the way out — typed, versioned, validated, decay-ranked. Your agent's context is now an engineering artifact, not chat history. Vendor memory follows the chat. The corpus follows the team.
-
-**The moat is the context you, your team, and your business have earned. AgentOps is how it compounds.**
-
-[Install](#install) · [Quick Start](#quick-start) · [Why DevOps?](#why-devops) · [Skills](#skills) · [CLI](#the-ao-cli) · [Doctrine](https://12factoragentops.com) · [Docs](docs/documentation-index.md)
+[Install](#install) · [Quick Start](#quick-start) · [Cross-Vendor](#agentops-is-the-cross-vendor-operating-layer) · [Why DevOps?](#why-devops) · [Skills](#skills) · [CLI](#the-ao-cli) · [Doctrine](https://12factoragentops.com) · [Docs](docs/documentation-index.md)
 
 </div>
-
----
-
-## What AgentOps Gives You
-
-AgentOps gives your coding agent four things it does not have by default:
-
-| Layer | What changes |
-|-------|--------------|
-| **Bookkeeping** | Learnings, findings, handoffs, and reusable context land in `.agents/` — the corpus. `ao compile`, `ao maturity --evict`, decay, and lint keep it from rotting. *Removes the toil of re-explaining context every session.* |
-| **Validation** | `/pre-mortem`, `/vibe`, and `/council` challenge plans and code before they ship. *Removes the toil of catching the same mistake twice.* |
-| **Primitives** | Skills, hooks, and the `ao` CLI give agents reusable building blocks. *Removes the toil of re-implementing the same flow per agent.* |
-| **Flows** | `/research`, `/implement`, `/validation`, and `/rpi` compose those primitives end to end. *Removes the toil of running the same multi-step process by hand.* |
-
-Session 1, your agent spends two hours debugging a timeout bug. Session 15, a new agent finds the lesson in seconds because the repo kept it.
-
-```mermaid
-flowchart LR
-    S[Session work] --> B[Bookkeeping]
-    S --> V[Validation]
-    B --> C[The corpus]
-    V --> C
-    C --> N[Next session]
-    N --> S
-```
-
-All state lives in local `.agents/` — auditable, versionable, yours. Plain text you can grep, diff, review, and commit. Zero telemetry. Zero cloud dependency.
-
-### Proof: the three-gap contract
-
-AgentOps closes three failure modes most agent setups don't even name:
-
-| Gap | What fails without it | Closed by |
-|-----|-----------------------|-----------|
-| **Judgment** | Plan looks coherent. Code passes tests. Both miss the edge case. No one challenged either. | `/pre-mortem` · `/vibe` · `/council` |
-| **Durable Learning** | Auth bug fixed Monday. Same auth bug returns Wednesday. The lesson lived in a chat transcript. | `/retro` · `/forge` · `ao lookup` |
-| **Loop Closure** | Code diff lands. No lesson extracted. No constraint hardened. Next session re-learns from scratch. | `/post-mortem` · finding compiler · `/evolve` |
-
-Each factor in the [12-factor doctrine](https://12factoragentops.com) closes one or more of these. Full contract: [docs/context-lifecycle.md](docs/context-lifecycle.md).
-
----
-
-## Why DevOps?
-
-DevOps changed how we ship software by closing three loops: **flow** (work moves forward), **feedback** (work that breaks comes back fast), and **continual learning** (the system gets smarter with every cycle). The Three Ways. They are not metaphors. They are the architecture of every team that ships reliably under pressure.
-
-Coding agents need the same architecture. They have prompts and weights — neither of which is an operations layer. Run an agent against a real codebase and you'll feel the gap immediately: no flow control between sessions, no feedback that survives compaction, no learning that compounds. Each session starts where every prior session started: zero.
-
-AgentOps applies the Three Ways to coding agents:
-
-| DevOps Three Ways | AgentOps surface | What it means in practice |
-|-------------------|------------------|---------------------------|
-| **Flow** | Primitives + Flows (`/research` → `/plan` → `/implement` → `/validation` → `/rpi`) | Work moves through scoped, auditable phases. No phase compresses into another. |
-| **Feedback** | Validation gates that block, not advise (`/pre-mortem`, `/vibe`, `/council`) | Multi-model consensus catches errors before they propagate. Verdicts are recorded, not assumed. |
-| **Continual Learning** | Bookkeeping + the knowledge flywheel (`/retro` → `/forge` → `ao inject` → next session) | Every session emits learnings. Learnings get scored, promoted, and decayed. Next session starts loaded. |
-
-Theoretical foundation lives in [docs/the-science.md](docs/the-science.md) (Meadows' leverage points + DevOps Three Ways) and [docs/brownian-ratchet.md](docs/brownian-ratchet.md) (chaos + filter + one-way gate = net forward progress).
-
-The lineage is direct: DevOps is what made software ship. AgentOps is what makes coding agents compound. Same shape, new substrate.
-
-> AgentOps and every harness like it gets absorbed into the model layer over time. Memory primitives, learning loops, even validation gates — frontier vendors will ship them natively. What stays yours is the corpus. AgentOps is the bridge tool that helps you build the moat *now*, before the harness layer commoditizes. See [PRODUCT.md](PRODUCT.md) for the full thesis.
-
----
-
-## The lineage
-
-Software shipped because we codified the work. Iteration. Test discipline. Pipelines. Toil reduction. Flow and waste. Each generation gave teams an artifact: the wiki (Ward Cunningham, 1995, in the same circle as XP), the runbook, the postmortem, the toil budget.
-
-AgentOps gives your agents the same kind of artifact: **the corpus** — a typed, versioned, agent-readable wiki maintained alongside the code. Same lineage. New substrate.
-
-The pattern is broader than code; the product is focused on coding agents.
 
 ---
 
@@ -162,26 +85,94 @@ Troubleshooting: [docs/troubleshooting.md](docs/troubleshooting.md) · Configura
 
 ---
 
+## What AgentOps Gives You
+
+Three layers. Each solves a different problem. All three compound.
+
+| Layer | Problem | What changes |
+|-------|---------|--------------|
+| **Context Compiler** | Every session starts from zero | `ao inject` delivers decay-ranked knowledge. `ao context assemble` builds phase-scoped packets. 71 skills load automatically via hooks. *Your agent starts loaded, not cold.* |
+| **Validation Gates** | Agents ship confident garbage | `/pre-mortem`, `/vibe`, `/council` — multi-model consensus validates plans before build and code before commit. Gates block, not advise. *Three fresh judges catch what one agent can't.* |
+| **Knowledge Flywheel** | Lessons disappear between sessions | `/forge` extracts learnings. `ao flywheel close-loop` scores and promotes. `/evolve` fixes the worst gap autonomously. `/dream` compounds overnight. *Session 15 starts with everything session 1 learned.* |
+
+```mermaid
+flowchart LR
+    S[Session starts] --> L1[Layer 1: Compile context]
+    L1 --> W[Agent works]
+    W --> L2[Layer 2: Validate output]
+    L2 --> E[Session ends]
+    E --> L3[Layer 3: Extract + compound]
+    L3 -->|better context| S
+```
+
+All state lives in local `.agents/` — plain text you can grep, diff, and review. Zero telemetry. Zero cloud dependency. Runtime-neutral across Claude Code, Codex CLI, and OpenCode.
+
+### The three gaps (proof contract)
+
+The three layers close three failure modes most agent setups don't even name:
+
+| Gap | Where the loop breaks | Closed by |
+|-----|-----------------------|-----------|
+| **Judgment** | Plan looks coherent. Code passes tests. Both miss the edge case. | Layer 2: `/pre-mortem` · `/vibe` · `/council` |
+| **Durable Learning** | Auth bug fixed Monday. Same bug returns Wednesday. | Layer 3: `/forge` · `ao flywheel` · `ao inject` |
+| **Loop Closure** | Code lands. No lesson extracted. Next session re-learns from scratch. | Layer 3→1: `/evolve` · finding compiler · `/dream` |
+
+Each factor in the [12-factor doctrine](https://12factoragentops.com) closes one or more of these gaps. Full contract: [docs/context-lifecycle.md](docs/context-lifecycle.md).
+
+---
+
+## Why DevOps?
+
+DevOps proved that disciplined systems around indeterministic workers produce reliable output. SRE proved it again with SLOs and error budgets. Kubernetes proved it for infrastructure with control loops. Coding agents are the next indeterministic worker class. Same playbook. New substrate.
+
+DevOps had the SDLC — the infinity loop that made software delivery an engineering discipline. Coding agents need an equivalent: the **Context Development Life Cycle (CDLC)**. Every SDLC phase has a context counterpart. AgentOps implements all of them.
+
+| SDLC | CDLC | AgentOps surface |
+|------|------|------------------|
+| **Plan** | **Generate** | `/research`, `/plan`, SKILL.md authoring |
+| **Code + Build** | **Compile** | `ao context assemble`, `ao inject`, decay-ranked retrieval |
+| **Test** | **Test** | `/pre-mortem`, `/vibe`, `/council`, `ao eval run` |
+| **Release** | **Distribute** | Skills registry, `/converter`, cross-runtime export |
+| **Deploy** | **Deliver** | `SessionStart` hooks, `ao inject --for=<skill>` |
+| **Operate** | **Observe** | Citation tracking, quality signals, session-outcome |
+| **Monitor → Plan** | **Adapt** | MemRL feedback, `/forge`, `/evolve`, `/dream` |
+
+LLMs are engines. Context is fuel. You can't tune the engine — that's the model vendor's job. But you can engineer the fuel. The CDLC is how.
+
+Each generation of software practice gave teams a durable artifact: the wiki, the runbook, the postmortem, the toil budget. AgentOps gives your agents the same kind of artifact — **the corpus**. A typed, versioned, agent-readable knowledge store maintained alongside the code. The model stays the same. The corpus compounds.
+
+> The harness layer commoditizes. Memory primitives, learning loops, validation gates — frontier vendors will ship them natively. What stays yours is the corpus. AgentOps is the bridge tool that helps you build that moat now. See [PRODUCT.md](PRODUCT.md) for the full thesis.
+
+Full CDLC treatment: [docs/cdlc.md](docs/cdlc.md). Theoretical foundations: [docs/the-science.md](docs/the-science.md) and [docs/brownian-ratchet.md](docs/brownian-ratchet.md).
+
+---
+
 ## Quick Start
 
-Inside a repo, run one command in your agent chat:
+Inside a repo, use the path that matches what you are trying to do.
+
+| Path | Run | Done when |
+|------|-----|-----------|
+| **First repo setup** | `ao quick-start`, then `/quickstart` | AgentOps reports repo readiness and a next action |
+| **First validated change** | `/rpi "a small goal"` | Discovery, implementation, validation, and learning closeout leave evidence in `.agents/` |
+| **Review something now** | `/council validate this PR` or `/vibe recent` | You get a consolidated verdict and an evidence record in `.agents/` before shipping |
+
+New project? Use the guided CLI seed first:
+
+```bash
+ao quick-start     # Canonical
+ao quickstart      # Stable alias
+```
+
+That command applies the repeatable core seed: `.agents/`, `GOALS.md`,
+AgentOps instructions, starter knowledge, and readiness guidance. Use
+`/bootstrap` after that when you want the product/operations layer:
+`PRODUCT.md`, `README.md`, `PROGRAM.md`/`AUTODEV.md`, and optional hooks.
+
+Already installed? Ask your agent for the next action:
 
 ```text
 /quickstart
-```
-
-That detects setup, explains the system, and gives you the next action.
-
-Then try the smallest useful flow:
-
-```text
-/council validate this PR
-```
-
-Or let AgentOps run the full discovery-to-validation loop:
-
-```text
-/rpi "a small goal"
 ```
 
 If you installed the CLI, check your local setup:
@@ -191,28 +182,24 @@ ao doctor
 ao demo
 ```
 
-New project? Use the guided CLI path:
-
-```bash
-ao quick-start
-```
-
 Full catalog: [docs/SKILLS.md](docs/SKILLS.md) · Unsure what to run? [Skill Router](docs/SKILL-ROUTER.md)
 
 ---
 
 ## See It Work
 
-**One command: validate a PR**
+**One command: validate a PR across vendors**
 
 ```text
-> /council validate this PR
+> /council --mixed validate this PR
 
-[council] 3 judges spawned independently
-[judge-1] PASS - token bucket implementation correct
-[judge-2] WARN - rate limiting missing on /login endpoint
-[judge-3] PASS - Redis integration follows middleware pattern
-Consensus: WARN - add rate limiting to /login before shipping
+[council] evidence packet sealed -> 6 judges across 2 runtimes
+[claude/judge-1] WARN - rate limiting missing on /login endpoint
+[claude/judge-2] PASS - Redis integration follows middleware pattern
+[codex/judge-1]  WARN - token bucket refill lacks jitter under burst
+[codex/judge-2]  PASS - backoff bounds match retry policy
+Consensus: WARN - fix /login rate limit and add refill jitter before shipping
+Recorded: .agents/council/<run-id>/verdict.md
 ```
 
 **Full loop: research through post-mortem**
@@ -240,7 +227,7 @@ Every skill works alone. Flows compose them when you want more structure.
 | Skill | Use it when |
 |-------|-------------|
 | `/quickstart` | You want the fastest setup check and next action |
-| `/council` | You want independent judges to review a plan, PR, or decision |
+| `/council` | You want independent judges — optionally across Claude and Codex — to evaluate one evidence packet and return a consolidated verdict |
 | `/research` | You need codebase context and prior learnings before changing code |
 | `/pre-mortem` | You want to pressure-test a plan before implementation |
 | `/implement` | You want one scoped task built and validated |
@@ -285,6 +272,7 @@ The `ao` CLI is the repo-native control plane behind the skills. It handles retr
 
 ```bash
 ao quick-start                            # Set up AgentOps in a repo
+ao quickstart                             # Alias for quick-start
 ao doctor                                 # Check local health
 ao demo                                   # See the value path in 5 minutes
 ao search "query"                         # Search session history and local knowledge
@@ -394,6 +382,7 @@ The AgentOps product implements these principles through skills, the `ao` CLI, a
 # 1. Install (pick your runtime above)
 # 2. Run in your repo
 ao quick-start
+#    or: ao quickstart
 # 3. Validate from your agent chat
 /council validate this PR
 ```

@@ -368,3 +368,7 @@ Next steps:
   cd <name>
   <language-specific "run" command>
 ```
+
+## References
+
+- [references/recommended-reading.md](references/recommended-reading.md) — forward-looking index of external skills (e.g., `mcp-server-design`) worth absorbing into scaffold when their trigger conditions arrive. Consult before designing a new scaffold mode that targets agent-facing tool surfaces.

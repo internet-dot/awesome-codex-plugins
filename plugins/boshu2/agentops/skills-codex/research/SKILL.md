@@ -277,6 +277,8 @@ Include in your Explore agent prompt:
 - "medium" - for feature exploration
 - "very thorough" - for architecture/cross-cutting concerns
 
+For onboarding-style research ("what does this do?", new repo orientation), follow `references/onboarding-methodology.md` for the phased docs-first walk and reusable mental-model template. When the question reduces to "what happens when <event> arrives?", trace one path end-to-end using `references/data-flow-from-entry-points.md`.
+
 ## Examples
 
 ### Investigate Authentication System
@@ -333,8 +335,10 @@ Include in your Explore agent prompt:
 - [references/backend-codex-subagents.md](references/backend-codex-subagents.md)
 - [references/backend-inline.md](references/backend-inline.md)
 - [references/context-discovery.md](references/context-discovery.md)
+- [references/data-flow-from-entry-points.md](references/data-flow-from-entry-points.md)
 - [references/document-template.md](references/document-template.md)
 - [references/failure-patterns.md](references/failure-patterns.md)
+- [references/onboarding-methodology.md](references/onboarding-methodology.md)
 - [references/ralph-loop-contract.md](references/ralph-loop-contract.md)
 - [references/vibe-methodology.md](references/vibe-methodology.md)
 
@@ -346,8 +350,10 @@ Include in your Explore agent prompt:
 - [references/backend-codex-subagents.md](references/backend-codex-subagents.md)
 - [references/backend-inline.md](references/backend-inline.md)
 - [references/context-discovery.md](references/context-discovery.md)
+- [references/data-flow-from-entry-points.md](references/data-flow-from-entry-points.md)
 - [references/document-template.md](references/document-template.md)
 - [references/failure-patterns.md](references/failure-patterns.md)
+- [references/onboarding-methodology.md](references/onboarding-methodology.md)
 - [references/ralph-loop-contract.md](references/ralph-loop-contract.md)
 - [references/vibe-methodology.md](references/vibe-methodology.md)
 

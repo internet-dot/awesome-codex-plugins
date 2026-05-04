@@ -2,8 +2,32 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-WORKSPACE_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 TARGET_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
+
+# WORKSPACE_ROOT must contain both schemas/evidence-only-closure.v1.schema.json
+# and lib/hook-helpers.sh. The canonical layout is the agentops repo root, but
+# the script also ships under skills-codex/ and is cached under
+# ~/.codex/plugins/cache/agentops-marketplace/agentops/local/skills-codex/...
+# where the simple "../../.." walk lands inside the cache instead of the
+# packaged repo. Probe several candidates so the script is layout-independent.
+_workspace_has_assets() {
+  [[ -f "$1/schemas/evidence-only-closure.v1.schema.json" && -f "$1/lib/hook-helpers.sh" ]]
+}
+WORKSPACE_ROOT=""
+for candidate in \
+  "$(cd "$SCRIPT_DIR/../../.." && pwd)" \
+  "$(cd "$SCRIPT_DIR/../.." && pwd)" \
+  "$TARGET_ROOT"; do
+  if _workspace_has_assets "$candidate"; then
+    WORKSPACE_ROOT="$candidate"
+    break
+  fi
+done
+if [[ -z "$WORKSPACE_ROOT" ]]; then
+  echo "post-mortem: cannot locate workspace assets (schemas/evidence-only-closure.v1.schema.json, lib/hook-helpers.sh)" >&2
+  echo "  searched: $SCRIPT_DIR/../../.., $SCRIPT_DIR/../.., $TARGET_ROOT" >&2
+  exit 1
+fi
 
 TARGET_ID="fixture-evidence-only-closure"
 TARGET_TYPE="task"
@@ -104,7 +128,7 @@ if [[ "$(cd "$(dirname "$schema_source")" && pwd)/$(basename "$schema_source")" 
   cp "$schema_source" "$schema_target"
 fi
 
-ROOT="$TARGET_ROOT"
+export ROOT="$TARGET_ROOT"
 source "$WORKSPACE_ROOT/lib/hook-helpers.sh"
 
 run_git_target() {

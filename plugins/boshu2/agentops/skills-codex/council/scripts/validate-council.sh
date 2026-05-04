@@ -18,7 +18,6 @@ if [[ "$OUTPUT_DIR" =~ ^-+ ]]; then
     exit 1
 fi
 
-DATE=$(date +%Y-%m-%d)
 PASS=0
 FAIL=0
 WARN=0
@@ -142,11 +141,19 @@ else
     fail "--deep mode should document 3 judges"
 fi
 
-# Check --mixed mode documents 3+3 agents
-if echo "$SKILL_CONTENT" | grep -qE '\-\-mixed.*\|.*3\+3'; then
-    pass "--mixed mode documents 3+3 judges"
+# Check --mixed mode documents the judge count (legacy "3+3" or new "2N (default N=3)")
+if echo "$SKILL_CONTENT" | grep -qE '\-\-mixed.*\|.*(3\+3|2N)'; then
+    pass "--mixed mode documents judge count (3+3 or 2N)"
 else
-    fail "--mixed mode should document 3+3 judges"
+    fail "--mixed mode should document judge count as 3+3 or 2N (default N=3)"
+fi
+
+# Check --mixed mode documents symmetric per-vendor persona pairing.
+MIXED_CONTEXT=$(echo "$SKILL_CONTENT" | awk '/^\| `--mixed`/{flag=1; ctx=0} flag && ctx<12{print; ctx++}')
+if echo "$SKILL_CONTENT$MIXED_CONTEXT" | grep -qiE 'same.*perspectives?.*(both|claude.*codex|two.*vendors)|paired per perspective|symmetric.*pairing'; then
+    pass "--mixed mode documents symmetric persona pairing"
+else
+    fail "--mixed mode should document symmetric persona pairing (same N perspectives applied to both vendors)"
 fi
 
 # ── Section 5: Output file naming convention ────────────────────────

@@ -21,7 +21,7 @@ Do not inline phase work, compress multiple phases into one pass, substitute Cod
 - *"I'll just spawn 3 judges directly — it's what `/vibe` does anyway."*
 - *"Post-mortem is just writing a summary, I'll do it inline."*
 
-All of these are contract violations. A live compression was observed 2026-04-19 (see [`.agents/learnings/2026-04-19-orchestrator-compression-anti-pattern.md`](../../../.agents/learnings/2026-04-19-orchestrator-compression-anti-pattern.md)). The compression "worked" mechanically (strict build passed, 2-judge inline vibe PASSed) but the knowledge flywheel never turned — no forged learnings, no post-mortem artifact, no structured council verdict. Contract strength depends on actual `$<skill>` invocations, not self-certification.
+All of these are contract violations. A live compression was observed 2026-04-19 (see [`docs/learnings/orchestrator-compression-anti-pattern.md`](../../../docs/learnings/orchestrator-compression-anti-pattern.md)). The compression "worked" mechanically (strict build passed, 2-judge inline vibe PASSed) but the knowledge flywheel never turned — no forged learnings, no post-mortem artifact, no structured council verdict. Contract strength depends on actual `$<skill>` invocations, not self-certification.
 
 ## Codex sub-agents vs `$<skill>` invocations
 
@@ -91,7 +91,7 @@ Missing any of the three = compression.
 
 1. **This contract document** — read before / during orchestrator invocation.
 2. **Loud text in each orchestrator's SKILL.md** — anti-pattern section with explicit examples.
-3. **Forged learning** at `.agents/learnings/2026-04-19-orchestrator-compression-anti-pattern.md` — surfaced via `ao inject` at session start.
+3. **Durable learning** at `docs/learnings/orchestrator-compression-anti-pattern.md` — surfaced through the orchestrator skill contracts.
 4. **Optional future**: runtime hook that inspects the skill invocation trace and blocks downstream work when phases were skipped. Not implemented; deferred to a follow-up initiative.
 
 Contract strength alone is not enforcement. Layer 1 (this doc) + Layer 2 (SKILL.md sections) + Layer 3 (flywheel injection) together give durable coverage.

@@ -5,7 +5,6 @@
 Council requires these runtime capabilities. Map them to whatever your agent harness provides.
 
 **For concrete tool call examples per backend, read the matching shared reference:**
-- Codex sub-agents → `skills/shared/references/backend-codex-subagents.md`
 - Codex Sub-Agents / CLI → `skills/shared/references/backend-codex-subagents.md`
 - Background Tasks → `skills/shared/references/backend-background-tasks.md`
 - Inline → `skills/shared/references/backend-inline.md`
@@ -27,13 +26,25 @@ exit without spawning judges (strict — see "Strict Codex Requirement" below).
 
 ### Phase 1: Spawn Judges in Parallel
 
-For each judge (N = 2 default, 3 with `--deep`):
+For each judge (N = 2 default, 3 with `--deep`, 2N with `--mixed`):
 
 1. Spawn a subagent with the judge prompt (see `agent-prompts.md`)
 2. Each judge receives the full context packet as its prompt
 3. Track the mapping: `judge-{N}` → agent handle (for messaging and cleanup)
 
 All judges spawn in parallel. Do not wait for one before spawning the next.
+
+#### Mixed-Mode Perspective Distribution
+
+When `--mixed` is set:
+
+1. Build the perspective list once from `--preset`, `--perspectives`, or `--perspectives-file`. If none of these is set, treat the list as `[default, default, default]` (3 generic slots).
+2. For each perspective P in the list, spawn EXACTLY ONE Claude judge AND ONE Codex judge, both receiving:
+   - the same packet (see "Pre-assemble packet" pattern)
+   - the same `{PERSONA_NAME}` and `{PERSPECTIVE}` slot in the agent prompt
+   - the same `output_schema`
+3. Total judges = 2 × len(perspectives). Default len=3 → 6 judges. Variable preset sizes scale naturally (e.g., `--preset=security-audit` has 4 perspectives → 8 judges; `--preset=plan-review` has 4 → 8; `--preset=leadership-quartet` has 4 → 8).
+4. Do **NOT** split perspectives across vendors. The whole point of `--mixed` is to hold the perspective constant and vary only the vendor — that is what makes verdict differences attributable to the vendor instead of to the perspective.
 
 ### Phase 2: Wait for Completion
 
@@ -74,9 +85,9 @@ Shut down all judges via runtime's shutdown mechanism. Cleanup MUST succeed even
 3. If any judge doesn't respond, log warning, proceed anyway
 4. Always run cleanup — lingering agents pollute future sessions
 
-## Codex CLI Judges (--mixed mode)
+## Codex CLI Judges (--mixed mode, paired)
 
-For cross-vendor consensus, run Codex CLI processes alongside runtime-native judges.
+For cross-vendor consensus, run Codex CLI processes alongside runtime-native judges. The Codex judges receive the **same** perspective list as the runtime-native judges (one Codex CLI process per perspective) — see "Mixed-Mode Perspective Distribution" above.
 
 ### Strict Codex Requirement (no silent fallback)
 
@@ -110,15 +121,21 @@ defeat the cross-vendor validation intent. The only acceptable degradation is
 explicit operator action (dropping `--mixed`). This rule is strict by design.
 
 Once Codex is confirmed available, spawn Codex judges alongside runtime-native
-judges:
+judges. **Always set `AGENTOPS_INTENT_ECHO_DISABLED=1` in the spawn env** —
+otherwise the `intent-echo.sh` UserPromptSubmit hook (in `~/.codex/hooks.json`
+on agentops-codex installs) detects high-stakes keywords in council packets
+("every", "all", "extract", scope-limiters) and forces an Intent/Confirm
+preamble that becomes the assistant message captured by `-o`. Council judges
+then never produce real output. See
+`.agents/learnings/2026-05-02-codex-intent-echo-hook-blocks-mixed-council.md`.
 
 ```bash
 # With structured output (preferred)
-codex exec -s read-only -C "$(pwd)" --output-schema skills/council/schemas/verdict.json -o .agents/council/codex-{N}.json "{PACKET}"
+AGENTOPS_INTENT_ECHO_DISABLED=1 codex exec -s read-only -C "$(pwd)" --output-schema skills/council/schemas/verdict.json -o .agents/council/codex-{N}.json "{PACKET}"
 
 # Fallback (if --output-schema unsupported — this is an output-format fallback,
 # NOT a vendor fallback; Codex is still required)
-codex exec --full-auto -C "$(pwd)" -o .agents/council/codex-{N}.md "{PACKET}"
+AGENTOPS_INTENT_ECHO_DISABLED=1 codex exec --full-auto -C "$(pwd)" -o .agents/council/codex-{N}.md "{PACKET}"
 ```
 
 Uses the user's default Codex model. Only pass `-m` if `COUNCIL_CODEX_MODEL` is explicitly set.

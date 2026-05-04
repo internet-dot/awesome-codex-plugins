@@ -56,11 +56,14 @@ write_codex_judge() {
       "recommendation": "Keep the six-artifact mixed-mode contract covered without live vendor spend.",
       "fix": "Run this smoke from council validators.",
       "why": "Static docs checks cannot prove the consolidator has one artifact per requested judge.",
-      "ref": "skills/council/references/cli-spawning.md"
+      "ref": "skills/council/references/cli-spawning.md",
+      "id": null
     }
   ],
   "recommendation": "Pass mocked mixed-mode artifact coverage.",
-  "schema_version": 4
+  "schema_version": 4,
+  "satisfaction_score": null,
+  "satisfaction_breakdown": null
 }
 EOF
 }
@@ -84,18 +87,35 @@ write_codex_judge 1 PASS
 write_codex_judge 2 WARN
 write_codex_judge 3 PASS
 
+DEFAULT_RUN_ID="$RUN_ID"
+LEADERSHIP_RUN_ID="2026-05-03-leadership-quartet-smoke"
+RUN_ID="$LEADERSHIP_RUN_ID"
+write_runtime_judge 1 PASS
+write_runtime_judge 2 PASS
+write_runtime_judge 3 WARN
+write_runtime_judge 4 PASS
+write_codex_judge 1 PASS
+write_codex_judge 2 PASS
+write_codex_judge 3 WARN
+write_codex_judge 4 PASS
+RUN_ID="$DEFAULT_RUN_ID"
+
 mapfile -t runtime_files < <(find "$COUNCIL_DIR" -maxdepth 1 -type f -name "${RUN_ID}-judge-*.md" | LC_ALL=C sort)
 mapfile -t codex_files < <(find "$COUNCIL_DIR" -maxdepth 1 -type f -name "${RUN_ID}-codex-*.json" | LC_ALL=C sort)
+mapfile -t leadership_runtime_files < <(find "$COUNCIL_DIR" -maxdepth 1 -type f -name "${LEADERSHIP_RUN_ID}-judge-*.md" | LC_ALL=C sort)
+mapfile -t leadership_codex_files < <(find "$COUNCIL_DIR" -maxdepth 1 -type f -name "${LEADERSHIP_RUN_ID}-codex-*.json" | LC_ALL=C sort)
 
 assert_count "runtime-native judge artifact" 3 "${runtime_files[@]}"
 assert_count "Codex judge artifact" 3 "${codex_files[@]}"
+assert_count "leadership-quartet runtime-native judge artifact" 4 "${leadership_runtime_files[@]}"
+assert_count "leadership-quartet Codex judge artifact" 4 "${leadership_codex_files[@]}"
 
-for file in "${runtime_files[@]}"; do
+for file in "${runtime_files[@]}" "${leadership_runtime_files[@]}"; do
     grep -q '^Verdict: ' "$file" || fail "runtime artifact missing Verdict line: $file"
     grep -q '^Confidence: ' "$file" || fail "runtime artifact missing Confidence line: $file"
 done
 
-python3 - "$SCHEMA_FILE" "${codex_files[@]}" <<'PY'
+python3 - "$SCHEMA_FILE" "${codex_files[@]}" "${leadership_codex_files[@]}" <<'PY'
 import json
 import pathlib
 import sys
@@ -156,8 +176,10 @@ report_file="$COUNCIL_DIR/${RUN_ID}-report.md"
 
 mapfile -t judge_files < <(find "$COUNCIL_DIR" -maxdepth 1 -type f \( -name "${RUN_ID}-judge-*.md" -o -name "${RUN_ID}-codex-*.json" \) | LC_ALL=C sort)
 assert_count "total mixed judge artifact" 6 "${judge_files[@]}"
+mapfile -t leadership_judge_files < <(find "$COUNCIL_DIR" -maxdepth 1 -type f \( -name "${LEADERSHIP_RUN_ID}-judge-*.md" -o -name "${LEADERSHIP_RUN_ID}-codex-*.json" \) | LC_ALL=C sort)
+assert_count "total leadership-quartet mixed judge artifact" 8 "${leadership_judge_files[@]}"
 
 grep -q 'Runtime-native judge artifacts: 3' "$report_file" || fail "report did not read runtime artifact count"
 grep -q 'Codex judge artifacts: 3' "$report_file" || fail "report did not read Codex artifact count"
 
-echo "PASS: mocked --mixed artifact smoke produced and read 3 runtime-native + 3 Codex judge artifacts"
+echo "PASS: mocked --mixed artifact smoke produced and read 3 runtime-native + 3 Codex judge artifacts plus 4+4 leadership-quartet artifacts"

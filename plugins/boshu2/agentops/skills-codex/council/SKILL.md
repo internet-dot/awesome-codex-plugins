@@ -14,6 +14,7 @@ $council validate this plan                                    # validation (2 j
 $council brainstorm caching approaches                         # brainstorm
 $council --deep validate the implementation                    # 3 judges
 $council --preset=security-audit validate the auth system      # preset personas
+$council --deep --mixed --preset=leadership-quartet validate product thesis
 ```
 
 ## Modes
@@ -23,7 +24,7 @@ $council --preset=security-audit validate the auth system      # preset personas
 | `--quick` | 0 (inline) | Self | Fast single-agent check, no spawning |
 | default | 2 | `spawn_agent` | Independent judges |
 | `--deep` | 3 | `spawn_agent` | Thorough review |
-| `--mixed` | 3+3 | `spawn_agent` + Codex CLI | Cross-vendor consensus |
+| `--mixed` | 2N (default N=3) | `spawn_agent` + Codex CLI | Cross-vendor consensus — same N perspectives applied to both vendors |
 
 **Note:** `--debate` (multi-round adversarial) requires agent messaging. Use `spawn_agent` plus `send_input` for one-off follow-up only; do not rely on debate-style rounds.
 
@@ -64,7 +65,9 @@ $council --preset=security-audit validate the auth system      # preset personas
 
 ### Phase 1a: Spawn Judges
 
-Use one `spawn_agent` call per judge. Include the same context packet in each prompt and assign a distinct perspective:
+Use one `spawn_agent` call per judge. Include the same context packet in each prompt and assign a distinct perspective.
+
+**Mixed-mode pairing (--mixed only):** For `--mixed`, build the perspective list once. For each perspective, spawn ONE `spawn_agent` call AND ONE `codex exec` process with the SAME perspective string, SAME packet, SAME prompt — only the vendor differs. The pair holds perspective constant and varies only the vendor, enabling head-to-head cross-vendor comparison per perspective. Do NOT split perspectives across vendors (e.g., do NOT give Claude judges perspectives 1-3 and Codex judges perspectives 4-6). Total judges = 2 × len(perspectives); default = 6.
 
 ```text
 spawn_agent(message="You are judge-1.
@@ -172,8 +175,10 @@ Save to `.agents/council/YYYY-MM-DD-<type>-<target>.md`:
 | architecture | coupling, scalability, maintainability |
 | research | breadth, depth, contrarian |
 | ops | reliability, observability, failure-modes |
+| leadership-quartet | product-manager, cto, chief-engineer, staff-engineer |
 
 Use: `$council --preset=security-audit validate the auth system`
+Use: `$council --deep --mixed --preset=leadership-quartet validate product thesis`
 
 ## Graceful Degradation
 

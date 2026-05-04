@@ -309,7 +309,9 @@ git tag -a v<version> -m "Release v<version>"
 Read `references/release-notes.md` for the full release notes format, quality bar, condensing rules, and examples. Key points:
 
 - Release notes are **not the changelog** — they're user-facing, plain-English, no jargon
-- Structure: Highlights → What's New → All Changes (condensed) → link to full CHANGELOG
+- Structure: Highlights → Upgrade Notes → At a Glance → Product Areas → Known Issues → link to full CHANGELOG
+- Only touched product areas appear, in canonical order. Use the coverage workflow in `references/release-notes.md` to map changed paths to component sections before writing prose.
+- Use stable per-component action labels: Added, Changed, Refactored, Fixed, Deprecated, Removed, Security, Docs.
 - Write to `docs/releases/YYYY-MM-DD-v<version>-notes.md`
 - Show to the user as part of Step 8 review
 
@@ -515,6 +517,8 @@ Everything this skill does is local and reversible:
 
 - [deps](../deps/SKILL.md) — Dependency audit and vulnerability scanning
 
+When wiring or auditing the CI workflow that backs `--check` mode (or the tag-triggered release pipeline that consumes the curated notes), pull the relevant patterns from `references/gh-actions-ci-patterns.md` (general CI) or `references/gh-actions-release-automation.md` (tag-triggered, draft flow, asset upload). When generating the curated release-notes file or auditing CHANGELOG.md drift, treat the changelog as an orientation layer and use `references/changelog-as-research-artifact.md` for the structured-section, breaking-change-callout, and notes-vs-changelog rules.
+
 ## Reference Documents
 
 - [references/release-cadence.md](references/release-cadence.md)
@@ -525,6 +529,9 @@ Everything this skill does is local and reversible:
 
 - [references/release-cadence.md](references/release-cadence.md)
 - [references/release-notes.md](references/release-notes.md)
+- [references/gh-actions-ci-patterns.md](references/gh-actions-ci-patterns.md)
+- [references/gh-actions-release-automation.md](references/gh-actions-release-automation.md)
+- [references/changelog-as-research-artifact.md](references/changelog-as-research-artifact.md)
 
 ### scripts/
 

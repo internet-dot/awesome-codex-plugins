@@ -1,5 +1,15 @@
 <p align="center">
-  <img src="assets/hero-banner.png" alt="agenttrace — find where your AI agents waste money & time" width="100%">
+  <img src="assets/logo-icon.png" alt="agenttrace logo" width="256" height="256">
+</p>
+
+<h1 align="center">AgentTrace</h1>
+
+<p align="center">
+  Review AI coding agent history across cost, tokens, and time, then find why a run was slow.
+</p>
+
+<p align="center">
+  English | <a href="README.zh-CN.md">简体中文</a>
 </p>
 
 <p align="center">
@@ -8,410 +18,152 @@
   <a href="https://github.com/luoyuctl/agenttrace/releases/latest"><img src="https://img.shields.io/github/v/release/luoyuctl/agenttrace?color=00ADD8" alt="Release"></a>
   <a href="https://pkg.go.dev/github.com/luoyuctl/agenttrace"><img src="https://pkg.go.dev/badge/github.com/luoyuctl/agenttrace.svg" alt="Go Reference"></a>
   <a href="https://goreportcard.com/report/github.com/luoyuctl/agenttrace"><img src="https://goreportcard.com/badge/github.com/luoyuctl/agenttrace" alt="Go Report Card"></a>
-  <a href="https://github.com/luoyuctl/agenttrace/stargazers"><img src="https://img.shields.io/github/stars/luoyuctl/agenttrace?style=social" alt="GitHub stars"></a>
-  <img src="https://img.shields.io/badge/go-1.24+-00ADD8.svg" alt="Go">
+  <img src="https://img.shields.io/badge/go-1.25+-00ADD8.svg" alt="Go">
   <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License">
-  <img src="https://img.shields.io/badge/Homebrew-v0.3.46-2bbc8a.svg" alt="Homebrew">
+  <img src="https://img.shields.io/badge/Homebrew-v0.4.2-2bbc8a.svg" alt="Homebrew">
 </p>
-
-<h3 align="center">💸 Stop burning cash and hours on invisible AI agent waste</h3>
-
----
-
-## What is agenttrace?
-
-AI coding agents (Claude Code, Gemini CLI, Codex CLI) burn tokens in loops, retry failures silently, and leave you with a surprise bill. You're wasting **money** on dead tokens and **time** on broken sessions — and you can't even see where.
-
-**agenttrace** finds the waste in both — so you stop paying for nothing and start shipping faster.
-
-Site: https://luoyuctl.github.io/agenttrace/
-
-Sample HTML report: https://luoyuctl.github.io/agenttrace/demo-report.html
-
-Featured in: [Awesome Codex CLI](https://github.com/RoggeOhta/awesome-codex-cli), [Awesome Gemini CLI](https://github.com/Piebald-AI/awesome-gemini-cli), [Charm in the Wild](https://github.com/charm-and-friends/charm-in-the-wild), and [Awesome Claude Code and Skills](https://github.com/GetBindu/awesome-claude-code-and-skills).
 
 <p align="center">
-  <img src="assets/agenttrace-demo.gif" alt="agenttrace TUI demo" width="100%">
+  <img src="assets/readme-real-run.gif" alt="agenttrace running locally against real AI coding agent session logs" width="100%">
 </p>
-
-The GIF follows the shortest first-run path: `agenttrace --demo`, `!`, `Enter`, then `w` for diagnostics.
-
-> Sharing agenttrace? See [docs/demo-playbook.md](docs/demo-playbook.md) for the GIF recording script, launch storyline, and posting copy.
-
-## Why it exists
-
-AI agents now behave like tiny build systems: they plan, call tools, retry, hang, and spend money while doing it. Most teams only see the final output, not the session health, token burn, tool failure rate, or whether the agent got stuck. agenttrace gives that missing operational view in the terminal.
-
-## Where it fits
-
-agenttrace is not a hosted tracing backend or another chat client. It is a local inspection tool for the logs your coding agents already leave on disk.
-
-| If you need... | Use agenttrace for... |
-|---|---|
-| Local-first privacy | Inspect sessions without uploading prompts, code, or tool logs |
-| Fast terminal triage | Open a TUI, sort bad sessions, and jump into detail/diagnostics |
-| Cross-agent comparison | Compare Claude Code, Codex CLI, Gemini CLI, Qwen Code, Cline, Aider, Cursor exports, Hermes, OpenCode, Oh My Pi, Kimi, and more |
-| Cost and token evidence | See cost, token usage, cache usage, retries, loops, latency, and health in one place |
-| Workflow improvement | Mine local sessions for repeated tool failures, hanging gaps, and costly loops before updating prompts, skills, or project instructions |
-| CI guardrails | Export JSON/Markdown/HTML and fail builds on low health or high tool failure rates |
-
-## What it catches
-
-| Pain | What agenttrace shows |
-|---|---|
-| Surprise token bills | input/output/cache tokens, estimated cost, top token-heavy agents |
-| Silent tool loops | repeated tool calls, retry loops, long gaps, hanging sessions |
-| Slow agents | P50/P95/P99 latency, per-tool latency ranking, timeout-like gaps |
-| Quality regressions | health score, anomaly types, shallow reasoning, redacted thinking |
-| Hard-to-compare tools | session diff across Claude Code, Codex CLI, Gemini CLI, Qwen Code, Cline, Aider, Cursor exports, Oh My Pi, and more |
-| Brittle prompts or skills | `tool_fail_rate`, anomaly mix, and expensive sessions that point to the workflow note, skill, or command wrapper to fix next |
-| CI blind spots | JSON reports and health gates for average health, critical sessions, and tool failure rate |
-
-## ✨ Features
-
-| Feature | Description |
-|---|---|
-| 🚀 **Single Binary** | 7.5 MB — `curl -sL ... \| sh` install, no runtime deps |
-| 🖥️ **Bubble Tea TUI** | Modern terminal UI: Overview → Session List → Detail → Diagnostics → Diff |
-| ⚡ **Persistent Cache** | Incremental session cache avoids a full disk parse on every startup |
-| 🩺 **Doctor Mode** | `--doctor` checks detected agent dirs, cache health, and next steps |
-| ⌨️ **Command Mode** | `:health <80`, `:cost >0.1`, `:sort cost desc`, `:anomalies` |
-| 🔍 **Multi-Format Auto-Detect** | Claude Code / Codex CLI / Gemini CLI / Qwen Code / Cline / Aider / Cursor exports / Hermes / OpenCode / OpenClaw / Oh My Pi / Kimi / Copilot-style logs |
-| 💸 **Cost & Time Waste** | How much 💰 you burned + ⏱️ time lost to loops, retries, failures |
-| 🚨 **6 Anomaly Types** | Hanging, tool failures, latency spikes, shallow thinking, redaction, zero-tool sessions |
-| 📊 **Multi-Session Comparison** | Compare across sessions and tools in one table |
-| 💯 **Health Score** | 0-100 composite with visual bar and emoji |
-| 🤖 **Machine Readable** | JSON output for CI/CD and automation |
-| 🌐 **Shareable Reports** | Self-contained HTML overview reports for CI artifacts, issues, and demos |
 
 ---
 
-## 🚀 Quick Start
+**agenttrace** is a local TUI and report generator for AI coding agent session history. It reads Claude Code, Codex CLI, Gemini CLI, Qwen Code, Cursor, Aider, OpenCode, OpenClaw, Hermes Agent, Kimi CLI, and Copilot-style logs, then helps with two daily jobs: see what multiple agents spent across cost, tokens, and time; and diagnose why a task ran slowly.
 
-Not sure which install path to use? Start with the one-liner for a quick local trial. Use Homebrew when you want managed upgrades, Go install when you already live in the Go toolchain, and manual build when you want to inspect or change the source first.
+## Why agenttrace?
 
-### One-liner install
+AI coding agents now behave like small build systems: they call tools, retry, stall, and spend tokens while you only see the final answer.
 
-Recommended for first-time Linux/macOS users who want to try the TUI quickly:
+**agenttrace** reads the logs your agents already write and puts cost-heavy or slow sessions first.
+
+It helps you answer:
+
+- **What did my agents spend?** Compare historical sessions by agent source, model, input/output/cache tokens, estimated cost, and wall-clock time.
+- **Why was this task slow?** Catch long gaps, hanging sessions, retry loops, slow tool calls, large parameters, and context pressure.
+- **What should I inspect first?** Rank sessions by cost, duration, turns, health, failures, anomalies, model, source, or text search.
+- **Can I inspect this privately?** Everything runs locally; prompts, code, and logs do not need to leave your machine.
+
+## Real local run
+
+These screenshots were captured from a local run against real session logs. They are not `--demo` output and not test fixtures.
 
 ```bash
-# Linux / macOS
+agenttrace
+```
+
+| Overview | Critical sessions |
+|---|---|
+| <img src="assets/readme-real-overview.png" alt="agenttrace overview showing real local AI coding agent sessions, token cost, errors, and health" width="100%"> | <img src="assets/readme-real-critical.png" alt="agenttrace critical session list from real local AI coding agent logs" width="100%"> |
+
+| Session detail | Diagnostics |
+|---|---|
+| <img src="assets/readme-real-detail.png" alt="agenttrace detail view showing health, cost, tool failures, and next action from a real local session" width="100%"> | <img src="assets/readme-real-diagnostics.png" alt="agenttrace diagnostics view showing latency, context window, and large parameter calls from real local logs" width="100%"> |
+
+That local run found:
+
+```text
+AGENTTRACE v0.4.2
+```
+
+| Signal | What agenttrace found |
+|---|---:|
+| Analyzed sessions | 1,714 |
+| Total tokens | 8.93B |
+| Estimated cost | $4,896.61 |
+| Tool failure rate | 1.5% |
+| Critical sessions | 35 |
+| Average health | 90% |
+
+## Install
+
+```bash
 curl -sL https://raw.githubusercontent.com/luoyuctl/agenttrace/master/install.sh | sh
 ```
 
-Windows users can use the PowerShell installer:
-
-```powershell
-# Windows (PowerShell)
-iwr -useb https://raw.githubusercontent.com/luoyuctl/agenttrace/master/install.ps1 | iex
-```
-
-### Homebrew (macOS / Linux)
-
-Recommended when you prefer package-manager upgrades:
+Other install paths:
 
 ```bash
 brew install luoyuctl/tap/agenttrace
-```
-
-### Go install
-
-Recommended when your `$GOBIN` or `$GOPATH/bin` is already on `PATH`:
-
-```bash
 go install github.com/luoyuctl/agenttrace/cmd/agenttrace@latest
 ```
 
-### 60-second value check
+Windows:
 
-After installing, run the shortest path before wiring agenttrace into a real workflow:
-
-```bash
-# See the TUI without needing local agent logs
-agenttrace --demo
-
-# Confirm which local session directories and cache state agenttrace can see
-agenttrace --doctor
-
-# Preview machine-readable evidence for CI, dashboards, or PR notes
-agenttrace --demo --overview -f json
+```powershell
+iwr -useb https://raw.githubusercontent.com/luoyuctl/agenttrace/master/install.ps1 | iex
 ```
 
-If those outputs show the pain you care about, try the real local scan:
+The npm wrapper is also available as `agenttrace` after each release is published.
+
+## Common workflows
 
 ```bash
+# Open the local TUI
+agenttrace
+
+# Check detected agent directories and cache state
+agenttrace --doctor
+
+# Generate machine-readable evidence
+agenttrace --overview -f json
+
+# Create a self-contained report for CI artifacts or issue links
+agenttrace --overview -f html -o agenttrace-overview.html
+
+# Fail CI on unhealthy agent runs
 agenttrace --overview \
   --fail-under-health 80 \
   --fail-on-critical \
   --max-tool-fail-rate 15
 ```
 
-### Codex plugin
+## Supported logs
 
-This repo includes a Codex plugin manifest and skill so Codex can use `agenttrace` to audit local AI agent session logs:
+agenttrace supports local sessions from:
 
-- `.codex-plugin/plugin.json`
-- `skills/agenttrace-session-audit/SKILL.md`
+Claude Code, Codex CLI, Gemini CLI, Qwen Code, Cline, Aider, Cursor exports, Hermes Agent, OpenCode, OpenClaw, Oh My Pi, Kimi CLI, Copilot-style logs, and generic JSON/JSONL traces.
 
-### npm
+## What you get
 
-The npm wrapper is prepared in `npm/`, but the public package is not published yet. Use the one-liner, Homebrew, or manual build for now.
-
-### Manual build
-
-```bash
-git clone https://github.com/luoyuctl/agenttrace.git
-cd agenttrace
-go build -ldflags="-s -w" -o agenttrace ./cmd/agenttrace/
-sudo mv agenttrace /usr/local/bin/
-```
-
-### Usage
-
-```bash
-# Launch TUI dashboard (default, no flags)
-agenttrace
-
-# Try the TUI with built-in sample sessions
-agenttrace --demo
-
-# Diagnose local session discovery and cache status
-agenttrace --doctor
-
-# Import a Cursor workspace export
-agenttrace cursor-export.json
-
-# Analyze latest session
-agenttrace --latest
-
-# Compare all sessions
-agenttrace --compare -d ~/.hermes/sessions
-
-# JSON output (CI/CD)
-agenttrace --latest -f json
-
-# Global fleet overview as JSON
-agenttrace --overview -f json -o agenttrace-overview.json
-
-# Markdown report for PR comments or CI artifacts
-agenttrace --overview -f markdown -o agenttrace-overview.md
-
-# Self-contained HTML report for sharing
-agenttrace --overview -f html -o agenttrace-overview.html
-
-# CI health gate
-agenttrace --overview --fail-under-health 80 --fail-on-critical --max-tool-fail-rate 15
-
-# Demo JSON for screenshots, CI examples, or first-time evaluation
-agenttrace --demo --overview -f json
-
-# Doctor JSON for support tickets or CI setup checks
-agenttrace --doctor -f json
-
-# List all model pricings (900+ from LiteLLM when cached)
-agenttrace --list-models
-
-# Update pricing from LiteLLM community database
-agenttrace --update-pricing
-
-# Update + list in one go
-agenttrace --update-pricing --list-models
-
-# Specify session language for cost estimation
-agenttrace --latest --lang zh    # Chinese (supports zh, en)
-```
-
-### Cursor Import
-
-Cursor keeps local composer/chat state in SQLite `state.vscdb` files. Export the relevant JSON keys once, then point `agenttrace` at the exported file:
-
-```bash
-db="$HOME/Library/Application Support/Cursor/User/workspaceStorage/<workspace-id>/state.vscdb"
-sqlite3 "$db" "select json_group_object(key, json(value)) from ItemTable where key in ('aiService.prompts','aiService.generations','composer.composerData');" > cursor-export.json
-agenttrace cursor-export.json
-```
-
-See [docs/cursor-import.md](docs/cursor-import.md) for details.
-
-### TUI Navigation
-
-| Key | Action |
+| Need | agenttrace gives you |
 |---|---|
-| `↑↓` / `jk` | Navigate sessions |
-| `Enter` | View session detail |
-| `Tab` | Switch view: Overview → List → Detail → Diagnostics → Diff |
-| `0`-`4` | Jump directly to a view |
-| `h` / `c` / `t` / `e` / `a` / `n` | Sort by health / cost / turns / failures / anomalies / name |
-| `f` / `s` / `/` | Filter by health / source / text |
-| `:` | Command mode |
-| `?` | Open the keyboard shortcut map |
-| `d` / `w` | Open diff / diagnostics |
-| `ctrl+r` | Force reload and rebuild local cache |
-| `q` / `Esc` | Quit / Back |
+| Historical spend review | Sessions grouped across agents with token totals, model pricing, estimated cost, and elapsed time |
+| Slow-task diagnosis | Latency stats, long gaps, hanging sessions, retry loops, slow tools, large params, and context pressure |
+| First-session triage | Sort and filter by cost, duration, health, failures, anomalies, model, source, or text search |
+| Shareable evidence | JSON, Markdown, and self-contained HTML reports |
+| Local-first inspection | No hosted backend required |
 
----
+## Docs
 
-## 📊 Sample Output
+- Site: https://luoyuctl.github.io/agenttrace/
+- Sample HTML report: https://luoyuctl.github.io/agenttrace/demo-report.html
+- CI setup: [docs/ci-integration.md](docs/ci-integration.md)
+- Cursor import: [docs/cursor-import.md](docs/cursor-import.md)
+- Parser guide: [docs/parser-guide.md](docs/parser-guide.md)
+- Launch notes: [docs/launch-kit.md](docs/launch-kit.md)
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  AGENTTRACE v0.3.46 — AI Agent Session Performance Report
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Listed in [Awesome Gemini CLI](https://github.com/Piebald-AI/awesome-gemini-cli), [Charm in the Wild](https://github.com/charm-and-friends/charm-in-the-wild), and [Awesome Claude Code and Skills](https://github.com/GetBindu/awesome-claude-code-and-skills).
 
-💰 TOKEN COST
-────────────────────────────────────────
-  Input:             1,342  tokens
-  Output:            3,947  tokens
-  ────────────────────────────────────
-  Total tokens:      5,289
-  Est. cost:    $     0.0632  (model: claude-sonnet-4)
+## Contributing
 
-📊 ACTIVITY
-────────────────────────────────────────
-  Messages:    2 user  |  42 turns
-  Tool calls:  70
-  Success:     91% (64/70)
-
-⏱️  LATENCY
-────────────────────────────────────────
-  min:     12.3s
-  median:  457.9s
-  p95:     720.1s
-  max:     901.0s
-  avg:     358.4s
-  Duration: 15.4m
-
-🧠 THINKING / COT
-────────────────────────────────────────
-  Blocks: 20
-  Avg:    392 chars
-  Total:  7,840 chars
-  Quality: 🔴 shallow
-
-🚨 ANOMALIES
-────────────────────────────────────────
-  🔴 [HIGH] hanging: 1 gap(s) >60s, max=901s
-  🟡 [MEDIUM] shallow_thinking: avg reasoning = 392 chars
-
-💯 HEALTH SCORE
-────────────────────────────────────────
-  🟢  90/100  [██████████████████░░]
-```
-
----
-
-## 🎯 Anomaly Detection
-
-| Type | Trigger | Severity |
-|---|---|---|
-| 🔴 **Hanging** | Event gap > 60s | high/medium |
-| 🔴 **Tool Failures** | Failure rate > 20% | high |
-| 🔴 **Latency Spikes** | p95 latency > 120s | low/medium |
-| 🟡 **Shallow Thinking** | Avg reasoning < 500 chars | high/medium |
-| 🟡 **Redaction** | Redacted thinking blocks | medium |
-| 🟡 **No Tools** | 3+ turns with zero tool calls | medium |
-
----
-
-## 📈 Multi-Session Comparison
-
-```
-===============================================================
-  AGENTTRACE — Multi-Session Comparison (12 sessions)
-===============================================================
-Session                   Turns  Tools   Succ     Cost  Health
----------------------------------------------------------------
-20260501_103809_71476f6d     42     70    91%  $0.0632   90/100
-20260501_084515_a1b2c3d4     18     25    96%  $0.0315   95/100
-20260430_192030_e5f6g7h8     65    110    78%  $0.1240   65/100 ⚠️
-===============================================================
-```
-
----
-
-## 💡 Use Cases
-
-- **CI/CD Gate** — fail builds when agent sessions degrade below health threshold
-- **Cost Audit** — find which sessions are burning tokens uselessly
-- **Tool Benchmarking** — compare Claude Code vs Gemini CLI objectively
-- **Quality Monitoring** — detect when your agent starts hallucinating or hanging
-- **Team Insights** — track agent performance across developers
-
----
-
-## 🗺️ Roadmap
-
-**Done**
-
-- [x] Installer paths: curl script, prebuilt binaries, Homebrew, and prepared npm wrapper
-- [x] Release safety: GitHub Actions, release pipeline, and CI health gates
-- [x] Session intelligence: historical trends, cost audit, health gates, and shareable reports
-- [x] Parser coverage: Claude Code, Codex CLI, Gemini CLI, Qwen Code, Cline, Aider, Cursor exports, Hermes, OpenCode, OpenClaw, Oh My Pi, Kimi, and Copilot-style logs
-
-**Next**
-
-- [ ] Publish npm package
-- [ ] Web dashboard for report exploration
-- [ ] VS Code extension
-
-See [CI Integration](docs/ci-integration.md) for a ready-to-copy GitHub Actions health gate.
-
----
-
-## 📣 Launch Kit
-
-Planning to share or collect feedback? See [docs/launch-kit.md](docs/launch-kit.md) for positioning, launch posts, short social copy, target communities, and demo checklist.
-
-Feedback and workflow examples are welcome in [GitHub Discussions](https://github.com/luoyuctl/agenttrace/discussions/2).
-
----
-
-## 🧩 Add a Parser
-
-Want agenttrace to support another coding agent? Start with [docs/parser-guide.md](docs/parser-guide.md). A good parser PR usually includes:
+Parser PRs are welcome. A good parser contribution usually includes:
 
 - a tiny redacted fixture or synthetic sample
 - format detection in `DetectFormat`
 - role, timestamp, model, token usage, tool call, and tool error extraction
 - tests for successful parsing and malformed input
 
----
-
-## 🏗️ Architecture
-
-```
-.
-├── cmd/agenttrace/main.go      # CLI entry: flags, TUI/CLI dispatch
-└── internal/
-    ├── engine/                 # parsers, pricing, anomalies, reports, cache
-    ├── index/                  # incremental local session index
-    ├── i18n/                   # bilingual UI/report strings
-    └── tui/                    # Bubble Tea TUI views, command mode, tests
-```
-
----
-
-## 🤝 Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution flow, validation commands, parser expectations, privacy guidance, and the [code of conduct](CODE_OF_CONDUCT.md).
+Run before sending a PR:
 
 ```bash
-git clone https://github.com/luoyuctl/agenttrace.git
-cd agenttrace
-go test ./...              # verify behavior and rendering constraints
+go test ./...
 go build -o agenttrace ./cmd/agenttrace/
-./agenttrace --latest      # smoke test
-./agenttrace --doctor      # verify local discovery and cache status
+./agenttrace --doctor
 ```
 
----
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full contribution flow.
 
-## 📄 License
+## License
 
-[MIT](LICENSE) © 2025 agenttrace contributors
-
----
-
-<p align="center">
-  <sub>Built with ❤️ for the AI engineering community</sub>
-</p>
+[MIT](LICENSE) © 2026 agenttrace contributors

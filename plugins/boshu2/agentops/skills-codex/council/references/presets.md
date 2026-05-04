@@ -1,5 +1,10 @@
 # Built-in Presets
 
-Presets are covered in `personas.md`. This file exists as a redirect.
+Presets are defined in `personas.md`. This file keeps the high-level preset
+index visible for agents that open the named preset reference first.
 
-**For all preset definitions and perspective details, read `skills/council/references/personas.md`.**
+| Preset | Perspectives | Best For |
+|--------|--------------|----------|
+| `leadership-quartet` | product-manager, cto, chief-engineer, staff-engineer | Product and engineering reality checks where stated thesis vs shipped reality is in question |
+
+For all preset definitions, read `skills/council/references/personas.md`.

@@ -1,11 +1,15 @@
-# oc-codex-multi-auth
+# oc-codex-multi-auth: ChatGPT OAuth and multi-account Codex routing for OpenCode
 
 [![npm version](https://img.shields.io/npm/v/oc-codex-multi-auth.svg)](https://www.npmjs.com/package/oc-codex-multi-auth)
 [![npm downloads](https://img.shields.io/npm/dw/oc-codex-multi-auth.svg)](https://www.npmjs.com/package/oc-codex-multi-auth)
+[![CI](https://github.com/ndycode/oc-codex-multi-auth/actions/workflows/ci.yml/badge.svg)](https://github.com/ndycode/oc-codex-multi-auth/actions/workflows/ci.yml)
+[![MIT license](https://img.shields.io/npm/l/oc-codex-multi-auth.svg)](LICENSE)
 
-OpenCode plugin for ChatGPT Plus/Pro OAuth, Codex-first GPT-5 workflows, and multi-account rotation.
+`oc-codex-multi-auth` is an OpenCode plugin for ChatGPT Plus/Pro OAuth, Codex and GPT-5 model routing, multi-account rotation, account switching, health checks, quota visibility, diagnostics, and recovery tools. It installs the OpenCode provider/TUI configuration, registers a `codex-*` command toolkit, and routes OpenCode OpenAI SDK requests through the ChatGPT-backed Codex flow with local account state.
 
-<img width="1227" height="702" alt="cover" src="https://github.com/user-attachments/assets/b796eb2f-282e-468a-ba6a-acadf09d731b" />
+Use it when you want OpenCode to run Codex-style coding workflows from your own ChatGPT subscription while keeping accounts visible, switchable, health-checked, and recoverable from the terminal.
+
+<img width="1227" height="702" alt="oc-codex-multi-auth OpenCode plugin dashboard for ChatGPT OAuth, Codex routing, and multi-account health" src="https://github.com/user-attachments/assets/b796eb2f-282e-468a-ba6a-acadf09d731b" />
 
 
 
@@ -15,16 +19,39 @@ OpenCode plugin for ChatGPT Plus/Pro OAuth, Codex-first GPT-5 workflows, and mul
 
 ## What You Get
 
-- Official ChatGPT OAuth login through OpenCode's auth flow
+- OpenCode plugin support for ChatGPT Plus/Pro OAuth and Codex/GPT-5 coding workflows
 - Ready-to-use GPT-5.5, GPT-5.5 Fast, GPT-5.4 Mini, GPT-5.4 Nano, GPT-5.1, and Codex model templates
-- Compact modern OpenCode config with model variants, plus legacy explicit selector IDs when needed
+- Compact modern OpenCode config with variant-based selectors, plus explicit legacy selector IDs when needed
 - Stateless Codex-compatible request handling with `store: false` and `reasoning.encrypted_content`
-- Multi-account rotation with health-aware selection, cooldowns, and automatic token refresh
+- Multi-account rotation with health-aware selection, cooldowns, automatic token refresh, and failover
+- Explicit saved-account listing, account switching, labeling, tagging, notes, health checks, and diagnostics
 - Per-project account storage under `~/.opencode/projects/<project-key>/...`
-- Guided account setup, health, dashboard, export/import, keychain, and troubleshooting tools
+- Guided setup, doctor, next-action, dashboard, export/import, keychain, and troubleshooting tools
 - Optional OS-native keychain backend for stored account pools
-- Request logging, metrics, and diagnostics for OpenCode integration debugging
-- Stable docs set for install, config, troubleshooting, privacy, and development architecture
+- TUI prompt quota status and quota detail views for OpenCode sessions
+- Request logging, runtime metrics, routing visibility, and redacted diagnostic snapshots for debugging
+- Stable docs for install, configuration, troubleshooting, privacy, architecture, testing, and release history
+
+---
+
+## Why Developers Use It
+
+`oc-codex-multi-auth` makes OpenCode's ChatGPT OAuth state understandable and operable. Instead of treating auth as one opaque provider file, you get a local account pool, deterministic account switching, health-aware request selection, visible quota status, JSON-friendly diagnostics, and safe repair commands for stale or damaged state. The plugin is designed for personal development workflows: credentials stay local, OpenCode keeps owning the host runtime, and the plugin only handles the OAuth-backed Codex routing layer it is installed for.
+
+---
+
+## Current Architecture At A Glance
+
+`oc-codex-multi-auth` ships four user-visible surfaces:
+
+| Surface | Purpose |
+| --- | --- |
+| `oc-codex-multi-auth` | npm installer bin; updates `~/.config/opencode/opencode.json`, manages `tui.json`, normalizes stale plugin entries, and clears OpenCode plugin cache |
+| OpenCode plugin entry (`index.ts`) | auth loader, OAuth login modes, provider fetch pipeline, account rotation, retry/failover, and `codex-*` tool registry |
+| OpenCode TUI plugin (`tui.ts`) | prompt quota status, quota details, shared quota cache, and active-account-aware display |
+| 21 `codex-*` tools | setup, help, status, list, switch, limits, health, metrics, doctor, dashboard, backup, keychain, diagnostics, and recovery actions |
+
+The plugin does not replace OpenCode. OpenCode remains the host; this package installs provider/TUI config and supplies the OAuth-backed Codex request pipeline that OpenCode calls.
 
 ---
 
@@ -71,7 +98,7 @@ opencode debug config
 opencode auth login
 ```
 
-The installer updates `~/.config/opencode/opencode.json`, backs up the previous config, normalizes the plugin entry to `"oc-codex-multi-auth"`, and clears the OpenCode cached plugin copy so OpenCode reinstalls the latest package.
+The installer updates `~/.config/opencode/opencode.json`, backs up the previous config, normalizes the plugin entry to `"oc-codex-multi-auth"`, enables the TUI status plugin in `~/.config/opencode/tui.json`, and clears the OpenCode cached plugin copy so OpenCode reinstalls the latest package.
 
 </details>
 
@@ -114,7 +141,7 @@ npx -y oc-codex-multi-auth@latest
 opencode auth login
 ```
 
-Run a prompt with the compact modern selectors:
+Run a prompt with compact modern selectors:
 
 ```bash
 opencode run "Summarize the failing test and suggest a fix" --model=openai/gpt-5.5 --variant=medium
@@ -127,7 +154,7 @@ Use Codex-focused routing:
 opencode run "Refactor the retry logic and update the tests" --model=openai/gpt-5-codex --variant=high
 ```
 
-If browser launch is blocked, use the alternate login paths in [docs/getting-started.md](docs/getting-started.md#alternate-login-paths).
+If browser launch is blocked, use the alternate login paths in [docs/getting-started.md](docs/getting-started.md#remote-or-headless-login).
 
 ---
 
@@ -168,7 +195,7 @@ If browser launch is blocked, use the alternate login paths in [docs/getting-sta
 | --- | --- |
 | `codex-health` | Which accounts look healthy, limited, or disabled? |
 | `codex-metrics` | What runtime counters and request metrics are visible? |
-| `codex-diag` | Can I export a diagnostic snapshot? |
+| `codex-diag` | Can I export a redacted diagnostic snapshot? |
 | `codex-diff` | What changed between account/config snapshots? |
 | `codex-export` | How do I back up account storage? |
 | `codex-import` | How do I restore accounts with a dry-run first? |
@@ -181,7 +208,8 @@ If browser launch is blocked, use the alternate login paths in [docs/getting-sta
 - account rotation is health-aware and avoids repeatedly selecting cooling accounts
 - 5xx bursts, network failures, and quota responses penalize account health
 - token refresh is queued to avoid refresh races
-- unsupported-model fallback is strict by default, with opt-in fallback controls
+- unsupported-model handling is strict by default, with opt-in fallback controls
+- TUI quota status follows the account/workspace used by the latest request
 
 ---
 
@@ -190,6 +218,7 @@ If browser launch is blocked, use the alternate login paths in [docs/getting-sta
 | File | Default path |
 | --- | --- |
 | OpenCode config | `~/.config/opencode/opencode.json` |
+| OpenCode TUI config | `~/.config/opencode/tui.json` |
 | OpenCode auth tokens | `~/.opencode/auth/openai.json` |
 | Plugin config | `~/.opencode/openai-codex-auth-config.json` |
 | Global account storage | `~/.opencode/oc-codex-multi-auth-accounts.json` |
@@ -197,6 +226,7 @@ If browser launch is blocked, use the alternate login paths in [docs/getting-sta
 | Flagged accounts | `~/.opencode/oc-codex-multi-auth-flagged-accounts.json` |
 | Backups | `~/.opencode/backups/` or `~/.opencode/projects/<project-key>/backups/` |
 | Logs | `~/.opencode/logs/codex-plugin/` |
+| TUI quota cache | OpenCode state path plus `~/.opencode/oc-codex-multi-auth-tui-quota.json` fallback |
 
 Per-project storage is enabled by default. The plugin walks up from the current directory to find a project root, then stores account pools under the project-specific key. If no project root is found, it falls back to global storage.
 
@@ -205,7 +235,9 @@ Per-project storage is enabled by default. The plugin walks up from the current 
 ## Configuration
 
 Primary config files:
+
 - `~/.config/opencode/opencode.json`
+- `~/.config/opencode/tui.json`
 - `~/.opencode/openai-codex-auth-config.json`
 
 Selected runtime/environment overrides:
@@ -297,7 +329,7 @@ opencode auth login
 - Plugin does not load: rerun `npx -y oc-codex-multi-auth@latest`, then restart OpenCode
 - Config looks wrong: run `opencode debug config` and confirm `"plugin": ["oc-codex-multi-auth"]`
 - OAuth callback fails: free port `1455`, then rerun `opencode auth login`
-- Browser launch is blocked: use the device-code/manual login path from [docs/getting-started.md](docs/getting-started.md#alternate-login-paths)
+- Browser launch is blocked: use the remote/headless login path from [docs/getting-started.md](docs/getting-started.md#remote-or-headless-login)
 - Wrong account is selected: run `codex-list`, then `codex-switch`
 - Account pool looks unhealthy: run `codex-health format="json"` and `codex-doctor deep=true format="json"`
 - Import/export feels risky: run `codex-import path="..." dryRun=true` before applying
@@ -333,15 +365,17 @@ codex-doctor deep=true format="json"
 - Troubleshooting: [docs/troubleshooting.md](docs/troubleshooting.md)
 - FAQ: [docs/faq.md](docs/faq.md)
 - Privacy: [docs/privacy.md](docs/privacy.md)
-- Architecture: [docs/development/ARCHITECTURE.md](docs/development/ARCHITECTURE.md)
+- Public architecture: [docs/architecture.md](docs/architecture.md)
+- Maintainer architecture: [docs/development/ARCHITECTURE.md](docs/development/ARCHITECTURE.md)
 - Testing: [docs/development/TESTING.md](docs/development/TESTING.md)
+- Discoverability guide: [docs/development/GITHUB_DISCOVERABILITY.md](docs/development/GITHUB_DISCOVERABILITY.md)
 - Audit index: [docs/audits/INDEX.md](docs/audits/INDEX.md)
 
 ---
 
 ## Release Notes
 
-- Current package version: `6.1.7`
+- Current package version: `6.1.8`
 - Changelog: [CHANGELOG.md](CHANGELOG.md)
 - Releases are automated with [release-please](https://github.com/googleapis/release-please)
 

@@ -16,6 +16,20 @@ Write the current packet to:
   "plan_path": ".agents/plans/<plan-file>.md",
   "contract_surfaces": ["docs/contracts/repo-execution-profile.md"],
   "validation_commands": ["<from repo profile or defaults>"],
+  "validation_lanes": [
+    {
+      "name": "<stable lane id>",
+      "command": "<validation command>",
+      "read_only": true,
+      "writes_artifacts": false,
+      "isolated_agents_home": true,
+      "release_only": false,
+      "mutation_escape_hatch": null,
+      "cost_class": "standard",
+      "auto_select": "default",
+      "timeout_seconds": 180
+    }
+  ],
   "tracker_mode": "<beads|tasklist>",
   "tracker_health": {
     "healthy": true,

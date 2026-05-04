@@ -29,9 +29,10 @@ Parameters:
   skill: "agentops:swarm"
 ```
 
-5. **After swarm completes, verify beads status:**
+5. **After swarm completes, verify and close beads with evidence:**
 ```bash
-bd update <issue-id> --status closed 2>/dev/null
+COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+bd close <issue-id> --reason "crank-sync wave:${wave} commit:${COMMIT_SHA}" 2>/dev/null
 ```
 
 
@@ -58,9 +59,11 @@ Parameters:
    ```
    If task is still pending/blocked, swarm validation failed — add to retry queue.
 
-2. **Sync to beads:**
+2. **Sync to beads with evidence:**
    ```bash
-   bd update <issue-id> --status closed 2>/dev/null
+   COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+   CHANGED_FILES=$(git diff --name-only HEAD~1 2>/dev/null | head -10 | tr '\n' ' ' | sed 's/ $//')
+   bd close <issue-id> --reason "commit:${COMMIT_SHA} files:[${CHANGED_FILES}]" 2>/dev/null
    ```
 
 3. **On sync failure** (bd unavailable or error):

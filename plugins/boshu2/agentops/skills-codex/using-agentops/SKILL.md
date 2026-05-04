@@ -124,6 +124,7 @@ These are the skills every user needs first. Everything else is available when y
 | `$readme` | Generate gold-standard README for any project |
 | `$security` | Continuous repository security scanning and release gating |
 | `$security-suite` | Binary and prompt-surface security suite — static analysis, dynamic tracing, offline redteam, policy gating |
+| `$system-tuning` | Restore system responsiveness via safe, ordered process cleanup and agent-swarm hygiene |
 
 ## Expert Skills (specialized workflows)
 

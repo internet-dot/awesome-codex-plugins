@@ -305,7 +305,7 @@ For validate mode:
 1. **Consensus Verdict**: PASS if all PASS, FAIL if any FAIL, else WARN
 2. **Shared Findings**: Points all judges agree on
 3. **Disagreements**: Where judges differ (with attribution)
-4. **Cross-Vendor Insights**: (if --mixed) Unique findings per vendor
+4. **Per-Perspective Cross-Vendor Comparison**: (if --mixed) For each perspective, present the Claude verdict AND the Codex verdict side-by-side (same perspective, two vendors). Highlight per-perspective consensus (both vendors agree) and per-perspective disagreement (vendors split on the same perspective — a high-signal finding). After the per-perspective table, list any unique findings only one vendor surfaced.
 5. **Final Recommendation**: Concrete next step
 
 For brainstorm mode:

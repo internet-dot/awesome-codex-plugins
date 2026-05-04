@@ -74,7 +74,7 @@ graph LR
 Once connected, your agent can:
 
 - Create, update, and delete products
-- View and process orders (confirm, fulfill, refund)
+- View and process orders (confirm, ship, refund)
 - Send messages to buyers
 - Manage discounts and collections
 - Check notifications and exchange rates
@@ -144,7 +144,7 @@ Once installed, your AI agent automatically discovers Mobazha skills:
 - "Walk me through the store setup wizard"
 - "Connect to my store and list my products"
 - "Import my Shopify products into Mobazha"
-- "Check my recent orders and fulfill the pending ones"
+- "Check my recent orders and ship the pending ones"
 - "Set up a custom domain and Telegram bot for my store"
 - "Write a better description for my handmade leather wallets"
 - "Generate product photo prompts for my candle collection"

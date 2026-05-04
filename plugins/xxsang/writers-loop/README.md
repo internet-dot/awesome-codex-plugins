@@ -34,6 +34,8 @@ Help me install Writer's Loop from https://github.com/xxsang/writers-loop, then 
 ```
 
 For manual installation, see [docs/installation.md](docs/installation.md).
+If your agent supports repository plugins, start with the public GitHub URL:
+`https://github.com/xxsang/writers-loop`.
 
 ---
 
@@ -113,8 +115,15 @@ project-local memory that writes only where you approve it.
 
 ## Install And Agent Support
 
-Writer's Loop is GitHub-only. Clone the repository, then install with the path
-or plugin flow that matches your agent.
+Writer's Loop is GitHub-only and public. If your agent supports repository
+plugins, install from:
+
+```text
+https://github.com/xxsang/writers-loop
+```
+
+For local skill-folder installs, clone the repository, then install with the
+path or plugin flow that matches your agent.
 
 ```bash
 git clone https://github.com/xxsang/writers-loop.git
@@ -123,8 +132,8 @@ git clone https://github.com/xxsang/writers-loop.git
 | Agent | Fast path |
 | --- | --- |
 | **Claude Code** | Copy `skills/writers-loop` into `~/.claude/skills/`, or use `.claude-plugin/plugin.json` |
-| **OpenAI Codex CLI** | Copy `skills/writers-loop` into `~/.codex/skills/`, or use `.codex-plugin/plugin.json` |
-| **OpenAI Codex App** | Copy `skills/writers-loop` into `~/.codex/skills/` and refresh skill discovery |
+| **OpenAI Codex CLI** | Use the plugin flow with the GitHub URL if available, or copy `skills/writers-loop` into `~/.codex/skills/` |
+| **OpenAI Codex App** | Use the plugin flow with the GitHub URL if available, or copy `skills/writers-loop` into `~/.codex/skills/` and refresh skill discovery |
 | **Cursor** | Use `.cursor-plugin/plugin.json`, or copy the skill folder |
 | **Gemini CLI** | Run `gemini extensions install https://github.com/xxsang/writers-loop` |
 | **GitHub Copilot CLI** | Point Copilot-enabled workflows at `AGENTS.md` |
@@ -135,6 +144,32 @@ For full per-agent steps, see [docs/installation.md](docs/installation.md).
 
 No npm install required for normal use. `package.json` is `private: true`; Node
 scripts are for validation, evals, and optional local storage tooling only.
+
+---
+
+## Writing Tool Templates
+
+Writer's Loop also ships templates for writing surfaces that do not run skills
+natively. These are linked from the full [writing tool integration guide](docs/writing-tools.md).
+
+| Tool | Easy path |
+| --- | --- |
+| **Obsidian** | Copy `integrations/obsidian/templates/` into your vault's template folder |
+| **Logseq** | Copy `integrations/logseq/templates/writers-loop.md` into a template page |
+| **Notion** | Paste `integrations/notion/writers-loop-page-template.md` into a page |
+| **Feishu / Lark Docs** | Paste or create `integrations/feishu/writers-loop-doc-template.md` |
+| **ChatGPT / Claude Projects** | Paste the project instructions and attach the listed Writer's Loop references |
+
+Obsidian quick setup:
+
+```bash
+VAULT="$HOME/Documents/Obsidian/MyVault"
+mkdir -p "$VAULT/Templates/Writers Loop"
+cp integrations/obsidian/templates/*.md "$VAULT/Templates/Writers Loop/"
+```
+
+Then enable Obsidian's **Templates** core plugin and set the template folder to
+`Templates/Writers Loop`.
 
 ---
 
@@ -229,4 +264,6 @@ useful across agents.
 
 ## License
 
-MIT
+MIT License. See [LICENSE](LICENSE).
+
+Copyright (c) 2026 Writer's Loop contributors.

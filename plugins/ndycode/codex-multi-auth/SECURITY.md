@@ -20,7 +20,7 @@ Key controls:
 - PKCE-based OAuth flow.
 - Local storage under `~/.codex/multi-auth` (or `CODEX_MULTI_AUTH_DIR`).
 - Refresh-token lifecycle management and account health isolation.
-- Runtime rotation proxy is loopback-only, enabled by default, and authenticated with a local client key. Users can opt out with `codex auth rotation disable` or `CODEX_MULTI_AUTH_RUNTIME_ROTATION_PROXY=0`.
+- Runtime rotation proxy is loopback-only, enabled by default, and authenticated with a local client key. Users can opt out with `codex-multi-auth rotation disable` or `CODEX_MULTI_AUTH_RUNTIME_ROTATION_PROXY=0`.
 - Packaged Codex app bind is reversible and stores backup/router metadata under `~/.codex/multi-auth/app-bind/`.
 - No project-owned telemetry backend.
 

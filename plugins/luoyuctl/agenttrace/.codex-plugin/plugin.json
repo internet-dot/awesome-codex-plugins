@@ -1,6 +1,6 @@
 {
   "name": "agenttrace",
-  "version": "0.3.46",
+  "version": "0.3.48",
   "description": "Audit local AI coding-agent sessions for cost, token waste, failures, latency, anomalies, health, diffs, and CI gate signals.",
   "author": {
     "name": "luoyuctl",

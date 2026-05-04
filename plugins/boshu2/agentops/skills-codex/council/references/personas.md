@@ -53,11 +53,13 @@ Use `--preset=<name>` for common persona configurations:
 | `retrospective` | plan-compliance, tech-debt, learnings | Post-implementation review (used by /post-mortem) |
 | `product` | user-value, adoption-barriers, competitive-position, strategic-fit | Product-market fit review (used by /pre-mortem when PRODUCT.md exists) |
 | `developer-experience` | api-clarity, error-experience, discoverability | Developer UX review (used by /vibe when PRODUCT.md exists) |
+| `leadership-quartet` | product-manager, cto, chief-engineer, staff-engineer | Product and engineering reality check when stated thesis vs shipped reality is in question |
 
 ```bash
 /council --preset=security-audit validate the auth system
 /council --preset=research --explorers=3 research upgrade automation
 /council --preset=architecture research microservices boundaries
+/council --deep --mixed --preset=leadership-quartet validate product thesis vs shipped reality
 ```
 
 **Preset definitions** are built-in perspective configurations.
@@ -100,6 +102,10 @@ Use `--preset=<name>` for common persona configurations:
 | ops | **Uptime** | reliability |
 | ops | **Lens** | observability |
 | ops | **Oncall** | incident-response |
+| leadership-quartet | **PM** | product-manager |
+| leadership-quartet | **CTO** | cto |
+| leadership-quartet | **Chief** | chief-engineer |
+| leadership-quartet | **Staff** | staff-engineer |
 
 **Preset perspective details:**
 
@@ -159,4 +165,36 @@ developer-experience:
   api-clarity:     {name: Signal}  "Is every public interface self-documenting? Can a user predict behavior from names alone?"
   error-experience: {name: SOS}    "When something goes wrong, does the user know what happened, why, and what to do next?"
   discoverability: {name: Beacon}  "Can a new user find this feature without reading docs? Is the happy path obvious?"
+
+leadership-quartet:
+  product-manager:
+    name: PM
+    lens: "Real users vs claimed users; persona fit; ship-vs-roadmap honesty."
+    read_budget: "Read product thesis, README/marketing claims, roadmap or goals, user-facing workflows, and the smallest shipped path that proves or falsifies the claim."
+    verdict_format: "State CLAIM_REALITY_FIT as aligned, overstated, missing-user, or roadmap-only; list the top user/value mismatch; name the one product decision that would make the claim honest."
+  cto:
+    name: CTO
+    lens: "Strategic bet quality; opportunity cost; build-vs-buy; closed-system risk; runway implications."
+    read_budget: "Read architecture overview, dependency and integration surfaces, cost/ops assumptions, strategic goals, and major irreversible technical choices."
+    verdict_format: "State BET_QUALITY as compounding, plausible, fragile, or value-destructive; identify the largest opportunity cost; give a go/hold/pivot recommendation with the gating evidence."
+  chief-engineer:
+    name: Chief
+    lens: "Architectural integrity: load-bearing vs decorative design, scaling envelope, second-order risks, and forking integrity."
+    read_budget: "Read core architecture docs, main execution paths, extension points, state boundaries, deployment/runtime contracts, and places where docs claim more than code enforces."
+    verdict_format: "State ARCHITECTURE_INTEGRITY as load-bearing, partial, decorative, or contradictory; separate real invariants from aspirational claims; name the first scaling or fork-integrity failure mode."
+  staff-engineer:
+    name: Staff
+    lens: "Code-level reality; lying-by-omission inventory; one-fix-away vs deep-refactor; new-contributor gotchas."
+    read_budget: "Read the concrete implementation files behind the claim, tests, validation scripts, generated artifacts, and any code paths new contributors would copy first."
+    verdict_format: "State IMPLEMENTATION_REALITY as shipped, thin-slice, papered-over, or absent; inventory the most important omissions; classify the remedy as one-fix-away, bounded refactor, or deep refactor."
+
+  # Exemplar: this preset was extracted from the 2026-05-03 Mt. Olympus
+  # thesis-vs-reality council session. In --mixed mode, spawn one runtime-native
+  # judge and one Codex judge per perspective for 8 total judges.
+
+red-team:
+  panicked-sre:        {name: OnCall}    "I'm a 3am on-call SRE with zero prior context. Can I find the runbook, diagnose the failure, and execute recovery in under 3 clicks? I don't know project jargon, internal names, or where things are organized."
+  junior-engineer:     {name: NewHire}   "I'm a day-1 junior engineer with basic language knowledge but zero project context. Can I complete onboarding, understand the architecture, and make my first change without hand-holding?"
+  zero-context-agent:  {name: Agent}     "I'm an AI agent seeing this skill's SKILL.md for the first time. Can I execute the workflow correctly without external knowledge? Are the steps unambiguous? Do the examples cover my use case?"
+  first-time-consumer: {name: Consumer}  "I'm trying to use this API/CLI for the first time with no tribal knowledge. Are error messages helpful? Can I discover flags without reading source? Does the happy path work from the README alone?"
 ```

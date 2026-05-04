@@ -124,7 +124,7 @@ AgentOps uses these custom fields under `metadata:` for tooling integration:
 
 ```yaml
 metadata:
-  tier: solo          # solo, team, orchestration, library, background, meta
+  tier: execution     # see schema enum + tier-caps reference below
   dependencies:       # List of skill names this skill depends on
     - standards
     - council
@@ -132,16 +132,12 @@ metadata:
   replaces: old-name  # Deprecated skill this replaces
 ```
 
-**Tier values and their constraints:**
+**Allowed tier values** (binding — from `scripts/validate-skill-schema.sh:174-178`):
+`judgment`, `execution`, `library`, `session`, `product`, `contribute`, `meta`, `background`, `orchestration`, `cross-vendor`, `knowledge`.
 
-| Tier | Max Lines | Purpose |
-|------|-----------|---------|
-| `solo` | 200 | Single-agent, no spawning |
-| `team` | 500 | Spawns workers |
-| `orchestration` | 500 | Coordinates multiple skills/teams |
-| `library` | 200 | Referenced by other skills, not invoked directly |
-| `background` | 200 | Hooks/automation, not user-invoked |
-| `meta` | 200 | Explains the system itself |
+**Per-tier line caps:** see [`skill-tier-caps.md`](skill-tier-caps.md) for the canonical mapping enforced by `tests/skills/lint-skills.sh:65-77`.
+
+`SKILL-TIERS.md` describes "utility", "team", and "solo" categories — these are narrative groupings, NOT binding `metadata.tier` values. Skills in those categories use `tier: execution` (e.g., `bug-hunt`, `brainstorm`, `system-tuning`).
 
 ### Security Restrictions
 
@@ -210,7 +206,7 @@ description: 'Auto-loaded by $vibe, $implement based on file types.'
 name: skill-name
 description: '...'
 metadata:
-  tier: solo
+  tier: execution
 ---
 
 # Skill Name
@@ -245,7 +241,7 @@ Solution: ...
 
 | Aspect | Requirement |
 |--------|-------------|
-| Size | Under 5,000 words; keep SKILL.md under 500 lines |
+| Size | Under 5,000 words; per-tier line caps enforced (see `skill-tier-caps.md`). PreToolUse hook warns at 248 lines globally. |
 | Instructions | Specific and actionable (exact commands, not "validate the data") |
 | Examples | At least 2-3 usage examples for user-facing skills |
 | Error handling | Troubleshooting section for common failures |

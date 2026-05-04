@@ -479,11 +479,19 @@ git commit -m "<descriptive message>
 Implements: <issue-id>"
 ```
 
-### Step 7: Close the Issue
+### Step 7: Close the Issue with Evidence
+
+Close with scoped evidence so the closure-integrity audit can resolve
+without parser_miss/timing_miss. The close reason must cite the commit
+and changed files from Step 6.
 
 ```bash
-bd update <issue-id> --status closed 2>/dev/null
+COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+CHANGED_FILES=$(git diff --name-only HEAD~1 2>/dev/null | head -10 | tr '\n' ' ' | sed 's/ $//')
+bd close <issue-id> --reason "commit:${COMMIT_SHA} files:[${CHANGED_FILES}]" 2>/dev/null
 ```
+
+If `bd close` is unavailable, fall back to `bd update <issue-id> --status closed`.
 
 ### Step 7a: Record Implementation in Ratchet Chain
 
@@ -492,7 +500,7 @@ bd update <issue-id> --status closed 2>/dev/null
 ```bash
 # Check if ao CLI is available
 if command -v ao &>/dev/null; then
-  # Get the commit hash as output artifact
+  # Reuse commit evidence from Step 7
   COMMIT_HASH=$(git rev-parse HEAD 2>/dev/null || echo "")
   CHANGED_FILES=$(git diff --name-only HEAD~1 2>/dev/null | tr '\n' ',' | sed 's/,$//')
 
@@ -600,7 +608,7 @@ If bd CLI not available:
 3. Agent edits `middleware/auth.go` to add token validation
 4. Runs `go test ./middleware/...` — all tests pass
 5. Commits with message "Add JWT token validation middleware\n\nImplements: ag-5k2"
-6. Closes issue via `bd update ag-5k2 --status closed`
+6. Closes issue via `bd close ag-5k2 --reason "commit:<sha> files:[middleware/auth.go]"`
 
 **Result:** Issue implemented, verified, committed, and closed. Ratchet recorded.
 

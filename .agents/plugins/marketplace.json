@@ -53,6 +53,18 @@
       "category": "Development & Workflow"
     },
     {
+      "name": "canvas-apps-plugin-codex",
+      "source": {
+        "source": "local",
+        "path": "./plugins/Ratnam-Mishra/canvas-apps-plugin-codex"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
+    },
+    {
       "name": "cc",
       "source": {
         "source": "local",
@@ -177,6 +189,18 @@
       "source": {
         "source": "local",
         "path": "./plugins/Kanevry/session-orchestrator"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
+    },
+    {
+      "name": "socraticode",
+      "source": {
+        "source": "local",
+        "path": "./plugins/giancarloerra/socraticode"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -369,6 +393,18 @@
       "source": {
         "source": "local",
         "path": "./plugins/ninihen1/power-automate-mcp-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Tools & Integrations"
+    },
+    {
+      "name": "honeydew-ai",
+      "source": {
+        "source": "local",
+        "path": "./plugins/honeydew-ai/honeydew-ai-coding-agents-plugins"
       },
       "policy": {
         "installation": "AVAILABLE",

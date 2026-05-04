@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
-  "last_updated": "2026-05-03",
-  "total": 54,
+  "last_updated": "2026-05-04",
+  "total": 57,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -48,6 +48,16 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/hyhmrright/brooks-lint/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Canvas-Apps-Plugin-Codex",
+      "url": "https://github.com/Ratnam-Mishra/canvas-apps-plugin-codex",
+      "owner": "Ratnam-Mishra",
+      "repo": "canvas-apps-plugin-codex",
+      "description": "Build and edit Power Apps Canvas Apps from natural language using Codex and the Canvas Authoring MCP server.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/Ratnam-Mishra/canvas-apps-plugin-codex/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "Claude Code for Codex",
@@ -158,6 +168,16 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/Kanevry/session-orchestrator/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "SocratiCode",
+      "url": "https://github.com/giancarloerra/socraticode",
+      "owner": "giancarloerra",
+      "repo": "socraticode",
+      "description": "Codebase context engine for AI assistants: hybrid semantic + BM25 search, file and symbol-level dependency / call graphs, blast-radius impact analysis, interactive graph viewer, and searchable architecture artefacts. Same understanding survives switching between any MCP-compatible assistant.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/giancarloerra/socraticode/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "tailtest",
@@ -318,6 +338,16 @@
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/ninihen1/power-automate-mcp-skills/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Honeydew AI",
+      "url": "https://github.com/honeydew-ai/honeydew-ai-coding-agents-plugins",
+      "owner": "honeydew-ai",
+      "repo": "honeydew-ai-coding-agents-plugins",
+      "description": "Skills and tools powered by the Honeydew MCP that help coding agents query data and build semantic models through a governed semantic layer.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/honeydew-ai/honeydew-ai-coding-agents-plugins/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "Jenkins CLI",
