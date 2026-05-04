@@ -10,11 +10,7 @@
   },
   "license": "MIT",
   "homepage": "https://github.com/HDeibler/universal-design-principles",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/HDeibler/universal-design-principles.git",
-    "directory": "plugins/aesthetics-and-emotion-principles"
-  },
+  "repository": "https://github.com/HDeibler/universal-design-principles.git",
   "category": "design",
   "keywords": [
     "design",

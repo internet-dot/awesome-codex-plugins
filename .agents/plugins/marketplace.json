@@ -173,6 +173,18 @@
       "category": "Development & Workflow"
     },
     {
+      "name": "spec-driven",
+      "source": {
+        "source": "local",
+        "path": "./plugins/Habib0x0/spec-driven-plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
+    },
+    {
       "name": "tailtest",
       "source": {
         "source": "local",
@@ -369,18 +381,6 @@
       "source": {
         "source": "local",
         "path": "./plugins/ninihen1/power-automate-mcp-skills"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Tools & Integrations"
-    },
-    {
-      "name": "guixu",
-      "source": {
-        "source": "local",
-        "path": "./plugins/guixu-project/guixu"
       },
       "policy": {
         "installation": "AVAILABLE",

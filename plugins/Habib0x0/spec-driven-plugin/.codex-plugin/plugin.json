@@ -1,0 +1,31 @@
+{
+  "name": "spec-driven",
+  "version": "5.3.0",
+  "description": "Spec-driven development workflow with structured requirements, design, tasks, and autonomous execution.",
+  "author": {
+    "name": "habib0x",
+    "url": "https://github.com/Habib0x0"
+  },
+  "homepage": "https://github.com/Habib0x0/spec-driven-plugin",
+  "repository": "https://github.com/Habib0x0/spec-driven-plugin",
+  "license": "MIT",
+  "keywords": ["specs", "requirements", "design", "planning", "workflow", "EARS", "codex"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Spec Driven",
+    "shortDescription": "Turn feature ideas into requirements, design docs, tasks, and execution loops.",
+    "longDescription": "A structured spec-driven development workflow for Codex. It guides features through brainstorming, EARS requirements, technical design, task breakdown, validation, execution, and post-completion review.",
+    "developerName": "habib0x",
+    "category": "Development",
+    "capabilities": ["Interactive", "Write"],
+    "websiteURL": "https://github.com/Habib0x0/spec-driven-plugin",
+    "privacyPolicyURL": "https://github.com/Habib0x0/spec-driven-plugin/blob/main/PRIVACY.md",
+    "termsOfServiceURL": "https://github.com/Habib0x0/spec-driven-plugin/blob/main/LICENSE",
+    "defaultPrompt": [
+      "Create a spec for this feature.",
+      "Validate the current spec.",
+      "Break this design into tasks."
+    ],
+    "brandColor": "#0F766E"
+  }
+}
