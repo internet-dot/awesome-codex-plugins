@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
-  "last_updated": "2026-05-04",
+  "last_updated": "2026-05-02",
   "total": 54,
   "categories": [
     "Development & Workflow",
@@ -148,6 +148,16 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/Kanevry/session-orchestrator/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Spec-Driven Development",
+      "url": "https://github.com/Habib0x0/spec-driven-plugin",
+      "owner": "Habib0x0",
+      "repo": "spec-driven-plugin",
+      "description": "Three-phase Requirements → Design → Tasks workflow for Claude Code and Codex — EARS notation acceptance criteria, autonomous execution loop, cross-spec dependencies, and post-implementation acceptance testing.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/Habib0x0/spec-driven-plugin/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "tailtest",
@@ -308,16 +318,6 @@
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/ninihen1/power-automate-mcp-skills/HEAD/.codex-plugin/plugin.json"
-    },
-    {
-      "name": "Guixu",
-      "url": "https://github.com/guixu-project/guixu",
-      "owner": "guixu-project",
-      "repo": "guixu",
-      "description": "Dataset discovery, valuation, and acquisition for AI agents. Search, evaluate, and purchase datasets from Kaggle, Hugging Face, IPFS, and more.",
-      "category": "Tools & Integrations",
-      "source": "awesome-codex-plugins",
-      "install_url": "https://raw.githubusercontent.com/guixu-project/guixu/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "Jenkins CLI",
