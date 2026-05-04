@@ -3,7 +3,7 @@
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
   "last_updated": "2026-05-02",
-  "total": 53,
+  "total": 54,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -308,6 +308,16 @@
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/ninihen1/power-automate-mcp-skills/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Guixu",
+      "url": "https://github.com/guixu-project/guixu",
+      "owner": "guixu-project",
+      "repo": "guixu",
+      "description": "Dataset discovery, valuation, and acquisition for AI agents. Search, evaluate, and purchase datasets from Kaggle, HuggingFace, IPFS, and more.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/guixu-project/guixu/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "Jenkins CLI",
