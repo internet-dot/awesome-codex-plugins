@@ -288,3 +288,4 @@ To add a plugin:
 - Plugin must have a public GitHub repository
 - Must include `.codex-plugin/plugin.json`
 - Must be functional and well-documented
+
