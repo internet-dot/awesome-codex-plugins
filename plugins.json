@@ -3,7 +3,7 @@
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
   "last_updated": "2026-05-04",
-  "total": 55,
+  "total": 56,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -128,6 +128,16 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/yimwoo/hotl-plugin/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Legion",
+      "url": "https://github.com/9thLevelSoftware/legion",
+      "owner": "9thLevelSoftware",
+      "repo": "legion",
+      "description": "Official Codex plugin bundle for Legion's multi-agent planning, execution, review, and shipping workflows.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/9thLevelSoftware/legion/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "Project Autopilot",

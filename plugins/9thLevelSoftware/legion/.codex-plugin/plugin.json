@@ -1,0 +1,39 @@
+{
+  "name": "legion",
+  "version": "7.4.0",
+  "description": "Official Codex plugin bundle for Legion's multi-agent planning, execution, review, and shipping workflows.",
+  "author": {
+    "name": "9thLevelSoftware",
+    "url": "https://github.com/9thLevelSoftware"
+  },
+  "homepage": "https://9thlevelsoftware.github.io/legion/",
+  "repository": "https://github.com/9thLevelSoftware/legion",
+  "license": "MIT",
+  "keywords": [
+    "legion",
+    "codex",
+    "plugin",
+    "multi-agent",
+    "workflow-orchestration",
+    "project-management"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Legion",
+    "shortDescription": "Multi-agent project orchestration for Codex.",
+    "longDescription": "Legion packages guided planning, phase execution, QA review, shipping, and portfolio workflows for Codex. It exposes the Legion skill set directly from this repository without changing the existing npm installer flow.",
+    "developerName": "9thLevelSoftware",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://9thlevelsoftware.github.io/legion/",
+    "defaultPrompt": [
+      "Use Legion to start a new project and capture the roadmap.",
+      "Use Legion to plan the next phase and recommend the right agents.",
+      "Use Legion to review the current phase and route any fixes."
+    ],
+    "brandColor": "#0F766E"
+  }
+}
