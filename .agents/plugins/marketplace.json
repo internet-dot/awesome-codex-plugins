@@ -149,6 +149,18 @@
       "category": "Development & Workflow"
     },
     {
+      "name": "legion",
+      "source": {
+        "source": "local",
+        "path": "./plugins/9thLevelSoftware/legion"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
+    },
+    {
       "name": "codex-project-autopilot",
       "source": {
         "source": "local",
