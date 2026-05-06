@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
-  "last_updated": "2026-05-04",
-  "total": 55,
+  "last_updated": "2026-05-06",
+  "total": 56,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -118,6 +118,16 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/schuettc/codex-reviewer/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Frappe Agent",
+      "url": "https://github.com/Dkm0315/frappe-agent",
+      "owner": "Dkm0315",
+      "repo": "frappe-agent",
+      "description": "Frappe and ERPNext coding, customization, bench, and review intelligence for Codex.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/Dkm0315/frappe-agent/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "HOTL Plugin",

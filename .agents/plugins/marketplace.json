@@ -137,6 +137,18 @@
       "category": "Development & Workflow"
     },
     {
+      "name": "frappe-agent",
+      "source": {
+        "source": "local",
+        "path": "./plugins/Dkm0315/frappe-agent"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
+    },
+    {
       "name": "hotl",
       "source": {
         "source": "local",
