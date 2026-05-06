@@ -189,6 +189,7 @@ For remote or headless shells, prefer `codex-multi-auth login --device-auth`.
 | `codex-multi-auth verify --paths` | Do my storage path chain and sandbox probes still pass self-test? |
 | `codex-multi-auth fix --dry-run` | What safe storage or account repairs are available? |
 | `codex-multi-auth doctor --fix` | Can the CLI diagnose and apply the safest fixes now? |
+| `codex-multi-auth uninstall` | Remove residual artifacts (run BEFORE `npm uninstall`; npm@7+ no longer fires `preuninstall`) |
 
 ### Advanced
 
@@ -382,8 +383,10 @@ codex-multi-auth doctor --json
 
 ## Release Notes
 
-- Current stable: [docs/releases/v2.1.5.md](docs/releases/v2.1.5.md)
-- Previous stable: [docs/releases/v2.1.4.md](docs/releases/v2.1.4.md)
+- Current stable: [docs/releases/v2.1.7.md](docs/releases/v2.1.7.md)
+- Previous stable: [docs/releases/v2.1.6.md](docs/releases/v2.1.6.md)
+- Earlier stable: [docs/releases/v2.1.5.md](docs/releases/v2.1.5.md)
+- Earlier stable: [docs/releases/v2.1.4.md](docs/releases/v2.1.4.md)
 - Earlier stable: [docs/releases/v2.1.3.md](docs/releases/v2.1.3.md)
 - Earlier stable: [docs/releases/v2.1.2.md](docs/releases/v2.1.2.md)
 - Earlier stable: [docs/releases/v2.1.1.md](docs/releases/v2.1.1.md)

@@ -98,6 +98,13 @@ Write gap list to `.agents/test/gaps.md`.
 
 For each gap (highest risk first), generate tests following language-specific patterns.
 
+If the target needs a specialized test pattern, load the matching reference before writing tests:
+
+- Contract/API/CLI compatibility: [references/conformance-harnesses.md](references/conformance-harnesses.md)
+- Parsers, serializers, and untrusted inputs: [references/fuzzing.md](references/fuzzing.md)
+- Generated files, snapshots, and rendered output: [references/golden-artifacts.md](references/golden-artifacts.md)
+- Real databases, services, queues, or APIs where mocks would hide failures: [references/real-service-e2e.md](references/real-service-e2e.md)
+
 ### Go: Table-Driven Tests
 
 ```go
@@ -324,6 +331,13 @@ When mode is `strategy`, analyze and recommend (no code generation):
 - **Flaky tests.** Tests that depend on timing, network, or ordering. Mock external dependencies. Use deterministic inputs.
 
 If you find existing tests that match the "bad" patterns, flag them in the summary but do not delete them without user confirmation.
+
+## Specialized Test References
+
+- [references/conformance-harnesses.md](references/conformance-harnesses.md) -- Contract, compatibility, schema, and process conformance patterns
+- [references/fuzzing.md](references/fuzzing.md) -- Fuzz targets, seed corpora, invariants, and crash triage
+- [references/golden-artifacts.md](references/golden-artifacts.md) -- Golden file modes, update discipline, and artifact diff review
+- [references/real-service-e2e.md](references/real-service-e2e.md) -- Real-service integration tests with non-production safety gates
 
 ## Integration with Other Skills
 

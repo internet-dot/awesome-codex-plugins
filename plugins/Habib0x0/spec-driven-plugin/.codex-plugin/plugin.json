@@ -1,6 +1,6 @@
 {
   "name": "spec-driven",
-  "version": "5.3.0",
+  "version": "5.3.2",
   "description": "Spec-driven development workflow with structured requirements, design, tasks, and autonomous execution.",
   "author": {
     "name": "habib0x",
@@ -22,9 +22,14 @@
     "privacyPolicyURL": "https://github.com/Habib0x0/spec-driven-plugin/blob/main/PRIVACY.md",
     "termsOfServiceURL": "https://github.com/Habib0x0/spec-driven-plugin/blob/main/LICENSE",
     "defaultPrompt": [
-      "Create a spec for this feature.",
-      "Validate the current spec.",
-      "Break this design into tasks."
+      "$spec create a spec for this feature.",
+      "$spec-loop run the implementation loop.",
+      "$spec-exec run one implementation iteration.",
+      "$spec-status check spec progress.",
+      "$spec-validate validate the current spec.",
+      "$spec-brainstorm explore this idea before formalizing.",
+      "$spec-bugfix analyze this bug and plan a fix.",
+      "$spec-refine update requirements or design."
     ],
     "brandColor": "#0F766E"
   }

@@ -34,7 +34,7 @@ validate_next_work_item() {
 
   # Source enum validation
   case "$source" in
-    council-finding|retro-learning|retro-pattern|evolve-generator|feature-suggestion|backlog-processing|post-mortem-finding|manifest-classification) ;;
+    council-finding|retro-learning|retro-pattern|evolve-generator|feature-suggestion|backlog-processing|post-mortem-finding|manifest-classification|dream-degraded) ;;
     *) echo "SCHEMA VALIDATION FAILED: invalid source '$source' for item '$title'"; return 1 ;;
   esac
 

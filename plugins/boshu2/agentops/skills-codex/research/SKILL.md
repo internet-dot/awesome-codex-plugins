@@ -2,9 +2,14 @@
 name: research
 description: 'Explore and write findings.'
 ---
+
 # Research Skill
 
 > **Quick Ref:** Deep codebase exploration with multi-angle analysis. Output: `.agents/research/*.md`
+
+```bash
+ao codex ensure-start 2>/dev/null || true
+```
 
 **YOU MUST EXECUTE THIS WORKFLOW. Do not just describe it.**
 
@@ -15,20 +20,6 @@ description: 'Explore and write findings.'
 | Flag | Default | Description |
 |------|---------|-------------|
 | `--auto` | off | Skip human approval gate. Used by `$rpi --auto` for fully autonomous lifecycle. |
-
-## Codex Lifecycle Guard
-
-When this skill runs in Codex hookless mode (`CODEX_THREAD_ID` is set or
-`CODEX_INTERNAL_ORIGINATOR_OVERRIDE` is `Codex Desktop`), ensure startup context
-before the research workflow:
-
-```bash
-ao codex ensure-start 2>/dev/null || true
-```
-
-`ao codex ensure-start` is the single startup guard for Codex skills. It records
-startup once per thread and skips duplicate startup automatically. Leave
-`ao codex ensure-stop` to closeout skills; `$research` is a start-path skill.
 
 ## Execution Steps
 
@@ -79,7 +70,7 @@ for dir in research learnings knowledge patterns retros plans brainstorm; do
 done
 
 # Search global patterns (cross-repo knowledge)
-grep -r -l -i "<topic>" ~/.codex/patterns/ 2>/dev/null
+grep -r -l -i "<topic>" ~/.agents/patterns/ 2>/dev/null
 ```
 
 If matches are found, read the relevant files before proceeding to exploration. Prior knowledge prevents redundant investigation.
@@ -89,15 +80,12 @@ If matches are found, read the relevant files before proceeding to exploration. 
 Before launching the explore agent, detect which backend is available:
 
 1. Check if `spawn_agent` is available → log `"Backend: codex-sub-agents"`
-3. Else if the runtime only exposes read-only skill loading, follow the research contract inline and do not rely on a separate sub-agent API
-4. Else if background task spawning is available, log `"Backend: background-task-fallback"`
 5. Else → log `"Backend: inline (no spawn available)"`
 
 Record the selected backend — it will be included in the research output document for traceability.
 
 **Read the matching backend reference for concrete tool call examples:**
 - Codex → `references/backend-codex-subagents.md`
-- Codex sub-agents → `references/backend-codex-subagents.md`
 - Background Tasks → `references/backend-background-tasks.md`
 - Inline → `references/backend-inline.md`
 
@@ -113,15 +101,18 @@ Record the selected backend — it will be included in the research output docum
 #### Backend Selection (MANDATORY)
 
 1. If `spawn_agent` is available → **Codex sub-agent**
-3. Else if the runtime only exposes read-only skill loading → perform the same exploration inline in this session
-4. Else → **Background task fallback**
+2. Else → **Background task fallback**
 
 #### Exploration Prompt (all backends)
 
-Use this prompt for whichever backend is selected:
+Use this prompt for whichever backend is selected. The exploration uses **iterative retrieval** (see `references/iterative-retrieval.md`): start broad, score relevance, extract new search terms from high-relevance files, and repeat for up to 3 cycles.
 
 ```
 Thoroughly investigate: <topic>
+
+Use iterative retrieval: after each discovery tier, score results 0-1 for relevance.
+From files scoring 0.5+, extract new search terms (function names, imports, config keys).
+Use extracted terms in subsequent tiers. Max 3 refinement cycles.
 
 Discovery tiers (execute in order, skip if source unavailable):
 
@@ -222,7 +213,7 @@ date: YYYY-MM-DD
 
 # Research: <Topic>
 
-**Backend:** <codex-sub-agents | background-task-fallback | inline>
+**Backend:** <codex-sub-agents | claude-native-teams | background-task-fallback | inline>
 **Scope:** <what was investigated>
 
 ## Summary
@@ -240,18 +231,46 @@ date: YYYY-MM-DD
 <next steps or actions>
 ```
 
+### Step 5.5: Persist Reusable Findings
+
+After the research artifact is written, identify any reusable findings that should influence future work.
+
+Persist only reusable findings, not transient observations, to `.agents/findings/registry.jsonl` using the finding-registry contract:
+
+- include provenance fields: `source.repo`, `source.session`, `source.file`, `source.skill`
+- require `dedup_key`, `pattern`, `detection_question`, `checklist_item`, `applicable_when`, and `confidence`
+- keep lifecycle fields explicit: `status`, `superseded_by`, `ttl_days`, `hit_count`, `last_cited`
+- merge by `dedup_key`
+- use the contract's temp-file-plus-rename atomic write rule
+
+After the registry update, if `hooks/finding-compiler.sh` exists, run:
+
+```bash
+bash hooks/finding-compiler.sh --quiet 2>/dev/null || true
+```
+
+This refreshes promoted findings and compiled prevention outputs in the same session.
+
 ### Step 6: Request Human Approval (Gate 1)
 
 **Skip this step if `--auto` flag is set.** In auto mode, proceed directly to Step 7.
 
-Ask the user directly:
+Ask the operator for approval:
 
-> Research complete. Approve to proceed to planning?
->
-> Options:
-> 1. **Approve** — Research is sufficient, proceed to `$plan`
-> 2. **Revise** — Need deeper research on specific areas
-> 3. **Abandon** — Stop this line of investigation
+```
+Parameters:
+  questions:
+    - question: "Research complete. Approve to proceed to planning?"
+      header: "Gate 1"
+      options:
+        - label: "Approve"
+          description: "Research is sufficient, proceed to $plan"
+        - label: "Revise"
+          description: "Need deeper research on specific areas"
+        - label: "Abandon"
+          description: "Stop this line of investigation"
+      multiSelect: false
+```
 
 **Wait for approval before reporting completion.**
 
@@ -326,6 +345,7 @@ For onboarding-style research ("what does this do?", new repo orientation), foll
 | Missing file references | Codebase has changed since last exploration or files are in unexpected locations | Use Glob to verify file locations before citing them. Always use absolute paths |
 | Auto mode skips important areas | Automated exploration prioritizes breadth over depth | Remove `--auto` flag to enable human approval gate for guided exploration |
 | Explore agent times out | Topic too broad for single exploration pass | Split into smaller focused topics (e.g., "auth flow" vs "entire auth system") |
+| No backend available for spawning | Running in environment without spawn_agent support | Research runs inline — still functional but slower |
 
 ## Reference Documents
 
@@ -340,24 +360,11 @@ For onboarding-style research ("what does this do?", new repo orientation), foll
 - [references/failure-patterns.md](references/failure-patterns.md)
 - [references/onboarding-methodology.md](references/onboarding-methodology.md)
 - [references/ralph-loop-contract.md](references/ralph-loop-contract.md)
+- [references/source-discovery-and-pattern-extraction.md](references/source-discovery-and-pattern-extraction.md)
 - [references/vibe-methodology.md](references/vibe-methodology.md)
-
-## Local Resources
-
-### references/
-
-- [references/backend-background-tasks.md](references/backend-background-tasks.md)
-- [references/backend-codex-subagents.md](references/backend-codex-subagents.md)
-- [references/backend-inline.md](references/backend-inline.md)
-- [references/context-discovery.md](references/context-discovery.md)
-- [references/data-flow-from-entry-points.md](references/data-flow-from-entry-points.md)
-- [references/document-template.md](references/document-template.md)
-- [references/failure-patterns.md](references/failure-patterns.md)
-- [references/onboarding-methodology.md](references/onboarding-methodology.md)
-- [references/ralph-loop-contract.md](references/ralph-loop-contract.md)
-- [references/vibe-methodology.md](references/vibe-methodology.md)
-
-### scripts/
-
-- `scripts/validate.md`
-- `scripts/validate.sh`
+- [../shared/references/backend-background-tasks.md](../shared/references/backend-background-tasks.md)
+- [../shared/references/backend-codex-subagents.md](../shared/references/backend-codex-subagents.md)
+- [../shared/references/backend-inline.md](../shared/references/backend-inline.md)
+- [../shared/references/ralph-loop-contract.md](../shared/references/ralph-loop-contract.md)
+- [references/codebase-archaeology.md](references/codebase-archaeology.md) — Systematic codebase exploration for onboarding
+- [references/software-research.md](references/software-research.md) — Research tools via source code, GitHub, and web

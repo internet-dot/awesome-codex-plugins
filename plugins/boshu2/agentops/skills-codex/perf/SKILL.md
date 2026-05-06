@@ -27,6 +27,10 @@ If no mode is specified, default to **profile**.
 
 Identify the language/runtime from file extensions, `go.mod`, `package.json`, `pyproject.toml`, `Cargo.toml`, or explicit user input. Select the profiling stack:
 
+If the symptom may be host pressure rather than target-code performance, read [references/system-pressure-triage.md](references/system-pressure-triage.md) before benchmarking.
+
+For the repeatable measurement loop, profiler selection, and report metrics, read [references/profiling-playbook.md](references/profiling-playbook.md).
+
 | Language | Benchmarking | CPU Profile | Memory Profile | Comparison |
 |----------|-------------|-------------|----------------|------------|
 | **Go** | `go test -bench` | `go tool pprof` (cpu) | `go tool pprof` (alloc) | `benchstat` |
@@ -202,6 +206,8 @@ For each optimization:
 5. **Keep or revert** — only keep changes that measurably improve metrics
 6. **Commit** with message format: `perf(<scope>): <description> (+X% throughput)` or `perf(<scope>): <description> (-X% latency)`
 
+For high-effort optimization work, load [references/optimization-proof-loop.md](references/optimization-proof-loop.md) before changing code. It defines the proof contract for isomorphic rewrites, benchmark deltas, and keep/revert decisions.
+
 ### Acceptance Criteria
 
 - Improvement must be statistically significant (p < 0.05 for `benchstat`, or >5% consistent change for manual comparison)
@@ -305,3 +311,9 @@ COMPARISON: baseline vs candidate
 - [complexity](../complexity/SKILL.md) — Find high-complexity code to target
 - [standards](../standards/SKILL.md) — Language-specific optimization patterns
 - [vibe](../vibe/SKILL.md) — Validate optimized code quality
+
+## Reference Documents
+
+- [references/profiling-playbook.md](references/profiling-playbook.md)
+- [references/system-pressure-triage.md](references/system-pressure-triage.md)
+- [references/optimization-proof-loop.md](references/optimization-proof-loop.md)

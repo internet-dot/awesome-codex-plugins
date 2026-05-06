@@ -39,7 +39,22 @@ gh api "repos/{owner}/{repo}/pulls/$PR_NUMBER" --jq '{number, url: .html_url, ti
    - `docs/features/<feature-id>/idea.md` — original problem
    - `docs/features/<feature-id>/plan.md` — the plan under review
 
-## Step 3: Analyze
+## Step 3: Pre-flight Verification
+
+Before writing any finding, list every claim the plan makes about the *current state* of an external surface and verify it against the source-of-truth file. Verify surfaces the plan makes a factual claim about; do not verify surfaces the plan only names in passing.
+
+Surfaces that require verification when claimed:
+
+- **Dependency manifests** — `Cargo.toml`, `package.json`, `pyproject.toml`, `requirements.txt`, lockfiles. If the plan says "X uses feature Y" or "X already has Y enabled", open the manifest and quote the actual `features = [...]` / `dependencies` block. A mismatch is a finding.
+- **Helpers and precedents** — when the plan says "see `<helper>` at `<file>:<line>`" or "matches the existing pattern in X", open the file and quote the contract (signature + doc-comment + relevant body). If the helper does not match the plan's described usage, that is a finding.
+- **Public surfaces** — endpoints, exported functions, schema fields, table columns the plan asserts already exist. Grep for the symbol and confirm.
+- **External commits or branches** — when the PR description flags conflict with another in-flight commit, run `git log` / `git show` on the named commits and quote what changed.
+
+If you cannot open a file (permission, missing in CI checkout, repo not available), name the file and downgrade affected findings to **Blocking pending verification** — same shape as the existing escape hatch in "When you cannot be fully specific."
+
+A finding that comes out of a verification step must quote the actual file contents, not paraphrase them. Quoting is what makes the finding self-contained.
+
+## Step 4: Analyze
 
 Review against the full superset of concerns:
 
@@ -54,7 +69,7 @@ Review against the full superset of concerns:
 - **Outcome mismatch** — listed steps do not produce the stated outcome
 - **Areas of Concern** — whatever the PR description specifically flagged
 
-## Step 4: Post the PR Review
+## Step 5: Post the PR Review
 
 Based on your verdict, use the corresponding `gh` flag:
 
@@ -118,6 +133,7 @@ You are not grading the plan's prose, structure, or formatting. You are looking 
 - Steps that cannot produce the stated outcome
 - Scope bullets that clearly exceed `idea.md`
 - Missing test strategy for **risky** paths (not every branch)
+- **Unverifiable safety claims** — the plan asserts an algorithm or helper is safe under stated conditions, but the safety boundary (panic-safety, runtime-flavor compatibility, concurrency / ordering guarantees, partial-write / transactional semantics, security boundary) is not visible from either the plan text or the helper's name. Required addition: the plan must add one of three things — (a) the inline algorithm with explicit guards for the unsafe case, (b) a quoted excerpt from the helper's rustdoc / doc-comment / precedent at `file:line`, or (c) an explicit deferral note ("safety guard verified at impl time per `<helper>` contract"). Without one of those three, mark **Blocking** — the next round of review cannot validate behavior that isn't on the page yet.
 
 ### Do NOT report
 
@@ -162,6 +178,8 @@ A competent developer will resolve these during implementation. If you flag them
 - "`ExpandedBody` doesn't receive `runStatus` as a prop" — state threading
 - "The local `ShopView` name will conflict with the extracted one" — naming
 
+**Carve-out for inlined algorithms:** when the plan inlines an algorithm whose correctness depends on a runtime, concurrency, or transactional invariant (panic-safety, runtime-flavor compatibility, ordering guarantees, partial-write semantics, security boundary), that algorithm is a plan-level surface — bugs in inlined plan code are plan-level findings, not code-review findings. The firewall above keeps signature/CSS/naming nits out; it does not protect inlined safety-critical code.
+
 **The nit test:** if the author could reasonably reply "I disagree, and I'm not changing the plan" and the feature would still ship safely — it was a nit. Do not post it.
 
 **Minimum bar for inclusion:** a finding must be either `Blocking` or `Should-fix`. If you catch yourself writing `Nit:`, delete the finding. There is no Nit severity in this review — use it as a filter, not a label.
@@ -171,6 +189,7 @@ A competent developer will resolve these during implementation. If you flag them
 - Zero findings is a valid and common outcome for a solid plan. Say "Plan is sound; residual risks listed below" and move on.
 - Three strong findings beats ten mixed findings. The mixed review gets ignored.
 - If you are unsure whether something is a real gap or a preference, it is a preference. Drop it.
+- On a re-review, treat new plan prose as never-reviewed. Do not anchor on the previous finding list — the next round's miss is usually content the author added in response to the previous round, and that content has not been verified yet. Run Pre-flight Verification against the new prose with the same rigor as round one.
 
 ## Specificity Requirements (MANDATORY for findings you do report)
 

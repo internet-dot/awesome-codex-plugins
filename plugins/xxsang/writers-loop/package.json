@@ -28,6 +28,8 @@
     "eval:ab": "node tools/run-evals.mjs --ab-control tools/evals/control-responses.codex.json --ab-treatment tools/evals/treatment-responses.codex.json",
     "eval:ab:live": "node tools/run-live-ab-evals.mjs",
     "eval:ab:live:dry": "node tools/run-live-ab-evals.mjs --dry-run",
+    "release:evidence": "node tools/run-live-ab-evals.mjs --evidence",
+    "release:evidence:dry": "node tools/run-live-ab-evals.mjs --evidence --dry-run",
     "journal:init": "node skills/writers-loop/scripts/journal.mjs init",
     "journal:append": "node skills/writers-loop/scripts/journal.mjs append",
     "journal:derive": "node skills/writers-loop/scripts/journal.mjs derive",

@@ -5,10 +5,10 @@
   },
   "plugins": [
     {
-      "name": "registry-broker-codex-plugin",
+      "name": "codiris-agentizer",
       "source": {
         "source": "local",
-        "path": "./plugins/hashgraph-online/registry-broker-codex-plugin"
+        "path": "./plugins/Humiris/wwa-transform"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -21,6 +21,30 @@
       "source": {
         "source": "local",
         "path": "./plugins/boshu2/agentops"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
+    },
+    {
+      "name": "antigravity",
+      "source": {
+        "source": "local",
+        "path": "./plugins/study8677/antigravity-workspace-template"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
+    },
+    {
+      "name": "bringyour-migration-auditor",
+      "source": {
+        "source": "local",
+        "path": "./plugins/unitedideas/bringyour-mcp"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -173,6 +197,18 @@
       "category": "Development & Workflow"
     },
     {
+      "name": "registry-broker-codex-plugin",
+      "source": {
+        "source": "local",
+        "path": "./plugins/hashgraph-online/registry-broker-codex-plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
+    },
+    {
       "name": "session-orchestrator",
       "source": {
         "source": "local",
@@ -309,6 +345,18 @@
       "source": {
         "source": "local",
         "path": "./plugins/CALLE-AI/call-e-integrations"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Tools & Integrations"
+    },
+    {
+      "name": "canvas-apps-plugin-codex",
+      "source": {
+        "source": "local",
+        "path": "./plugins/Ratnam-Mishra/canvas-apps-plugin-codex"
       },
       "policy": {
         "installation": "AVAILABLE",

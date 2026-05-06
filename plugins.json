@@ -3,21 +3,21 @@
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
   "last_updated": "2026-05-06",
-  "total": 56,
+  "total": 60,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
   ],
   "plugins": [
     {
-      "name": "Registry Broker",
-      "url": "https://github.com/hashgraph-online/registry-broker-codex-plugin",
-      "owner": "hashgraph-online",
-      "repo": "registry-broker-codex-plugin",
-      "description": "Delegate tasks to specialist AI agents via the HOL Registry, plan, find, summon, and recover sessions.",
+      "name": "Agentizer",
+      "url": "https://github.com/Humiris/wwa-transform",
+      "owner": "Humiris",
+      "repo": "wwa-transform",
+      "description": "Turn any website into an AI-powered agentfront with split-pane",
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
-      "install_url": "https://raw.githubusercontent.com/hashgraph-online/registry-broker-codex-plugin/HEAD/.codex-plugin/plugin.json"
+      "install_url": "https://raw.githubusercontent.com/Humiris/wwa-transform/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "AgentOps",
@@ -28,6 +28,26 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/boshu2/agentops/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Antigravity Workspace Template",
+      "url": "https://github.com/study8677/antigravity-workspace-template",
+      "owner": "study8677",
+      "repo": "antigravity-workspace-template",
+      "description": "Multi-agent codebase knowledge graph generator with context-aware planning and automatic scope management — turns codebases into coherent agent workspaces.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/study8677/antigravity-workspace-template/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Bring Your AI Migration Auditor",
+      "url": "https://github.com/unitedideas/bringyour-mcp",
+      "owner": "unitedideas",
+      "repo": "bringyour-mcp",
+      "description": "Read-only Codex plugin for auditing Claude Code to Codex migrations before Codex edits code. Checks AGENTS.md/CLAUDE.md scope, hooks, MCP config, skills, secret references, and validation notes.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/unitedideas/bringyour-mcp/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "Brooks Lint",
@@ -150,6 +170,16 @@
       "install_url": "https://raw.githubusercontent.com/AlexMi64/codex-project-autopilot/HEAD/.codex-plugin/plugin.json"
     },
     {
+      "name": "Registry Broker",
+      "url": "https://github.com/hashgraph-online/registry-broker-codex-plugin",
+      "owner": "hashgraph-online",
+      "repo": "registry-broker-codex-plugin",
+      "description": "Delegate tasks to specialist AI agents via the HOL Registry, plan, find, summon, and recover sessions.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/hashgraph-online/registry-broker-codex-plugin/HEAD/.codex-plugin/plugin.json"
+    },
+    {
       "name": "Session Orchestrator",
       "url": "https://github.com/Kanevry/session-orchestrator",
       "owner": "Kanevry",
@@ -268,6 +298,16 @@
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/CALLE-AI/call-e-integrations/HEAD/packages/codex-plugin/plugin/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Canvas Apps Plugin Codex",
+      "url": "https://github.com/Ratnam-Mishra/canvas-apps-plugin-codex",
+      "owner": "Ratnam-Mishra",
+      "repo": "canvas-apps-plugin-codex",
+      "description": "Build and edit Microsoft Power Apps Canvas Apps using natural language and Canvas Authoring MCP server.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/Ratnam-Mishra/canvas-apps-plugin-codex/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "Chrome DevTools",

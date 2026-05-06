@@ -95,6 +95,8 @@ For code review and analysis tasks, prefer `-s read-only` over `--full-auto`.
 
 Break work into focused tasks. Each task = one Codex agent (unless merged).
 
+For multi-agent work that needs interchangeable workers, file reservations, session mail, repeated passes, or tmux-backed coordination, read [references/fungible-agent-coordination.md](references/fungible-agent-coordination.md) before dispatching.
+
 ### Step 2: Analyze File Targets (REQUIRED)
 
 **Before spawning, identify which files each task will edit.** Codex agents are headless — they can't negotiate locks or wait turns. All conflict prevention happens here.
@@ -353,13 +355,13 @@ $swarm
 
 ## Reference Documents
 
-(No additional reference documents.)
+- [references/fungible-agent-coordination.md](references/fungible-agent-coordination.md)
 
 ## Local Resources
 
 ### references/
 
-(No local reference documents.)
+- [references/fungible-agent-coordination.md](references/fungible-agent-coordination.md)
 
 ### scripts/
 

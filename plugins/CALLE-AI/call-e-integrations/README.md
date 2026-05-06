@@ -13,21 +13,25 @@ The official marketplace install command requires `codex-cli >= 0.122.0`.
 Check your version with `codex --version`; older Codex releases are outside the
 primary support path for this command.
 
-Add the Call-E Codex marketplace from the repository root:
+Add the latest released Call-E Codex marketplace from the repository root:
 
 ```bash
 codex plugin marketplace add CALLE-AI/call-e-integrations \
-  --ref '@call-e/codex-plugin@0.1.6' \
+  --ref '@call-e/codex-plugin@latest' \
   --sparse .agents/plugins \
   --sparse packages/codex-plugin/plugin
 ```
+
+`@call-e/codex-plugin@latest` is a Git tag updated by the release workflow after
+`@call-e/codex-plugin` publishes. For a reproducible install, replace it with a
+package-level release tag such as `@call-e/codex-plugin@<version>`.
 
 Open Codex, run `/plugins`, choose the `Call-E` marketplace, and install
 `Calle`.
 
 If you are pinned to a Codex CLI older than `0.122.0` and cannot use
 `codex plugin marketplace add`, upgrade Codex when possible. As a manual
-fallback, add the equivalent sparse payload from the same release tag to your
+fallback, add the equivalent sparse payload from the same Git ref to your
 workspace root:
 
 ```text

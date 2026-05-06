@@ -219,7 +219,10 @@ Proposed Changes
 - [targeted content or style changes]
 ```
 
-If the requested style pack is missing, do not draft. Use:
+Style-pack availability is checked before artifact questions. If the requested
+style pack is missing, unavailable, or the user says not to load it first, do
+not draft, do not output `QUESTION GATE`, and do not ask general artifact
+questions yet. Use the section headers below exactly:
 
 ```text
 Frame

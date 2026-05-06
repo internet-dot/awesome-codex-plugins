@@ -133,6 +133,7 @@ Choose strategy based on the update scope requested (or default to the classific
 - Research breaking changes first (check CHANGELOG, migration guide, release notes).
 - Update one dependency at a time.
 - Run full test suite after each.
+- For whole library families, read [references/library-update-ratchet.md](references/library-update-ratchet.md) before changing manifests.
 - Individual commits with body noting breaking changes:
   ```
   chore(deps): update <pkg> to <version>
@@ -279,3 +280,4 @@ File name format: `YYYY-MM-DD-deps-<mode>.md`
 - `skills/standards/SKILL.md` -- Language-specific conventions
 - `skills/security/SKILL.md` -- Broader security scanning
 - `skills/vibe/SKILL.md` -- Code quality validation
+- [references/library-update-ratchet.md](references/library-update-ratchet.md)

@@ -166,6 +166,20 @@ $discovery --skip-brainstorm "fix login bug"       # skip brainstorm for specifi
 $discovery --complexity=full "migrate to v2 API"   # force full council ceremony
 ```
 
+## Output Specification
+
+**Format:** markdown phase summary to stdout + JSON execution packet on disk.
+
+**Files written:**
+
+- `.agents/research/<topic-slug>.md` — research artifact (via `$research` delegation)
+- `.agents/plans/YYYY-MM-DD-<goal-slug>.md` — plan document (via `$plan` delegation)
+- `.agents/council/YYYY-MM-DD-pre-mortem-<topic>.md` — pre-mortem report (via `$pre-mortem` delegation)
+- `.agents/rpi/execution-packet.json` — latest packet (consumed by `$crank` and `$validation`)
+- `.agents/rpi/runs/<run-id>/execution-packet.json` — per-run archive when `run_id` is set
+
+**Exit signal:** completion marker (`<promise>DONE</promise>` or `<promise>BLOCKED</promise>`) — see Completion Markers below.
+
 ## Completion Markers
 
 ```

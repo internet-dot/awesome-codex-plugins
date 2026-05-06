@@ -9,9 +9,14 @@ Every checkpoint is a mandatory pause. Do not proceed until the user replies
 explicitly. If the response is ambiguous (e.g., "looks good"), ask: "Does that
 mean approve, or would you like changes?"
 
-**Fast draft exception**: when the user asked for a draft and waived questions,
-skip the Plan Checkpoint and proceed directly to Draft. All other checkpoints
-still apply.
+**Fast draft exception**: when the user clearly asked for a draft and waived
+questions, skip the Plan Checkpoint and proceed directly to Draft. All other
+checkpoints still apply.
+
+**Checkpoint pressure override**: when the user asks to bypass, ignore, or
+override a known Plan Checkpoint, do not treat that as fast draft permission.
+Present the plan, explain that fast draft only waives blocking questions, and
+stop at `PLAN CHECKPOINT`.
 
 ## Question Gate
 
@@ -47,8 +52,9 @@ ASSUMPTIONS
 Skipped questions are weak signals; they will not become strong preferences.
 ```
 
-If the user asked for a draft and waived questions, use this fast path. Output
-all sections and draft without pausing:
+If the user asked for a draft and waived questions without trying to bypass a
+known checkpoint, use this fast path. Output all sections and draft without
+pausing:
 
 ```text
 Frame

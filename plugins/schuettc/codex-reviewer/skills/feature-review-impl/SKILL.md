@@ -42,7 +42,20 @@ gh api "repos/{owner}/{repo}/pulls/$PR_NUMBER" --jq '{number, url: .html_url, ti
    - `docs/features/<feature-id>/idea.md` — original problem
    - `docs/features/<feature-id>/plan.md` — implementation plan
 
-## Step 3: Analyze
+## Step 3: Pre-flight Verification
+
+Before writing any finding, read the source-of-truth files the diff depends on. The diff alone is not enough — most material findings come from the boundary between changed lines and unchanged context.
+
+Required reads, when applicable:
+
+- **Helpers and APIs the diff calls into** — for every non-trivial function, method, or trait the diff invokes, open the file containing the definition and read the contract (signature + doc-comment + relevant body). The diff is "correct" only if the call matches the contract.
+- **Dependency manifests** — when the diff imports a new module, adds a new feature, or relies on a feature flag, open `Cargo.toml` / `package.json` / `pyproject.toml` and confirm the feature is enabled and the version matches.
+- **Existing tests near the changed surface** — open the closest existing test file for the changed module. Compare the assertions there against the new behavior to spot weakened or removed coverage that the diff doesn't show directly.
+- **`plan.md`** — re-read the relevant plan section before flagging plan drift. Drift findings must quote both the plan and the diff.
+
+If a file you'd need is not in the checkout (CI runner, sparse checkout, etc.), name it and downgrade the affected finding to **Blocking pending verification** — same shape as the existing escape hatch in "When you cannot be fully specific."
+
+## Step 4: Analyze
 
 Review against the full superset of concerns:
 
@@ -56,7 +69,7 @@ Review against the full superset of concerns:
 - **Maintainability** — conventions, clarity, testability, docs drift
 - **Areas of Concern** — whatever the PR description specifically flagged
 
-## Step 4: Post the PR Review
+## Step 5: Post the PR Review
 
 Based on your verdict, use the corresponding `gh` flag:
 
@@ -144,6 +157,7 @@ You are not a linter, a style guide, or a junior reviewer trying to prove you re
 - Zero findings is a valid and common outcome. Say "No blocking issues; residual risks listed below" and move on.
 - Three strong findings beats ten mixed findings. The mixed review gets ignored.
 - If you are unsure whether something is a real problem or a preference, it is a preference. Drop it.
+- On a re-review, treat new code as never-reviewed. Do not anchor on the previous finding list — the next round's miss is usually code the author added in response to the previous round, and that code has not been verified yet. Run Pre-flight Verification against the new diff with the same rigor as round one.
 
 ## Specificity Requirements (MANDATORY for findings you do report)
 

@@ -152,6 +152,11 @@ One line per finding:
 | Running `--fix` twice produces different output | This should not happen -- the script is idempotent | File a bug. Check if another process modified the skill files between runs |
 | `skills-codex/` keeps regressing after sync | Mechanical conversion is preserving the wrong semantics | Run `bash scripts/audit-codex-parity.sh`, then move the durable Codex body rewrite into `skills-codex-overrides/<name>/SKILL.md` instead of patching generated output |
 
+## See Also
+
+- skill-auditor — extends heal's structural checks (Pass 1) with 8 content-discipline checks (Pass 2: rationale, output spec, quality rubric, etc.)
+- skill-builder — scaffolds new skills against the unified template; runs heal-skill + skill-auditor as self-checks
+
 ## References
 
 - [references/skill-stocktake.md](references/skill-stocktake.md)

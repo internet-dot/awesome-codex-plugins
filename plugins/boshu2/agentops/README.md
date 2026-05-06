@@ -6,11 +6,13 @@
 [![Nightly](https://github.com/boshu2/agentops/actions/workflows/nightly.yml/badge.svg)](https://github.com/boshu2/agentops/actions/workflows/nightly.yml)
 [![GitHub stars](https://img.shields.io/github/stars/boshu2/agentops?style=social)](https://github.com/boshu2/agentops/stargazers)
 
-**Context compiler for coding agents. Assembles, tests, and delivers the right context across Claude, Codex, Cursor, and OpenCode.**
+### Operational discipline for coding agents.
 
-AgentOps gives agents a shared `ao` control plane, lifecycle hooks, validation gates, and a repo-owned `.agents/` corpus so work survives chat windows and vendor boundaries.
+Ship reliable code with unreliable agents.
 
-[Install](#install) · [Quick Start](#quick-start) · [Cross-Vendor](#agentops-is-the-cross-vendor-operating-layer) · [Why DevOps?](#why-devops) · [Skills](#skills) · [CLI](#the-ao-cli) · [Doctrine](https://12factoragentops.com) · [Docs](docs/documentation-index.md)
+**AgentOps is the context compiler — compile context, gate output, compound knowledge across Claude, Codex, Cursor, and OpenCode.**
+
+[Install](#install) · [See It Work](#see-it-work) · [Quick Start](#quick-start) · [Why DevOps?](#why-devops) · [Skills](#skills) · [CLI](#the-ao-cli) · [Doctrine](https://12factoragentops.com) · [Docs](docs/documentation-index.md)
 
 </div>
 
@@ -82,6 +84,40 @@ You can also install the CLI from [release binaries](https://github.com/boshu2/a
 | Reversible | Remove the installed skill directories, delete `.agents/`, and remove hook entries from your runtime settings |
 
 Troubleshooting: [docs/troubleshooting.md](docs/troubleshooting.md) · Configuration: [docs/ENV-VARS.md](docs/ENV-VARS.md)
+
+---
+
+## See It Work
+
+**One command: validate a PR across Claude and Codex**
+
+```text
+> /council --mixed validate this PR
+
+[council] evidence packet sealed -> 6 judges across Claude Code and Codex CLI
+[claude/judge-1] WARN - rate limiting missing on /login endpoint
+[claude/judge-2] PASS - Redis integration follows middleware pattern
+[codex/judge-1]  WARN - token bucket refill lacks jitter under burst
+[codex/judge-2]  PASS - backoff bounds match retry policy
+Consensus: WARN - fix /login rate limit and add refill jitter before shipping
+Recorded: .agents/council/<run-id>/verdict.md
+```
+
+**Full loop: research through post-mortem**
+
+```text
+> /rpi "add retry backoff to rate limiter"
+
+[research]    Found 3 prior learnings on rate limiting
+[plan]        2 issues, 1 wave
+[pre-mortem]  Council validates the plan
+[crank]       Executes the scoped work
+[vibe]        Council validates the code
+[post-mortem] Captures new learnings in .agents/
+[flywheel]    Next session starts with better context
+```
+
+The point is not a bigger prompt. The point is a repo that remembers what worked.
 
 ---
 
@@ -186,40 +222,6 @@ Full catalog: [docs/SKILLS.md](docs/SKILLS.md) · Unsure what to run? [Skill Rou
 
 ---
 
-## See It Work
-
-**One command: validate a PR across vendors**
-
-```text
-> /council --mixed validate this PR
-
-[council] evidence packet sealed -> 6 judges across 2 runtimes
-[claude/judge-1] WARN - rate limiting missing on /login endpoint
-[claude/judge-2] PASS - Redis integration follows middleware pattern
-[codex/judge-1]  WARN - token bucket refill lacks jitter under burst
-[codex/judge-2]  PASS - backoff bounds match retry policy
-Consensus: WARN - fix /login rate limit and add refill jitter before shipping
-Recorded: .agents/council/<run-id>/verdict.md
-```
-
-**Full loop: research through post-mortem**
-
-```text
-> /rpi "add retry backoff to rate limiter"
-
-[research]    Found 3 prior learnings on rate limiting
-[plan]        2 issues, 1 wave
-[pre-mortem]  Council validates the plan
-[crank]       Executes the scoped work
-[vibe]        Council validates the code
-[post-mortem] Captures new learnings in .agents/
-[flywheel]    Next session starts with better context
-```
-
-The point is not a bigger prompt. The point is a repo that remembers what worked.
-
----
-
 ## Skills
 
 Every skill works alone. Flows compose them when you want more structure.
@@ -237,17 +239,17 @@ Every skill works alone. Flows compose them when you want more structure.
 | `/dream` | You want overnight knowledge compounding that never mutates source code |
 
 <details>
-<summary><b>Full catalog</b> - validation, flows, bookkeeping, and session skills</summary>
+<summary><b>Full catalog</b> — organized by product layer</summary>
 
-**Validation:** `/council` · `/vibe` · `/pre-mortem` · `/post-mortem`
+**Context Compiler (L1):** `/research` · `/compile` · `/inject` · `/handoff` · `/recover`
 
-**Flows:** `/research` · `/plan` · `/implement` · `/crank` · `/swarm` · `/rpi` · `/evolve`
+**Validation Gates (L2):** `/council` · `/vibe` · `/pre-mortem` · `/post-mortem`
 
-**Bookkeeping:** `/retro` · `/forge` · `/flywheel` · `/compile`
+**Knowledge Flywheel (L3):** `/retro` · `/forge` · `/flywheel` · `/dream`
 
-**Session:** `/handoff` · `/recover` · `/status` · `/trace` · `/provenance` · `/dream`
+**Orchestrated Flows:** `/plan` · `/implement` · `/crank` · `/swarm` · `/rpi` · `/evolve`
 
-**Product:** `/product` · `/goals` · `/release` · `/readme` · `/doc`
+**Session & Product:** `/status` · `/trace` · `/provenance` · `/product` · `/goals` · `/release` · `/readme` · `/doc`
 
 **Utility:** `/brainstorm` · `/bug-hunt` · `/complexity` · `/scaffold` · `/push`
 
@@ -256,9 +258,9 @@ Full reference: [docs/SKILLS.md](docs/SKILLS.md)
 </details>
 
 <details>
-<summary><b>Cross-runtime orchestration</b> - mix Claude, Codex, Cursor, and OpenCode</summary>
+<summary><b>Cross-runtime orchestration</b> — mix Claude, Codex, Cursor, and OpenCode</summary>
 
-Multi-runtime, one workflow. The same validation, research, delivery, and bookkeeping flows run whether the active worker is Claude Code, Codex, Cursor, or OpenCode.
+Multi-runtime, one workflow. The same three layers — context compilation, validation gates, and knowledge flywheel — run whether the active worker is Claude Code, Codex, Cursor, or OpenCode.
 
 One runtime leads a session. Another reviews the result. A third handles focused implementation. Adapters are runtime-specific. The contract is constant: independent context, auditable files, validation before promotion.
 
@@ -321,11 +323,11 @@ Run Dream overnight, then run Evolve in the morning against a fresher corpus. Th
 
 ## Competitive Positioning
 
-Most tools optimize work *within* a session. AgentOps compounds across them. The bookkeeping and validation layer is the gap.
+Most tools optimize work *within* a session. AgentOps compounds across them. The three product layers — Context Compiler, Validation Gates, Knowledge Flywheel — are the gap.
 
 | Tool | What it does well | What AgentOps adds |
 |------|-------------------|--------------------|
-| **[GSD](https://github.com/glittercowboy/get-shit-done)** | Fresh-context phased execution, recovery loops, runtime breadth | Cross-session bookkeeping, pre-build validation, the knowledge flywheel |
+| **[GSD](https://github.com/glittercowboy/get-shit-done)** | Fresh-context phased execution, recovery loops, runtime breadth | Context Compiler (cross-session retrieval), Validation Gates (pre-build), Knowledge Flywheel |
 | **[Compound Engineer](https://github.com/EveryInc/compound-engineering-plugin)** | Ideation, configurable reviewers, cross-runtime conversion | Automatic capture/scoring/injection, council validation, repo-native `ao` workflows |
 | **[Spec Kit](https://github.com/github/spec-kit) / [Kiro](https://kiro.dev/)** | Spec-driven development and executable planning artifacts | Learning beyond specs: failures, decisions, retros, prevention rules |
 | **[Superpowers](https://github.com/obra/superpowers)** | TDD discipline and autonomous work patterns | Memory, pre-mortems, validation across repeated sessions |

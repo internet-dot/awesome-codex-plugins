@@ -1,19 +1,26 @@
 ---
 name: beads
-description: 'Track bd issues and dependencies.'
+description: 'Track issues with bd/br, triage with bv, and convert plans to beads.'
 ---
+
 # Beads - Persistent Task Memory for AI Agents
 
 Graph-based issue tracker that survives conversation compaction.
 
 ## Overview
 
-**bd (beads)** replaces markdown task lists with a dependency-aware graph stored in git.
+**bd** and **br (beads_rust)** replace markdown task lists with a dependency-aware graph stored in git. **bv** adds graph-aware triage using PageRank and betweenness centrality.
 
 **Key Distinction**:
-- **bd**: Multi-session work, dependencies, survives compaction, git-backed
+- **bd/br**: Multi-session work, dependencies, survives compaction, git-backed
+- **bv**: Graph analysis, priority triage, bottleneck detection, parallel execution planning
+- **In-session tracking**: Single-session tasks, status tracking, conversation-scoped (harness-native)
 
 **Decision Rule**: If resuming in 2 weeks would be hard without bd, use bd.
+
+**br vs bd**: br is the Rust rewrite. Commands are the same except: br never auto-commits (git is your job), and `bd sync` becomes `br sync --flush-only`. Use whichever is installed.
+
+**bv safety**: NEVER run bare `bv` — it launches interactive TUI and blocks the terminal. Always use `--robot-*` flags.
 
 ## Operating Rules
 
@@ -67,49 +74,94 @@ bd dolt push                        # only if a Dolt remote is configured
 
 **Result:** Issue lifecycle managed automatically during implementation.
 
+## br (beads_rust) Quick Reference
+
+br is the Rust rewrite of bd. Commands match bd except git handling is explicit.
+
+```bash
+# Lifecycle
+br create "Title" -p 1 -t task       # Create (priority 0-4)
+br update <id> --status in_progress  # Claim work
+br close <id> --reason "Done"        # Complete
+br ready --json                      # Actionable work (not blocked)
+br list --json                       # All issues
+br show <id> --json                  # Issue details
+
+# Dependencies
+br dep add <child> <parent>          # child depends on parent
+br dep cycles                        # MUST be empty
+br dep tree <id>                     # Visualize dependencies
+
+# Sync (EXPLICIT — never automatic)
+br sync --flush-only                 # DB → JSONL (before git commit)
+br sync --import-only                # JSONL → DB (after git pull)
+```
+
+**Session ending pattern (br):**
+```bash
+git pull --rebase
+br sync --flush-only
+git add .beads/ && git commit -m "Update issues"
+git push
+```
+
+## bv Graph Triage
+
+NEVER run bare `bv`. Always use `--robot-*` flags.
+
+| Command | Use When |
+|---------|----------|
+| `bv --robot-triage` | What should I work on? Full recommendations + blockers + health |
+| `bv --robot-next` | Just the single top pick |
+| `bv --robot-plan` | What can run concurrently? Parallel execution tracks |
+| `bv --robot-insights` | Deep analysis: metrics, cycles, density, k-core |
+| `bv --robot-priority` | Am I prioritizing wrong? Misalignment detection |
+| `bv --robot-alerts` | Stale issues, blocking cascades, priority mismatches |
+
+**Key metrics:** PageRank = everything depends on this (fix first). Betweenness = bottleneck (blocks multiple paths). High both = critical bottleneck, drop everything.
+
+## Plan-to-Beads Workflow
+
+Convert a markdown plan into fully dependency-wired beads:
+
+1. Read the plan file
+2. Create beads with `br create` for each issue, including full context in the description
+3. Wire dependencies with `br dep add`
+4. Polish iteratively (run polish prompt 6-9 times until steady-state)
+5. Validate: `br dep cycles` must be empty, `bv --robot-insights` for graph health
+6. Begin: `bv --robot-next` for first bead
+
+Beads should be so detailed that a fresh agent can implement without consulting the original plan.
+
 ## Troubleshooting
 
 | Problem | Cause | Solution |
 |---------|-------|----------|
-| bd command not found | bd CLI not installed or not in PATH | Install bd: `brew install bd` or check PATH |
+| bd/br command not found | CLI not installed or not in PATH | Install bd: `brew install bd` or check PATH |
 | "not a git repository" error | bd requires git repo, current dir not initialized | Run `git init` or navigate to git repo root |
 | "beads not initialized" error | .beads/ directory missing | Human runs `bd init --prefix <prefix>` once |
-| Issue ID format errors | Wrong prefix or malformed ID | Check rigs.json for correct prefix, follow `<prefix>-<tag>-<num>` format |
+| Issue ID format errors | Wrong prefix or malformed ID | Check rigs.json for correct prefix |
+| `bv` hangs | TUI launched without robot flag | Always use `--robot-*` flags |
+| Cycles detected | Circular dependency | `br dep remove` to break cycle |
+| br sync confusion | Missing `--flush-only` or `--import-only` | Always specify direction explicitly |
 
 ## Reference Documents
 
 - [references/ANTI_PATTERNS.md](references/ANTI_PATTERNS.md)
 - [references/BOUNDARIES.md](references/BOUNDARIES.md)
+- [references/BR_REFERENCE.md](references/BR_REFERENCE.md)
+- [references/BV_TRIAGE.md](references/BV_TRIAGE.md)
 - [references/CLI_REFERENCE.md](references/CLI_REFERENCE.md)
 - [references/DEPENDENCIES.md](references/DEPENDENCIES.md)
 - [references/INTEGRATION_PATTERNS.md](references/INTEGRATION_PATTERNS.md)
 - [references/ISSUE_CREATION.md](references/ISSUE_CREATION.md)
+- [references/MIGRATION.md](references/MIGRATION.md)
 - [references/MOLECULES.md](references/MOLECULES.md)
 - [references/PATTERNS.md](references/PATTERNS.md)
+- [references/PLAN_TO_BEADS.md](references/PLAN_TO_BEADS.md)
 - [references/RESUMABILITY.md](references/RESUMABILITY.md)
 - [references/ROUTING.md](references/ROUTING.md)
 - [references/STATIC_DATA.md](references/STATIC_DATA.md)
+- [references/tracker-migration-and-triage.md](references/tracker-migration-and-triage.md)
 - [references/TROUBLESHOOTING.md](references/TROUBLESHOOTING.md)
 - [references/WORKFLOWS.md](references/WORKFLOWS.md)
-
-## Local Resources
-
-### references/
-
-- [references/ANTI_PATTERNS.md](references/ANTI_PATTERNS.md)
-- [references/BOUNDARIES.md](references/BOUNDARIES.md)
-- [references/CLI_REFERENCE.md](references/CLI_REFERENCE.md)
-- [references/DEPENDENCIES.md](references/DEPENDENCIES.md)
-- [references/INTEGRATION_PATTERNS.md](references/INTEGRATION_PATTERNS.md)
-- [references/ISSUE_CREATION.md](references/ISSUE_CREATION.md)
-- [references/MOLECULES.md](references/MOLECULES.md)
-- [references/PATTERNS.md](references/PATTERNS.md)
-- [references/RESUMABILITY.md](references/RESUMABILITY.md)
-- [references/ROUTING.md](references/ROUTING.md)
-- [references/STATIC_DATA.md](references/STATIC_DATA.md)
-- [references/TROUBLESHOOTING.md](references/TROUBLESHOOTING.md)
-- [references/WORKFLOWS.md](references/WORKFLOWS.md)
-
-### scripts/
-
-- `scripts/validate.sh`

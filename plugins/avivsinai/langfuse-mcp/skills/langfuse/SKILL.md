@@ -1,6 +1,6 @@
 ---
 name: langfuse
-version: 0.9.0
+version: 0.9.1
 description: Debug AI traces, find exceptions, analyze sessions, and manage prompts via Langfuse MCP. Use when debugging AI pipelines, investigating errors, analyzing latency, managing prompt versions, or setting up Langfuse. Triggers on "langfuse", "traces", "debug AI", "find exceptions", "what went wrong", "why is it slow", "datasets", "evaluation sets".
 metadata:
   short-description: Langfuse observability via MCP
@@ -21,6 +21,8 @@ If self-hosted, use your instance URL for `LANGFUSE_HOST` and create keys there.
 
 **Step 2:** Install MCP (pick one):
 
+Requires Python 3.10 or newer. CI verifies Python 3.10 through 3.14.
+
 ```bash
 # Claude Code (project-scoped, shared via .mcp.json)
 claude mcp add \
@@ -28,15 +30,17 @@ claude mcp add \
   --env LANGFUSE_PUBLIC_KEY=pk-... \
   --env LANGFUSE_SECRET_KEY=sk-... \
   --env LANGFUSE_HOST=https://cloud.langfuse.com \
-  langfuse -- uvx --python 3.11 langfuse-mcp
+  langfuse -- uvx langfuse-mcp
 
 # Codex CLI (user-scoped, stored in ~/.codex/config.toml)
 codex mcp add langfuse \
   --env LANGFUSE_PUBLIC_KEY=pk-... \
   --env LANGFUSE_SECRET_KEY=sk-... \
   --env LANGFUSE_HOST=https://cloud.langfuse.com \
-  -- uvx --python 3.11 langfuse-mcp
+  -- uvx langfuse-mcp
 ```
+
+Add `--python 3.14` before `langfuse-mcp` if you want to pin a CI-verified interpreter explicitly.
 
 **Step 3:** Restart CLI, verify with `/mcp` (Claude) or `codex mcp list` (Codex)
 

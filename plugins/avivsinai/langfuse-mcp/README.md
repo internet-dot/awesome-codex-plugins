@@ -2,7 +2,7 @@
 
 [![PyPI](https://badge.fury.io/py/langfuse-mcp.svg)](https://badge.fury.io/py/langfuse-mcp)
 [![Downloads](https://static.pepy.tech/badge/langfuse-mcp)](https://pepy.tech/projects/langfuse-mcp)
-[![Python 3.10–3.13](https://img.shields.io/badge/python-3.10–3.13-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10–3.14](https://img.shields.io/badge/python-3.10–3.14-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 [Model Context Protocol](https://modelcontextprotocol.io) server for [Langfuse](https://langfuse.com) observability. Query traces, debug errors, analyze sessions, manage prompts.
@@ -26,7 +26,7 @@ This project provides a **full observability toolkit** — traces, observations,
 
 ## Quick Start
 
-Requires [uv](https://docs.astral.sh/uv/getting-started/installation/) (for `uvx`).
+Requires [uv](https://docs.astral.sh/uv/getting-started/installation/) (for `uvx`) and Python 3.10 or newer. CI verifies Python 3.10 through 3.14.
 
 Get credentials from [Langfuse Cloud](https://cloud.langfuse.com) → Settings → API Keys. If self-hosted, use your instance URL for `LANGFUSE_HOST`.
 
@@ -37,15 +37,17 @@ claude mcp add \
   -e LANGFUSE_SECRET_KEY=sk-... \
   -e LANGFUSE_HOST=https://cloud.langfuse.com \
   --scope project \
-  langfuse -- uvx --python 3.11 langfuse-mcp
+  langfuse -- uvx langfuse-mcp
 
 # Codex CLI (user-scoped, stored in ~/.codex/config.toml)
 codex mcp add langfuse \
   --env LANGFUSE_PUBLIC_KEY=pk-... \
   --env LANGFUSE_SECRET_KEY=sk-... \
   --env LANGFUSE_HOST=https://cloud.langfuse.com \
-  -- uvx --python 3.11 langfuse-mcp
+  -- uvx langfuse-mcp
 ```
+
+To pin a CI-verified interpreter explicitly, add `--python 3.14` before `langfuse-mcp`.
 
 Restart your CLI, then verify with `/mcp` (Claude Code) or `codex mcp list` (Codex).
 
@@ -147,7 +149,7 @@ Create `.cursor/mcp.json` in your project (or `~/.cursor/mcp.json` for global):
   "mcpServers": {
     "langfuse": {
       "command": "uvx",
-      "args": ["--python", "3.11", "langfuse-mcp"],
+      "args": ["langfuse-mcp"],
       "env": {
         "LANGFUSE_PUBLIC_KEY": "pk-...",
         "LANGFUSE_SECRET_KEY": "sk-...",
@@ -178,7 +180,7 @@ docker run --rm -i \
 ## Development
 
 ```bash
-uv venv --python 3.11 .venv && source .venv/bin/activate
+uv venv --python 3.14 .venv && source .venv/bin/activate
 uv pip install -e ".[dev]"
 pytest
 ```

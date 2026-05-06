@@ -2,6 +2,7 @@
 name: doc
 description: 'Generate and validate repo docs.'
 ---
+
 # Doc Skill
 
 **YOU MUST EXECUTE THIS WORKFLOW. Do not just describe it.**
@@ -244,19 +245,8 @@ Tell the user:
 ## Reference Documents
 
 - [references/generation-templates.md](references/generation-templates.md)
+- [references/prose-and-report-workmanship.md](references/prose-and-report-workmanship.md)
 - [references/project-types.md](references/project-types.md)
 - [references/validation-rules.md](references/validation-rules.md)
-
-## Local Resources
-
-### references/
-
-- [references/generation-templates.md](references/generation-templates.md)
-- [references/project-types.md](references/project-types.md)
-- [references/validation-rules.md](references/validation-rules.md)
-
-### scripts/
-
-- `scripts/validate.sh`
-
-
+- [references/de-slopify.md](references/de-slopify.md) — Remove AI writing artifacts from docs
+- [references/architecture-report.md](references/architecture-report.md) — Generate technical architecture documents

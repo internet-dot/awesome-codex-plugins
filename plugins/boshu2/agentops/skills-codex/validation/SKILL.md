@@ -176,20 +176,7 @@ Track state inline: `epic_id`, `complexity`, `no_retro`, `no_forge`, `strict_sur
 
 ## Phase Summary Format
 
-Write to `.agents/rpi/phase-3-summary-YYYY-MM-DD-<slug>.md`:
-
-```markdown
-# Phase 3 Summary: Validation
-
-- **Epic:** <epic-id or "standalone">
-- **Vibe verdict:** <PASS|WARN|FAIL>
-- **Post-mortem verdict:** <verdict or "skipped">
-- **Retro:** <captured|skipped>
-- **Forge:** <mined|skipped>
-- **Complexity:** <fast|standard|full>
-- **Status:** <DONE|FAIL>
-- **Timestamp:** <ISO-8601>
-```
+See [references/phase-summary-format.md](references/phase-summary-format.md).
 
 ## Phase Budgets
 
@@ -233,6 +220,10 @@ $validation --no-retro ag-5k2             # skip retro only
 $validation --no-forge ag-5k2             # skip forge only
 ```
 
+## Output Specification
+
+**Format:** markdown summary to stdout + on-disk artifacts. Files written: `.agents/rpi/phase-3-summary-YYYY-MM-DD-validation.md` (phase summary), `.agents/post-mortems/YYYY-MM-DD-<topic>.md`, `.agents/learnings/<slug>.md`, `.agents/findings/registry.jsonl` (appended), `.agents/ratchet/state.json`. **Exit signal:** completion marker — see below.
+
 ## Completion Markers
 
 ```
@@ -242,16 +233,10 @@ $validation --no-forge ag-5k2             # skip forge only
 
 ## Troubleshooting
 
-| Problem | Cause | Solution |
-|---------|-------|----------|
-| Vibe FAIL on first run | Implementation has quality issues | Fix findings via `$crank`, then re-run `$validation` |
-| Post-mortem reviewed recent work instead of an epic | No epic-id provided | Pass epic-id for epic-scoped closeout: `$validation ag-5k2` |
-| Codex closeout missing | Codex has no session-end hook surface | Let `$validation` run `ao codex ensure-stop`, or run `ao codex ensure-stop` manually before leaving the session |
-| Forge produces no output | No ao CLI or no transcript content | Install ao CLI or run `$retro` manually |
-| Stale execution-packet | Packet from a previous RPI cycle | Delete `.agents/rpi/execution-packet.json` and pass `--complexity` explicitly |
+See [references/troubleshooting.md](references/troubleshooting.md).
 
 ## Reference Documents
 
 - [references/four-surface-closure.md](references/four-surface-closure.md) — four-surface closure validation (code + docs + examples + proof)
-- [references/forge-scope.md](references/forge-scope.md) — forge session scoping and deduplication
-- [references/idempotency-and-resume.md](references/idempotency-and-resume.md) — re-run behavior and standalone mode
+- [references/forge-scope.md](references/forge-scope.md) and [references/idempotency-and-resume.md](references/idempotency-and-resume.md) — forge scoping, rerun behavior, standalone mode
+- [references/remote-and-multi-repo-validation.md](references/remote-and-multi-repo-validation.md)

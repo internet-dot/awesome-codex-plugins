@@ -1620,8 +1620,8 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
-  uuid@13.0.0:
-    resolution: {integrity: sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w==}
+  uuid@13.0.2:
+    resolution: {integrity: sha512-vzi9uRZ926x4XV73S/4qQaTwPXM2JBj6/6lI/byHH1jOpCzb0zDbfytgA9LcN/hzb2l7WQSQnxITOVx5un/wGw==}
     hasBin: true
 
   validate-npm-package-license@3.0.4:
@@ -2323,7 +2323,7 @@ snapshots:
       msgpackr: 1.11.10
       multipasta: 0.2.7
       toml: 4.1.1
-      uuid: 13.0.0
+      uuid: 13.0.2
       yaml: 2.8.3
 
   emoji-regex@10.6.0: {}
@@ -3215,7 +3215,7 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  uuid@13.0.0: {}
+  uuid@13.0.2: {}
 
   validate-npm-package-license@3.0.4:
     dependencies:

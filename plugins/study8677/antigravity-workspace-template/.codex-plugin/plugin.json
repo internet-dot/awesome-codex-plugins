@@ -1,0 +1,6 @@
+{
+  "name": "antigravity",
+  "version": "0.2.1",
+  "description": "Multi-agent knowledge hub plugin (Codex CLI). Provides Antigravity skills; ag-ask/ag-refresh run through the CLI, with MCP optional.",
+  "skills": "./skills/"
+}

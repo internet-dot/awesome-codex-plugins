@@ -24,13 +24,12 @@
 
 ## Installation
 
-This mirrored bundle ships the Codex plugin files used by the curated `awesome-codex-plugins` marketplace.
+This repository currently ships:
 
-For the full upstream repository, including cross-agent packaging and development docs, see:
-
-```text
-https://github.com/Dkm0315/frappe-agent
-```
+- a real Codex plugin
+- a native Claude Code plugin package and marketplace file
+- portable and reusable Cursor rules plus command files
+- GitHub Copilot repository instructions
 
 ### Codex
 
@@ -67,7 +66,114 @@ codex marketplace add /path/to/local/clone/of/frappe-agent
 
 3. Enable `frappe-agent` and restart Codex.
 
-This mirrored bundle includes `.codex-plugin/plugin.json` and `skills/` for Codex installation through the curated marketplace.
+This repo includes:
+
+- `.codex-plugin/plugin.json`
+- `.agents/plugins/marketplace.json`
+
+so it can act as a self-contained Codex plugin repository.
+
+### Claude Code
+
+Claude Code supports plugins and plugin marketplaces.
+
+This repository now includes:
+
+- `.claude-plugin/plugin.json`
+- `.claude-plugin/marketplace.json`
+- `commands/`
+- `skills/`
+
+Install from GitHub with:
+
+```text
+/plugin marketplace add Dkm0315/frappe-agent
+/plugin install frappe-agent@frappe-agent --scope local
+```
+
+Install from a local clone with:
+
+```text
+/plugin marketplace add /path/to/frappe-agent
+/plugin install frappe-agent@frappe-agent --scope local
+```
+
+For local development:
+
+```bash
+claude --plugin-dir /path/to/frappe-agent
+```
+
+Local repo flow:
+
+1. Clone this repository locally.
+2. In Claude Code, run:
+
+```text
+/plugin marketplace add /path/to/frappe-agent
+/plugin install frappe-agent@frappe-agent --scope local
+```
+
+3. Run `/reload-plugins` if Claude is already open.
+
+After updates during a session, reload plugins with:
+
+```text
+/reload-plugins
+```
+
+### Cursor
+
+Cursor uses repository instructions such as `AGENTS.md`, `.cursor/rules`, and `.cursor/commands`.
+
+This repository now includes:
+
+- `AGENTS.md`
+- `.cursor/rules/frappe-agent.mdc`
+- `.cursor/commands/*.md`
+
+To install them into a local project repository:
+
+```bash
+cp /path/to/frappe-agent/AGENTS.md /path/to/your-frappe-project/AGENTS.md
+mkdir -p /path/to/your-frappe-project/.cursor/rules
+cp /path/to/frappe-agent/.cursor/rules/frappe-agent.mdc /path/to/your-frappe-project/.cursor/rules/frappe-agent.mdc
+mkdir -p /path/to/your-frappe-project/.cursor/commands
+cp /path/to/frappe-agent/.cursor/commands/*.md /path/to/your-frappe-project/.cursor/commands/
+```
+
+Or use symlinks during development:
+
+```bash
+ln -s /path/to/frappe-agent/AGENTS.md /path/to/your-frappe-project/AGENTS.md
+mkdir -p /path/to/your-frappe-project/.cursor
+ln -s /path/to/frappe-agent/.cursor/rules /path/to/your-frappe-project/.cursor/rules
+ln -s /path/to/frappe-agent/.cursor/commands /path/to/your-frappe-project/.cursor/commands
+```
+
+Cursor does not currently use the same repo-marketplace plugin install flow here that Claude Code does, so the practical local installation path is still repo-level rules and commands.
+
+### GitHub Copilot
+
+Copilot uses repository custom instructions and agent instructions.
+
+To install the local guidance into a repository:
+
+```bash
+mkdir -p /path/to/your-frappe-project/.github
+cp /path/to/frappe-agent/.github/copilot-instructions.md /path/to/your-frappe-project/.github/copilot-instructions.md
+cp /path/to/frappe-agent/AGENTS.md /path/to/your-frappe-project/AGENTS.md
+```
+
+Or use symlinks during development:
+
+```bash
+mkdir -p /path/to/your-frappe-project/.github
+ln -s /path/to/frappe-agent/.github/copilot-instructions.md /path/to/your-frappe-project/.github/copilot-instructions.md
+ln -s /path/to/frappe-agent/AGENTS.md /path/to/your-frappe-project/AGENTS.md
+```
+
+Copilot does not use the same plugin marketplace flow here, so the practical local installation path is repository instructions.
 
 ## Usage Examples
 
@@ -93,8 +199,39 @@ Use Frappe Agent to decide whether this UI should be a desk page, a www page, a 
 
 ```text
 frappe-agent/
+├── .agents/
+│   └── plugins/
+│       └── marketplace.json
+├── .cursor/
+│   ├── commands/
+│   │   ├── frappe-backend.md
+│   │   ├── frappe-bench.md
+│   │   ├── frappe-customization.md
+│   │   ├── frappe-erpnext.md
+│   │   ├── frappe-frontend.md
+│   │   ├── frappe-fullstack.md
+│   │   ├── frappe-search.md
+│   │   └── frappe-sql.md
+│   └── rules/
+│       └── frappe-agent.mdc
+├── .claude-plugin/
+│   ├── marketplace.json
+│   └── plugin.json
 ├── .codex-plugin/
 │   └── plugin.json
+├── .github/
+│   └── copilot-instructions.md
+├── AGENTS.md
+├── CLAUDE.md
+├── commands/
+│   ├── frappe-backend.md
+│   ├── frappe-bench.md
+│   ├── frappe-customization.md
+│   ├── frappe-erpnext.md
+│   ├── frappe-frontend.md
+│   ├── frappe-fullstack.md
+│   ├── frappe-search.md
+│   └── frappe-sql.md
 ├── skills/
 │   ├── frappe-backend/
 │   ├── frappe-bench/
@@ -109,7 +246,18 @@ frappe-agent/
 
 ## Current Scope
 
-This mirrored bundle is a Codex-native plugin package. The upstream repository may contain additional host adapters and docs.
+This repository is now:
+
+- a Codex-native plugin package
+- a Claude Code-native plugin package
+- a Cursor-ready repository rules and commands bundle
+- a Copilot-ready repository instructions bundle
+
+Planned future work:
+
+- official Claude marketplace submission
+- richer Cursor command bundles
+- deeper Copilot instruction coverage
 
 ## Design Goals
 
@@ -123,6 +271,7 @@ This mirrored bundle is a Codex-native plugin package. The upstream repository m
 
 - Add more first-class skills for custom fields, reports, workflows, dashboards, and upgrade planning
 - Add better source-backed command and flag coverage for Bench
+- Add distribution adapters for Claude Code, Cursor, and Copilot
 - Add richer repo examples and team onboarding docs
 
 ## License

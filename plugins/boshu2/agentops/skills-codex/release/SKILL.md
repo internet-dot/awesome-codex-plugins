@@ -519,9 +519,12 @@ Everything this skill does is local and reversible:
 
 When wiring or auditing the CI workflow that backs `--check` mode (or the tag-triggered release pipeline that consumes the curated notes), pull the relevant patterns from `references/gh-actions-ci-patterns.md` (general CI) or `references/gh-actions-release-automation.md` (tag-triggered, draft flow, asset upload). When generating the curated release-notes file or auditing CHANGELOG.md drift, treat the changelog as an orientation layer and use `references/changelog-as-research-artifact.md` for the structured-section, breaking-change-callout, and notes-vs-changelog rules.
 
+For release-prep sessions that span package registries, deploy hosts, multi-repo sync, or platform-specific publishers, use `references/release-preflight-and-publishers.md` to separate local readiness from remote publishing and to preserve rollback evidence.
+
 ## Reference Documents
 
 - [references/release-cadence.md](references/release-cadence.md)
+- [references/release-preflight-and-publishers.md](references/release-preflight-and-publishers.md)
 
 ## Local Resources
 
@@ -529,6 +532,7 @@ When wiring or auditing the CI workflow that backs `--check` mode (or the tag-tr
 
 - [references/release-cadence.md](references/release-cadence.md)
 - [references/release-notes.md](references/release-notes.md)
+- [references/release-preflight-and-publishers.md](references/release-preflight-and-publishers.md)
 - [references/gh-actions-ci-patterns.md](references/gh-actions-ci-patterns.md)
 - [references/gh-actions-release-automation.md](references/gh-actions-release-automation.md)
 - [references/changelog-as-research-artifact.md](references/changelog-as-research-artifact.md)

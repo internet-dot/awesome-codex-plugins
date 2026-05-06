@@ -125,6 +125,8 @@ These are the skills every user needs first. Everything else is available when y
 | `$security` | Continuous repository security scanning and release gating |
 | `$security-suite` | Binary and prompt-surface security suite — static analysis, dynamic tracing, offline redteam, policy gating |
 | `$system-tuning` | Restore system responsiveness via safe, ordered process cleanup and agent-swarm hygiene |
+| `$skill-auditor` | Two-pass audit of an existing SKILL.md against the unified template (15 checks) |
+| `$skill-builder` | Scaffold or absorb new SKILL.md files against the unified template |
 
 ## Expert Skills (specialized workflows)
 

@@ -61,12 +61,12 @@ has passed:
 ## Entry Modes
 
 - **New artifact**: start at `Frame`, then `Question Gate`, then `Plan`.
-- **Fast draft** (questions waived): Frame → state Assumptions → compact inline Plan → Draft → Learning Status. Proceed without stopping at a plan checkpoint. Skipped questions are weak signals and will not become preferences.
+- **Fast draft** (questions waived): Frame → state Assumptions → compact inline Plan → Draft → Learning Status. Use only when the user clearly waives questions and asks for an immediate draft. Do not use this path when the user asks to bypass, ignore, or override a known plan checkpoint; in that case, present the plan and stop at `PLAN CHECKPOINT`. Skipped questions are weak signals and will not become preferences.
 - **Multi-agent**: default to single-agent. Use multi-agent only for high-stakes, long, ambiguous, or multi-audience artifacts where independent planning or critique would materially improve quality. Read `references/multi-agent.md` first.
 - **Existing draft**: start at `Frame`, then `Critique`; plan only if structure is unclear. If source text is missing or placeholder-only, ask for it and use this wording: "preserve user intent, voice, plot facts, and continuity."
 - **Targeted revision**: start at `Frame`, then `Propose`; keep changes at sentence or paragraph level unless the user explicitly asked for section-scale changes.
 - **Style learning**: start at `Frame`, then read `references/style-distillation.md`. Output `Frame`, `Style Versus Content`, `Style Pack`, and `Storage Decision`. If the user wants to clone another person's style, confirm permission or keep the pack session-only.
-- **Using a learned style**: load the style pack from the conversation or from `.writers-loop/styles/` only when the user opted into local storage. State which pack is loaded. Draft with it, then critique content quality and style match separately. Do not copy source passages or facts from the style pack evidence. If the style pack is missing, use the missing-style-pack template in `references/style-distillation.md` and do not draft.
+- **Using a learned style**: before asking artifact questions or drafting, load the style pack from the conversation or from `.writers-loop/styles/` only when the user opted into local storage. State which pack is loaded. Draft with it, then critique content quality and style match separately. Do not copy source passages or facts from the style pack evidence. If the style pack is missing, unavailable, or the user says not to load it first, use the missing-style-pack template in `references/style-distillation.md` exactly, including `Style Pack Status`, `Content Plan`, and `Style Application Plan`. Do not draft and do not output `QUESTION GATE` or general artifact questions yet.
 - **Translation**: start at `Frame`, then read `references/translation.md`. Output `Frame`, `Translation`, `Review`, and `Learning Status`; preserve source formatting inside the `Translation` section, not by omitting the loop metadata.
 - **Preference update**: start at `Learn`. For storage-mode requests, confirm whether `.writers-loop/`, `journal.jsonl`, `prefs.md`, or style packs will be created before asking artifact questions. Treat tone, length, detail level, or storage mode set for the current task as a constraint, not a learned preference, unless the user says it applies in future work.
 
@@ -76,9 +76,13 @@ Ask up to five questions only when the answer would materially change the plan.
 If the user skips questions, state working assumptions and continue. Skipped
 questions are weak or neutral signals, not strong preferences.
 
-Fast draft exception: if the user waived questions while asking for a draft,
-show a compact `Plan` inline and draft immediately. Do not pause for plan
+Fast draft exception: if the user clearly waived questions while asking for a
+draft, show a compact `Plan` inline and draft immediately. Do not pause for plan
 approval. End with `Learning Status`.
+
+Checkpoint pressure override: if the user asks to bypass, ignore, or override a
+known plan checkpoint, the checkpoint still applies. Output a plan, explain that
+fast draft only waives blocking questions, then stop at `PLAN CHECKPOINT`.
 
 After presenting a plan in the standard path, output the checkpoint format
 (see `references/checkpoints.md`) and wait. Do not draft until the user
@@ -142,7 +146,10 @@ you are reading before using it. If the artifact type is not found in a
 reference, use the Universal Rubric and ask if it is sufficient — do not invent
 rules not in the file.
 
-- `references/artifact-types.md`: plan shapes for common writing artifacts
+- `references/artifact-types.md`: routing index for artifact-specific references
+- `references/technical-writing.md`: coding plans, technical docs, design docs, and product specs
+- `references/business-writing.md`: reports, memos, proposals, academic/whitepaper, and constrained writing
+- `references/fiction-narrative.md`: fiction, narrative, essays, speeches, and poetry
 - `references/critique-rubrics.md`: artifact-specific critique criteria
 - `references/preference-signals.md`: signal examples and weighting guidance
 - `references/checkpoints.md`: checkpoint formats for question, plan, proposal, and close

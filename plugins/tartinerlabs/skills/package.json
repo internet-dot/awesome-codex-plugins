@@ -47,7 +47,7 @@
   "peerDependencies": {
     "@opencode-ai/plugin": "1.14.24"
   },
-  "packageManager": "pnpm@10.29.3",
+  "packageManager": "pnpm@11.0.6",
   "lint-staged": {
     "*": [
       "biome check --write --no-errors-on-unmatched"

@@ -128,6 +128,7 @@ Read [references/examples.md](references/examples.md) for full examples.
 - [references/implementation-detail.md](references/implementation-detail.md)
 - [references/plan-document-template.md](references/plan-document-template.md)
 - [references/plan-mutations.md](references/plan-mutations.md)
+- [references/plan-to-beads-workflow.md](references/plan-to-beads-workflow.md)
 - [references/planning-rules.md](references/planning-rules.md)
 - [references/pre-decomposition.md](references/pre-decomposition.md)
 - [references/sdd-patterns.md](references/sdd-patterns.md)

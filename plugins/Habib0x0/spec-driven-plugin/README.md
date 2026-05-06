@@ -12,46 +12,54 @@ This plugin guides you through three phases:
 
 ## Commands
 
+Commands use `/` prefix in Claude Code and `$` prefix in Codex.
+
 ### Core Workflow
-| Command | Description |
-|---------|-------------|
-| `/spec-brainstorm` | Brainstorm a feature idea before spec creation |
-| `/spec <feature-name>` | Start a new feature spec with interactive 3-phase workflow |
-| `/spec-bugfix <bug-name>` | Start a new bugfix spec with defect analysis and regression prevention |
-| `/spec-refine` | Refine requirements/design for current spec |
-| `/spec-tasks` | Regenerate tasks from updated spec |
-| `/spec-status` | Show spec progress, task completion, and dependency status |
-| `/spec-validate` | Validate spec completeness and consistency |
+| Claude Code | Codex | Description |
+|-------------|-------|-------------|
+| `/spec-brainstorm` | `$spec-brainstorm` | Brainstorm a feature idea before spec creation |
+| `/spec <name>` | `$spec <name>` | Start a new feature spec with interactive 3-phase workflow |
+| `/spec-bugfix <name>` | `$spec-bugfix <name>` | Start a new bugfix spec with defect analysis and regression prevention |
+| `/spec-refine` | `$spec-refine` | Refine requirements/design for current spec |
+| `/spec-tasks` | `$spec-tasks` | Regenerate tasks from updated spec |
+| `/spec-status` | `$spec-status` | Show spec progress, task completion, and dependency status |
+| `/spec-validate` | `$spec-validate` | Validate spec completeness and consistency |
 
 ### Research & Navigation
-| Command | Description |
-|---------|-------------|
-| `/research` | Deep parallel research before planning — searches docs, web, and codebase |
-| `/zoom-out` | Map modules, interfaces, and callers for unfamiliar code |
-| `/ubiquitous-language` | Extract domain terms into a canonical glossary with flagged ambiguities |
+| Claude Code | Codex | Description |
+|-------------|-------|-------------|
+| `/research` | `$research` | Deep parallel research before planning — searches docs, web, and codebase |
+| `/zoom-out` | `$zoom-out` | Map modules, interfaces, and callers for unfamiliar code |
+| `/ubiquitous-language` | `$ubiquitous-language` | Extract domain terms into a canonical glossary with flagged ambiguities |
 
 ### Implementation
-| Command | Description |
-|---------|-------------|
-| `/spec-exec` | Run one autonomous implementation iteration |
-| `/spec-loop` | Loop implementation until all tasks complete |
+| Claude Code | Codex | Description |
+|-------------|-------|-------------|
+| `/spec-exec` | `$spec-exec` | Run one autonomous implementation iteration |
+| `/spec-loop` | `$spec-loop` | Loop implementation until all tasks complete |
 
 ### Post-Completion (Optional)
-| Command | Description |
-|---------|-------------|
-| `/spec-accept` | Run user acceptance testing for formal sign-off |
-| `/spec-docs` | Generate documentation from spec and implementation |
-| `/spec-release` | Generate release notes and deployment checklist |
-| `/spec-verify` | Run post-deployment smoke tests |
-| `/spec-retro` | Run a retrospective on a completed spec |
-| `/spec-complete` | Run full post-completion pipeline (accept → docs → release → retro) |
+| Claude Code | Codex | Description |
+|-------------|-------|-------------|
+| `/spec-accept` | `$spec-accept` | Run user acceptance testing for formal sign-off |
+| `/spec-docs` | `$spec-docs` | Generate documentation from spec and implementation |
+| `/spec-release` | `$spec-release` | Generate release notes and deployment checklist |
+| `/spec-verify` | `$spec-verify` | Run post-deployment smoke tests |
+| `/spec-retro` | `$spec-retro` | Run a retrospective on a completed spec |
+| `/spec-complete` | `$spec-complete` | Run full post-completion pipeline (accept → docs → release → retro) |
 
 ## Usage
 
 ### Starting a New Spec
 
+**Claude Code:**
 ```
 /spec user-authentication
+```
+
+**Codex:**
+```
+$spec user-authentication
 ```
 
 This will:
@@ -211,15 +219,25 @@ bash scripts/spec-exec.sh --spec-name user-authentication
 
 #### Usage in Codex
 
-Codex does not use slash commands. Instead, invoke the skill by typing one of the prompt phrases defined in the plugin manifest:
+Codex commands use `$` prefix instead of `/`:
 
-| What you type in Codex | What it does |
+```
+$spec user-authentication
+$spec-status
+$spec-exec
+```
+
+You can also invoke the skill by typing one of its default prompt phrases:
+
+| Prompt | Action |
 | --- | --- |
 | `Create a spec for this feature` | Start a new spec workflow |
 | `Validate the current spec` | Run validation on the active spec |
 | `Break this design into tasks` | Regenerate tasks from the design doc |
 
-You can also reference the skill by its display name, e.g. `Use Spec Driven to plan user authentication`.
+Or reference it by display name: `Use Spec Driven to plan user authentication`.
+
+**Plan mode vs build mode:** Works in both. Plan mode generates the spec for review before writing; build mode writes files directly. Implementation scripts (`spec-exec.sh`, `spec-loop.sh`) run from your terminal.
 
 All generated spec files live in `.codex/specs/<feature-name>/` when running under Codex.
 
