@@ -2,13 +2,23 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
-  "last_updated": "2026-05-06",
-  "total": 60,
+  "last_updated": "2026-05-07",
+  "total": 61,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
   ],
   "plugins": [
+    {
+      "name": "Aegis",
+      "url": "https://github.com/GanyuanRan/Aegis",
+      "owner": "GanyuanRan",
+      "repo": "Aegis",
+      "description": "An agentic skills framework & software development methodology that works: planning, TDD, debugging, and collaboration workflows.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/GanyuanRan/Aegis/HEAD/.codex-plugin/plugin.json"
+    },
     {
       "name": "Agentizer",
       "url": "https://github.com/Humiris/wwa-transform",
