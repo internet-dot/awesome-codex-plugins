@@ -88,3 +88,62 @@ The learning lifecycle states are:
 **Confidence bounds enforcement:** After EVERY increment or decrement, clamp confidence to [0.0, 1.0]. A learning at 0.95 confirmed becomes 1.0 (not 1.10). A learning at 0.1 contradicted becomes 0.0 and is pruned.
 
 Cleanup (pruning expired + deduplicating by type+subject) runs on EVERY write to `learnings.jsonl`, in both session-end and evolve skills.
+
+## Rule Loading (Glob-Scoped)
+
+Rule files at `.claude/rules/*.md` may carry an optional `globs:` YAML frontmatter field — an array of glob patterns relative to the repo root. The wave-executor calls `loadApplicableRules()` from `scripts/lib/rule-loader.mjs` before each wave to determine which rules apply.
+
+### Glob-Scoped Rule Injection (#336)
+
+**Frontmatter parsing.** At load time, `rule-loader.mjs` reads the YAML frontmatter block (delimited by `---`) from each `.md` file in `.claude/rules/`. The `globs:` key is expected to be a YAML sequence of glob-pattern strings (e.g. `- src/**/*.tsx`). Flow-style arrays (`globs: ["src/**", "tests/**"]`) are also accepted. Any parse error falls back to always-on (see Failure mode below).
+
+**Match algorithm.** Before each wave begins, the wave-executor reads `allowedPaths` from `wave-scope.json`. This array is passed to `loadApplicableRules()` as `scopePaths`. For each rule file:
+
+1. If `globs:` is **absent** → rule is always-on; include it unconditionally.
+2. If `globs:` is **present and non-empty** → test each `scopePath` against each glob pattern using `minimatch` (or equivalent). If at least one `scopePath` matches at least one glob → include the rule. If the intersection is empty → skip the rule for this wave.
+3. If `globs:` is **present but empty (`[]`)** → rule matches nothing; never loaded. Reserved for temporarily disabling a scoped rule without removing the file.
+
+**Where in the config-reading flow this hook fires.** After `parse-config.mjs` completes and `$CONFIG` is populated (Phase 2 of session-start / wave-executor pre-wave setup), and before the agent prompt for the wave is assembled. The `loadApplicableRules()` call happens at the wave boundary so that each wave gets a fresh rule set scoped to its `allowedPaths`. It does NOT run at session-start for the coordinator prompt; the coordinator always receives all always-on rules regardless of scope.
+
+**Token reduction.** Scope-targeted waves that touch only frontend or only Swift files skip unrelated backend, security-web, and other path-scoped rules — typically reducing injected rule content by 30–50% on narrow waves (token reduction target ≥20%, issue #336 acceptance criterion 4).
+
+### Frontmatter format
+
+```yaml
+---
+globs:
+  - src/app/api/**
+  - src/routes/**
+---
+```
+
+Flow-style arrays are also accepted: `globs: ["src/**", "tests/**"]`.
+
+### Loading semantics
+
+- **`globs:` absent** — rule is always-on; loaded for every wave regardless of scope.
+- **`globs:` present** — rule loads only when `scopePaths` (the wave's `allowedPaths` from `wave-scope.json`) intersects at least one glob pattern.
+- **`globs: []` (empty array)** — rule matches nothing; never loaded. Reserve for temporarily disabling a scoped rule.
+
+### Wave-executor integration
+
+```js
+import { loadApplicableRules } from 'scripts/lib/rule-loader.mjs';
+
+const rules = loadApplicableRules({
+  rulesDir: '.claude/rules',          // absolute path
+  scopePaths: wave.allowedPaths,      // from wave-scope.json
+});
+// rules[n].alwaysOn === true  → cross-cutting rule (no globs frontmatter)
+// rules[n].alwaysOn === false → scope-matched rule
+// rules[n].matchedGlobs       → which patterns triggered inclusion
+```
+
+### Backward compatibility
+
+- Rule files without any frontmatter continue to load as always-on. No migration required.
+- Files already using the old `paths:` frontmatter key do not match `globs:` — they are treated as always-on until updated.
+
+### Failure mode
+
+Frontmatter parse errors write a warning to stderr and fall back to always-on. A rule is **never silently dropped** — degraded loading is always preferable to missing a security or architecture constraint.

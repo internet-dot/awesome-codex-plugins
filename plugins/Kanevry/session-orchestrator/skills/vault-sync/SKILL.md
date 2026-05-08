@@ -58,6 +58,10 @@ The validator (both `validator.mjs` and the `validator.sh` wrapper) accepts:
 
 - `--mode <hard|warn|off>` — gate severity. `hard` (default) exits 1 on any frontmatter/schema error. `warn` exits 0 but still populates the `errors` array in the JSON output so callers can surface them as warnings. `off` short-circuits to `status: "skipped-mode-off"` — useful during onboarding when the gate is enabled but the vault is not yet clean.
 - `--exclude <glob>` — repeatable. Glob patterns (relative to `VAULT_DIR`, POSIX-style forward slashes) matching files to skip. Supports `**` (any number of segments), `*` (any chars except `/`), and `?` (single char except `/`). Excluded files are counted in `excluded_count` and contribute nothing to `errors`/`warnings`. Example: `--exclude "**/_MOC.md" --exclude "**/README.md"`.
+
+#### Bare-invocation config loading (#329)
+
+On every invocation — including bare `validator.sh` runs with no `--exclude` flags — the validator unconditionally reads `vault-sync.exclude` from `<VAULT_DIR>/CLAUDE.md` (or `AGENTS.md` on Codex CLI repos) and seeds the exclusion list with those globs first. CLI `--exclude` flags are additive: they extend the config-loaded list rather than replacing it. If `CLAUDE.md` is missing, unparseable, or has no `vault-sync.exclude:` block, the validator silently falls back to an empty config list and proceeds with CLI-only excludes. Required env: `VAULT_DIR` (resolved against cwd if absent).
 - `--check-expires` — flag expired notes (`expires:` date in the past) as warnings. Default off.
 
 Environment variables:
@@ -246,6 +250,51 @@ The schema block in `validator.mjs` is delimited by:
 | `1` | Drift detected (--check only). |
 | `2` | Source or target file not found. |
 | `3` | Malformed sentinels (BEGIN/END markers missing or out of order in `validator.mjs`). |
+
+## Modes (#327)
+
+The validator supports three operating modes via `--mode=<value>`. Default is `hard` (legacy enforcement).
+
+| Mode | Purpose | Exit code |
+|---|---|---|
+| `baseline` | Snapshot current errors+warnings into `<vault-dir>/.orchestrator/metrics/vault-sync-baseline.json` with schema-hash header | 0 |
+| `diff` | Show only NEW errors since baseline. Schema-hash mismatch falls back to full enforcement with WARN. | 0 if `new_errors === []`, 1 otherwise |
+| `full` | Legacy enforcement (same as `hard`). Reports all errors. | 0 if no errors, 1 otherwise |
+| `hard` | Alias of `full` (backward-compat). | as above |
+| `warn` | Reports errors but always exits 0. | 0 |
+| `off` | Skip validation entirely. | 0 |
+
+### Baseline file shape
+
+```json
+{
+  "schema_hash": "a1b2c3d4",
+  "generated_at": "2026-05-08T05:30:00Z",
+  "vault_dir": "/Users/.../vault",
+  "error_count": 12,
+  "warning_count": 3,
+  "errors": [...],
+  "warnings": [...]
+}
+```
+
+### Diff output (stdout, mode=diff)
+
+```json
+{
+  "new_errors": [...],
+  "resolved_errors": [...],
+  "baseline_count": 12,
+  "current_count": 14,
+  "schema_hash": "a1b2c3d4"
+}
+```
+
+### Schema-hash mismatch
+
+When the vendored zod schema in `validator.mjs` changes, the schema-hash in the baseline file won't match. The validator emits `WARN: baseline outdated (hash=<old>, current=<new>) — please re-snapshot via --mode=baseline` to stderr and falls back to full enforcement. Re-run `--mode=baseline` once to refresh.
+
+> **Inter-wave integration:** the wave-executor Quality-Lite checkpoint prefers `--mode=diff` once a baseline exists, surfacing only regressions introduced by that wave. See `skills/wave-executor/SKILL.md` § Vault-Sync Diff Reporting (#327).
 
 ## References
 

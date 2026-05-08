@@ -171,6 +171,29 @@ Each entry's `status` is initialized to `planned`. session-end Phase 3.2 (Docs V
 
 Read and follow `wave-loop.md` in this skill directory for the complete wave execution loop, including agent dispatch, output review, plan adaptation, progress updates, and scope manifest creation.
 
+### Mission-Status Updates (#340)
+
+The coordinator (you) is responsible for updating per-task mission status in STATE.md as tasks progress through the wave. Use `setMissionStatus(stateContent, taskId, status)` from `scripts/lib/state-md.mjs` and write the result back to STATE.md immediately.
+
+**Per-task transition rules (coordinator fires these, NOT wave-loop.md):**
+
+| Transition | When to fire |
+|---|---|
+| `brainstormed` → `validated` | User runs `/go` to approve the wave plan (all items simultaneously) |
+| `validated` → `in-dev` | Agent for that wave-plan item is dispatched via `Agent()` tool |
+| `in-dev` → `testing` | Quality wave begins and this item's implementation wave completed without failure |
+| `testing` → `completed` | Quality-Lite gate passes (green) for this task's wave — coordinator confirms item done |
+| Any → `brainstormed` | Item is discarded, re-planned, or rolled back |
+
+**Important scoping notes:**
+- These transitions are **coordinator-level orchestration** decisions, not part of `wave-loop.md` dispatch/review logic. Do NOT modify `wave-loop.md` to add mission-status calls.
+- `wave-loop.md` is NOT modified by #340 — the transitions listed above are called by the coordinator after observing the wave-loop outcomes.
+- Only update items whose `id` appears in the `### Wave-Plan Mission Status (machine-readable)` block emitted by session-plan. Invent no new IDs.
+- When STATE.md does not yet have a `## Mission Status` body section, `setMissionStatus` creates it automatically (see `scripts/lib/state-md.mjs`).
+- `readMissionStatus(stateContent, taskId)` from the same module returns the current status string for a task (or `null` if not found), useful for guard-checking before transitions.
+
+**Backward compat:** STATE.md files without a `## Mission Status` section are valid — absence means no status tracking was started. The helpers are no-throw on bad input.
+
 ## Circuit Breaker & Worktree Isolation
 
 > **Reference:** See `circuit-breaker.md` in this skill directory for MaxTurns enforcement, spiral detection, recovery protocol, and worktree isolation configuration. Apply those rules during every wave dispatch and post-wave review.
@@ -288,6 +311,32 @@ After the Finalization wave completes successfully:
 1. Report final status to the user
 2. If `persistence: true`, suggest invoking `/close` to finalize the session. If `persistence: false`, note that the session is complete (no STATE.md to close — session-end would be a no-op).
 3. Do NOT auto-commit — `/close` handles that with proper verification
+
+## Vault-Sync Diff Reporting (#327)
+
+When the inter-wave Quality-Lite checkpoint invokes vault-sync, it should prefer `--mode=diff` over full enforcement so the coordinator sees only regressions introduced by the current wave — not pre-existing issues that were already present at session start.
+
+**Preferred checkpoint invocation (once a baseline exists):**
+
+```bash
+VAULT_DIR=<vault-dir> bash skills/vault-sync/validator.sh --mode diff
+```
+
+The diff JSON block (`{ new_errors, resolved_errors, baseline_count, current_count, schema_hash }`) is emitted to stdout. The coordinator parses it and surfaces a compact summary in the inter-wave checkpoint output. Focus on `new_errors` only — `resolved_errors` are informational.
+
+**First-run bootstrap:** if no baseline file exists at `<vault-dir>/.orchestrator/metrics/vault-sync-baseline.json`, the coordinator runs `--mode=baseline` once before the next wave starts, then switches to `--mode=diff` for all subsequent checkpoints.
+
+**Schema migration:** when the vendored schema in `validator.mjs` changes, the schema-hash in the existing baseline won't match. The validator falls back to full enforcement and emits a WARN to stderr. The coordinator must re-run `--mode=baseline` manually before resuming diff-mode checkpoints.
+
+**Configuration:** diff-mode is enabled by default once a baseline exists. To force full enforcement at any checkpoint, set `vault-sync.mode: full` in Session Config or pass `--mode full` explicitly.
+
+> **Cross-reference:** baseline file shape, diff output schema, and schema-hash mismatch handling are documented in `skills/vault-sync/SKILL.md` § Modes (#327).
+
+## Frontmatter-Guard (#328)
+
+When an agent's task scope includes vault paths (`~/Projects/vault/` or vault subdirectories such as `40-learnings/`, `50-sessions/`, `03-daily/`, `01-projects/`), the wave-executor injects a deterministic frontmatter-schema snippet into the agent's prompt. This eliminates the recurring failure class where agents guess at enum values for `type`, `status`, or `tags`.
+
+See `wave-loop.md` § Pre-Dispatch: Frontmatter-Guard Injection for the exact contract. The snippet generator is `scripts/lib/frontmatter-guard.mjs` (skill: `skills/frontmatter-guard/`).
 
 ## Anti-Patterns
 

@@ -4,7 +4,8 @@ Codex plugin package for OrgX:
 
 - OrgX MCP server wiring via `https://mcp.useorgx.com/`
 - Initiative-aware Codex skills for OrgX execution
-- Runtime reporting guidance for progress, artifacts, blockers, and completion
+- Runtime reporting guidance and passive hook templates for progress, artifacts,
+  blockers, and completion
 - Install-surface metadata for Codex plugin directories and local marketplaces
 
 ## Why this plugin exists
@@ -27,6 +28,8 @@ plugin repos.
 .mcp.json                   # OrgX MCP configuration
 skills/orgx-initiative-ops/SKILL.md
 skills/orgx-runtime-reporting/SKILL.md
+hooks/codex/hooks.json
+hooks/scripts/orgx-session-hook.mjs
 assets/icon.png
 assets/logo.png
 scripts/verify-plugin.mjs
@@ -44,10 +47,47 @@ workstream, milestone, task, blocker, or decision.
 Keep OrgX updated during live Codex execution with progress, artifacts,
 blockers, and completion events.
 
+## Runtime hooks
+
+The plugin now includes Codex hook templates, but the recommended install path is
+through `orgx-wizard hooks install`. The wizard can merge global hook config,
+preserve existing `notify` integrations such as Computer Use, and write a local
+outbox under `~/.config/useorgx/wizard/hooks/events.jsonl`.
+
+Hook events are a passive backstop. They record compact session metadata and
+safe summaries so a later Work Graph reconciliation can answer:
+
+- Did the session call OrgX MCP?
+- Did meaningful work happen without OrgX writeback?
+- Are there decisions, blockers, artifacts, people, product surfaces, or goals
+  that should become an OrgX initiative kickoff?
+
+Each reconciliation report should also emit a stable `work_graph_fingerprint`
+and `signup_hydration.hydration_key`. That fingerprint is the bridge between a
+pre-signup audit/share surface and the user's future OrgX workspace: after
+signup, OrgX can claim the fingerprint, dedupe replays, and attach the redacted
+Work Graph to a kickoff initiative.
+
+Raw transcripts are not sent by the hook template. The reconciler should keep
+transcripts local and write only redacted summaries, hashes, evidence refs,
+Work Graph fingerprints, and approved OrgX activity.
+
 ## Local verification
 
 ```bash
 npm run check
+```
+
+To preview the runtime wiring without editing Codex config:
+
+```bash
+orgx-wizard hooks doctor
+```
+
+To install the passive Codex/Claude Code hook backstop:
+
+```bash
+orgx-wizard hooks install --targets all
 ```
 
 ## Install locally in Codex
