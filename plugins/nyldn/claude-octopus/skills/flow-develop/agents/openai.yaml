@@ -1,0 +1,3 @@
+interface:
+  display_name: "Develop"
+  short_description: "Multi-AI implementation using Codex and Gemini CLIs (Double Diamond Develop phase)"

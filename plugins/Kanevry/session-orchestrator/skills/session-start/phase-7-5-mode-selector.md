@@ -121,6 +121,35 @@ AUQ option ordering is **unchanged** from the existing `presentation-format.md` 
 
 When operating on Codex CLI or Cursor IDE, apply the same ordering logic but render as a numbered Markdown list (per `presentation-format.md` Codex fallback section). When `confidence >= 0.5`, prefix option 1 with `(Recommended by Mode-Selector)`.
 
+## Step 4.5: Context-Pressure Annotation (#332)
+
+When `selectMode()` returns `context_pressure: { score, level }` with `level !== 'low'`, surface it in the AUQ option `description` for the recommended option (NOT in the question itself — the question must stay short):
+
+| Level | Annotation to append to recommended option description |
+|---|---|
+| `low` | (no annotation) |
+| `medium` | `"(context-pressure: medium — scope is moderately large or carryover present)"` |
+| `high` | `"(context-pressure: high — recommend reducing scope or preferring deep mode)"` |
+
+**Append** the annotation to the existing description — do NOT replace it. Example for a `feature` recommendation with medium pressure:
+
+```
+description: recommendation.rationale + " (context-pressure: medium — scope is moderately large or carryover present)"
+```
+
+**Additional rule when `level === 'high'` and recommended mode is `feature` or `housekeeping`:**
+
+Include the `deep` alternative's score advantage in its description to help the user make an informed choice. The AUQ ordering protocol (Step 4) already places `alternatives` in options 2..N by confidence; context-pressure flows in as a delta in `computeDelta()` before scoring (wired in W2). The description nudge is the only addition required here:
+
+```
+// deep alternative description when context pressure is high and recommended mode is feature/housekeeping:
+"(confidence: <pct(alt.confidence)>) — deep mode absorbs higher scope; preferred under high context-pressure"
+```
+
+This annotation is applied at the same site as Step 4's option-description assembly — add it conditionally after building the base descriptions.
+
+Cross-reference: `skills/mode-selector/SKILL.md` § Context-Pressure Signal (#332) for the full heuristic and `computeContextPressure` contract.
+
 ## Step 5: Graceful No-Op Rules
 
 All of the following result in **no banner and default AUQ ordering** — they are silent no-ops that do not block session startup:

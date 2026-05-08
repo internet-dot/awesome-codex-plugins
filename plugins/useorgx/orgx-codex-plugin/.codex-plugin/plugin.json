@@ -1,6 +1,6 @@
 {
   "name": "orgx-codex-plugin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "OrgX MCP access and initiative-aware Codex skills for operating inside OrgX workstreams.",
   "author": {
     "name": "OrgX Team",
@@ -21,7 +21,7 @@
   "interface": {
     "displayName": "OrgX for Codex",
     "shortDescription": "Install OrgX MCP and initiative-aware workflows in Codex.",
-    "longDescription": "Bundles OrgX MCP configuration and Codex skills for initiative orchestration, runtime reporting, artifact registration, and human-in-the-loop decision flows.",
+    "longDescription": "Bundles OrgX MCP configuration, Codex skills, and runtime hook templates for initiative orchestration, passive Work Graph reconciliation, artifact registration, and human-in-the-loop decision flows.",
     "developerName": "OrgX Team",
     "category": "Productivity",
     "capabilities": [

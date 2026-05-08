@@ -13,10 +13,12 @@ For each wave, define agents with:
   Dependencies: [output from which prior role/agent]
   Isolation: [worktree|none — read from Session Config, default: worktree for feature/deep, none for housekeeping]
   MaxTurns: [read from Session Config max-turns, default: housekeeping=8, feature=15, deep=25]
+  status: brainstormed
 ```
 
 - `Isolation: worktree` means the wave-executor will pass `isolation: "worktree"` to the Agent tool, giving each agent its own git worktree copy
 - `MaxTurns` is enforced via the agent prompt — wave-executor includes a turn limit instruction in each agent's prompt
+- `status` is the mission-status enum value for this wave-plan item (#340). Always `brainstormed` in the initial plan. Wave-executor updates it at gate transitions (validated → in-dev → testing → completed). Values are validated against `scripts/lib/mission-status-schema.mjs`. Rollback to `brainstormed` is allowed from any state.
 
 > **Deconfliction rule:** Before finalizing agent specs for a wave, verify that no two agents in the same wave list overlapping `Files:` paths. If overlap is found, either merge the agents into one or move one task to a later wave. Two agents editing the same file in parallel causes merge conflicts that require manual resolution.
 

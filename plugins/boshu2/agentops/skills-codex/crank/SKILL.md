@@ -536,6 +536,7 @@ fi
 - [references/ralph-loop-contract.md](references/ralph-loop-contract.md) - Ralph Wiggum loop contract
 - [references/taskcreate-examples.md](references/taskcreate-examples.md) - task creation examples
 - [references/team-coordination.md](references/team-coordination.md) - worker coordination details
+- [references/worker-specs.md](references/worker-specs.md) - per-worker model/tool/prompt specs
 - [references/external-gate-protocol.md](references/external-gate-protocol.md) - external gate protocol for wave validation
 - [references/test-first-mode.md](references/test-first-mode.md) - test-first wave sequence
 - [references/troubleshooting.md](references/troubleshooting.md) - common issues and fixes

@@ -32,6 +32,88 @@ Do NOT proceed past Phase 0 if GATE_CLOSED. There is no bypass. Refer to `skills
 
 Read and parse Session Config per `skills/_shared/config-reading.md`. Store result as `$CONFIG`.
 
+## Phase 1.2: Session Lock Acquire (#330)
+
+> Skip this phase if `persistence` config is `false`.
+
+Acquire a distributed session-lock to detect parallel sessions in the same repo before initializing STATE.md. This prevents two concurrent Claude/Codex sessions from stomping each other's wave state and metrics writes.
+
+```javascript
+import { acquire, forceAcquire } from 'scripts/lib/session-lock.mjs';
+const result = acquire({ sessionId, mode: sessionType, ttlHours: 4, repoRoot: process.cwd() });
+```
+
+Where `sessionId` is the session identifier derived from the session type and timestamp (e.g. `main-2026-05-08-deep-1`), and `sessionType` is the session mode (`housekeeping`, `feature`, or `deep`).
+
+### Decision flow
+
+1. **`result.ok === true`** → lock is held. Continue to Phase 1.5 (Session Continuity). The lock must be released in session-end.
+
+2. **`result.ok === false`** with `reason === 'active'**:
+   - Another Claude/Codex session holds an active lock in this repo.
+   - Present a choice via `AskUserQuestion`:
+     ```js
+     AskUserQuestion({
+       questions: [{
+         question: `Another session lock is active in this repo (started ${ageHours}h ago, mode=${existingLock.mode}, host=${existingLock.host}, pid=${existingLock.pid}). How should I proceed?`,
+         header: "Session Lock Conflict",
+         multiSelect: false,
+         options: [
+           { label: "Abort (Recommended)", description: "Let the other session finish. Safe default — prevents metrics and wave-state corruption." },
+           { label: "Force-take the lock", description: "Overwrites the active lock. ONLY use if you are certain the other session is no longer running." },
+         ],
+       }],
+     });
+     ```
+   - **Codex CLI / Cursor IDE fallback (numbered Markdown list):**
+     ```
+     Session lock conflict — active lock detected (started <ageHours>h ago, mode=<mode>, host=<host>, pid=<pid>).
+     1. Abort (Recommended) — let the other session finish.
+     2. Force-take the lock — ONLY if the other session is known dead.
+     Reply with the number of your choice.
+     ```
+   - On **Abort**: exit session-start cleanly with a brief stderr note (`session-lock: aborted — active lock held by session_id=<id>`). Do NOT initialize STATE.md.
+   - On **Force-take**: call `forceAcquire({ sessionId, mode: sessionType, ttlHours: 4, repoRoot: process.cwd() })`. After Phase 1.5 initializes STATE.md, append a deviation via `appendDeviation()`:
+     `Force-took session lock from session_id=<existingLock.session_id>, age=<ageHours>h, mode=<existingLock.mode>, pid=<existingLock.pid>`. Continue.
+
+3. **`result.ok === false`** with `reason === 'stale-pid-dead'` or `'stale-pid-alive'**:
+   - A stale lock was found (TTL expired). Likely left behind by a session that crashed or was force-killed.
+   - Present a choice via `AskUserQuestion`:
+     ```js
+     AskUserQuestion({
+       questions: [{
+         question: `Stale session lock found (started ${ageHours}h ago, ttl=${existingLock.ttl_hours}h). Process pid=${existingLock.pid} on host=${existingLock.host} is ${reason === 'stale-pid-dead' ? 'confirmed dead' : 'still running or status unknown'}. Reclaim the lock?`,
+         header: "Stale Session Lock",
+         multiSelect: false,
+         options: [
+           { label: "Reclaim (Recommended)", description: "Overwrite the stale lock and continue. Safe when the previous session is no longer active." },
+           { label: "Abort — investigate manually", description: "Stop here. Inspect .orchestrator/session.lock before proceeding." },
+         ],
+       }],
+     });
+     ```
+   - **Codex CLI / Cursor IDE fallback (numbered Markdown list):**
+     ```
+     Stale session lock found (started <ageHours>h ago, ttl=<ttlHours>h, pid=<pid> on <host>).
+     1. Reclaim (Recommended) — overwrite stale lock and continue.
+     2. Abort — investigate .orchestrator/session.lock manually.
+     Reply with the number of your choice.
+     ```
+   - On **Reclaim**: call `forceAcquire({ sessionId, mode: sessionType, ttlHours: 4, repoRoot: process.cwd() })`. After Phase 1.5 initializes STATE.md, append a deviation:
+     `Stale-lock reclaim: replaced lock from session_id=<existingLock.session_id>, age=<ageHours>h, pid=<existingLock.pid>`. Continue.
+   - On **Abort**: exit cleanly.
+
+4. **`result.ok === false`** with `reason === 'fs-error'**:
+   - Filesystem error when writing the lock file. Log `⚠ session-lock: acquire failed — <error>. Continuing without lock (degraded mode).` and proceed without a lock. Do NOT block the session for a transient FS error.
+
+### Cross-host behaviour
+
+When `existingLock.host !== os.hostname()`, PID liveness cannot be checked (`pidAlive: null`). In this case:
+- For `reason === 'active'`: the recommendation is **Abort** — cross-host locks cannot be verified as dead.
+- For stale reasons: the recommendation is still **Reclaim** only if TTL is clearly expired (>2× ttl_hours). Otherwise default to **Abort**.
+- **Never auto-reclaim cross-host locks** under any circumstance — always present the AUQ and let the user decide.
+- The AUQ question text for cross-host cases should note: `"(cross-host — PID liveness cannot be verified)"`.
+
 ## Phase 1.5: Session Continuity
 
 > Skip this phase if `persistence` config is `false`.
@@ -255,6 +337,38 @@ Reads the `docs-orchestrator` config fields, auto-detects which audiences (user/
 
 **See `phase-2-5-docs-planning.md` for full details.**
 
+## Phase 2.6: Steering Docs Loading
+
+> Skip this phase silently when `.orchestrator/steering/` does not exist in the project root. This mirrors Phase 2.5's silent-no-op pattern — backward compatibility with repos that have not yet scaffolded steering docs.
+
+Check for the steering directory and load all three docs if present:
+
+```bash
+STEERING_DIR=".orchestrator/steering"
+if [ -d "$STEERING_DIR" ]; then
+  PRODUCT_MD=""
+  TECH_MD=""
+  STRUCTURE_MD=""
+  [ -f "$STEERING_DIR/product.md" ]   && PRODUCT_MD=$(cat "$STEERING_DIR/product.md")
+  [ -f "$STEERING_DIR/tech.md" ]      && TECH_MD=$(cat "$STEERING_DIR/tech.md")
+  [ -f "$STEERING_DIR/structure.md" ] && STRUCTURE_MD=$(cat "$STEERING_DIR/structure.md")
+fi
+```
+
+When at least one file is non-empty, inject the following **Steering Context** banner into the conversation context before Phase 3. This gives Phase 3 (VCS Deep Dive) and subsequent phases stable product/tech/structure facts without re-reading CLAUDE.md:
+
+```
+--- Steering Context ---
+[product.md contents — mission, target users, in-scope, out-of-scope]
+[tech.md contents — stack, commands, constraints]
+[structure.md contents — directory map, inventory, key skills]
+--- End Steering Context ---
+```
+
+If `.orchestrator/steering/` is absent or all three files are empty, proceed directly to Phase 3 with no banner and no warning. Do not treat missing steering docs as an error.
+
+**See `.orchestrator/steering/{product,tech,structure}.md` for file contents.**
+
 ## Phase 3: VCS Deep Dive (parallel)
 
 > **VCS Reference:** Detect the VCS platform per the "VCS Auto-Detection" section of the gitlab-ops skill.
@@ -434,7 +548,7 @@ Present a Surface Health block immediately after the per-type grouping, before t
 
 Run immediately before Phase 8 so the Mode-Selector recommendation can influence the AUQ option ordering.
 
-Invokes `buildLiveSignals` (single SSOT for the signals shape) then `selectMode(signals)` (pure function, never throws). Renders a `📊` banner when confidence ≥ 0.5, an informational banner when < 0.5, and no banner when confidence = 0.0. High-confidence output pre-selects an AUQ option in Phase 8 — see Step 4 AUQ Option Ordering Protocol. After Phase 8 collects the user's mode choice, writes a `mode-selector-accuracy` learning to `learnings.jsonl` (Step 6, Phase B-4). All failure paths are graceful no-ops logged to `sweep.log`.
+Invokes `buildLiveSignals` (single SSOT for the signals shape) then `selectMode(signals)` (pure function, never throws). Renders a `📊` banner when confidence ≥ 0.5, an informational banner when < 0.5, and no banner when confidence = 0.0. High-confidence output pre-selects an AUQ option in Phase 8 — see Step 4 AUQ Option Ordering Protocol. After Phase 8 collects the user's mode choice, writes a `mode-selector-accuracy` learning to `learnings.jsonl` (Step 6, Phase B-4). All failure paths are graceful no-ops logged to `sweep.log`. See `phase-7-5-mode-selector.md` § Context-Pressure Annotation (#332) for context-pressure handling.
 
 **See `phase-7-5-mode-selector.md` for full details.**
 
@@ -487,8 +601,10 @@ After user alignment:
 | File | Purpose |
 |------|---------|
 | `soul.md` | Identity and communication principles |
+| (inline) Phase 1.2 | Session Lock Acquire — `acquire()` call, active/stale/cross-host AUQ flows, `forceAcquire()` on user consent, deviation note wiring |
 | `presentation-format.md` | Phase 8 output templates and AskUserQuestion examples |
 | `phase-2-5-docs-planning.md` | Phase 2.5 full procedural body — docs-orchestrator config, audience detection, AUQ confirmation, result block emission, non-overlap rules |
+| (inline) Phase 2.6 | Steering docs gate + load — reads `.orchestrator/steering/{product,tech,structure}.md`; silent no-op when directory absent |
 | `phase-4-5-resource-health.md` | Phase 4.5 full procedural body — resource probe, adaptive thresholds table, AUQ presentation, session-plan cap handoff |
 | `phase-7-5-mode-selector.md` | Phase 7.5 full procedural body — buildLiveSignals, selectMode invocation, banner rendering, AUQ ordering protocol, graceful no-op rules, accuracy learning write |
 | `phase-8-5-express-path.md` | Phase 8.5 full procedural body — activation conditions, banner, coordinator-direct execution, STATE.md logging, condition examples table |

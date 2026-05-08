@@ -173,6 +173,45 @@ VCS backlog priority-weighting, and bootstrap.lock tier — is the Phase B-1 fol
 - Phase A writer: `skills/session-end/SKILL.md` Phase 3.7a (issue #273)
 - Mode enum: `scripts/lib/recommendations-v0.mjs::isValidMode`
 
+## Context-Pressure Signal (#332)
+
+Context-pressure is a single 0.0–1.0 score combining scope size, cross-cutting keyword presence,
+and recent-session carryover-ratio. It modulates `selectMode()` decisions without overriding them:
+
+| Level  | Score       | Effect on mode delta                                  |
+|--------|-------------|-------------------------------------------------------|
+| low    | < 0.3       | feature +0.05 (rewards clean scope)                   |
+| medium | 0.3 – 0.7   | no adjustment                                         |
+| high   | ≥ 0.7       | feature −0.15, housekeeping −0.10 (favors deep)       |
+
+### Components
+
+- **Scope**: `(priorityCount - 3) / 10`, clamped to [0, 0.5] — 0 issues = 0, 3 = 0, 8 = 0.5, 13+ = 0.5
+- **Cross-cutting keywords**: +0.25 fixed bonus if task description matches `/across all|every (skill|agent|repo)|repo-?wide|cross-cutting|rename across|massive refactor/i`
+- **Carryover**: mean of `effectiveness.carryover / effectiveness.planned_issues` over the last 5 sessions, then `ratio - 0.3` clamped to [0, 0.25]
+
+### Examples
+
+- 2 issues, no cross-cutting keywords, low carryover → score ≈ 0.0 (low) → feature +0.05
+- 8 issues, "rename across all skills", carryover 0.4 → score ≈ 0.5 + 0.25 + 0.1 = 0.85 (high) → feature −0.15, housekeeping −0.10
+- 5 issues, no keywords, carryover 0.2 → score ≈ 0.2 (low) → feature +0.05
+
+### Output
+
+`selectMode()` now returns `context_pressure: { score, components: { scope, keywords, carryover }, level }` on all
+return paths. The rationale string is annotated with `; pressure:<level>(<score>)` when level is `medium` or `high`.
+
+### API
+
+`computeContextPressure(signals)` is exported as a standalone pure function for testing and
+future callers (e.g. session-start Phase 7.5 AUQ rendering — deferred to W3-C5).
+
+### Constraints
+
+Context-pressure is NOT an Express Path gate (Express Path is structural: housekeeping + ≤3 issues).
+It is a complementary heuristic that surfaces in the session-start AUQ alongside the recommended mode.
+Missing signal fields contribute 0 to the score — no NaN propagation.
+
 ## Open Questions (for Phase B-1 follow-up)
 
 - Learnings freshness window — default 30d? Configurable per-type or a single global TTL?

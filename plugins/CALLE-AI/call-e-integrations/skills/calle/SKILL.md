@@ -1,12 +1,12 @@
 ---
 name: calle
-description: Use Call-E from Codex through the calle CLI. Use for Call-E setup checks, authentication recovery, phone call planning, planned call execution, and call status checks.
+description: Use CALL-E from Codex through the calle CLI. Use for CALL-E setup checks, authentication recovery, phone call planning, planned call execution, and call status checks.
 license: MIT
 ---
 
-# Call-E
+# CALL-E
 
-Use this skill when the user wants Codex to use Call-E through the `calle` CLI.
+Use this skill when the user wants Codex to use CALL-E through the `calle` CLI.
 This plugin version intentionally calls the CLI instead of configuring Codex to
 connect directly to the remote MCP server.
 
@@ -14,10 +14,10 @@ connect directly to the remote MCP server.
 
 Use this skill for:
 
-- verifying Call-E setup in Codex
+- verifying CALL-E setup in Codex
 - checking whether the `calle` CLI is available
-- recovering from missing or expired Call-E authentication
-- listing available Call-E MCP tools through the CLI
+- recovering from missing or expired CALL-E authentication
+- listing available CALL-E MCP tools through the CLI
 - planning a phone call
 - running a planned call after planning returns complete run credentials
 - checking a call run status
@@ -25,7 +25,7 @@ Use this skill for:
   a terminal status
 
 Do not use this skill when the user only wants a call script, roleplay,
-simulated conversation, or general contact lookup that does not require Call-E.
+simulated conversation, or general contact lookup that does not require CALL-E.
 
 ## Safety and consent
 
@@ -41,11 +41,11 @@ simulated conversation, or general contact lookup that does not require Call-E.
 
 ## CLI selection
 
-All CLI commands run from this Codex plugin must include the Call-E integration
+All CLI commands run from this Codex plugin must include the CALL-E integration
 attribution environment:
 
 ```bash
-env CALLE_SOURCE=codex CALLE_INTEGRATION=codex_plugin CALLE_INTEGRATION_VERSION=0.1.7
+env CALLE_SOURCE=codex CALLE_INTEGRATION=codex_plugin CALLE_INTEGRATION_VERSION=0.1.8
 ```
 
 Use the first command form that works.
@@ -53,19 +53,19 @@ Use the first command form that works.
 Prefer the repository-local CLI when the current workspace contains it:
 
 ```bash
-env CALLE_SOURCE=codex CALLE_INTEGRATION=codex_plugin CALLE_INTEGRATION_VERSION=0.1.7 node packages/cli/bin/calle.js
+env CALLE_SOURCE=codex CALLE_INTEGRATION=codex_plugin CALLE_INTEGRATION_VERSION=0.1.8 node packages/cli/bin/calle.js
 ```
 
 If the repository-local CLI is unavailable, use the global command:
 
 ```bash
-env CALLE_SOURCE=codex CALLE_INTEGRATION=codex_plugin CALLE_INTEGRATION_VERSION=0.1.7 calle
+env CALLE_SOURCE=codex CALLE_INTEGRATION=codex_plugin CALLE_INTEGRATION_VERSION=0.1.8 calle
 ```
 
 If neither command works, use the pinned npm package through `npx`:
 
 ```bash
-env CALLE_SOURCE=codex CALLE_INTEGRATION=codex_plugin CALLE_INTEGRATION_VERSION=0.1.7 npx -y @call-e/cli@0.3.1
+env CALLE_SOURCE=codex CALLE_INTEGRATION=codex_plugin CALLE_INTEGRATION_VERSION=0.1.8 npx -y @call-e/cli@0.3.2
 ```
 
 Only tell the user to install the CLI globally if `npx` is unavailable,
@@ -74,9 +74,9 @@ command.
 
 ## Readiness flow
 
-Use this flow whenever this Codex plugin is actively invoked for a Call-E
+Use this flow whenever this Codex plugin is actively invoked for a CALL-E
 request. Run it before call planning, before tool listing, when setup is
-uncertain, when auth fails, or when the user asks to verify Call-E setup:
+uncertain, when auth fails, or when the user asks to verify CALL-E setup:
 
 1. Check CLI availability with `--help`.
 2. Run `auth status`.
@@ -130,7 +130,7 @@ I'll keep you updated on the phone status, call content, and summary.
 1. Use `call plan` first.
    If the user has not provided enough explicit fields for `call plan`, use
    `mcp call plan_call --args-json '{"user_input":"<latest user message verbatim>"}'`
-   so Call-E can ask for the missing details.
+   so CALL-E can ask for the missing details.
 2. Read the returned `plan_id` and `confirm_token`.
 3. If the user's request is to place a call, immediately use `call run` with
    the exact `plan_id` and `confirm_token` returned by planning.

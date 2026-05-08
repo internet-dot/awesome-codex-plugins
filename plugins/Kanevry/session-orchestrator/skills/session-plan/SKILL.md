@@ -220,6 +220,64 @@ docs-tasks:
 
 **Omission rule:** When `docs-orchestrator.enabled: false` OR there are 0 Docs tasks, do NOT emit the `### Docs Tasks (machine-readable)` block. Absence of the block signals to wave-executor and session-end that no docs verification is needed for this session.
 
+### Wave-Plan Mission Status (machine-readable)
+
+When the wave plan contains 1 or more wave-plan items (i.e., for all non-empty plans), session-plan MUST emit a machine-readable mission-status block **at the end of its plan output** (after the Docs Tasks block if present, before `Ready to execute?`). This block is the SSOT consumed by wave-executor (for STATE.md persistence) and session-end Phase 1.9 (for enum-based classification).
+
+- **wave-executor Pre-Wave 1b (STATE.md init):** reads this block and persists `mission-status: [...]` into STATE.md frontmatter via `writeMissionStatus` from `scripts/lib/state-md.mjs`.
+- **session-end Phase 1.9:** reads `mission-status` back from STATE.md frontmatter via `parseMissionStatus` to classify items into the 1.1–1.4 buckets using enum values.
+
+**Emit format:**
+
+```yaml
+### Wave-Plan Mission Status (machine-readable)
+mission-status:
+  - id: m-1
+    task: <task description from wave-plan item>
+    wave: <N>
+    status: brainstormed
+  - id: m-2
+    task: <task description from wave-plan item>
+    wave: <N>
+    status: brainstormed
+```
+
+**Field rules:**
+- `id`: sequential `m-N` identifier. No UUID generation required.
+- `task`: verbatim task description from the wave-plan item (do not paraphrase).
+- `wave`: the wave number where this task is dispatched.
+- `status`: always `brainstormed` at plan emission. Terminal values are updated at gate transitions by wave-executor: `brainstormed` → `validated` (user confirms via `/go`) → `in-dev` (agent dispatched) → `testing` (Quality wave) → `completed` (Quality gate green). session-end Phase 1.9 reads the current value to classify the item.
+
+**Transition gates (summary):**
+At plan time, all items start at `brainstormed`. When the user runs `/go` to approve the plan, wave-executor updates each item to `validated`. When an agent for a wave-plan item is dispatched, wave-executor updates that item to `in-dev`. When the Quality wave begins, items from prior waves move to `testing`. When the Quality gate passes, items finalize at `completed`. Rollback to `brainstormed` is permitted from any state. All transitions are validated against the schema in `scripts/lib/mission-status-schema.mjs`.
+
+**Omission rule:** When the plan has 0 wave-plan items (e.g., pure express-path coord-direct with no sub-agent tasks), do NOT emit the `### Wave-Plan Mission Status (machine-readable)` block.
+
+### Mission-Status Enum (#340)
+
+Every wave-plan item carries a `status` field drawn from a 5-value enum. The field is always present on items emitted in the `### Wave-Plan Mission Status (machine-readable)` block (see below). It is also the value persisted in STATE.md frontmatter and read back by session-end Phase 1.9 for enum-based classification.
+
+#### Enum values
+
+| Status | Meaning | Set when |
+|---|---|---|
+| `brainstormed` | Draft item from `/plan`, not yet user-confirmed | Plan emitted by session-plan (all items start here) |
+| `validated` | User confirmed via AUQ in session-plan (`/go` approval) | wave-executor: user runs `/go` to approve the wave plan |
+| `in-dev` | Agent picked up the task this wave | wave-executor: agent dispatched for this item |
+| `testing` | Implementation done, tests passing for this task | wave-executor: Quality wave begins for this item's work |
+| `completed` | Quality-Lite green for this task's wave | wave-executor: Quality gate passes for this item |
+
+#### Default and transitions
+
+- **Default at plan creation:** `brainstormed` — all items start here.
+- **Transitions are coordinator-level orchestration** (not inside individual agent prompts). See `skills/wave-executor/SKILL.md` "Mission-Status Updates (#340)" for when each transition fires.
+- **Rollback:** any item may return to `brainstormed` from any state (e.g. if work is discarded or re-planned).
+- **Schema validation:** transitions are validated against `scripts/lib/mission-status-schema.mjs` before being written to STATE.md.
+
+#### Status field in wave-plan items
+
+Every item in the wave plan output carries an implicit `status: brainstormed` at plan time. The `### Wave-Plan Mission Status (machine-readable)` block below (emitted at the end of the plan output) is the machine-readable form that wave-executor and session-end Phase 1.9 consume. session-plan does NOT write STATUS transitions — it only emits the initial `brainstormed` values.
+
 ## Step 2: Wave Assignment
 
 Distribute tasks across waves using 5 named roles. Read `waves` from Session Config (default: 5) and map roles to wave numbers.

@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
-  "last_updated": "2026-05-06",
-  "total": 60,
+  "last_updated": "2026-05-08",
+  "total": 61,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -268,6 +268,16 @@
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/avivsinai/agent-message-queue/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Agent Vision",
+      "url": "https://github.com/zfifteen/agent-vision",
+      "owner": "zfifteen",
+      "repo": "agent-vision",
+      "description": "macOS-only local camera plugin for explicit snapshots, streaming controls, and file-backed image input.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/zfifteen/agent-vision/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "Apple Productivity",
