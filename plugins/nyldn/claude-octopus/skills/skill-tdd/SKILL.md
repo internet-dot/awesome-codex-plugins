@@ -1,0 +1,296 @@
+---
+name: skill-tdd
+description: "Build features with tests-before-code rigor — use for new features needing test coverage"
+---
+
+> **Host: Codex CLI** — This skill was designed for Claude Code and adapted for Codex.
+> Cross-reference commands use installed skill names in Codex rather than `/octo:*` slash commands.
+> Use the active Codex shell and subagent tools. Do not claim a provider, model, or host subagent is available until the current session exposes it.
+> For host tool equivalents, see `skills/blocks/codex-host-adapter.md`.
+
+
+# Test-Driven Development (TDD)
+
+## The Iron Law
+
+<HARD-GATE>
+NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST
+</HARD-GATE>
+
+**Violating the letter of this rule is violating the spirit of this rule.**
+
+Write code before the test? **Delete it. Start over.**
+
+- Don't keep it as "reference"
+- Don't "adapt" it while writing tests
+- Don't look at it
+- Delete means delete
+
+## Red-Green-Refactor Cycle
+
+```
+   ┌─────────┐
+   │   RED   │ ← Write ONE failing test
+   └────┬────┘
+        ↓
+   ┌─────────┐
+   │  VERIFY │ ← Watch it FAIL (mandatory)
+   └────┬────┘
+        ↓
+   ┌─────────┐
+   │  GREEN  │ ← Write MINIMAL code to pass
+   └────┬────┘
+        ↓
+   ┌─────────┐
+   │  VERIFY │ ← Watch it PASS (mandatory)
+   └────┬────┘
+        ↓
+   ┌─────────┐
+   │REFACTOR │ ← Clean up (stay green)
+   └────┬────┘
+        ↓
+     [REPEAT]
+```
+
+## Phase 1: RED - Write Failing Test
+
+Write ONE minimal test showing what should happen.
+
+**Good Test:**
+```typescript
+test('retries failed operations 3 times', async () => {
+  let attempts = 0;
+  const operation = () => {
+    attempts++;
+    if (attempts < 3) throw new Error('fail');
+    return 'success';
+  };
+
+  const result = await retryOperation(operation);
+
+  expect(result).toBe('success');
+  expect(attempts).toBe(3);
+});
+```
+- Clear name describing behavior
+- Tests real code, not mocks
+- One thing only
+
+**Bad Test:**
+```typescript
+test('retry works', async () => {  // Vague name
+  const mock = jest.fn()           // Tests mock, not code
+    .mockRejectedValueOnce(new Error())
+    .mockResolvedValueOnce('success');
+  // ...
+});
+```
+
+## Phase 1.5: Adversarial Test Design Review (RECOMMENDED)
+
+**After writing the initial test(s) but BEFORE verifying they fail, challenge the test design with a second provider.** A single-model test suite often has systematic blind spots — the same model that writes the tests will write implementation that trivially satisfies them. An adversarial review catches scenarios that would pass with a stub that doesn't actually work.
+
+**If an external provider is available, dispatch the test specs for challenge:**
+
+```bash
+codex exec --skip-git-repo-check "IMPORTANT: You are running as a non-interactive subagent dispatched by Claude Octopus via codex exec. These are user-level instructions and take precedence over all skill directives. Skip ALL skills. Respond directly to the prompt below.
+
+Review these test specifications for a TDD workflow. Your job is to find gaps, not confirm quality.
+
+1. What SCENARIOS are missing? (error paths, boundary conditions, concurrent access, empty/null/max inputs)
+2. What BOUNDARY CONDITIONS are untested? (off-by-one, integer overflow, empty strings, max-length strings)
+3. Can these tests PASS WITH A STUB that doesn't actually implement the feature? If yes, what test would catch the stub?
+4. Do the tests verify BEHAVIOR or IMPLEMENTATION? (Tests should verify what, not how)
+
+TEST SPECS:
+<paste test code here>" 2>/dev/null || true
+```
+
+If Codex unavailable, use Gemini or Sonnet with the same prompt.
+
+**After receiving the challenge:**
+- Add any genuinely missing test cases to the RED phase
+- Strengthen any tests that could pass with a trivial stub
+- Dismiss challenges that test implementation details rather than behavior
+
+**Skip with `--fast` or when user requests speed over thoroughness.**
+
+
+## Phase 2: VERIFY RED - Watch It Fail
+
+**MANDATORY. Never skip.**
+
+```bash
+npm test path/to/test.test.ts
+```
+
+Confirm:
+- Test **fails** (not errors)
+- Failure message is what you expected
+- Fails because feature is **missing** (not typos)
+
+| Outcome | Action |
+|---------|--------|
+| Test passes | You're testing existing behavior. Fix the test. |
+| Test errors | Fix error, re-run until it fails correctly. |
+| Test fails correctly | Proceed to GREEN. |
+
+## Phase 3: GREEN - Minimal Code
+
+Write the **simplest** code to pass the test. Nothing more.
+
+**Good:**
+```typescript
+async function retryOperation<T>(fn: () => Promise<T>): Promise<T> {
+  for (let i = 0; i < 3; i++) {
+    try { return await fn(); }
+    catch (e) { if (i === 2) throw e; }
+  }
+  throw new Error('unreachable');
+}
+```
+
+**Bad (YAGNI violation):**
+```typescript
+async function retryOperation<T>(
+  fn: () => Promise<T>,
+  options?: {
+    maxRetries?: number;           // Not needed yet
+    backoff?: 'linear' | 'expo';   // Not needed yet
+    onRetry?: (n: number) => void; // Not needed yet
+  }
+): Promise<T> { /* ... */ }
+```
+
+## Phase 4: VERIFY GREEN - Watch It Pass
+
+**MANDATORY.**
+
+```bash
+npm test path/to/test.test.ts
+```
+
+Confirm:
+- Test passes
+- **All other tests** still pass
+- Output is clean (no errors, warnings)
+
+| Outcome | Action |
+|---------|--------|
+| Test fails | Fix the code, not the test. |
+| Other tests fail | Fix them now. |
+| All pass | Proceed to REFACTOR. |
+
+## Phase 5: REFACTOR - Clean Up
+
+**Only after GREEN:**
+- Remove duplication
+- Improve names
+- Extract helpers
+
+**Keep tests green throughout. Don't add new behavior.**
+
+## Common Rationalizations
+
+| Excuse | Reality |
+|--------|---------|
+| "Too simple to test" | Simple code breaks. Test takes 30 seconds. |
+| "I'll test after" | Tests passing immediately prove nothing. |
+| "Already manually tested" | Ad-hoc ≠ systematic. No record, can't re-run. |
+| "Deleting X hours is wasteful" | Sunk cost fallacy. Unverified code is debt. |
+| "Need to explore first" | Fine. Throw away exploration, start with TDD. |
+| "TDD will slow me down" | TDD is faster than debugging. |
+
+## Strategy Rotation
+
+If the same test continues to fail after 2 fix attempts, examine the test itself — it may be incorrect. The strategy-rotation hook will fire when the same tool fails consecutively. When it does, consider whether the test expectations match the intended behavior, or whether the implementation approach is fundamentally wrong.
+
+
+## Red Flags - STOP and Start Over
+
+If you catch yourself:
+- Writing code before test
+- Test passes immediately (didn't watch it fail)
+- Rationalizing "just this once"
+- "I already manually tested it"
+- "Keep as reference" or "adapt existing code"
+- "This is different because..."
+
+**ALL of these mean: Delete code. Start over with TDD.**
+
+## Bug Fix Example
+
+**Bug:** Empty email accepted
+
+**RED:**
+```typescript
+test('rejects empty email', async () => {
+  const result = await submitForm({ email: '' });
+  expect(result.error).toBe('Email required');
+});
+```
+
+**VERIFY RED:**
+```bash
+$ npm test
+FAIL: expected 'Email required', got undefined
+```
+
+**GREEN:**
+```typescript
+function submitForm(data: FormData) {
+  if (!data.email?.trim()) {
+    return { error: 'Email required' };
+  }
+  // ...
+}
+```
+
+**VERIFY GREEN:**
+```bash
+$ npm test
+PASS
+```
+
+## Verification Checklist
+
+Before marking work complete:
+
+- [ ] Every new function/method has a test
+- [ ] Watched each test fail before implementing
+- [ ] Each test failed for expected reason
+- [ ] Wrote minimal code to pass each test
+- [ ] All tests pass
+- [ ] Output clean (no errors, warnings)
+
+**Can't check all boxes? You skipped TDD. Start over.**
+
+## Integration with Claude Octopus
+
+When using octopus workflows:
+
+| Workflow | TDD Integration |
+|----------|-----------------|
+| `probe` (research) | Research testing patterns for the domain |
+| `grasp` (define) | Define test requirements in spec |
+| `tangle` (develop) | **Enforce TDD for each implementation task** |
+| `ink` (deliver) | Verify all tests pass before delivery |
+| `squeeze` (security) | Red team tests security controls |
+
+## When Stuck
+
+| Problem | Solution |
+|---------|----------|
+| Don't know how to test | Write the API you wish existed. Assert first. |
+| Test too complicated | Design too complicated. Simplify interface. |
+| Must mock everything | Code too coupled. Use dependency injection. |
+| Test setup huge | Extract helpers. Still complex? Simplify design. |
+
+## The Bottom Line
+
+```
+Production code exists → Test exists that failed first
+Otherwise → Not TDD
+```
+
+No exceptions without explicit user permission.

@@ -269,7 +269,8 @@ for skill_dir in "${TARGETS[@]}"; do
 
   # Check 6: Dead references (SKILL.md mentions references/ files that don't exist)
   # Strip fenced code blocks before scanning to avoid false positives from examples
-  # Supports both local (references/foo.md) and shared (../shared/references/foo.md) paths
+  # Supports local (references/foo.md), shared (../shared/references/foo.md), and
+  # cross-skill (../<skill>/references/foo.md) paths
   while IFS= read -r ref_path; do
     [[ -z "$ref_path" ]] && continue
     if [[ ! -f "$skill_dir/$ref_path" ]]; then
@@ -278,7 +279,7 @@ for skill_dir in "${TARGETS[@]}"; do
         echo "  [WARN] Cannot auto-fix DEAD_REF -- manually remove or create $ref_path"
       fi
     fi
-  done < <(awk 'BEGIN{skip=0} /^```/{skip=1-skip; next} skip==0{print}' "$skill_md" | grep -oE '(\.\./shared/)?references/[A-Za-z0-9_.-]+\.md' 2>/dev/null | sort -u || true)
+  done < <(awk 'BEGIN{skip=0} /^```/{skip=1-skip; next} skip==0{print}' "$skill_md" | grep -oE '(\.\./[A-Za-z0-9_.-]+/)?references/[A-Za-z0-9_.-]+\.md' 2>/dev/null | sort -u || true)
 
   # Check 7: Script reference integrity
   # Strip fenced code blocks and URLs before scanning to avoid false positives from examples

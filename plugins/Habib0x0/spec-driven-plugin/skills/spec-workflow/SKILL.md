@@ -1,7 +1,7 @@
 ---
 name: spec-workflow
 description: This skill should be used when the user asks to "create a spec", "write requirements", "design a feature", "plan implementation", "use EARS notation", "create user stories", "break down tasks", "write a PRD", "technical specification", or mentions "spec-driven development", "feature spec", "requirements phase", "design phase", or "tasks phase". Provides structured 3-phase workflow for feature development.
-version: 5.3.2
+version: 5.3.3
 ---
 
 # Spec-Driven Development Workflow

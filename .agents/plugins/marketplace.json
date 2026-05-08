@@ -5,6 +5,18 @@
   },
   "plugins": [
     {
+      "name": "aegis",
+      "source": {
+        "source": "local",
+        "path": "./plugins/GanyuanRan/Aegis"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
+    },
+    {
       "name": "codiris-agentizer",
       "source": {
         "source": "local",
@@ -309,6 +321,18 @@
       "source": {
         "source": "local",
         "path": "./plugins/avivsinai/agent-message-queue"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Tools & Integrations"
+    },
+    {
+      "name": "agent-vision",
+      "source": {
+        "source": "local",
+        "path": "./plugins/zfifteen/agent-vision"
       },
       "policy": {
         "installation": "AVAILABLE",

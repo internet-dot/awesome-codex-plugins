@@ -181,6 +181,41 @@ git add docs/prd/YYYY-MM-DD-{project-name}.md
 git commit -m "docs: add project PRD from /plan new session"
 ```
 
+### Step 7: Scaffold Steering Docs
+
+Create `.orchestrator/steering/` with three stub documents populated from planning answers.
+Steering docs give every future session stable product/tech/structure context without re-reading
+CLAUDE.md from scratch (consumed by session-start Phase 2.6).
+
+```bash
+mkdir -p .orchestrator/steering
+```
+
+**`product.md`** — mission + scope derived from Wave 1 (core decisions) and Wave 3 (MVP scope):
+- Mission: one sentence from the project pitch in PRD Section 1
+- Target users: from PRD Section 3 (personas)
+- In-scope features: from PRD Section 4 In-Scope MVP list
+- Out of scope: from PRD Section 4 Out-of-Scope list
+
+**`tech.md`** — stack + commands + constraints derived from Wave 2 (tech decisions):
+- Runtime stack: archetype + chosen tech stack + language/framework
+- Key commands: test, lint, typecheck, install (from archetype defaults)
+- Coverage thresholds: from archetype template if present, else leave as placeholder
+- Constraints: archetype-specific pitfalls (fill in or leave `_TODO_` for follow-up)
+
+**`structure.md`** — directory map + inventory from the scaffolded repo:
+- Top-level directory map: run `ls -1` and annotate each directory with its purpose
+- Inventory counts: fill in after `setup-project.sh` completes (skills/commands/agents as applicable)
+- Key files: entry points, SSOT files, main config files
+
+Write each file with real content from planning answers — never leave all three as pure stubs.
+At minimum, `product.md` must contain the mission sentence and the In-Scope list from the PRD.
+
+```bash
+git add .orchestrator/steering/
+git commit -m "chore: scaffold steering docs from /plan new session"
+```
+
 ---
 
 ## Phase 4: Issue Creation

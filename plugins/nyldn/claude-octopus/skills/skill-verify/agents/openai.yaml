@@ -1,0 +1,3 @@
+interface:
+  display_name: "Verify"
+  short_description: "Evidence before claims — run verification commands before declaring work complete, fixed, or passing"

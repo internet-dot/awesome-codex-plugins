@@ -11,8 +11,8 @@ Every AI model has blind spots. Claude Octopus puts up to eight of them on every
 <p align="center">
   <a href="https://claude.ai"><img src="https://img.shields.io/badge/Claude-Built_with_AI-c96442?logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTEyIDJhMTAgMTAgMCAxIDAgMCAyMCAxMCAxMCAwIDAgMCAwLTIwbTAgMS44YTEuMiAxLjIgMCAwIDEgLjg1LjM1bDEuNSA0LjVhLjYuNiAwIDAgMCAuMzUuMzVsNC41IDEuNWExLjIgMS4yIDAgMCAxIDAgMi4yN2wtNC41IDEuNWEuNi42IDAgMCAwLS4zNS4zNWwtMS41IDQuNWExLjIgMS4yIDAgMCAxLTIuMjcgMGwtMS41LTQuNWEuNi42IDAgMCAwLS4zNS0uMzVsLTQuNS0xLjVhMS4yIDEuMiAwIDAgMSAwLTIuMjdsNC41LTEuNWEuNi42IDAgMCAwIC4zNS0uMzVsMS41LTQuNUExLjIgMS4yIDAgMCAxIDEyIDMuOCIvPjwvc3ZnPg==&labelColor=333" alt="Built with Claude"></a>
   <a href="https://github.com/nyldn/claude-octopus/actions/workflows/test.yml"><img src="https://github.com/nyldn/claude-octopus/actions/workflows/test.yml/badge.svg" alt="Tests"></a>
-  <img src="https://img.shields.io/badge/Tests-146_passing-brightgreen" alt="146 tests passing">
-  <img src="https://img.shields.io/badge/Version-9.36.0-blue" alt="Version 9.36.0">
+  <img src="https://img.shields.io/badge/Tests-117_suites_passing-brightgreen" alt="117 suites passing">
+  <img src="https://img.shields.io/badge/Version-9.37.0-blue" alt="Version 9.37.0">
   <img src="https://img.shields.io/badge/Claude_Code-v2.1.14+_required-blueviolet" alt="Requires Claude Code v2.1.14+">
   <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License">
 </p>
@@ -37,7 +37,7 @@ Every AI model has blind spots. Claude Octopus puts up to eight of them on every
 
 | Version | Best Features |
 |---------|--------------|
-| **v9** (current) | Up to 8 providers (Codex, Gemini, Copilot, Qwen, Ollama, Perplexity, OpenRouter, OpenCode). Four-way AI debates. Smart router — just say what you need. Discipline mode with 8 auto-invoke gates. Two-stage review. Circuit breakers with automatic provider recovery. Cursor + OpenCode + Codex cross-compatibility. Token compression: `bin/octo-compress` pipe + auto PostToolUse hook save ~7,300 tokens/session. PostCompact context recovery. `bin/octopus` CLI. 170+ CC feature flags through v2.1.131. |
+| **v9** (current) | Up to 8 providers (Codex, Gemini, Copilot, Qwen, Ollama, Perplexity, OpenRouter, OpenCode). Four-way AI debates. Smart router — just say what you need. Agent summary tables show which providers actually contributed. Provider-aware prompt preflight prevents silent oversize failures. Research breadth modes fan out light, standard, or exhaustive investigations. Setup aliases and fuzzy `/octo:*` corrections reduce command friction. Discipline mode with 8 auto-invoke gates. Two-stage review. Circuit breakers with automatic provider recovery. Cursor + OpenCode + Codex cross-compatibility. Token compression: `bin/octo-compress` pipe + auto PostToolUse hook save ~7,300 tokens/session. PostCompact context recovery. `bin/octopus` CLI. 170+ CC feature flags through v2.1.132. |
 | **v8** | Multi-LLM code review with inline PR comments. Parallel workstreams in isolated git worktrees. Reaction engine — auto-responds to CI failures. 32 specialized personas. Dark Factory autonomous pipeline. |
 | **v7** | Double Diamond workflow. Multi-provider dispatch. Quality gates and consensus scoring. Configurable sandbox modes. |
 
@@ -56,7 +56,7 @@ claude plugin install octo@nyldn-plugins
 
 That's it. Setup detects installed providers, shows what's missing, and walks you through configuration. You need **zero** external providers to start — Claude is built in.
 
-Claude Code **v2.1.14+** is the minimum supported runtime. Newer Claude Code releases unlock additional Octopus diagnostics and release checks automatically; the current plugin tracks feature flags through **Claude Code v2.1.131**.
+Claude Code **v2.1.14+** is the minimum supported runtime. Newer Claude Code releases unlock additional Octopus diagnostics and release checks automatically; the current plugin tracks feature flags through **Claude Code v2.1.132**.
 
 <details>
 <summary>Install for Codex CLI</summary>
@@ -237,7 +237,7 @@ Set `OCTO_TIER=prototype|mvp|production` as a project hint. It does not hard-blo
 /octo:embrace build stripe integration     # Full lifecycle: research → define → develop → deliver
 /octo:factory "build a CLI that converts CSV to JSON"  # Autonomous pipeline — spec in, software out
 /octo:debate monorepo vs microservices     # Structured four-way AI debate with consensus
-/octo:research htmx vs react in 2026       # Multi-source synthesis from three AI providers
+/octo:research --breadth=standard htmx vs react in 2026  # Attributed multi-provider research
 /octo:design mobile checkout redesign       # UI/UX design with BM25 style intelligence
 /octo:tdd create user auth                 # Red-green-refactor with test discipline
 /octo:security                              # OWASP vulnerability scan + remediation
@@ -255,6 +255,8 @@ Don't remember the command name? Just describe what you need:
 ```
 
 The smart router parses your intent and selects the right workflow.
+
+Multi-provider runs also write an agent status ledger. Use `octopus agent-summary` to see which providers contributed, which ran degraded, and which failed before synthesis.
 
 ---
 

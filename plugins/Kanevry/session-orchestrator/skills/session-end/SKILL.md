@@ -112,6 +112,42 @@ Dispatch the session-reviewer agent to verify implementation quality before the 
    - **PROCEED** — continue to Phase 2
    - **FIX REQUIRED** — address each listed item before proceeding. For quick fixes (<2 min each), fix inline. For larger items, create carryover issues (same as Phase 1.2) and note them as unresolved review findings in the Final Report
 
+### 1.9 Mission-Status Classification (when `mission-status` present in STATE.md)
+
+> Skip if `persistence` is `false` in Session Config, or if `mission-status:` is absent from STATE.md frontmatter. When absent, fall back to binary checkbox detection in 1.1–1.4 unchanged — full backward compat.
+
+When STATE.md frontmatter contains a `mission-status:` array (set by session-plan + wave-executor per #340), use the enum values to classify items into the 1.1–1.4 buckets. Read the array via `parseMissionStatus(frontmatter)` from `scripts/lib/state-md.mjs`.
+
+**Classification mapping:**
+- `status: completed` → **1.1 Done Items** (item finished; verify with evidence per 1.1)
+- `status: testing` or `status: in-dev` → **1.2 Partially Done** (carryover; document what remains)
+- `status: validated` or `status: brainstormed` → **1.3 Not Started** (carryover; check if still relevant)
+- Items NOT present in the `mission-status:` array → fall back to binary checkbox detection per 1.1–1.4 unchanged
+
+**Backward compat:** When `mission-status:` is absent from STATE.md (pre-#340 STATE.md files, or sessions where session-plan did not emit the block), behave exactly as before — enum classification is skipped entirely and 1.1–1.4 binary checkbox logic runs as the sole classification mechanism.
+
+### 1.10 Mission Status Breakdown (when `mission-status` present)
+
+> Skip if `mission-status:` is absent from STATE.md frontmatter (backward compat — no breakdown emitted).
+
+After classifying items in Phase 1.9, produce a **Mission Status breakdown** subsection as part of the closed/carryover summary output. Count the number of tasks at each enum value across ALL waves:
+
+```
+### Mission Status Breakdown
+- completed:    <N> tasks
+- testing:      <N> tasks
+- in-dev:       <N> tasks
+- validated:    <N> tasks
+- brainstormed: <N> tasks
+- Total:        <N> tasks across <W> waves
+```
+
+Rules:
+- Count each task-id entry from the `mission-status:` frontmatter array by its current `status` value.
+- `completed` maps to Phase 1.1 (Done). `testing` + `in-dev` map to Phase 1.2 (Partial). `validated` + `brainstormed` map to Phase 1.3 (Not Started).
+- Include this block in the Phase 6 Final Report under `### Carried Over` or as a standalone subsection immediately after the Completed/Carried Over/New Issues lists.
+- When all tasks are `completed`, the breakdown still appears (confirms clean session state).
+
 ## Phase 2: Quality Gate
 
 > **Verification Reference:** See `verification-checklist.md` in this skill directory for the full quality gate checklist.
@@ -291,6 +327,26 @@ Calls `computeV0Recommendation({completionRate, carryoverRatio, carryoverIssues}
 
 **See `phase-3-7a-recommendations.md` for full details.**
 
+## Phase 3.8: Session Lock Release (#330)
+
+> Gate: Only run if `persistence` is `true` in Session Config. Skip silently otherwise.
+
+After STATE.md is finalized with `status: completed` (Phase 3.4) and Recommendations are written (Phase 3.7a), release the distributed session-lock so the next session can acquire it cleanly:
+
+```javascript
+import { release } from 'scripts/lib/session-lock.mjs';
+const result = release({ sessionId, repoRoot: process.cwd() });
+// result.ok is always true unless a filesystem error occurred.
+// result.deleted === true  → lock file removed successfully.
+// result.deleted === false → lock was absent or belonged to a different session_id (silent-OK).
+```
+
+If `result.deleted === false`, log `info: session-lock not released — already absent or session_id mismatch (no action needed)` and continue. This is a non-error state.
+
+If `result.ok === false` (rare filesystem error), log `⚠ session-lock: release failed — <result.reason>` and continue. Do NOT block the close for a lock-release failure — the TTL provides automatic expiry for the next session.
+
+The lock is released here — AFTER all STATE.md writes are complete and BEFORE the commit is staged in Phase 4.1. This ordering ensures a clean handover: the lock file is absent from the working tree when the commit is assembled, so it is not accidentally staged.
+
 ## Phase 4: Commit & Push
 
 ### 4.1 Stage Changes
@@ -427,6 +483,7 @@ Present to the user:
 | `learning-patterns.md` | Phases 3.5a + 3.6 extraction heuristics, confidence updates, passive decay, and JSONL write procedure |
 | `session-metrics-write.md` | Phase 3.7 JSONL append, vault-mirror invocation, and behavior matrix |
 | `phase-3-7a-recommendations.md` | Phase 3.7a full procedural body — computeV0Recommendation call, STATE.md field write, data source guarantee, error mode |
+| (inline) Phase 3.8 | Session Lock Release — `release()` call, silent-OK on mismatch/absent, non-fatal on fs-error, ordering note (after STATE.md writes, before Phase 4 commit staging) |
 
 ## Anti-Patterns
 
