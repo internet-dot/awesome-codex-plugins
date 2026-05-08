@@ -10,7 +10,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
   dispatch:
@@ -22,4 +21,4 @@ jobs:
         with:
           repository: hashgraph-online/awesome-ai-plugins
           event-type: sync-to-ai-plugins
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.BOT_TOKEN }}
