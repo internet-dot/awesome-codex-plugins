@@ -1,0 +1,130 @@
+---
+name: writing-plans
+description: Use when you have a spec or requirements for a multi-step task, before touching code
+---
+
+# Execute
+
+→ Have approved spec/requirements? → **Write implementation plan. Assume engineer has zero context.**
+  1. Scope check: fact/assumption/unknown, baseline, Ripple Signal Triage, compatibility boundary, dual-track needs
+  2. File map: what files created/modified, clear boundaries, follow existing patterns
+  3. Bite-sized tasks (2-5 min each): exact file paths, complete code, exact commands, expected output
+  4. Self-review: spec coverage, placeholders, type consistency, compatibility, verification, dual-track
+  5. Save → offer execution choice (subagent-driven or inline)
+→ Plan must answer: problem, baseline, files, compat, verification, risks, retirement.
+
+# Writing Plans
+
+## Overview
+
+Write comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste. Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it. Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
+
+Assume they are a skilled developer, but know almost nothing about our toolset or problem domain. Assume they don't know good test design very well.
+
+This skill is the canonical planning workflow for multi-step implementation work. Use it to convert approved specs or requirements into plans that are executable, testable, impact-aware, and bounded by compatibility and authority constraints.
+
+**Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
+
+**Context:** This should be run in a dedicated worktree (created by brainstorming skill).
+
+**Save plans to:** `docs/aegis/plans/YYYY-MM-DD-<feature-name>.md`
+Plan always goes to `plans/` — never to `work/`.
+(User preferences for plan location override this default.)
+
+If `docs/aegis/` does not exist and `scripts/aegis-workspace.py` is available
+in the active method-pack checkout, initialize the target project first:
+
+```bash
+python scripts/aegis-workspace.py init --root <target-project-root>
+```
+
+If the helper is unavailable, initialize the workspace manually:
+  1. Create `docs/aegis/README.md` and `docs/aegis/INDEX.md`
+  2. Create `docs/aegis/BASELINE-GOVERNANCE.md` from template
+  3. If the project has code, create `docs/aegis/baseline/YYYY-MM-DD-initial-baseline.md`
+Then save the plan and append to `docs/aegis/INDEX.md`. Prefer:
+
+```bash
+python scripts/aegis-workspace.py append-index --root <target-project-root> --path docs/aegis/plans/<filename>.md --kind plan --title "<title>"
+python scripts/aegis-workspace.py check --root <target-project-root>
+```
+
+## Scope Check
+
+If the spec covers multiple independent subsystems, suggest breaking into separate plans. Before writing tasks, check: fact/assumption/unknown, baseline docs, compatibility boundary, whether dual-track (repair + retirement) applies.
+
+## Aegis Project Workspace
+
+Workspace creation is triggered by the plan save step. See `using-aegis/SKILL.md` Rule 3 for the hard binary rule. If the project already has docs/adr/ or architecture docs, reference them — do not duplicate authority.
+
+## File Structure
+
+Map files before defining tasks. Design units with clear boundaries and single responsibilities. Files that change together should live together. Follow existing codebase patterns. Each task should produce self-contained, independently reviewable changes.
+
+## Required Planning Outputs
+
+Before you leave this workflow, the written plan must make these items answerable:
+
+1. **What problem or approved scope this plan is implementing**
+2. **Which baseline docs, ADRs, or requirements shaped the plan**
+3. **What files own the change**
+4. **What compatibility boundary must hold**
+5. **What verification proves each major slice**
+6. **What risks, rollback surface, or unknowns remain**
+7. **What old owner / fallback / patch stays, shrinks, or retires when applicable**
+8. **Whether Ripple Signal Triage expands owner, downstream, contract, source-of-truth, or verification scope**
+
+## Bite-Sized Task Granularity
+
+**Each step is one action (2-5 minutes):**
+- "Write the failing test" - step
+- "Run it to make sure it fails" - step
+- "Implement the minimal code to make the test pass" - step
+- "Run the tests and make sure they pass" - step
+- "Commit" - step
+
+## Plan Document Header
+
+Every plan MUST start with: Goal, Architecture, Tech Stack, Baseline/Authority Refs, Compatibility Boundary, Verification. See template in this directory.
+
+## Task Structure
+
+Each task: Files (create/modify/test paths), Why (user/business value), Impact/Compatibility, Verification (exact commands), then 5 checkbox steps: Write test → Verify RED → Minimal code → Verify GREEN → Commit. Every step must include complete code and exact commands.
+
+For bug fixes, refactors, contract changes, or governance cleanup, add Repair Track (root cause, canonical owner, minimal change, compat boundary, verification) and Retirement Track (old owner/fallback, active status, keep reason or deletion trigger) inside the relevant task. If Ripple Signal Triage fired, include the affected downstream consumers and expanded verification path in the same task.
+
+## No Placeholders
+
+Never write: "TBD", "TODO", "implement later", "fill in details", "Add appropriate error handling", "Write tests for the above" without actual test code, "Similar to Task N" without repeating code. Every step must contain complete, copy-paste-ready content.
+
+## Self-Review
+
+Check plan against spec: 1) Spec coverage — can you point to a task for each requirement? 2) Placeholder scan — any TBD/TODO/vague instructions? 3) Type consistency — do signatures match across tasks? 4) Compatibility — invariants, non-goals, stable interfaces marked? 5) Verification — every major task has exact verification steps? 6) Dual-track — old logic addressed?
+
+Fix issues inline. Re-review is not needed — just fix and move on.
+
+## Execution Handoff
+
+After saving the plan, offer execution choice:
+
+**"Plan complete and saved to `docs/aegis/plans/<filename>.md`. Two execution options:**
+
+**1. Subagent-Driven (recommended)** - I dispatch a fresh subagent per task, review between tasks, fast iteration
+
+**2. Inline Execution** - Execute tasks in this session using executing-plans, batch execution with checkpoints
+
+**Which approach?"**
+
+**If Subagent-Driven chosen:**
+- **REQUIRED SUB-SKILL:** Use aegis:subagent-driven-development
+- Fresh subagent per task + two-stage review
+
+**If Inline Execution chosen:**
+- **REQUIRED SUB-SKILL:** Use aegis:executing-plans
+- Batch execution with checkpoints for review
+
+## Planning Boundaries
+
+- A plan can define implementation slices, verification, rollback surface, and retirement expectations
+- A plan cannot grant authoritative completion
+- A plan should prepare runtime-ready execution, not pretend to be runtime authority

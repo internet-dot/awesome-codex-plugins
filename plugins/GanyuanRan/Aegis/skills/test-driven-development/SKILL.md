@@ -1,0 +1,319 @@
+---
+name: test-driven-development
+description: Use when implementing any feature or bugfix, before writing implementation code
+---
+
+# Execute
+
+→ Implementing a feature or bugfix? → **No production code without a failing test first.**
+  Gate: medium/high complexity? → route to brainstorming or writing-plans first.
+  Cycle: RED (write test → watch it fail) → GREEN (minimal code → watch it pass) → REFACTOR (clean up → keep green)
+  Regression: shared module → related tests. contract change → producer + consumer. core logic → old + new tests.
+  Ripple signal hit → cover producer+consumer or real user path before claiming green.
+→ Done when: all tests pass, every new function has a test that failed first, TDD preflight gate passed.
+
+# Test-Driven Development (TDD)
+
+## Overview
+
+Write the test first. Watch it fail. Write minimal code to pass.
+
+If you didn't watch the test fail, you don't know if it tests the right thing.
+
+## When to Use
+
+New features, bug fixes, refactoring, behavior/logic changes, interface/data contract changes, cross-module or shared module changes, core logic refactors.
+
+Exceptions (ask your human partner): throwaway prototypes, generated code, config files, pure docs cleanup, read-only diagnosis, comment-only changes.
+
+## Preflight Gate
+
+TDD is the implementation discipline for an approved behavior or atomic task.
+It is not a substitute for task routing, product clarification, or planning.
+
+Before writing tests or production code, stop and route to brainstorming or
+writing-plans if the current request has any medium- or high-complexity signal:
+
+- multiple files, modules, pages, screens, services, or owners
+- user-visible flows such as navigation, onboarding, checkout, lifecycle, or
+  recovery paths
+- state transitions, routing rules, API or data contracts, compatibility
+  boundaries, migrations, permissions, or persistence
+- more than one acceptance path or manual/visual verification requirement
+- unclear product behavior, competing constraints, or long-running execution
+
+For these tasks, require a baseline read-set, plan, and atomic tasks before TDD.
+High-complexity or ambiguous tasks also need a spec/design review before
+planning. Only proceed directly with TDD for low-complexity work whose intent,
+owner, compatibility boundary, and verification path are already clear.
+
+When a medium- or high-complexity task needs project records, use the Aegis
+Project Workspace lazily. Prefer
+`python scripts/aegis-workspace.py init --root <target-project-root>` when the
+helper is available in the active method-pack checkout. If the task needs a
+process trail under `work/`, prefer `python scripts/aegis-workspace.py new-work --root <target-project-root> ...`
+so the intent, checkpoint, drift, and evidence paths are indexed and
+structurally checkable:
+
+```text
+docs/aegis/
+  README.md
+  INDEX.md
+  BASELINE-GOVERNANCE.md
+  adr/
+  baseline/
+  specs/
+  plans/
+  work/YYYY-MM-DD-<task-slug>/
+    10-intent.md
+    20-checkpoint.md
+    90-evidence.md
+    99-reflection.md
+```
+
+Do not promote reusable project facts, decisions, specs, or plans into those
+directories unless the workflow needs them and no existing project authority
+already owns them.
+
+## Red-Green-Refactor
+
+### RED - Write Failing Test
+
+State: input | output | boundary | acceptance criteria. Check existing test coverage first. Write one minimal test showing what should happen.
+
+<Good>
+```typescript
+test('retries failed operations 3 times', async () => {
+  let attempts = 0;
+  const operation = () => {
+    attempts++;
+    if (attempts < 3) throw new Error('fail');
+    return 'success';
+  };
+
+  const result = await retryOperation(operation);
+
+  expect(result).toBe('success');
+  expect(attempts).toBe(3);
+});
+```
+Clear name, tests real behavior, one thing
+</Good>
+
+<Bad>
+```typescript
+test('retry works', async () => {
+  const mock = jest.fn()
+    .mockRejectedValueOnce(new Error())
+    .mockRejectedValueOnce(new Error())
+    .mockResolvedValueOnce('success');
+  await retryOperation(mock);
+  expect(mock).toHaveBeenCalledTimes(3);
+});
+```
+Vague name, tests mock not code
+</Bad>
+
+**Requirements:**
+- One behavior
+- Clear name
+- Real code (no mocks unless unavoidable)
+- If a new feature changes user-observable behavior, prefer one minimal
+  end-to-end or integration test for the main path before narrower unit tests
+- For user-visible work, cover the main journey and the highest-risk experience
+  or operational floor before treating unit tests as sufficient
+- Add unit tests for core rules, boundary conditions, and error branches
+
+### Verify RED - Watch It Fail
+
+**MANDATORY. Never skip.**
+
+```bash
+npm test path/to/test.test.ts
+```
+
+Confirm:
+- Test fails (not errors)
+- Failure message is expected
+- Fails because feature missing (not typos)
+
+**Test passes?** You're testing existing behavior. Fix test.
+
+**Test errors?** Fix error, re-run until it fails correctly.
+
+### GREEN - Minimal Code
+
+Write simplest code to pass the test.
+
+<Good>
+```typescript
+async function retryOperation<T>(fn: () => Promise<T>): Promise<T> {
+  for (let i = 0; i < 3; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      if (i === 2) throw e;
+    }
+  }
+  throw new Error('unreachable');
+}
+```
+Just enough to pass
+</Good>
+
+<Bad>
+```typescript
+async function retryOperation<T>(
+  fn: () => Promise<T>,
+  options?: {
+    maxRetries?: number;
+    backoff?: 'linear' | 'exponential';
+    onRetry?: (attempt: number) => void;
+  }
+): Promise<T> {
+  // YAGNI
+}
+```
+Over-engineered
+</Bad>
+
+Don't add features, refactor other code, or "improve" beyond the test.
+
+Fix the real owner of the behavior. Do not add a new fallback, adapter, or
+branch unless the debugging or design workflow identifies why it is necessary
+and what old path retires.
+
+### Verify GREEN - Watch It Pass
+
+**MANDATORY.**
+
+```bash
+npm test path/to/test.test.ts
+```
+
+Confirm:
+- Test passes
+- Other tests still pass
+- Output pristine (no errors, warnings)
+
+**Test fails?** Fix code, not test.
+
+**Other tests fail?** Fix now.
+
+### REFACTOR - Clean Up
+
+After green only:
+- Remove duplication
+- Improve names
+- Extract helpers
+
+Keep tests green. Don't add behavior.
+
+### Repeat
+
+Next failing test for next feature.
+
+## Regression Scope
+
+At minimum, run the target test you just changed or added. Broaden regression
+based on impact:
+
+- Shared module change -> related module tests
+- Interface or data contract change -> producer and consumer tests
+- Cross-module behavior change -> integration or end-to-end path
+- Core logic refactor -> old behavior regression tests plus new behavior tests
+- Ripple Signal Triage fired -> producer+consumer or real user path that proves
+  the downstream effect remains bounded
+
+If the current environment cannot run automated tests, state the blocker and provide reproducible manual verification steps.
+
+## Good Tests
+
+| Quality | Good | Bad |
+|---------|------|-----|
+| **Minimal** | One thing. "and" in name? Split it. | `test('validates email and domain and whitespace')` |
+| **Clear** | Name describes behavior | `test('test1')` |
+| **Shows intent** | Demonstrates desired API | Obscures what code should do |
+
+## Red Flags - STOP and Start Over
+
+- Code before test
+- Test after implementation
+- Test passes immediately
+- Can't explain why test failed
+- Tests added "later"
+- Rationalizing "just this once"
+- "I already manually tested it"
+- "Tests after achieve the same purpose"
+- "It's about spirit not ritual"
+- "Keep as reference" or "adapt existing code"
+- "Already spent X hours, deleting is wasteful"
+- "TDD is dogmatic, I'm being pragmatic"
+- "This is different because..."
+
+**All of these mean: Delete code. Start over with TDD.**
+
+## Example: Bug Fix
+
+**Bug:** Empty email accepted
+
+**RED**
+```typescript
+test('rejects empty email', async () => {
+  const result = await submitForm({ email: '' });
+  expect(result.error).toBe('Email required');
+});
+```
+
+**Verify RED**
+```bash
+$ npm test
+FAIL: expected 'Email required', got undefined
+```
+
+**GREEN**
+```typescript
+function submitForm(data: FormData) {
+  if (!data.email?.trim()) {
+    return { error: 'Email required' };
+  }
+  // ...
+}
+```
+
+**Verify GREEN**
+```bash
+$ npm test
+PASS
+```
+
+**REFACTOR**
+Extract validation for multiple fields if needed.
+
+## Verification Checklist
+
+- [ ] Defined input, output, boundaries, compatibility, acceptance criteria
+- [ ] Every new function/method has a test that failed first
+- [ ] All tests pass, output pristine
+- [ ] Regression: shared/contract/core changes ran related tests
+- [ ] Ripple signal hit: downstream or real user path covered
+- [ ] If automation blocked → blocker + manual steps documented
+
+Can't check all boxes? Start over.
+
+## Exploration and Emergency Exceptions
+
+Exploratory spikes are allowed only as throwaway learning. When the spike ends,
+convert confirmed behavior into tests before formal implementation.
+
+Emergency hotfixes may prioritize the smallest safe repair when delay is more
+dangerous than incomplete TDD. Record the reason, keep the change narrow, and
+add the missing regression test in the same slice or the next nearest slice.
+
+## When Stuck
+
+Don't know how to test → write wished-for API first. Test too complicated → simplify design. Must mock everything → reduce coupling.
+
+## Debugging Integration
+
+Bug found? Write failing test reproducing it. Follow TDD cycle. Never fix bugs without a test.
