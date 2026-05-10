@@ -103,6 +103,8 @@ If the target needs a specialized test pattern, load the matching reference befo
 - Contract/API/CLI compatibility: [references/conformance-harnesses.md](references/conformance-harnesses.md)
 - Parsers, serializers, and untrusted inputs: [references/fuzzing.md](references/fuzzing.md)
 - Generated files, snapshots, and rendered output: [references/golden-artifacts.md](references/golden-artifacts.md)
+- Metamorphic/invariant-heavy behavior: [references/metamorphic-testing.md](references/metamorphic-testing.md)
+- Golden artifact update review: [references/golden-artifact-strategy.md](references/golden-artifact-strategy.md)
 - Real databases, services, queues, or APIs where mocks would hide failures: [references/real-service-e2e.md](references/real-service-e2e.md)
 
 ### Go: Table-Driven Tests

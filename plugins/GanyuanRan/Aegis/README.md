@@ -19,7 +19,7 @@
 If you are using an AI coding agent, you can ask it to install Aegis for you:
 
 ```text
-Please read the installation instructions in https://github.com/GanyuanRan/Aegis carefully, identify the correct path for my AI coding host, install Aegis globally, restart or reload the host if needed, and verify that the Aegis skills are discoverable.
+Please read the installation instructions in https://github.com/GanyuanRan/Aegis carefully, identify the correct path for my AI coding host, install Aegis globally, restart or reload the host if needed, and verify that Aegis is fully available, including skill discovery and project workspace support.
 ```
 
 ## Updating Aegis
@@ -27,7 +27,7 @@ Please read the installation instructions in https://github.com/GanyuanRan/Aegis
 If Aegis is already installed, you can ask your AI coding agent to update it for you:
 
 ```text
-Please update my installed Aegis to the latest main branch version from https://github.com/GanyuanRan/Aegis, using the correct update path for my current AI coding host, then restart or reload the host if needed and verify Aegis skills are discoverable.
+Please update my installed Aegis to the latest main branch version from https://github.com/GanyuanRan/Aegis, using the correct update path for my current AI coding host, then restart or reload the host if needed and verify that Aegis is fully available, including skill discovery and project workspace support.
 ```
 
 ## Optional Lite Global Rules
@@ -440,8 +440,8 @@ The method pack is organized around agent workflows:
 Aegis routes work by complexity before implementation:
 
 - Low-complexity tasks can proceed with a concise intent, baseline check, TDD, and verification.
-- Medium-complexity tasks require a baseline read set, plan, and atomic tasks before TDD.
-- High-complexity tasks require a spec/design and plan first, with user review where the workflow calls for it.
+- Medium-complexity tasks require a baseline read set, a Spec Brief or stable requirements, a plan, and atomic tasks before TDD.
+- High-complexity tasks require a Design Spec and plan first, with user review where the workflow calls for it.
 
 When a project needs persistent Aegis records, Aegis creates a lightweight
 project workspace lazily. The default workspace includes `README.md`,
@@ -451,20 +451,21 @@ records live under `docs/aegis/work/YYYY-MM-DD-<task-slug>/`. Existing project
 docs and ADRs remain the preferred authority; reusable Aegis outputs are
 promoted only when the workflow needs them.
 
-For host or workflow authors, this repository includes a zero-dependency helper
-for target-project workspace operations:
+Recommended installs keep the Aegis method-pack root available so project
+workspace support can be verified after installation. The Aegis method-pack
+repository itself does not ship a precreated live `docs/aegis/` workspace.
+Workspace structure checks do not judge evidence sufficiency or grant
+completion authority.
+
+Maintainers can verify a complete install with:
 
 ```bash
-python scripts/aegis-workspace.py init --root /path/to/target-project
-python scripts/aegis-workspace.py check --root /path/to/target-project
-python scripts/aegis-workspace.py append-index --root /path/to/target-project --path docs/aegis/specs/example.md --kind spec --title "Example"
-python scripts/aegis-workspace.py validate-artifact --type TaskIntentDraft --file /path/to/target-project/docs/aegis/work/example/task-intent-draft.json
+python scripts/aegis-doctor.py --json
 ```
 
-The helper writes only to the explicit target project root. The Aegis
-method-pack repository itself does not ship a precreated live `docs/aegis/`
-workspace. Artifact validation checks JSON sidecar structure only; it does not
-judge evidence sufficiency or grant completion authority.
+When a host exposes a separate skill discovery directory, pass it as
+`--discovery-root <path>` to confirm it resolves to the current method-pack
+skills rather than a stale copied version.
 
 For bug fixes, architecture changes, contract work, and governance cleanup, Aegis requires:
 
@@ -534,6 +535,7 @@ Read:
 
 Before changing behavior-shaping skill content, also read:
 
+- [skills/first-principles-review/SKILL.md](skills/first-principles-review/SKILL.md)
 - [skills/writing-skills/SKILL.md](skills/writing-skills/SKILL.md)
 - [skills/verification-before-completion/SKILL.md](skills/verification-before-completion/SKILL.md)
 

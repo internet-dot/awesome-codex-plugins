@@ -25,9 +25,9 @@ Use the `Skill` tool to invoke any of these when appropriate:
 | Skill | When to Use |
 |---|---|
 | `hotl:brainstorming` | Before any feature work — design with HOTL contracts |
-| `hotl:writing-plans` | After design approval — produces `hotl-workflow-<slug>.md` |
+| `hotl:writing-plans` | After design approval — produces `docs/plans/YYYY-MM-DD-<slug>-workflow.md` |
 | `hotl:executing-plans` | Linear execution with human checkpoints |
-| `hotl:loop-execution` | Execute a `hotl-workflow-*.md` with loops + auto-approve |
+| `hotl:loop-execution` | Execute a workflow file with loops + auto-approve |
 | `hotl:subagent-execution` | Delegated step runner over the loop execution engine — delegates eligible steps to fresh subagents |
 | `hotl:dispatch-agents` | 2+ independent tasks that can run in parallel |
 | `hotl:finishing-a-development-branch` | After execution — merge back, publish/PR, keep, or discard the execution branch/worktree |

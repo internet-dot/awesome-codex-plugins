@@ -1,6 +1,6 @@
 {
   "name": "session-orchestrator",
-  "version": "3.4.0",
+  "version": "3.5.0",
   "description": "Session Orchestrator — Claude Code plugin for structured development sessions",
   "type": "module",
   "engines": {
@@ -13,17 +13,24 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "node scripts/typecheck.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "share:hw-learnings": "node scripts/export-hw-learnings.mjs",
-    "vault-watcher": "node scripts/vault-integration-watcher.mjs"
+    "vault-watcher": "node scripts/vault-integration-watcher.mjs",
+    "prepare": "husky"
   },
   "dependencies": {
     "zx": "^8.1.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.6.0",
+    "@commitlint/config-conventional": "^19.6.0",
     "@eslint/js": "^10.0.1",
     "@vitest/coverage-v8": "^4.1.5",
     "eslint": "^10.2.1",
+    "husky": "^9.1.7",
     "js-yaml": "^4.1.1",
+    "lint-staged": "^15.2.10",
     "prettier": "^3.0.0",
     "vitest": "^4.1.5"
   },

@@ -121,7 +121,7 @@ Four layers. Each solves a different problem. All four compound.
 | Layer | Problem | What changes |
 |-------|---------|--------------|
 | **Bookkeeping** | Agents forget what they tried, why they changed course, and what evidence mattered | `.agents/` captures run packets, handoffs, findings, citations, decisions, verdicts, retros, and post-mortems. *The work leaves a trace.* |
-| **Context Compiler** | Every session starts from zero | `ao inject` delivers decay-ranked knowledge. `ao context assemble` builds phase-scoped packets. 73 skills load automatically via hooks. *Your agent starts loaded, not cold.* |
+| **Context Compiler** | Every session starts from zero | `ao inject` delivers decay-ranked knowledge. `ao context assemble` builds phase-scoped packets. 74 skills load automatically via hooks. *Your agent starts loaded, not cold.* |
 | **Validation Gates** | Agents ship confident garbage | `/pre-mortem`, `/vibe`, `/council` — multi-model consensus validates plans before build and code before commit. Gates block, not advise. *Three fresh judges catch what one agent can't.* |
 | **Knowledge Flywheel** | Lessons disappear between sessions | `/forge` extracts learnings from the bookkeeping trail. `ao flywheel close-loop` scores and promotes. `/evolve` fixes the worst gap autonomously. `/dream` compounds overnight. *Session 15 starts with everything session 1 learned.* |
 

@@ -27,18 +27,20 @@ This skill is the canonical planning workflow for multi-step implementation work
 
 **Context:** This should be run in a dedicated worktree (created by brainstorming skill).
 
+**Input:** approved requirements, a Spec Brief, or a Design Spec.
+
 **Save plans to:** `docs/aegis/plans/YYYY-MM-DD-<feature-name>.md`
 Plan always goes to `plans/` — never to `work/`.
 (User preferences for plan location override this default.)
 
-If `docs/aegis/` does not exist and `scripts/aegis-workspace.py` is available
-in the active method-pack checkout, initialize the target project first:
+If `docs/aegis/` does not exist and configured Aegis workspace support is
+available, initialize the target project first:
 
 ```bash
 python scripts/aegis-workspace.py init --root <target-project-root>
 ```
 
-If the helper is unavailable, initialize the workspace manually:
+If installed Aegis workspace support is unavailable, initialize the workspace manually:
   1. Create `docs/aegis/README.md` and `docs/aegis/INDEX.md`
   2. Create `docs/aegis/BASELINE-GOVERNANCE.md` from template
   3. If the project has code, create `docs/aegis/baseline/YYYY-MM-DD-initial-baseline.md`
@@ -50,6 +52,10 @@ python scripts/aegis-workspace.py check --root <target-project-root>
 ```
 
 ## Scope Check
+
+If the input is a Spec Brief, keep the plan scoped to the pinned
+what/why/acceptance and do not expand into a formal design unless new
+architecture, contract, migration, or cross-module uncertainty appears.
 
 If the spec covers multiple independent subsystems, suggest breaking into separate plans. Before writing tasks, check: fact/assumption/unknown, baseline docs, compatibility boundary, whether dual-track (repair + retirement) applies.
 
