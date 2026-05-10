@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
-  "last_updated": "2026-05-08",
-  "total": 62,
+  "last_updated": "2026-05-10",
+  "total": 63,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -388,6 +388,16 @@
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/Rothschildiuk/context-pack/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Dodo Payments",
+      "url": "https://github.com/dodopayments/dodo-agent-plugin",
+      "owner": "dodopayments",
+      "repo": "dodo-agent-plugin",
+      "description": "Payments integration for checkouts, subscriptions, and billing with live API and documentation MCP servers with browser OAuth.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/dodopayments/dodo-agent-plugin/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "Flow Studio Power Automate",
