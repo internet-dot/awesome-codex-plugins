@@ -509,10 +509,10 @@
       "category": "Tools & Integrations"
     },
     {
-      "name": "education-agent-skills",
+      "name": "dodopayments",
       "source": {
         "source": "local",
-        "path": "./plugins/GarethManning/education-agent-skills"
+        "path": "./plugins/dodopayments/dodo-agent-plugin"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -521,10 +521,10 @@
       "category": "Tools & Integrations"
     },
     {
-      "name": "dodopayments",
+      "name": "education-agent-skills",
       "source": {
         "source": "local",
-        "path": "./plugins/dodopayments/dodo-agent-plugin"
+        "path": "./plugins/GarethManning/education-agent-skills"
       },
       "policy": {
         "installation": "AVAILABLE",
