@@ -1,20 +1,52 @@
 # Session Orchestrator
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.3.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.5.0-blue.svg)](CHANGELOG.md)
+[![Tests](https://img.shields.io/badge/tests-4430%20passing-brightgreen.svg)](#development)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-blueviolet.svg)](https://docs.anthropic.com/en/docs/claude-code)
 [![Codex](https://img.shields.io/badge/Codex-Compatible-green.svg)](https://developers.openai.com/codex/)
 [![Cursor IDE](https://img.shields.io/badge/Cursor_IDE-Compatible-blue.svg)](https://cursor.com)
 
-Session orchestration plugin for Claude Code, Codex, and Cursor IDE. Covers project planning, wave execution, VCS integration, and quality gates.
+Session orchestration for Claude Code, Codex CLI, and Cursor IDE. It turns ad-hoc agent sessions into a repeatable loop: research the project, agree on scope, execute in waves with quality gates, close out cleanly.
 
-> [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Codex](https://developers.openai.com/codex/), and [Cursor IDE](https://cursor.com) are agentic coding tools. This plugin adds structured session management on top, turning ad-hoc agent interactions into repeatable, quality-gated engineering workflows. No runtime code. Pure Markdown.
+> No runtime code, just markdown. The plugin layers on top of the existing harness. If you remove it, your editor still works.
 
-> **Project-instruction file:** the per-repo config host is `CLAUDE.md (or AGENTS.md on Codex CLI)`. Both files are transparent aliases — pick one, never both. Resolution rule: [skills/_shared/instruction-file-resolution.md](skills/_shared/instruction-file-resolution.md).
+> **Project-instruction file:** the per-repo config host is `CLAUDE.md` (or `AGENTS.md` on Codex CLI). Both files are transparent aliases. Pick one, never both. Resolution rule: [skills/_shared/instruction-file-resolution.md](skills/_shared/instruction-file-resolution.md).
+
+## What's new in v3.5.0
+
+Four deep sessions on top of v3.4.0. Twenty issues closed, plus a non-tracked architectural refactor. Tests grew from 3138 to **4430** (+1292) since the v3.4.0 cut.
+
+- **CI security gates** (#350 #351). Gitleaks (37 rules, 0 leaks across 258 commits) and `npm audit` now run on every push, GitLab and GitHub mirrored. Husky + commitlint + lint-staged ship pre-commit defence in depth.
+- **9th autopilot kill-switch** (#355). `TOKEN_BUDGET_EXCEEDED` is opt-in via `opts.maxTokens`, forward-compatible with sessionRunner builds that don't yet emit `usage`. Defaults to off so existing callers stay green.
+- **CI fix that mattered** (#356). `harness-audit` was truncating its JSON output at byte 8188 on every CI runner since 2026-05-01. Local runs were green because pipes drain instantly on dev hardware. Pattern A drain-aware stdout fixed it. Ten-plus failed CI runs now resolved.
+- **Anthropic-canonical agent authoring** (#359 to #363). Validator and all 10 agent files re-aligned with [code.claude.com/sub-agents](https://code.claude.com/docs/en/sub-agents). `tools` accepts both forms, color palette expanded to 9 distinct values, full model IDs allowed alongside aliases. Implementer agents normalised to the 500 to 3000 word body range with proper Output-Format and Edge-Cases sections.
+- **Hotspot-splits refactor**. Six files at or above 400 LOC split into submodules under 300 LOC each. Public APIs preserved via barrel re-exports, verified by 26 new test files (+534 tests). Zero behaviour change, much better navigability for future contributors.
+
+For the full version history see [CHANGELOG.md](CHANGELOG.md).
+
+### Multi-Story Autopilot (v3.6 Phase D — thin-slice scaffold)
+
+`scripts/autopilot-multi.mjs` adds a `--multi-story` orchestration mode that runs N parallel issue pipelines in isolated git worktrees with per-loop kill-switches. Built on the ADR-364 substrate (sessions.jsonl optional fields, autopilot.jsonl extensions, `STALL_TIMEOUT` kill-switch, `gc-stale-worktrees`, `validateWorkspacePath`).
+
+**Status:** v1 thin-slice (deep-1 2026-05-11). Production: dry-run plan and basic apply mode. Phase D.2 follow-ups: cross-loop commit-wait, real SIGTERM cohort enforcement, on-green MR-draft trigger.
+
+```bash
+# Dry-run plan (default, safe)
+node scripts/autopilot-multi.mjs --dry-run --json
+
+# Apply mode (real glab issue fetch + worktree spawn)
+node scripts/autopilot-multi.mjs --apply --max-stories 3 --max-hours 4
+
+# With draft-MR creation
+node scripts/autopilot-multi.mjs --apply --draft-mr on-loop-start
+```
+
+See [`commands/autopilot-multi.md`](commands/autopilot-multi.md) or `node scripts/autopilot-multi.mjs --help` for the full flag reference.
 
 ## Install
 
-> **Prerequisite:** Node.js 20 or later. Check with `node --version`. v3.x runs as ES modules and requires a real Node runtime (no Bash shim). [Install Node.js](https://nodejs.org/).
+> **Prerequisite:** Node.js 20 or later. Check with `node --version`. v3.x runs as ES modules and requires a real Node runtime, no Bash shim. [Install Node.js](https://nodejs.org/).
 
 ### Claude Code
 
@@ -32,7 +64,7 @@ cd "$(claude plugin dir session-orchestrator 2>/dev/null || echo ~/.claude/plugi
 npm install
 ```
 
-Restart Claude Code so the slash commands (`/session`, `/go`, `/close`, …) become available.
+Restart Claude Code so the slash commands (`/session`, `/go`, `/close`, ...) become available.
 
 Prefer installing from a local clone? Use an absolute path instead of the `owner/repo` shorthand:
 
@@ -41,7 +73,7 @@ Prefer installing from a local clone? Use an absolute path instead of the `owner
 /plugin install session-orchestrator@kanevry
 ```
 
-### Codex
+### Codex CLI
 
 ```bash
 git clone https://github.com/Kanevry/session-orchestrator.git ~/Projects/session-orchestrator
@@ -53,22 +85,19 @@ node scripts/codex-install.mjs
 ### Cursor IDE
 
 ```bash
-# 1. Clone the session-orchestrator repo
 git clone https://github.com/Kanevry/session-orchestrator.git ~/Projects/session-orchestrator
 cd ~/Projects/session-orchestrator
 npm install
 
-# 2. Install Cursor rules into your project
+# Install Cursor rules into your project
 node scripts/cursor-install.mjs /path/to/your/project
 
-# Session Config goes in CLAUDE.md (or AGENTS.md on Codex CLI; Cursor reads CLAUDE.md natively)
+# Session Config goes in CLAUDE.md (Cursor reads CLAUDE.md natively)
 ```
 
 ## Quick Start
 
-### Claude Code
-
-After installing the plugin (see [Install](#install)), add a `## Session Config` section to your project's `CLAUDE.md (or AGENTS.md on Codex CLI)`, then run:
+Add a `## Session Config` section to your project's `CLAUDE.md` (or `AGENTS.md` on Codex CLI), then run three commands:
 
 ```text
 /session feature
@@ -76,231 +105,7 @@ After installing the plugin (see [Install](#install)), add a `## Session Config`
 /close
 ```
 
-### Codex
-
-```bash
-git clone https://github.com/Kanevry/session-orchestrator.git ~/Projects/session-orchestrator
-node ~/Projects/session-orchestrator/scripts/codex-install.mjs
-```
-
-Add Session Config to `AGENTS.md` (the Codex CLI alias for `CLAUDE.md` — see [skills/_shared/instruction-file-resolution.md](skills/_shared/instruction-file-resolution.md)), restart Codex, then run:
-
-```text
-/session feature
-/go
-/close
-```
-
-See [Usage](#usage) for all 10 commands and [User Guide](docs/USER-GUIDE.md) for the full walkthrough.
-
-## Prerequisites
-
-- **Node.js 20 or later** — plugin runs as ES modules; no Bash runtime needed.
-- **Claude Code**, **Codex**, or **Cursor IDE**: [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | [Codex](https://developers.openai.com/codex/) | [Cursor IDE](https://cursor.com)
-- **jq** (optional): convenience for editing the `.orchestrator/policy/*.json` files. Not invoked by hooks at runtime in v3.
-- **git** — any recent version.
-
-### Platform Support
-
-| Feature | Claude Code | Codex | Cursor IDE |
-|---------|------------|-----------|------------|
-| OS | macOS, Linux, **Windows (native)** | macOS, Linux, **Windows (native)** | macOS, Linux, **Windows (native)** |
-| All 10 commands | Native slash commands | Native plugin commands | Rules-based (.mdc) |
-| Parallel agents | Agent tool | Multi-agent roles | Sequential only |
-| Session persistence | .claude/STATE.md | .codex/STATE.md | .cursor/STATE.md |
-| Shared knowledge | .orchestrator/metrics/ | .orchestrator/metrics/ | .orchestrator/metrics/ |
-| Scope enforcement | PreToolUse hooks | Hooks (experimental) | afterFileEdit (post-hoc) |
-| AskUserQuestion | Native tool | Numbered list fallback | Numbered list fallback |
-| Quality gates | Full | Full | Full |
-| Design alignment | Pencil integration | Pencil integration | Pencil integration |
-
-Windows support is **native** as of v3.0.0 — no WSL, no Git-Bash, no msys. All file paths use `path.join`, all tmp paths use `os.tmpdir()`, and CI verifies on `windows-latest` alongside `ubuntu-latest` and `macos-latest`.
-
-All platforms share the same skills, commands, hooks, and scripts. Platform-specific adaptations are handled automatically via `scripts/lib/platform.mjs`. See setup guides: [Codex](docs/codex-setup.md) | [Cursor IDE](docs/cursor-setup.md).
-
-## Troubleshooting
-
-### Hooks silently no-op after install
-
-Most common cause on any OS: `npm install` was not run in the plugin directory, so `zx` is missing. Run it and restart your editor. Verify with `ls node_modules/zx` in the plugin root.
-
-### Windows: `Cannot use import statement outside a module` or `node` not found
-
-`node` must be on the editor's `PATH`. If you installed Node via nvm-windows or fnm, relaunch the editor from a shell where `node --version` prints `v20.x` or later. In Claude Code you can sanity-check with `!node --version`.
-
-### Windows: CRLF breaks shell scripts / hooks after upgrade
-
-v3 ships `.gitattributes` with explicit LF rules for `.sh`, `.mjs`, `.md`, `.json`, and `.yaml`. Clones from before v3 may still have CRLF endings in tracked files. Normalize once:
-
-```bash
-git config core.autocrlf false
-git rm --cached -r .
-git reset --hard
-```
-
-Back up any uncommitted work first.
-
-### macOS / Linux: `Permission denied` on a hook
-
-v3 hooks are `.mjs` files invoked via `node <path>` — the executable bit is not required. If your editor reports `Permission denied`, it is still pointing at a stale `.sh` path. Re-run the platform install script (`scripts/codex-install.mjs`, `scripts/cursor-install.mjs`) or re-add the plugin in Claude Code.
-
-### `SyntaxError` in hooks
-
-Confirm Node version (`node --version` must be `v20.x+`) and that `package.json` has `"type": "module"`. Both are required for ESM imports.
-
-### `npm install` fails with `ERESOLVE`
-
-Use Node 20 or 22 LTS. If the error persists: `npm install --legacy-peer-deps`. Open an issue if it still fails.
-
-For a longer walkthrough including rollback, see [docs/migration-v3.md](docs/migration-v3.md).
-
-## Why Session Orchestrator
-
-Session Orchestrator covers the full development session lifecycle: project state analysis, structured wave execution, and verified close-out. Each step is gated on quality, not just speed.
-
-### Soul Personality System
-
-A `soul.md` file defines the orchestrator's identity: communication principles, a decision-making hierarchy (safety > productivity > quality > ecosystem health > speed), and values (pragmatism, evidence, ownership). This shapes every interaction, not just tone.
-
-### 5-Wave Execution Pattern
-
-Five typed waves: Discovery (read-only), Core Implementation, Polish & Integration, Quality & Testing, Finalization. The Quality wave includes a simplification pass that cleans AI-generated code patterns before tests are written. Each wave has a defined purpose and agent count that scales by session type.
-
-### Inter-Wave Quality Gates
-
-A session-reviewer agent runs 8 review sections between waves (implementation correctness, test coverage, TypeScript health, OWASP security, issue tracking, silent failures, test depth, type design). Findings are confidence-scored (0-100) -- only >=80 make the report. Verification escalates progressively across waves.
-
-### Design-Code Alignment
-
-When a Pencil design file is configured, the wave executor screenshots design frames after Impl-Core and Impl-Polish waves and compares them with the actual implementation, checking layout structure, component hierarchy, and visual elements. Results are classified as ALIGNED / MINOR DRIFT / MAJOR MISMATCH with automatic plan adaptation.
-
-### VCS Dual Support
-
-Auto-detects GitLab or GitHub from your git remote. Full lifecycle support for both: issue management, MR/PR tracking, pipeline/workflow status, label taxonomy, and milestone queries. No lock-in.
-
-### Ecosystem Health Monitoring
-
-Checks configured service endpoints and scans cross-repo critical issues at session start. Know your ecosystem state before you start working.
-
-### Session Persistence & Safety
-
-Sessions persist across interruptions via `STATE.md` -- crash recovery, resume, and handover. PreToolUse hooks enforce agent scope and block dangerous commands. A circuit breaker detects execution spirals and recovers automatically.
-
-### Metrics & Cross-Session Learning
-
-Every session writes metrics (duration, agents, files per wave) and effectiveness stats (completion rate, carryover). After 5+ sessions, the system surfaces trends. Use `/evolve analyze` to extract cross-session patterns, `/evolve review` to curate learnings, or `/evolve list` to inspect them.
-
-### Adaptive Wave Sizing
-
-A complexity scoring formula (files x modules x issues) determines agent counts per role and session type. Dynamic scaling adjusts between waves based on actual performance.
-
-### Verified Session Close-Out
-
-`/close` verifies every planned item, runs a full quality gate, creates carryover issues for unfinished work, and commits with individually staged files. `/discovery` runs 23 modular probes across code, infra, UI, architecture, and session categories -- each finding confidence-scored.
-
-### Comparison
-
-| Feature | Session Orchestrator | Manual CLAUDE.md | Other Orchestrators | <!-- consistency:exempt: column label, not a per-platform file reference -->
-|---------|---------------------|------------------|-------------------|
-| Session lifecycle (start → plan → execute → close) | Full, automated | Manual | Partial |
-| Typed waves with quality gates | 5 roles, progressive verification | None | Batch execution |
-| Session persistence & crash recovery | STATE.md + memory files | None | Partial |
-| Scope & command enforcement hooks | PreToolUse with strict/warn/off | None | None |
-| Circuit breaker & spiral detection | Per-agent, with recovery | None | Partial |
-| Cross-session learning | Confidence-scored learnings | None | None |
-| Adaptive wave sizing | Complexity-scored, dynamic | Fixed | Fixed |
-| VCS integration (GitLab + GitHub) | Dual, auto-detected | Manual CLI | Usually GitHub only |
-| Design-code alignment | Pencil integration | None | None |
-| Session close with carryover | Verified, with issue creation | Manual | Partial |
-
-The design goal is engineering quality: every wave exits verified, every unfinished issue gets a carryover ticket, and every session closes with a clean commit.
-
-## Usage
-
-| Command | Purpose |
-|---------|---------|
-| `/session [type]` | Start session (housekeeping, feature, deep) |
-| `/go` | Approve plan, begin wave execution |
-| `/close` | End session with verification |
-| `/discovery [scope]` | Systematic quality discovery and issue detection |
-| `/plan [mode]` | Plan a project, feature, or retrospective |
-| `/evolve [mode]` | Extract, review, or list cross-session learnings |
-| `/bootstrap` | Scaffold required repo structure for session-orchestrator |
-| `/harness-audit` | Score the harness against the deterministic 7-category rubric |
-| `/autopilot` | Headless walk-away CLI driver for chained sessions |
-| `/repo-audit` | One-shot repo-level audit |
-
-## Workflow
-
-Session Orchestrator has two complementary workflows: **planning** (what to build) and **execution** (how to build it).
-
-```
-/plan [mode]  →  /session [type]  →  /go  →  /close  →  /plan retro
-    WHAT              HOW            DO      VERIFY       REFLECT
-```
-
-### Planning (`/plan`)
-
-Run `/plan` **before** starting a session to define requirements and create issues:
-
-- **`/plan new`**: Full project kickoff. 3-wave requirement gathering, 8-section PRD, repo scaffolding, Epic + prioritized issues. Use when starting from scratch.
-- **`/plan feature`**: Compact feature PRD. 1-2 wave discovery, acceptance criteria, feature issues. Use when adding a feature to an existing project.
-- **`/plan retro`**: Data-driven retrospective. Analyzes session metrics, surfaces trends, creates improvement issues. Use after completing significant work.
-
-`/plan` is optional. You can create issues manually and jump straight to `/session`.
-
-### Execution (`/session` → `/go` → `/close`)
-
-Run `/session` to **implement** existing issues across structured waves:
-
-```
-/session feature     # Analyze project, pick issues, agree on scope
-/go                  # Execute across 5 parallel waves
-/close               # Verify, commit, push, create carryover issues
-```
-
-### Example: Feature from idea to delivery
-
-```bash
-/plan feature        # 10 min: define requirements → PRD + 3 issues
-/session feature     # Pick those 3 issues → wave plan
-/go                  # Execute: Discovery → Impl-Core → Polish → Quality → Finalize
-/close               # Verify + commit + push
-```
-
-### Learning (`/evolve`)
-
-`/evolve` is a standalone command for deliberate reflection. It is **not** called automatically during sessions.
-
-**Why it exists:** `/close` extracts learnings from the *current* session only. `/evolve` analyzes *all* session history to find cross-session patterns that only emerge over time.
-
-- **`/evolve analyze`** (default): Reads `sessions.jsonl`, extracts patterns across all sessions (fragile files, effective sizing, recurring issues, scope guidance, deviation patterns). Presents findings for confirmation before writing.
-- **`/evolve review`**: Interactive management. Boost or reduce confidence, delete stale learnings, extend expiry.
-- **`/evolve list`**: Read-only display of active learnings grouped by type.
-
-**When to use:**
-- After 5+ sessions, so there is enough data for meaningful patterns
-- When Project Intelligence is empty despite running sessions
-- Before a big feature, to check if the system has useful sizing/scope recommendations
-- Periodically for housekeeping, to prune outdated or incorrect learnings
-
-**How it fits in the flow:**
-```
-/session → /go → /close       ← automatic learning (per-session)
-         ...repeat 5+ times...
-/evolve analyze                ← deliberate learning (cross-session)
-/session → /go → /close       ← now session-start shows richer Project Intelligence
-```
-
-## Session Types
-
-- **housekeeping**: Git cleanup, SSOT refresh, CI checks, branch merges (1-2 agents, serial)
-- **feature**: Frontend/backend feature work (4-6 agents per wave x 5 waves)
-- **deep**: Complex backend, security, DB, refactoring (up to 10-18 agents per wave x 5 waves)
-
-## Repo Session Config
-
-Add a `## Session Config` section to each repo's `CLAUDE.md (or AGENTS.md on Codex CLI)`. The smallest valid config:
+The smallest valid Session Config is seven fields:
 
 ```yaml
 ## Session Config
@@ -314,25 +119,144 @@ persistence: true
 enforcement: warn
 ```
 
-Those seven mandatory fields are schema-validated by `scripts/lib/config-schema.mjs`. Everything else is opt-in (env-aware sizing, vault sync, drift checks, docs orchestrator, webhooks, agent mapping, …).
+Everything else is opt-in. See [`docs/session-config-template.md`](docs/session-config-template.md) for the full template and [`docs/session-config-reference.md`](docs/session-config-reference.md) for the canonical type and default reference.
 
-For the full template — minimal baseline, opt-in baseline, and per-section walk-through of every field — see [`docs/session-config-template.md`](docs/session-config-template.md). For the canonical type/default/edge-case reference, see [`docs/session-config-reference.md`](docs/session-config-reference.md).
+## How it works
 
-### Intelligent Agent Dispatch
+Most agentic-coding tools jump straight into writing code. Session Orchestrator adds a structured loop on top: research first, agree on scope, then execute in waves with verification gates between them.
 
-When dispatching agents, Session Orchestrator uses a three-tier resolution:
+Here is what happens when you type `/session feature`:
 
-1. **Project agents** (`.claude/agents/`): highest priority, domain-specific
-2. **Plugin agents** (`session-orchestrator:*`): generic base agents, work in any project
-3. **`general-purpose`**: fallback when no specialized agent matches
+1. **Phase analysis runs in parallel.** Git state, open issues, recent commits, SSOT freshness, plugin freshness, resource health, prior-session memory, and project-intelligence learnings all get inspected. The result is a structured Session Overview with a recommendation, not a wall of raw data.
+2. **You agree on scope.** Through a tool-rendered picker (Claude Code) or a numbered list (Codex CLI / Cursor), you pick which issues to tackle. The orchestrator has an opinion and tells you what it would do.
+3. **The plan is decomposed into five waves.** Discovery (read-only), Impl-Core, Impl-Polish, Quality, and Finalize. Agent counts per role scale by session type. Each wave has a defined purpose and a deliverable.
+4. **`/go` executes.** Agents work in parallel within a wave. A session-reviewer audits the output between waves on eight dimensions: implementation correctness, test coverage, TypeScript health, OWASP, issue tracking, silent failures, test depth, type design. Only findings with confidence at or above 80 reach you.
+5. **`/close` ships it.** Every planned item is verified. Quality gates run full. Unfinished work becomes carryover issues so nothing falls through the cracks. Files are staged individually, not via `git add .`, so parallel sessions cannot stomp each other.
 
-The `agent-mapping` config lets you explicitly bind roles to agents. Without it, session-plan auto-matches tasks to agents based on their descriptions.
+Two complementary commands round out the loop:
 
-For the full field reference with types, defaults, and descriptions, see the [User Guide: Session Config Reference](docs/USER-GUIDE.md#4-session-config-reference).
+- **`/plan`** runs *before* a session, when you need a PRD, requirements, or a retrospective.
+- **`/evolve`** runs occasionally, deliberately. It analyses session history across runs, surfaces patterns that only emerge over time, and feeds them back as Project Intelligence at the next session-start.
 
-## VCS Auto-Detection
+The whole system is markdown. There is no runtime, no daemon, no DB. Skills are read by the editor, hooks fire on events, scripts run on demand. If something goes wrong, you can read every file and see what happened.
 
-Session Orchestrator auto-detects your VCS from the git remote URL:
+## Why this design
+
+**Five typed waves, not one big batch.** Discovery first, so the implementer agents start with shared context. Impl-Core before Impl-Polish, so the architectural decisions land before the integrations. Quality runs a *simplification pass* on AI-generated code before tests are written, otherwise tests pin the AI patterns into place.
+
+**Inter-wave reviews, not just end-of-session.** A session-reviewer agent runs between every wave with explicit confidence scoring. The eight review dimensions are not advisory; only findings at or above confidence 80 are surfaced. This filters speculative criticism and keeps your attention on what actually matters.
+
+**State persists across crashes.** `STATE.md` records wave progress, mission status, and deviations. If the session is interrupted, the next `/session` invocation offers to resume from the last completed wave. Coordinator snapshots (git refs under `refs/so-snapshots/*`) capture the working tree on demand.
+
+**Hooks enforce, not just warn.** Pre-Bash destructive-command guard blocks `git reset --hard`, `rm -rf`, force-pushes, and ten more rules from `.orchestrator/policy/blocked-commands.json`. Pre-Edit scope enforcement blocks writes outside an agent's `allowedPaths`. The guard runs in main sessions and subagent waves equally.
+
+**Cross-session learning is opt-in and inspectable.** Every session writes a record to `.orchestrator/metrics/sessions.jsonl`. After five-plus sessions, `/evolve analyze` extracts confidence-scored patterns into `learnings.jsonl`. You can read every line. You can prune via `/evolve review`. Nothing is hidden.
+
+**VCS dual support, no lock-in.** Auto-detects GitLab or GitHub from your git remote. Full lifecycle for both: issue management, MR/PR tracking, pipeline status, label taxonomy, milestone queries.
+
+## Commands
+
+| Command | Purpose |
+|---------|---------|
+| `/session [type]` | Start a session (housekeeping, feature, deep) |
+| `/go` | Approve plan, begin wave execution |
+| `/close` | End session with verification, commit, push |
+| `/discovery [scope]` | Run modular probes, surface findings, create issues |
+| `/plan [mode]` | Plan a project, feature, or retrospective |
+| `/evolve [mode]` | Extract, review, or list cross-session learnings |
+| `/bootstrap` | Scaffold required repo structure |
+| `/harness-audit` | Score the harness against the 7-category rubric |
+| `/autopilot` | Headless walk-away CLI driver for chained sessions |
+| `/repo-audit` | One-shot repo-level baseline audit |
+
+## Session Types
+
+- **`housekeeping`**: git cleanup, SSOT refresh, CI checks, branch merges. Often runs coordinator-direct (Express Path) when scope is at most three sequential issues. 1 to 2 agents, serial.
+- **`feature`**: frontend or backend feature work. 4 to 6 agents per wave times 5 waves.
+- **`deep`**: complex backend, security, DB, refactoring. Up to 10 to 18 agents per wave times 5 waves.
+
+## Workflow
+
+The two complementary loops:
+
+```
+/plan [mode]  →  /session [type]  →  /go  →  /close  →  /plan retro
+    WHAT              HOW            DO      VERIFY       REFLECT
+```
+
+`/plan` is optional. You can create issues manually and jump straight to `/session`.
+
+For a feature from idea to delivery:
+
+```bash
+/plan feature        # 10 min: requirements → PRD + 3 issues
+/session feature     # pick those 3 issues → wave plan
+/go                  # execute 5 waves
+/close               # verify, commit, push
+```
+
+For learning across sessions, see [`/evolve`](commands/evolve.md). It is *not* called automatically. Run it deliberately after five-plus sessions, when Project Intelligence stops surfacing useful guidance, or before a big feature.
+
+## Platform Support
+
+| Feature | Claude Code | Codex CLI | Cursor IDE |
+|---------|------------|-----------|------------|
+| OS | macOS, Linux, **Windows (native)** | macOS, Linux, **Windows (native)** | macOS, Linux, **Windows (native)** |
+| All 10 commands | Native slash commands | Native plugin commands | Rules-based (.mdc) |
+| Parallel agents | Agent tool | Multi-agent roles | Sequential only |
+| Session persistence | `.claude/STATE.md` | `.codex/STATE.md` | `.cursor/STATE.md` |
+| Shared knowledge | `.orchestrator/metrics/` | `.orchestrator/metrics/` | `.orchestrator/metrics/` |
+| Scope enforcement | PreToolUse hooks | Hooks (experimental) | `afterFileEdit` (post-hoc) |
+| AskUserQuestion | Native tool | Numbered-list fallback | Numbered-list fallback |
+| Quality gates | Full | Full | Full |
+| Design alignment | Pencil integration | Pencil integration | Pencil integration |
+
+Windows support is **native** since v3.0.0. No WSL, no Git-Bash, no msys. All file paths use `path.join`, all tmp paths use `os.tmpdir()`, CI verifies on `windows-latest` alongside `ubuntu-latest` and `macos-latest`.
+
+All platforms share the same skills, commands, hooks, and scripts. Platform-specific adaptations are handled in `scripts/lib/platform.mjs`. Setup guides: [Codex](docs/codex-setup.md) and [Cursor IDE](docs/cursor-setup.md).
+
+### Cursor IDE caveats
+
+Cursor has two event-coverage limitations vs. Claude Code and Codex CLI:
+
+1. **No SessionStart equivalent.** Cursor lacks a conversation-start lifecycle event. Session initialisation must be triggered manually via `/session`.
+2. **Post-hoc scope enforcement.** The Cursor-equivalent `afterFileEdit` hook fires *after* the edit. The destructive-command guard (`beforeShellExecution`) is fully equivalent to Claude Code's PreToolUse Bash gate. Scope enforcement is best-effort warn-only on Cursor.
+
+Active Cursor hooks: 2 events (`afterFileEdit`, `beforeShellExecution`) routed to 2 handlers (`enforce-scope.mjs`, `enforce-commands.mjs`).
+
+## Components
+
+- **29 Skills**: bootstrap, session-start, session-plan, wave-executor, session-end, claude-md-drift-check, ecosystem-health, gitlab-ops, quality-gates, discovery, plan, evolve, vault-sync, vault-mirror, daily, docs-orchestrator, skill-creator, mcp-builder, hook-development, architecture, domain-model, ubiquitous-language, autopilot, mode-selector, repo-audit, convergence-monitoring, using-orchestrator, frontmatter-guard, session-start (sub-files: `phase-2-5-docs-planning.md`, `phase-4-5-resource-health.md`, `phase-7-5-mode-selector.md`, `phase-8-5-express-path.md`)
+- **10 Commands**: `/session`, `/go`, `/close`, `/discovery`, `/plan`, `/evolve`, `/bootstrap`, `/harness-audit`, `/autopilot`, `/repo-audit`
+- **10 Agents**: code-implementer, test-writer, ui-developer, db-specialist, security-reviewer, session-reviewer, docs-writer, architect-reviewer, qa-strategist, analyst
+- **10 hook event matchers / 10 handlers**: SessionStart (banner + init), PreToolUse/Edit\|Write (scope enforcement), PreToolUse/Bash (destructive-command guard + enforce-commands), PostToolUse (edit validation), Stop (session events), SubagentStop (telemetry), PostToolUseFailure (corrective context), PostToolBatch (wave signal), SubagentStart (telemetry), CwdChanged (cwd-change record). Plus the Clank Event Bus integration in `hooks/_lib/events.mjs`.
+- **Output Styles**: 3 (session-report, wave-summary, finding-report) for consistent reporting
+- **`.orchestrator/policy/`**: runtime policy files, e.g. `blocked-commands.json` with 13 rules consumed by the destructive-command guard
+- **`.claude/rules/`**: always-on contributor rules, e.g. `parallel-sessions.md` (PSA-001 through PSA-004)
+- **`.codex-plugin/`**: Codex plugin manifest (`plugin.json`), compatibility config, 3 agent role definitions
+- **`scripts/`**: deterministic scripts (parse-config, run-quality-gate, validate-wave-scope, validate-plugin, token-audit, autopilot) plus shared lib (`scripts/lib/*.mjs`) plus a vitest suite of 4430 tests
+
+## Comparison
+
+| Capability | Session Orchestrator | Manual `CLAUDE.md` | Other orchestrators |
+|---|---|---|---|
+| Session lifecycle (start → plan → execute → close) | Full, automated | Manual | Partial |
+| Typed waves with quality gates | 5 roles, progressive verification | None | Batch execution |
+| Session persistence and crash recovery | `STATE.md` plus memory files | None | Partial |
+| Scope and command enforcement hooks | PreToolUse with strict / warn / off | None | None |
+| Circuit breaker and spiral detection | Per-agent, with recovery | None | Partial |
+| Cross-session learning | Confidence-scored learnings | None | None |
+| Adaptive wave sizing | Complexity-scored, dynamic | Fixed | Fixed |
+| VCS integration (GitLab + GitHub) | Dual, auto-detected | Manual CLI | Usually GitHub only |
+| Design-code alignment | Pencil integration | None | None |
+| Session close with carryover | Verified, with issue creation | Manual | Partial |
+
+The design goal is engineering quality. Every wave exits verified, every unfinished issue gets a carryover ticket, every session closes with a clean commit.
+
+## VCS auto-detection
+
+Session Orchestrator detects your VCS from the git remote URL:
+
 - Remote contains `github.com` → uses `gh` CLI
 - All other remotes → uses `glab` CLI
 
@@ -340,35 +264,21 @@ Override with `vcs: github` or `vcs: gitlab` in Session Config.
 
 ## Architecture
 
-Session Orchestrator handles the **session layer** (orchestration, VCS integration, waves, close-out).
-Superpowers handles the **task layer** (TDD, debugging, brainstorming per feature).
+Session Orchestrator handles the **session layer**: orchestration, VCS integration, waves, close-out. Skills like [obra/superpowers](https://github.com/obra/superpowers) handle the **task layer**: TDD, debugging, brainstorming per feature. They compose well.
 
 ```
-/plan → PRD + Issues    (optional: define WHAT to build)
+/plan → PRD + Issues          (optional: define WHAT to build)
   ↓
-/session → Research → Q&A → Plan    (define HOW to build it)
+/session → Research → Q&A     (define HOW to build it)
   ↓
-/go → 5 Waves → Inter-Wave Reviews    (execute)
+/go → 5 Waves + Reviews       (execute)
   ↓
-/close → Verify → Commit → Mirror    (verify + ship)
+/close → Verify → Commit      (verify and ship)
 ```
 
-## Components
+## Destructive-command guard
 
-- **28 Skills**: bootstrap, session-start, session-plan, wave-executor, session-end, claude-md-drift-check, ecosystem-health, gitlab-ops, quality-gates, discovery, plan, evolve, vault-sync, vault-mirror, daily, docs-orchestrator, skill-creator, mcp-builder, hook-development, **architecture**, **domain-model**, **ubiquitous-language**, autopilot, mode-selector, repo-audit, convergence-monitoring, using-orchestrator, frontmatter-guard
-- **10 Commands**: /session, /go, /close, /discovery, /plan, /evolve, /bootstrap, /harness-audit, /autopilot, /repo-audit
-- **10 Agents**: code-implementer, test-writer, ui-developer, db-specialist, security-reviewer, session-reviewer, docs-writer, architect-reviewer, qa-strategist, analyst
-- **Hooks**: 10 event matchers covering 10 hook handlers — SessionStart (banner + init), PreToolUse/Edit\|Write (scope enforcement), PreToolUse/Bash (destructive-command guard + enforce-commands), PostToolUse (edit validation), Stop (session events), SubagentStop (agent events + telemetry), PostToolUseFailure (corrective-context note), PostToolBatch (batch-resolved signal), SubagentStart (telemetry), CwdChanged (cwd-change record). Plus the Clank Event Bus integration (`hooks/_lib/events.mjs`).
-- **Output Styles**: 3 styles (session-report, wave-summary, finding-report) for consistent reporting
-- `.orchestrator/policy/` — runtime policy files (e.g. `blocked-commands.json`, 13 rules consumed by the destructive-command guard)
-- `.claude/rules/` — always-on contributor rules (e.g. `parallel-sessions.md`)
-- `.codex-plugin/`: Codex plugin manifest (`plugin.json`) + compatibility config + 3 agent role definitions
-- `scripts/codex-install.mjs`: installs into the active Codex desktop plugin catalog or falls back to a local marketplace
-- `scripts/`: deterministic scripts (parse-config, run-quality-gate, validate-wave-scope, validate-plugin, token-audit, autopilot) + shared lib (`scripts/lib/*.mjs`) + vitest suite (2623+ tests)
-
-## Destructive-Command Guard
-
-`hooks/pre-bash-destructive-guard.mjs` blocks destructive shell commands in the main session (alongside subagent waves). Policy lives in `.orchestrator/policy/blocked-commands.json` (13 rules covering `git reset --hard`, `rm -rf`, `git push --force`, etc.).
+`hooks/pre-bash-destructive-guard.mjs` blocks destructive shell commands in the main session and in subagent waves. Policy lives in `.orchestrator/policy/blocked-commands.json` (13 rules covering `git reset --hard`, `rm -rf`, `git push --force`, and more).
 
 Bypass per-session by adding to your Session Config:
 
@@ -376,47 +286,58 @@ Bypass per-session by adding to your Session Config:
 allow-destructive-ops: true
 ```
 
-Set this for intentional maintenance sessions only. The rule source of truth is [`.claude/rules/parallel-sessions.md`](.claude/rules/parallel-sessions.md) (PSA-003), which is vendored to all consumer repos via `/bootstrap`. See issue #155 for the codification narrative.
+Set this for intentional maintenance sessions only. The rule source of truth is [`.claude/rules/parallel-sessions.md`](.claude/rules/parallel-sessions.md) (PSA-003), vendored to all consumer repos via `/bootstrap`.
 
-## Agent Authoring Rules
+## Agent authoring
 
-Custom agents live in `agents/` (plugin) or `.claude/agents/` (project) as Markdown with YAML frontmatter. The frontmatter contract is strict — Claude Code emits `agents: Invalid input` and silently drops the agent on any deviation. Required fields:
+Custom agents live in `agents/` (plugin) or `.claude/agents/` (project) as Markdown with YAML frontmatter. The frontmatter contract follows the canonical [code.claude.com/sub-agents](https://code.claude.com/docs/en/sub-agents) spec. Required fields:
 
 ```yaml
 ---
-name: kebab-case-name          # 3-50 chars, lowercase + hyphens only
-description: Use this agent when [conditions]. <example>Context: ... user: "..." assistant: "..." <commentary>Why this agent is appropriate</commentary></example>
-model: inherit                 # inherit | sonnet | opus | haiku
-color: blue                    # blue | cyan | green | yellow | magenta | red
-tools: Read, Grep, Glob, Bash  # COMMA-SEPARATED STRING, not JSON array!
+name: kebab-case-name           # 3-50 chars, lowercase + hyphens only
+description: Use this agent when [conditions]. <example>...</example>
+model: inherit                  # inherit | sonnet | opus | haiku, OR full ID like claude-opus-4-7
+color: blue                     # blue | cyan | green | yellow | purple | orange | pink | red | magenta
+tools: Read, Grep, Glob, Bash   # comma-separated string OR JSON array; both accepted
 ---
 ```
 
-**Critical pitfalls** (cause `agents: Invalid input` validation failure):
-
-- `tools` MUST be a comma-separated string (`Read, Edit, Write`), NOT a JSON array (`["Read", "Edit"]`).
-- `description` MUST be a single-line inline string, NOT a YAML block scalar (`>` or `|`). Put `<example>` blocks inline.
-- All four fields (`name`, `description`, `model`, `color`) are required. `tools` is optional.
-
-Reference: [Anthropic agent-development SKILL.md](https://github.com/anthropics/claude-code/blob/main/plugins/plugin-dev/skills/agent-development/SKILL.md).
+**Critical:** `description` must be a single-line inline string, not a YAML block scalar (`>` or `|`). Put `<example>` blocks inline. Reference: [Anthropic agent-development SKILL.md](https://github.com/anthropics/claude-code/blob/main/plugins/plugin-dev/skills/agent-development/SKILL.md). Body conventions: 500 to 3000 words, sections in the order Core Responsibilities → Process → Quality Standards → Output Format → Edge Cases.
 
 ## Development
 
-Clone, install, and verify in three commands:
+Clone, install, verify in three commands:
 
 ```bash
 git clone https://github.com/Kanevry/session-orchestrator.git && cd session-orchestrator
 npm install
-npm test        # vitest — primary test flow
+npm test        # vitest, 4430 tests
 ```
 
 Additional scripts:
 
-- `npm run test:watch` — vitest in watch mode
-- `npm run lint` / `npm run lint:fix` — ESLint v9 + Prettier
-- `npm run typecheck` — `node --check` on every `.mjs` file (syntactic-only; no TypeScript yet)
+- `npm run test:watch`: vitest in watch mode
+- `npm run lint` / `npm run lint:fix`: ESLint v9 + Prettier
+- `npm run typecheck`: `node --check` on every `.mjs` file (syntactic only; no TypeScript yet)
+- `npm run format` / `npm run format:check`: Prettier write or check
 
-The legacy `bats` shell suite (`scripts/test/run-all.sh`) is retained for historical reference but is **deprecated** and will be removed in a future release. Do not add new tests there — use `tests/**/*.test.mjs` under vitest.
+### Pre-commit hooks (Husky + commitlint + lint-staged)
+
+`.npmrc` ships with `ignore-scripts=true` (SEC-020 supply-chain defence), so the `prepare` script does **not** auto-run on `npm install`. After cloning, run husky once manually:
+
+```bash
+npm install
+npx husky                  # one-time setup, wires git hooks via .husky/_/
+```
+
+After that, `git commit` will:
+
+- **pre-commit**: run `lint-staged` (ESLint `--fix` on staged `*.mjs` files) and (after #350 polish) gitleaks scan on staged files.
+- **commit-msg**: validate Conventional Commits format via commitlint.
+
+To bypass (rare, emergencies only): `git commit --no-verify`. CI re-runs everything pre-commit ran, plus more.
+
+The legacy `bats` shell suite (`scripts/test/run-all.sh`) is retained for historical reference but is **deprecated** and will be removed in a future release. Do not add new tests there. Use `tests/**/*.test.mjs` under vitest.
 
 For contributor-facing architecture, hook authoring, and the `zx`-vs-stdlib heuristic, see [docs/plugin-architecture-v3.md](docs/plugin-architecture-v3.md).
 
@@ -424,7 +345,7 @@ For contributor-facing architecture, hook authoring, and the `zx`-vs-stdlib heur
 
 - [User Guide](docs/USER-GUIDE.md): installation, config reference, workflow walkthrough, FAQ
 - [Migration to v3](docs/migration-v3.md): upgrade path from v2.x to v3.0.0, known issues, rollback
-- [Plugin Architecture (v3)](docs/plugin-architecture-v3.md): contributor guide — layering, hook anatomy, lib catalog, testing
+- [Plugin Architecture (v3)](docs/plugin-architecture-v3.md): contributor guide, layering, hook anatomy, lib catalog, testing
 - [CONTRIBUTING.md](CONTRIBUTING.md): plugin architecture, skill anatomy, development setup
 - [CHANGELOG.md](CHANGELOG.md): version history
 - [Example Configs](docs/examples/): Session Config examples for Next.js, Express, Swift
@@ -434,10 +355,14 @@ For contributor-facing architecture, hook authoring, and the `zx`-vs-stdlib heur
 - [Homepage](https://gotzendorfer.at/en/session-orchestrator)
 - [Privacy Policy](https://gotzendorfer.at/en/session-orchestrator/privacy)
 
-## Weiterführend
+## Project state
 
-- **Project state & runtime SSOT:** Siehe [`CLAUDE.md`](./CLAUDE.md) für den `## Current State`-Block (was läuft gerade, welche Tests, welcher Backlog) und den live `## Session Config`-Block, den `skills/_shared/config-reading.md` zur Laufzeit liest.
-- **Codex CLI:** Auf Codex CLI heißt die gleiche Datei `AGENTS.md`. Auflösungs-Regel: [skills/_shared/instruction-file-resolution.md](skills/_shared/instruction-file-resolution.md).
+For the live runtime SSOT, see [`CLAUDE.md`](./CLAUDE.md):
+
+- `## Current State` block (active epic, test count, backlog snapshot, recent sessions)
+- `## Session Config` block (read at runtime by `skills/_shared/config-reading.md`)
+
+On Codex CLI the same file is `AGENTS.md`. Resolution rule: [skills/_shared/instruction-file-resolution.md](skills/_shared/instruction-file-resolution.md).
 
 ## License
 

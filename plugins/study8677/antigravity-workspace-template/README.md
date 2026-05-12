@@ -45,7 +45,7 @@ The engine is the core: `ag-refresh` deploys a multi-agent cluster that autonomo
 
 **Instead of handing Claude Code / Codex a repo-wide `grep` and making it hunt on its own, give it a ChatGPT for your repository.**
 
-**Tested on [OpenClaw](https://github.com/openclaw/openclaw) (12K files, 348K stars) with MiniMax2.7 — module Q&A scored 10/10, 111 modules self-learned in 43 minutes.** [See full eval below.](#real-world-eval-minimax27-on-openclaw-12k-files-348k-stars)
+**Benchmarked head-to-head against Codex CLI and Claude Code on 36 questions across 3 real-world Python codebases (`fastapi`, `requests`, `sqlmodel`) — Antigravity 99% on factual lookups, 97% on audit/security, 2.1× faster than Codex on factual.** [See eval below.](#head-to-head-eval-antigravity-vs-codex-cli-vs-claude-code-2026-05-09)
 
 ```
 Traditional approach:              Antigravity approach:
@@ -433,123 +433,48 @@ See [Sandbox docs](docs/en/SANDBOX.md).
 
 ---
 
-## Real-World Eval: MiniMax2.7 on OpenClaw (12K files, 348K stars)
+## Head-to-Head Eval: Antigravity vs Codex CLI vs Claude Code (2026-05-09)
 
-Tested against [OpenClaw](https://github.com/openclaw/openclaw) — the most popular open-source AI assistant (TypeScript + Swift + Kotlin, 12,133 files) — using **MiniMax2.7** free API.
+Asymmetric benchmark on three real-world Python codebases — `fastapi/fastapi`,
+`psf/requests`, `fastapi/sqlmodel` — asking each tool **the same 36 questions**
+across three difficulty bands. All three tools used `gpt-5.5` with high
+reasoning effort; Codex and Claude had full read access to the workspace.
+Codex was the grader (4-axis 0–3 rubric, scores verified against actual source).
 
-### Refresh results
+| Question type | Antigravity | Codex CLI | Claude Code |
+|:---|:---:|:---:|:---:|
+| 15 factual lookups | **179/180 (99%)** | 179/180 (99%) | 178/180 (99%) |
+| 12 synthesis (project / arch tour) | 116/144 (81%) | **144/144 (100%)** | 136/144 (94%) |
+| 9 audit / security | **105/108 (97%)** | 104/108 (96%) | 98/108 (91%) |
 
-```
-$ ag-refresh --workspace /path/to/openclaw
-[1/3] Scanning project... 5000 files, 0.14s
-[7/8] ▶ Running 154 modules (concurrency=8)...
-      Auto-split: extensions/ → 50+ sub-modules (slack, telegram, whatsapp, ...)
-      Auto-split: src/ → 40+ sub-modules (agents, gateway, config, ...)
-[8/8] module_registry ✅ 164 lines
+**Combined factual + audit (24 cells): Antigravity 284/288, Codex 283/288,
+Claude 276/288.** Antigravity edges out both — at lower latency than Codex on
+every single question.
 
-Total time: 42m52s | 111 module docs | 1.5MB knowledge base
-```
+**Latency** (mean wall-clock per question, same proxy):
 
-### Ask evaluation matrix (11 tests)
+| Question type | Antigravity | Codex | Claude |
+|:---|:---:|:---:|:---:|
+| Factual | **56s** | 119s | 42s |
+| Audit | 160s | 177s | **100s** |
 
-| Category | Question | Result | Quality |
-|:---------|:---------|:------:|:-------:|
-| Basic understanding | "What is this project?" | **Pass** | 5/5 — sponsors, platforms, features, structure |
-| Tech stack | "Tech stack and frameworks?" | Timeout | 3/5 — fallback gave language/framework data |
-| Module deep-dive | "How does Telegram integration work?" | **Pass** | **5/5** — file table + architecture diagram + types + constants |
-| Module deep-dive | "Discord voice channels?" | **Pass** | **5/5** — audio pipeline + code samples + design patterns |
-| Module deep-dive | "WhatsApp integration?" | **Pass** | **5/5** — auth flow + plugin architecture + dependencies |
-| Hallucination test | "Does this support GraphQL?" | 413 | 0/5 — request too large for free API |
-| Architecture | "How does Gateway work?" | Timeout | 2/5 — file list but no analysis |
-| Chinese query | "支持哪些AI模型？" | Timeout | 1/5 — cross-module, needs faster model |
-| Skills system | "What is the skill system?" | Timeout | 2/5 — listed skill files |
-| Testing patterns | "Testing frameworks?" | Timeout | 2/5 — listed vitest configs |
-| Platform listing | "What messaging platforms?" | Crash | 0/5 — 413 error |
+Antigravity is **2.1× faster than Codex on factual** and on par with Codex on
+audit, while matching or beating it on correctness. Claude is fastest on
+audit but loses 7 percentage points of correctness.
 
-### Key finding: auto-split unlocks module-level excellence
+**What changed in this repo to get there.** Two engine fixes landed during the
+benchmark, both committed in this branch:
 
-```
- ✅ Module-level Q&A (5/5)              ⚠️ Cross-module questions              ❌ Free API limits
- ──────────────────────────             ────────────────────────              ─────────────────
- Telegram: architecture diagram         Gateway: timeout                      413 on large context
- Discord: audio pipeline + code         Testing: timeout                      Rate limiting (429)
- WhatsApp: auth + plugin system         Tech stack: timeout
- Each module has its own knowledge doc  Needs faster model or higher timeout
-```
+1. `_ask_with_agent_md` now surfaces project-level docs (`conventions.md`,
+   `module_registry.md`, `map.md`, `structure.md`) into its answer prompts.
+   Removes the “module knowledge does not include project-wide conventions”
+   refusal pattern.
+2. The structured-facts answer agents now have `search_code`, `read_file`,
+   `list_directory`, `read_file_metadata`, `search_by_type` bound at runtime,
+   so the LLM can grep and read actual source instead of paraphrasing the KG.
 
-### Scores
-
-| Dimension | Score | Notes |
-|:----------|:-----:|:------|
-| Basic Q&A | **9/10** | Project overview excellent |
-| Module deep-dive | **10/10** | Telegram/Discord/WhatsApp — architecture diagrams, types, design patterns |
-| Cross-module | **3/10** | Gateway, Testing, Skills — timeout with free API |
-| **Overall** | **6.5/10** | **Module Q&A: production-ready even on 12K-file projects. Cross-module: needs faster model.** |
-
-### Performance comparison
-
-| Metric | OpenCMO (374 files) | OpenClaw (12K files) | Improvement |
-|:-------|:-------------------:|:--------------------:|:-----------:|
-| Refresh time | ~10 min | **43 min** | Parallel + auto-split |
-| Module docs | 9 | **111** | 12x |
-| Knowledge base | 540KB | **1.5MB** | 2.8x |
-| Module Q&A quality | 7/10 | **10/10** | Auto-split = focused knowledge |
-
-> **What changed:** Large modules (extensions/ with 262 groups, src/ with 363 groups) are now auto-split into independent sub-modules. All modules run in parallel (8 concurrency). This reduced OpenClaw refresh from **5+ hours (never finished)** to **43 minutes (completed)**.
-
-### Quick config for best results
-
-```bash
-# .env — recommended settings after eval
-OPENAI_BASE_URL=https://your-openai-compatible-endpoint/v1
-OPENAI_API_KEY=your-key
-OPENAI_MODEL=your-model
-
-# Tuning — raise timeouts for large repos
-AG_ASK_TIMEOUT_SECONDS=120
-AG_REFRESH_AGENT_TIMEOUT_SECONDS=180
-AG_MODULE_AGENT_TIMEOUT_SECONDS=300
-AG_API_CONCURRENCY=5           # Max simultaneous LLM calls (prevents rate-limiting)
-AG_MAX_GROUP_CHARS=800000      # Hard char limit per group (prevents context overflow)
-```
-
-> Works with any OpenAI-compatible provider: **NVIDIA**, **OpenAI**, **Ollama**, **vLLM**, **LM Studio**, **Groq**, **MiniMax**, etc.
-
----
-
-<details>
-<summary><b>Earlier Eval: MiniMax2.7 on OpenCMO (374 files, 29K lines)</b></summary>
-
-Tested end-to-end against the [OpenCMO](https://github.com/study8677/OpenCMO) codebase (Python + React/TS, 374 files) using **MiniMax2.7** via an OpenAI-compatible router.
-
-### Ask evaluation matrix (18 tests)
-
-| Category | Question | Result | Quality |
-|:---------|:---------|:------:|:-------:|
-| Basic understanding | "What is this project?" | **Pass** | 5/5 — accurate summary with tech details |
-| Tech stack | "What tech stack and frameworks?" | **Pass** | 5/5 — frontend + backend + libs listed |
-| Module listing | "List all main modules" | **Pass** | 5/5 — table format, accurate |
-| API routing | "How does API routing work?" | **Pass** | 5/5 — routes + endpoints + client code |
-| Precise function | "get_model() in llm.py signature" | **Pass** | 5/5 — **100% accurate** file, line, logic |
-| Hallucination test | "Does this support GraphQL?" | **Pass** | 5/5 — correctly said **No** with 4-point evidence |
-| Chinese query | "社区监控支持哪些平台?" | **Pass** | 5/5 — Chinese answer, platform style table |
-| Database schema | "List all database tables" | **Pass** | 5/5 — 34 tables listed with source file |
-| Approval workflow | "How does approval work?" | **Pass** | 5/5 — full state machine with line numbers |
-| Complex architecture | "How does multi-agent work?" (120s) | **Pass** | 5/5 — 20 agents listed, comm patterns |
-
-### Scores
-
-| Dimension | Score | Notes |
-|:----------|:-----:|:------|
-| Basic Q&A | **9/10** | Project, tech stack, modules — excellent |
-| Code location | **7/10** | Precise queries great; same-name files can confuse |
-| Hallucination control | **9/10** | Won't fabricate; gives negative evidence |
-| Multi-language | **9/10** | Chinese Q&A excellent |
-| **Overall** | **7/10** | **Daily code Q&A: production-ready. Complex analysis: tune timeout.** |
-
-> Full evaluation report: [`artifacts/plan_20260404_opencmo_ask_boundary_eval.md`](artifacts/plan_20260404_opencmo_ask_boundary_eval.md)
-
-</details>
+Full report (data, methodology, per-cell tables, caveats):
+[`artifacts/benchmark-2026-05-09/REPORT.md`](artifacts/benchmark-2026-05-09/REPORT.md).
 
 ---
 

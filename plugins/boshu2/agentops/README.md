@@ -4,11 +4,12 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/boshu2/agentops?style=social)](https://github.com/boshu2/agentops/stargazers)
 
-### A wiki for your agents. Built so you own the moat.
+### The engineering operating system for agent teams.
 
-`.agents/` is just a wiki — markdown files in your repo, version-controlled with your code, that agents read, traverse, and contribute to. The kind of wiki your team should already have. AgentOps automates the discipline of building one.
+From agent opinions to engineering verdicts.
 
-*The only verifiable moat in this uncertain time is context. Models will get smarter, harnesses will commoditize, agents will get cheaper. Your accumulated context — the lessons learned about your individual problems, the patterns that worked, the decisions that survived review — is the one asset that compounds and doesn't get eaten by the next vendor release. That's what your company actually is.*
+<!-- agentops:claim:AOP-CLAIM-README-FACTORY-CONTEXT -->
+**AgentOps is a disciplined engineering layer for agentic software development.** It keeps the books for coding agents, then compiles that record into context for your software factory. It captures what agents tried, what worked, what failed, what was validated, and what should constrain the next run.
 
 *AgentOps is the shovel. Start digging.*
 
@@ -121,7 +122,7 @@ Four layers. Each solves a different problem. All four compound.
 | Layer | Problem | What changes |
 |-------|---------|--------------|
 | **Bookkeeping** | Agents forget what they tried, why they changed course, and what evidence mattered | `.agents/` captures run packets, handoffs, findings, citations, decisions, verdicts, retros, and post-mortems. *The work leaves a trace.* |
-| **Context Compiler** | Every session starts from zero | `ao inject` delivers decay-ranked knowledge. `ao context assemble` builds phase-scoped packets. 73 skills load automatically via hooks. *Your agent starts loaded, not cold.* |
+| **Context Compiler** | Every session starts from zero | `ao inject` delivers decay-ranked knowledge. `ao context assemble` builds phase-scoped packets. 75 skills load automatically via hooks. *Your agent starts loaded, not cold.* |
 | **Validation Gates** | Agents ship confident garbage | `/pre-mortem`, `/vibe`, `/council` — multi-model consensus validates plans before build and code before commit. Gates block, not advise. *Three fresh judges catch what one agent can't.* |
 | **Knowledge Flywheel** | Lessons disappear between sessions | `/forge` extracts learnings from the bookkeeping trail. `ao flywheel close-loop` scores and promotes. `/evolve` fixes the worst gap autonomously. `/dream` compounds overnight. *Session 15 starts with everything session 1 learned.* |
 
@@ -205,6 +206,18 @@ ao doctor
 ao demo
 ```
 
+The demo path shows the 3.0 product loop: visible domain/practice packet,
+bounded task context, mixed Claude/Codex council verdict, tracked follow-up
+work, and the optional scheduled compounding lane.
+For the exact first-session command path, see
+[AgentOps 3.0 First-Value Path](docs/first-value-path.md). For copy, gist,
+and launch-post language, see the
+[AgentOps 3.0 Explainer Kit](docs/agentops-3-explainer-kit.md). For launch
+video planning, see the
+[AgentOps 3.0 YouTube Starter Series](docs/agentops-3-youtube-starter-series.md).
+For the evidence loop behind PMF claims, see
+[AgentOps 3.0 PMF Evidence Loop](docs/agentops-3-pmf-evidence-loop.md).
+
 Full catalog: [docs/SKILLS.md](docs/SKILLS.md) · Unsure what to run? [Skill Router](docs/SKILL-ROUTER.md)
 
 ---
@@ -238,7 +251,7 @@ The `ao` CLI is the repo-native control plane behind the skills. It handles retr
 ```bash
 ao quick-start                            # Set up AgentOps in a repo
 ao doctor                                 # Check local health
-ao demo                                   # See the value path in 5 minutes
+ao demo                                   # See the council-first value path
 ao search "query"                         # Search session history and local knowledge
 ao lookup --query "topic"                 # Retrieve curated learnings and findings
 ao context assemble                       # Build a task briefing

@@ -1,31 +1,35 @@
 ---
 name: brainstorming
-description: "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation."
+description: "Use when defining new features, product behavior, UI/component design, architecture choices, contract changes, or ambiguous medium/high-complexity work before implementation."
 ---
 
 # Execute
 
-→ Creative work (feature, component, behavior change)? → **Design first. No code until design approved.**
+→ New feature, product behavior, UI/component design, architecture/contract change, or ambiguous medium/high-complexity work? → **Design first. No implementation until the needed design/spec is approved.**
   1. Explore project context → read authority docs, check for existing patterns
   2. Ask clarifying questions one at a time (prefer multiple choice)
   3. Propose 2-3 approaches with trade-offs and your recommendation
   4. Present design sections → get user approval after each
   5. Write spec → self-review → user review → transition to writing-plans
-→ HARD GATE: Do NOT write code, scaffold projects, or invoke implementation skills until design is approved.
+→ HARD GATE: For tasks that match this skill, do NOT write code, scaffold projects, or invoke implementation skills until design/spec approval is satisfied.
 
 # Brainstorming Ideas Into Designs
 
 Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
 
-Start by understanding the current project context and authority boundary, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design and get user approval.
+Start by understanding the current project context and authority boundary, then ask questions one at a time to refine the idea. Once you understand what you're building, present the smallest design artifact that stabilizes the work and get the required approval.
 
 <HARD-GATE>
-Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
+Do NOT invoke any implementation skill, write any code, scaffold any project, or take implementation action for work that matches this skill until you have presented the required design/spec and the user has approved it where this workflow requires approval.
 </HARD-GATE>
 
-## Anti-Pattern: "This Is Too Simple To Need A Design"
+## Route Away When It Is Small
 
-Every project goes through this process. A todo list, a single-function utility, a config change — all of them. "Simple" projects are where unexamined assumptions cause the most wasted work. The design can be short (a few sentences for truly simple projects), but you MUST present it and get approval.
+Do not force this workflow onto low-complexity work. A tiny wording edit,
+single-owner bug fix, simple config/status question, or local utility change
+can proceed through concise intent, baseline check, TDD/debugging, and
+verification. If uncertainty or impact grows, escalate back here and write the
+smallest stabilizing spec.
 
 ## Checklist
 
@@ -37,8 +41,8 @@ You MUST create a task for each of these items and complete them in order:
 4. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 5. **Draft working artifacts** — `TaskIntentDraft`, `BaselineReadSetHint`, `ImpactStatementDraft`
 6. **Propose 2-3 approaches** — with trade-offs and your recommendation
-7. **Present design** — in sections scaled to complexity, get user approval after each
-8. **Write design doc** — save to `docs/aegis/specs/YYYY-MM-DD-<topic>-design.md` and commit
+7. **Present design** — in sections scaled to complexity, get user approval where required
+8. **Write spec artifact** — save a Spec Brief or Design Spec under `docs/aegis/specs/` when persistent requirements are needed
 9. **Spec self-review** — check for placeholders, contradictions, ambiguity, scope, boundary
 10. **User reviews written spec** — ask user to review before proceeding
 11. **Transition to implementation** — invoke writing-plans skill (terminal state)
@@ -59,7 +63,7 @@ You MUST create a task for each of these items and complete them in order:
 
 **Exploring approaches:** Propose 2-3 approaches with trade-offs and recommendation. Make scope boundary explicit: what's in, what's deferred, what belongs elsewhere.
 
-**Presenting the design:** Scale sections to complexity. Cover: architecture, components, data flow, error handling, testing, compatibility boundary. Get approval after each section.
+**Presenting the design:** Scale sections to complexity. Cover only the surfaces that matter: architecture, components, data flow, error handling, testing, compatibility boundary. Get approval for the design before implementation when behavior, contract, architecture, or user-facing flow is being decided.
 
 **Design for isolation:** Each unit = one clear purpose, well-defined interface, testable independently. Can someone understand it without reading internals? Can you change internals without breaking consumers?
 
@@ -70,10 +74,10 @@ You MUST create a task for each of these items and complete them in order:
 **Documentation:**
 
 1. **Aegis Project Workspace initialization (first creation only):**
-   If `docs/aegis/` does not exist and `scripts/aegis-workspace.py` is
-   available in the active method-pack checkout, initialize the target project:
+   If `docs/aegis/` does not exist and configured Aegis workspace support is
+   available, initialize the target project:
    `python scripts/aegis-workspace.py init --root <target-project-root>`.
-   If the helper is unavailable, create it manually:
+   If installed Aegis workspace support is unavailable, create it manually:
    a. Create `docs/aegis/README.md` — describes workspace purpose and structure
    b. Create `docs/aegis/INDEX.md` — empty index, will be appended below
    c. Create `docs/aegis/BASELINE-GOVERNANCE.md` from the template in
@@ -83,17 +87,22 @@ You MUST create a task for each of these items and complete them in order:
       "Initial Baseline Snapshot Template" below
    If `docs/aegis/` already exists, use it — do not recreate.
 
-2. **Write the validated design (spec):**
-   Save to `docs/aegis/specs/YYYY-MM-DD-<topic>-design.md`.
-   Spec always goes to `specs/` — never to `work/`.
+2. **Write the validated spec artifact when needed:**
+   Use the smallest artifact that stabilizes the task:
+   - Spec Brief: `docs/aegis/specs/YYYY-MM-DD-<topic>-brief.md` for medium
+     tasks that need what/why/acceptance pinned before planning.
+   - Design Spec: `docs/aegis/specs/YYYY-MM-DD-<topic>-design.md` for high
+     complexity, architecture, contract, migration, cross-module, or ambiguous
+     behavior requiring user review.
+   Specs always go to `specs/` — never to `work/`.
 
 3. **Update INDEX.md:**
-   Prefer the helper: `python scripts/aegis-workspace.py append-index --root
+   Prefer configured Aegis workspace support: `python scripts/aegis-workspace.py append-index --root
    <target-project-root> --path docs/aegis/specs/<filename>.md --kind spec
-   --title "<title>"`. If the helper is unavailable, append the new spec entry
+   --title "<title>"`. If workspace support is unavailable, append the new spec entry
    to `docs/aegis/INDEX.md` manually.
    After the append, run `python scripts/aegis-workspace.py check --root
-   <target-project-root>` when the helper is available. This validates
+   <target-project-root>` when configured workspace support is available. This validates
    structure and index coverage only; it does not grant completion authority.
 
 4. Commit the design document to git.
@@ -114,11 +123,11 @@ After writing the spec document, look at it with fresh eyes:
 Fix any issues inline. No need to re-review — just fix and move on.
 
 **User Review Gate:**
-After the spec review loop passes, ask the user to review the written spec before proceeding:
+After a Design Spec review loop passes, ask the user to review the written spec before proceeding:
 
 > "Spec written and committed to `<path>`. Please review it and let me know if you want to make any changes before we start writing out the implementation plan."
 
-Wait for the user's response. If they request changes, make them and re-run the spec review loop. Only proceed once the user approves.
+Wait for the user's response when this workflow requires review. If they request changes, make them and re-run the spec review loop. Only proceed once the user approves. For a small Spec Brief created only to pin medium-task acceptance, user review may be concise unless project rules require a formal approval step.
 
 **Implementation:**
 

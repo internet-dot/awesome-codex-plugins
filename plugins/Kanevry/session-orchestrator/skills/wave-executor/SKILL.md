@@ -300,6 +300,11 @@ When wave-executor is invoked as `sessionRunner` from `scripts/lib/autopilot.mjs
     completion_rate?: number,
     completed_issues?: number,
   },
+
+  usage?: {                                     // schema-canonical (autopilot token-budget kill-switch, #355)
+    output_tokens?: number,                     // cumulative output tokens for this session; absence → 0 (forward-compat)
+    total_tokens?: number,                      // alternative name accepted as fallback
+  },
 }
 ```
 

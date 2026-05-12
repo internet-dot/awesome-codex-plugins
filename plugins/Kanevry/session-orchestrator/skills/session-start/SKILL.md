@@ -410,6 +410,12 @@ Group issues by:
 
    The helper returns `null` (silent no-op) when the JSONL is absent, malformed, or `stale_count === 0`. Skip silently in those cases — do not block the session.
 
+   Additionally, if the current repo has a configured `origin` remote and `glab` (GitLab) or `gh` (GitHub) is available, invoke the CI-status probe (`scripts/lib/ci-status-banner.mjs`) via `checkCiStatus({ repoRoot: process.cwd() })`. The helper returns `null` (silent no-op) when no VCS remote, no CLI tool, parse failure, or CLI timeout (8s default). When `result.status === 'red'`, render a banner alongside the bootstrap-lock and vault-staleness warnings:
+   - **Red** (`status === 'red'`): `"🚨 CI RED on HEAD (pipeline #<currentPipelineId>) — last green: #<lastGreen.pipelineId> (commit <SHA-7>, <redCount> pipelines ago). Failing job: <failingJobName>"`
+   - **Green** or **unknown**: silent (no banner) — informational only.
+
+   The banner is non-blocking — display in the Session Overview, do not halt the session. If `ci-status-banner.mjs` is absent (pre-#369 plugin install), skip silently.
+
    All banners are non-blocking — display in the Session Overview, do not halt the session. If `bootstrap-lock-freshness.mjs` is absent (pre-#186 plugin install), skip silently.
 
 ## Phase 4.5: Resource Health (v3.1.0)

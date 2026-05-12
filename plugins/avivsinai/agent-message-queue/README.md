@@ -112,6 +112,8 @@ amq coop exec claude -- --dangerously-skip-permissions
 amq coop exec --session feature-a codex
 ```
 
+Managed launchers can add `--require-wake` to fail instead of launching the agent when the wake watcher cannot start.
+
 ### 3. Send & Receive
 
 ```bash

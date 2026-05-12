@@ -173,10 +173,34 @@
       "category": "Development & Workflow"
     },
     {
+      "name": "codex-rg-guard",
+      "source": {
+        "source": "local",
+        "path": "./plugins/Rycen7822/codex-rg-guard"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
+    },
+    {
       "name": "frappe-agent",
       "source": {
         "source": "local",
         "path": "./plugins/Dkm0315/frappe-agent"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
+    },
+    {
+      "name": "graymatter",
+      "source": {
+        "source": "local",
+        "path": "./plugins/ValkyrLabs/GrayMatter"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -269,6 +293,18 @@
       "category": "Development & Workflow"
     },
     {
+      "name": "team-skills-platform",
+      "source": {
+        "source": "local",
+        "path": "./plugins/Colin4k1024/tsp"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow"
+    },
+    {
       "name": "tool-advisor",
       "source": {
         "source": "local",
@@ -345,6 +381,18 @@
       "source": {
         "source": "local",
         "path": "./plugins/matk0shub/apple-productivity-mcp"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Tools & Integrations"
+    },
+    {
+      "name": "axonflow",
+      "source": {
+        "source": "local",
+        "path": "./plugins/getaxonflow/axonflow-codex-plugin"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -453,6 +501,18 @@
       "source": {
         "source": "local",
         "path": "./plugins/Rothschildiuk/context-pack"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Tools & Integrations"
+    },
+    {
+      "name": "education-agent-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/GarethManning/education-agent-skills"
       },
       "policy": {
         "installation": "AVAILABLE",

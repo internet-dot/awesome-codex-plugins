@@ -128,14 +128,17 @@ Quick routing rule:
 Standard read-only review of your current work.
 
 ```text
-$cc:review                          # review uncommitted changes
+$cc:review                          # review uncommitted changes (default: opus + xhigh effort)
 $cc:review --base main              # review branch vs main
 $cc:review --scope branch           # explicitly compare branch tip to base
 $cc:review --background             # run in background, check with $cc:status later
-$cc:review --model sonnet           # use a specific Claude model
+$cc:review --model sonnet           # switch to sonnet (defaults to high effort)
+$cc:review --model opus --effort high   # opus with a lighter effort
 ```
 
-**Flags:** `--base <ref>`, `--scope <auto|working-tree|branch>`, `--wait`, `--background`, `--model <model>`
+**Flags:** `--base <ref>`, `--scope <auto|working-tree|branch>`, `--wait`, `--background`, `--model <model>`, `--effort <low|medium|high|max>`
+
+**Defaults:** model `opus` (resolves to `claude-opus-4-7[1m]`, the 1M-context variant) with `xhigh` effort. If you pick `sonnet`, it resolves to `claude-sonnet-4-6[1m]` (also 1M context) and the default effort drops to `high`. `haiku` resolves to `claude-haiku-4-5` and has no effort setting. Pass `--model` and `--effort` to override.
 
 Scope `auto` (the default) inspects `git status` and chooses between working-tree and branch automatically.
 
@@ -179,8 +182,8 @@ $cc:rescue --model sonnet --effort medium investigate the flaky test
 | `--resume-last` | Alias for `--resume` |
 | `--fresh` | Force a new task (don't resume) |
 | `--write` | Allow file edits (default) |
-| `--model <model>` | Claude model (`sonnet`, `haiku`, or full ID) |
-| `--effort <level>` | Reasoning effort: `low`, `medium`, `high`, `max` |
+| `--model <model>` | Claude model (`opus`, `sonnet`, `haiku`, or full ID; defaults to `opus`. The `opus` and `sonnet` aliases resolve to their 1M-context variants `claude-opus-4-7[1m]` and `claude-sonnet-4-6[1m]`.) |
+| `--effort <level>` | Reasoning effort: `low`, `medium`, `high`, `xhigh`, `max` (default: `xhigh` for opus, `high` for sonnet, unset for haiku) |
 | `--prompt-file <path>` | Read task description from a file |
 
 **Resume behavior:** If you don't pass `--resume` or `--fresh`, rescue checks for a resumable Claude session and asks once whether to continue or start fresh. Your phrasing guides the recommendation — "continue the last run" → resume, "start over" → fresh.

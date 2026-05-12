@@ -47,11 +47,11 @@ High-complexity or ambiguous tasks also need a spec/design review before
 planning. Only proceed directly with TDD for low-complexity work whose intent,
 owner, compatibility boundary, and verification path are already clear.
 
-When a medium- or high-complexity task needs project records, use the Aegis
-Project Workspace lazily. Prefer
-`python scripts/aegis-workspace.py init --root <target-project-root>` when the
-helper is available in the active method-pack checkout. If the task needs a
-process trail under `work/`, prefer `python scripts/aegis-workspace.py new-work --root <target-project-root> ...`
+When a medium- or high-complexity task needs project records, use configured Aegis workspace support
+lazily. Prefer the installed Aegis workspace helper
+(`python scripts/aegis-workspace.py init --root <target-project-root>`) when it
+is available. If the task needs a process trail under `work/`, prefer
+`python scripts/aegis-workspace.py new-work --root <target-project-root> ...`
 so the intent, checkpoint, drift, and evidence paths are indexed and
 structurally checkable:
 

@@ -1,6 +1,6 @@
 ---
 name: review
-description: 'Run a standard Claude Code review of local git changes in this repository. Args: --wait, --background, --base <ref>, --scope <auto|working-tree|branch>, --model <model>. Use as the default path for ordinary code-review requests when the user did not explicitly ask for stronger adversarial scrutiny or for Claude to own the implementation work.'
+description: 'Run a standard Claude Code review of local git changes in this repository. Args: --wait, --background, --base <ref>, --scope <auto|working-tree|branch>, --model <model>, --effort <low|medium|high|xhigh|max>. Defaults to opus + xhigh effort. Use as the default path for ordinary code-review requests when the user did not explicitly ask for stronger adversarial scrutiny or for Claude to own the implementation work.'
 ---
 
 # Claude Code Review
@@ -16,7 +16,7 @@ If the overall request is "you review it too, also ask Claude to review in the b
 Do not derive the companion path from this skill file or any cache directory. Always run the installed copy:
 `node "<installed-plugin-root>/scripts/claude-companion.mjs" review ...`
 
-Supported arguments: `--wait`, `--background`, `--base <ref>`, `--scope auto|working-tree|branch`, `--model <model>`
+Supported arguments: `--wait`, `--background`, `--base <ref>`, `--scope auto|working-tree|branch`, `--model <model>`, `--effort <low|medium|high|xhigh|max>` (defaults: model=opus, effort=xhigh; sonnet defaults to high; haiku has no effort)
 
 Raw slash-command arguments:
 `$ARGUMENTS`

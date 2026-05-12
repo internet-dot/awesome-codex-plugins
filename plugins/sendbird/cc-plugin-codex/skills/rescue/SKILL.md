@@ -1,6 +1,6 @@
 ---
 name: rescue
-description: 'Delegate a substantial diagnosis, implementation, or follow-up task to Claude Code through the tracked-job runtime. Args: --background, --wait, --resume, --resume-last, --fresh, --write, --model <model>, --effort <low|medium|high|max>, --prompt-file <path>, [task text]. Use when Claude should investigate or change things, not when the user only wants review findings.'
+description: 'Delegate a substantial diagnosis, implementation, or follow-up task to Claude Code through the tracked-job runtime. Args: --background, --wait, --resume, --resume-last, --fresh, --write, --model <model>, --effort <low|medium|high|xhigh|max>, --prompt-file <path>, [task text]. Defaults to opus + xhigh effort. Use when Claude should investigate or change things, not when the user only wants review findings.'
 ---
 
 # Claude Code Rescue
@@ -22,7 +22,7 @@ Do not derive the companion path from this skill file or any cache directory. Al
 Raw slash-command arguments:
 `$ARGUMENTS`
 
-Supported arguments: `--background`, `--wait`, `--resume`, `--resume-last`, `--fresh`, `--write`, `--model <model>`, `--effort <low|medium|high|max>`, `--prompt-file <path>`, plus free-text task text
+Supported arguments: `--background`, `--wait`, `--resume`, `--resume-last`, `--fresh`, `--write`, `--model <model>`, `--effort <low|medium|high|xhigh|max>`, `--prompt-file <path>`, plus free-text task text
 
 Main-thread routing rules:
 - If the user explicitly invoked `$cc:rescue` or `Claude Code Rescue`, do not keep the work in the main Codex thread. Delegate it.

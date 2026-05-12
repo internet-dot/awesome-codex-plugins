@@ -1,16 +1,16 @@
 # Claude Code Skills & Plugins — Agent Skills for Every Coding Tool
 
-**235 production-ready Claude Code skills, plugins, and agent skills for 12 AI coding tools.**
+**246 production-ready Claude Code skills, plugins, and agent skills for 12 AI coding tools.**
 
 The most comprehensive open-source library of Claude Code skills and agent plugins — also works with OpenAI Codex, Gemini CLI, Cursor, and 7 more coding agents. Reusable expertise packages covering engineering, DevOps, marketing, compliance, C-level advisory, and more.
 
 **Works with:** Claude Code · OpenAI Codex · Gemini CLI · OpenClaw · Hermes Agent · Cursor · Aider · Windsurf · Kilo Code · OpenCode · Augment · Antigravity
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](https://opensource.org/licenses/MIT)
-[![Skills](https://img.shields.io/badge/Skills-235-brightgreen?style=for-the-badge)](#skills-overview)
-[![Agents](https://img.shields.io/badge/Agents-28-blue?style=for-the-badge)](#agents)
-[![Personas](https://img.shields.io/badge/Personas-3-purple?style=for-the-badge)](#personas)
-[![Commands](https://img.shields.io/badge/Commands-27-orange?style=for-the-badge)](#commands)
+[![Skills](https://img.shields.io/badge/Skills-246-brightgreen?style=for-the-badge)](#skills-overview)
+[![Agents](https://img.shields.io/badge/Agents-20-blue?style=for-the-badge)](#agents)
+[![Personas](https://img.shields.io/badge/Personas-7-purple?style=for-the-badge)](#personas)
+[![Commands](https://img.shields.io/badge/Commands-33-orange?style=for-the-badge)](#commands)
 [![Stars](https://img.shields.io/github/stars/alirezarezvani/claude-skills?style=for-the-badge)](https://github.com/alirezarezvani/claude-skills/stargazers)
 [![SkillCheck Validated](https://img.shields.io/badge/SkillCheck-Validated-4c1?style=for-the-badge)](https://getskillcheck.com)
 
@@ -23,10 +23,10 @@ The most comprehensive open-source library of Claude Code skills and agent plugi
 Claude Code skills (also called agent skills or coding agent plugins) are modular instruction packages that give AI coding agents domain expertise they don't have out of the box. Each skill includes:
 
 - **SKILL.md** — structured instructions, workflows, and decision frameworks
-- **Python tools** — 305 CLI scripts (all stdlib-only, zero pip installs)
+- **Python tools** — 359 CLI scripts (all stdlib-only, zero pip installs)
 - **Reference docs** — templates, checklists, and domain-specific knowledge
 
-**One repo, eleven platforms.** Works natively as Claude Code plugins, Codex agent skills, Gemini CLI skills, and converts to 8 more tools via `scripts/convert.sh`. All 305 Python tools run anywhere Python runs.
+**One repo, eleven platforms.** Works natively as Claude Code plugins, Codex agent skills, Gemini CLI skills, and converts to 8 more tools via `scripts/convert.sh`. All 359 Python tools run anywhere Python runs.
 
 ### Skills vs Agents vs Personas
 
@@ -146,21 +146,21 @@ Run `./scripts/convert.sh --tool all` to generate tool-specific outputs locally.
 
 ## Skills Overview
 
-**235 skills across 9 domains:**
+**246 skills across 9 domains:**
 
 | Domain | Skills | Highlights | Details |
 |--------|--------|------------|---------|
-| **🔧 Engineering — Core** | 37 | Architecture, frontend, backend, fullstack, QA, DevOps, SecOps, AI/ML, data, Playwright, self-improving agent, security suite (6), a11y audit | [engineering-team/](engineering-team/) |
+| **🔧 Engineering — Core** | 32 | Architecture, frontend, backend, fullstack, QA, DevOps, SecOps, AI/ML, data, Playwright, self-improving agent, security suite (6), a11y audit | [engineering-team/](engineering-team/) |
 | **🎭 Playwright Pro** | 9+3 | Test generation, flaky fix, Cypress/Selenium migration, TestRail, BrowserStack, 55 templates | [engineering-team/playwright-pro](engineering-team/playwright-pro/) |
 | **🧠 Self-Improving Agent** | 5+2 | Auto-memory curation, pattern promotion, skill extraction, memory health | [engineering-team/self-improving-agent](engineering-team/self-improving-agent/) |
-| **⚡ Engineering — POWERFUL** | 45 | Agent designer, RAG architect, database designer, CI/CD builder, security auditor, MCP builder, AgentHub, Helm charts, Terraform, self-eval, llm-wiki (second brain for Obsidian), tc-tracker | [engineering/](engineering/) |
-| **🎯 Product** | 16 | Product manager, agile PO, strategist, UX researcher, UI design, landing pages, SaaS scaffolder, analytics, experiment designer, discovery, roadmap communicator, code-to-prd, apple-hig-expert | [product-team/](product-team/) |
+| **⚡ Engineering — POWERFUL** | 40 | Agent designer, RAG architect, database designer, CI/CD builder, security auditor, MCP builder, AgentHub, Helm charts, Terraform, self-eval, llm-wiki, tc-tracker, **reliability portfolio** (feature-flags-architect, kubernetes-operator, chaos-engineering, slo-architect), ship-gate | [engineering/](engineering/) |
+| **🎯 Product** | 13 | Product manager, agile PO, strategist, UX researcher, UI design, landing pages, SaaS scaffolder, analytics, experiment designer, discovery, roadmap communicator, code-to-prd, apple-hig-expert | [product-team/](product-team/) |
 | **📣 Marketing** | 44 | 7 pods: Content (8), SEO (5), CRO (6), Channels (6), Growth (4), Intelligence (4), Sales (2) + context foundation + orchestration router. 32 Python tools. | [marketing-skill/](marketing-skill/) |
-| **📋 Project Management** | 9 | Senior PM, scrum master, Jira, Confluence, Atlassian admin, templates | [project-management/](project-management/) |
-| **🏥 Regulatory & QM** | 14 | ISO 13485, MDR 2017/745, FDA, ISO 27001, GDPR, CAPA, risk management | [ra-qm-team/](ra-qm-team/) |
-| **💼 C-Level Advisory** | 34 | Full C-suite (10 roles) + orchestration + board meetings + culture & collaboration | [c-level-advisor/](c-level-advisor/) |
-| **📈 Business & Growth** | 5 | Customer success, sales engineer, revenue ops, contracts & proposals | [business-growth/](business-growth/) |
-| **💰 Finance** | 4 | Financial analyst (DCF, budgeting, forecasting), SaaS metrics coach (ARR, MRR, churn, LTV, CAC) | [finance/](finance/) |
+| **📋 Project Management** | 9 | Senior PM, scrum master, Jira, Confluence, Atlassian admin, templates + bundled Atlassian Remote MCP | [project-management/](project-management/) |
+| **🏥 Regulatory & QM** | 14 | ISO 13485, MDR 2017/745, FDA, ISO 27001, GDPR, SOC 2, CAPA, risk management | [ra-qm-team/](ra-qm-team/) |
+| **💼 C-Level Advisory** | 28 | Full C-suite (10 roles) + orchestration + board meetings + culture & collaboration | [c-level-advisor/](c-level-advisor/) |
+| **📈 Business & Growth** | 5 | Customer success, sales engineer, revenue ops, contracts & proposals, BizDev toolkit | [business-growth/](business-growth/) |
+| **💰 Finance** | 3 | Financial analyst (DCF, budgeting, forecasting), SaaS metrics coach, business investment advisor | [finance/](finance/) |
 
 ---
 
@@ -328,6 +328,7 @@ python3 product-team/landing-page-generator/scripts/landing_page_scaffolder.py c
 | [**Claude Code Skills & Agents Factory**](https://github.com/alirezarezvani/claude-code-skills-agents-factory) | Methodology for building skills at scale |
 | [**Claude Code Tresor**](https://github.com/alirezarezvani/claude-code-tresor) | Productivity toolkit with 60+ prompt templates |
 | [**Product Manager Skills**](https://github.com/Digidai/product-manager-skills) | Senior PM agent with 6 knowledge domains, 12 templates, 30+ frameworks — discovery, strategy, delivery, SaaS metrics, career coaching, AI product craft |
+| [**toprank**](https://github.com/nowork-studio/toprank) | 9 SEO and Google Ads skills for Claude Code — connects Google Search Console, PageSpeed Insights, and Google Ads API; ships meta tag, schema markup, and keyword bid fixes to source or CMS. MIT, 107 stars |
 
 ---
 

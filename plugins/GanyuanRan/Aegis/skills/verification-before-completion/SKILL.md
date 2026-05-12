@@ -1,6 +1,6 @@
 ---
 name: verification-before-completion
-description: Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always
+description: Use when about to claim work is complete, fixed, passing, verified, release-ready, or ready to commit, merge, publish, or hand off.
 ---
 
 # Execute
@@ -43,7 +43,8 @@ Before ANY success/completion claim, expression of satisfaction, commit, PR, tas
 5. **Authority**: verified evidence ≠ authoritative completion. Keep distinct.
 6. **Long-Task**: re-read checkpoint, confirm every todo has status, no drift check unresolved.
 7. **Workspace Integrity**: if the task created or modified a target project's
-   `docs/aegis/` workspace and `scripts/aegis-workspace.py` is available, run
+   `docs/aegis/` workspace and configured Aegis workspace support is available,
+   run
    `python scripts/aegis-workspace.py bundle --root <target-project-root> --work YYYY-MM-DD-<slug>`
    when a `work/` record exists, then run
    `python scripts/aegis-workspace.py check --root <target-project-root>` and

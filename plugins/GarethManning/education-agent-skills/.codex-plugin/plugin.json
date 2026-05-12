@@ -1,0 +1,6 @@
+{
+  "name": "education-agent-skills",
+  "version": "2.1.0",
+  "description": "131 evidence-based education skills for curriculum design, lesson planning, assessment, and AI-assisted teaching — built on the Agent Skills open standard.",
+  "skills": "./skills/"
+}

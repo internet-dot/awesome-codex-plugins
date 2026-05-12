@@ -1,6 +1,6 @@
 ---
 name: long-task-continuation
-description: Use when a task is multi-step, may span context resets or sessions, uses subagents, or risks losing state before completion - keeps todo, checkpoint, resume, drift, and evidence discipline without granting completion authority
+description: Use when a task is multi-step, may span context resets or sessions, uses subagents, or risks losing state before completion.
 ---
 
 # Long Task Continuation
@@ -59,8 +59,8 @@ These are draft / hint / projection inputs. They are not authoritative runtime r
 
 ## Workspace Helper Protocol
 
-When `scripts/aegis-workspace.py` is available in the active method-pack
-checkout, use it for the target project workspace and lifecycle records:
+When configured Aegis workspace support or installed Aegis workspace support is
+available, use it for the target project workspace and lifecycle records:
 
 1. Initialize before writing work records:
 

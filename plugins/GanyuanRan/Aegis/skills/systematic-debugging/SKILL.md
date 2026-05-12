@@ -6,12 +6,12 @@ description: Use when encountering any bug, test failure, or unexpected behavior
 # Execute
 
 → Bug? Test failure? Unexpected behavior? → **Find root cause first. No fixes without evidence.**
-  1. Isolate: read error → reproduce → check git diff → drill down through diagnostic layers:
+  1. Isolate: read error → reproduce → check git diff → drill upward through diagnostic layers:
      L1 symptom → L2 logic → L3 system → L4 architecture →
      L5 cross-system contract → L6 platform constraint → L7 spec gap.
      Stop when no deeper "why" remains OR terminal unactionable (T1-T4).
   2. Identify owner: compare with working code → locate canonical owner → flag duplicate owners as a finding
-  3. Before fixing, run Ripple Signal Triage if the candidate fix touches shared/core/cross-module behavior, contract, source-of-truth, fallback, adapter, duplicate owner, producer+consumer, or consumer-side patching.
+  3. Before fixing, run Patch-Shape Triage and Ripple Signal Triage if the candidate fix touches shared/core/cross-module behavior, contract, source-of-truth, fallback, adapter, duplicate owner, producer+consumer, or consumer-side patching.
   4. Prove: one hypothesis → minimal test → iterate. 3+ failed fixes = question architecture, do not attempt another code fix.
      After fix, if any symptom persists → differential diagnosis (Phase 4 Step 4bis).
   5. Fix: failing test → minimal code at canonical owner → verify → Reflection + architecture review → repair + retirement track
@@ -58,9 +58,9 @@ Especially under time pressure, when "just one quick fix" seems obvious, after m
    - Keep tracing up until you find the source. Fix at source, not at symptom.
    - For the complete backward tracing technique, see `root-cause-tracing.md`.
 
-6. **Drill Down Through Diagnostic Layers**
+6. **Drill Upward Through Diagnostic Layers**
 
-   Start at L1. Exhaust all "why" questions at each layer before descending.
+   Start at L1. Exhaust all "why" questions at each layer before moving upward.
    The chain is open-ended — architecture is not the endpoint.
 
    ```
@@ -75,6 +75,32 @@ Especially under time pressure, when "just one quick fix" seems obvious, after m
 
    Hard signal definitions (H/T/D) are in the Quality Gate — apply them there,
    not during initial investigation.
+
+7. **Patch-Shape Triage Before Editing**
+
+   Treat the first obvious fix as evidence, not clearance to edit. If the
+   candidate fix shape matches any item below, continue upward before changing
+   code unless you can prove the local layer is the canonical owner:
+
+   - keyword, phrase, regex, negation-word list, or sample-text exception
+   - local guard, extra conditional, `try`/`catch`, early return, or one-off branch
+   - fallback, adapter, compatibility branch, prompt branch, or legacy path expansion
+   - consumer/caller/readiness/presentation-layer patch
+   - downstream re-parsing of raw text when typed intent, normalized state,
+     contract, or another source-of-truth already exists
+   - artifact/download/export/readback/cache patch that does not first locate
+     the producer and source-of-truth owner
+   - duplicate parsing, duplicate owner, or "keep both for now" reasoning
+   - fix that only names the observed sample instead of the bug class
+
+   Required output before editing when this gate fires:
+
+   ```text
+   PatchShape:
+   CanonicalOwner:
+   UpwardDrillSignal:
+   Decision: fix owner | continue investigation | escalate
+   ```
 
 ### Phase 2: Pattern Analysis
 
@@ -106,9 +132,9 @@ Especially under time pressure, when "just one quick fix" seems obvious, after m
    - Address the root cause identified. ONE change at a time.
    - No "while I'm here" improvements. No bundled refactoring.
    - Prefer changing the canonical owner instead of stacking more logic into a fallback path.
-   - If Ripple Signal Triage fired, carry its owner, downstream, contract,
-     source-of-truth, fallback, retirement, and verification findings into the
-     fix boundary before editing code.
+   - If Patch-Shape Triage or Ripple Signal Triage fired, carry its owner,
+     downstream, contract, source-of-truth, fallback, retirement, and
+     verification findings into the fix boundary before editing code.
 
 3. **Verify Fix**
    - Test passes now? No other tests broken? Issue actually resolved?
@@ -132,10 +158,10 @@ Especially under time pressure, when "just one quick fix" seems obvious, after m
 
    | Residual pattern | Diagnosis | Action |
    | --- | --- | --- |
-   | Same reproduction conditions as fixed symptom | Fix is incomplete | Continue drilling from same source |
-   | Different reproduction conditions, chains converge to same source | Fix was at wrong depth | Re-drill from the shared source |
+   | Same reproduction conditions as fixed symptom | Fix is incomplete | Continue upward drilling from same source |
+   | Different reproduction conditions, chains converge to same source | Fix was at wrong depth | Drill upward again from the shared source |
    | Different reproduction conditions, chains diverge | Compound root cause (≥2 independent roots) | Each root needs its own fix |
-   | Same symptom, reduced but not eliminated | Fix was a downstream patch | Re-drill from source |
+   | Same symptom, reduced but not eliminated | Fix was a downstream patch | Drill upward again from source |
 
    4. If uncertain whether convergent or divergent: **escalate. Do not guess.**
 
@@ -169,8 +195,8 @@ Especially under time pressure, when "just one quick fix" seems obvious, after m
 Before you claim debugging is complete:
 
 0. **Workspace record for non-trivial debugging** — if this is medium+ complexity
-   or it writes `docs/aegis/` records, initialize/check through the helper when
-   available:
+   or it writes `docs/aegis/` records, initialize/check through configured
+   Aegis workspace support when available:
 
    ```bash
    python scripts/aegis-workspace.py init --root <target-project-root>
@@ -179,19 +205,30 @@ Before you claim debugging is complete:
    python scripts/aegis-workspace.py check --root <target-project-root>
    ```
 
+   Fast bug fix or quick bug fix pressure does not skip this: if Ripple Signal
+   Triage fires, do the triage before editing and expand verification to the
+   canonical owner plus affected downstream path.
+
    These records are method-pack evidence trails only. They do not grant
    authoritative completion.
 
-1. **Stop-when review** — re-read the diagnostic layer where you stopped. Did you reach "no deeper why remains" or a T-class terminal boundary? If the chain ended at L1-L2 and the evidence is conclusive, that is a valid endpoint. If there are still unexplained "why" questions, continue drilling before claiming done.
+1. **Stop-when review** — re-read the diagnostic layer where you stopped. Did you reach "no deeper why remains" or a T-class terminal boundary? If the chain ended at L1-L2 and the evidence is conclusive, that is a valid endpoint. If there are still unexplained "why" questions, continue upward drilling before claiming done.
 2. **Hard signal check** — apply these countable facts, not judgments:
 
-   Must continue drilling (H-class — ANY hit = NOT done):
+   Must continue upward drilling (H-class — ANY hit = NOT done):
    - **H1** — fix added a conditional branch (`if` / `switch` / `catch` / `try`)
    - **H2** — fix touched multiple sites but only 1 covered by failing test
    - **H3** — fix is at consumer/caller, not canonical owner
    - **H4** — same bug pattern exists elsewhere in repo (grep for it)
    - **H5** — original reproduction still produces any anomaly
    - **H6** — `git log --grep` shows this symptom was "fixed" before → Read that commit's diff. Understand why it failed. Do not repeat the same patch pattern.
+   - **H7** — candidate fix adds keyword, phrase, regex, negation-word list, or sample-text exception
+   - **H8** — candidate fix adds a local guard, one-off branch, early return, fallback, adapter, compatibility branch, prompt branch, or legacy path expansion
+   - **H9** — candidate fix patches a consumer/caller/readiness/presentation layer while an upstream owner could own correctness
+   - **H10** — downstream logic re-parses raw text or re-infers action/state while typed intent, normalized state, contract, or another source-of-truth exists
+   - **H11** — candidate fix patches artifact/download/export/readback/cache symptoms without proving the producer and source-of-truth owner
+   - **H12** — candidate fix keeps duplicate owners active, moves authority silently, or says "keep both for now" without a retirement trigger
+   - **H13** — candidate fix names only the observed sample wording/input instead of proving the bug class
 
    Terminal unactionable (T-class — any hit = stop drilling, switch to mitigation):
    - **T1** — required change is outside this repo's boundary

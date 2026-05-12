@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
-  "last_updated": "2026-05-08",
-  "total": 62,
+  "last_updated": "2026-05-12",
+  "total": 67,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -150,6 +150,16 @@
       "install_url": "https://raw.githubusercontent.com/schuettc/codex-reviewer/HEAD/.codex-plugin/plugin.json"
     },
     {
+      "name": "Codex rg Guard",
+      "url": "https://github.com/Rycen7822/codex-rg-guard",
+      "owner": "Rycen7822",
+      "repo": "codex-rg-guard",
+      "description": "Budgeted `rg`/`grep` replacement for Codex that narrows broad searches before they waste model context.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/Rycen7822/codex-rg-guard/HEAD/.codex-plugin/plugin.json"
+    },
+    {
       "name": "Frappe Agent",
       "url": "https://github.com/Dkm0315/frappe-agent",
       "owner": "Dkm0315",
@@ -158,6 +168,16 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/Dkm0315/frappe-agent/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "GrayMatter",
+      "url": "https://github.com/ValkyrLabs/GrayMatter",
+      "owner": "ValkyrLabs",
+      "repo": "GrayMatter",
+      "description": "Durable memory and shared graph state for Codex and OpenClaw agents, with live ValkyrAI schema awareness.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/ValkyrLabs/GrayMatter/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "HOTL Plugin",
@@ -230,6 +250,16 @@
       "install_url": "https://raw.githubusercontent.com/tartinerlabs/skills/HEAD/.codex-plugin/plugin.json"
     },
     {
+      "name": "Team Skills Platform",
+      "url": "https://github.com/Colin4k1024/tsp",
+      "owner": "Colin4k1024",
+      "repo": "tsp",
+      "description": "Role-based team delivery framework — Tech Lead-orchestrated 8-role system with 195+ skills, 27 specialist agents, 80+ commands, hooks, and ECC harness for Claude Code, Codex, and OpenCode.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/Colin4k1024/tsp/HEAD/.codex-plugin/plugin.json"
+    },
+    {
       "name": "Tool Advisor",
       "url": "https://github.com/dragon1086/claude-skills",
       "owner": "dragon1086",
@@ -298,6 +328,16 @@
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/matk0shub/apple-productivity-mcp/HEAD/plugins/apple-calendar/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "AxonFlow",
+      "url": "https://github.com/getaxonflow/axonflow-codex-plugin",
+      "owner": "getaxonflow",
+      "repo": "axonflow-codex-plugin",
+      "description": "Runtime governance for Codex with policy enforcement on terminal commands, advisory checks for non-terminal tools via skills, PII/secret detection, and compliance-grade audit trails. Self-hosted via Docker.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/getaxonflow/axonflow-codex-plugin/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "Bitbucket CLI",
@@ -388,6 +428,16 @@
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/Rothschildiuk/context-pack/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Education Agent Skills",
+      "url": "https://github.com/GarethManning/education-agent-skills",
+      "owner": "GarethManning",
+      "repo": "education-agent-skills",
+      "description": "131 evidence-based education skills for curriculum design, lesson planning, and assessment, with transparent evidence ratings and MCP server.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/GarethManning/education-agent-skills/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "Flow Studio Power Automate",

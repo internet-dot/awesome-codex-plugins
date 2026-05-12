@@ -122,6 +122,15 @@ node scripts/vault-mirror.mjs \
   --dry-run
 ```
 
+## Live State
+
+**Phase 1 shipped and actively running.** As of 2026-05-09, the skill has produced:
+
+- **847 learning notes** under `vault://40-learnings/` — each carries `_generator: session-orchestrator-vault-mirror@1` in the YAML frontmatter.
+- **466 session notes** under `vault://50-sessions/` — same generator stamp.
+
+Both target directories were verified by direct `ls | wc -l` measurement against `~/Projects/vault/`. The numeric-prefix layout (`40-learnings/`, `50-sessions/`) confirmed correct per the Target Paths spec above.
+
 ## Configuration
 
 vault-mirror respects the `vault-integration` block in the project's Session Config (`CLAUDE.md`, or `AGENTS.md` on Codex CLI). The script itself does not read Session Config — the calling skill (session-end, evolve) is responsible for reading the config and deciding whether to invoke vault-mirror at all.
