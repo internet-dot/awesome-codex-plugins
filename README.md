@@ -143,6 +143,7 @@ Third-party plugins built by the community. [PRs welcome](#contributing)!
 - [Codex Obsidian](https://github.com/greg-asher/codex-obsidian) - Local Obsidian note and vault workflows through the official desktop `obsidian` CLI.
 - [Codex SEO](https://github.com/BestLemoon/codex-seo) - Full-stack SEO audits, Google API workflows, backlinks analysis, reporting, and optional MCP extensions for Codex.
 - [Context Pack](https://github.com/Rothschildiuk/context-pack) - Generate compact first-pass repository briefings for coding agents before deeper exploration.
+- [Education Agent Skills](https://github.com/GarethManning/education-agent-skills) - 131 evidence-based education skills for curriculum design, lesson planning, and assessment, with transparent evidence ratings and MCP server.
 - [Flow Studio Power Automate](https://github.com/ninihen1/power-automate-mcp-skills) - Debug, build, and operate Power Automate flows via FlowStudio MCP with action-level inputs and outputs.
 - [Jenkins CLI](https://github.com/avivsinai/jenkins-cli) - GitHub CLI-style interface for Jenkins controllers with jobs, pipelines, runs, logs, artifacts, credentials, and nodes.
 - [Kachilu Browser](https://github.com/kachilu-inc/kachilu-browser) - Anti-bot-aware browser automation for AI agents with MCP tools, CAPTCHA-aware workflows, and WSL2 Windows browser support.
