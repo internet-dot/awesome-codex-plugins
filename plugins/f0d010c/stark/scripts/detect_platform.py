@@ -35,7 +35,7 @@ SIGNALS: dict[str, list[str]] = {
         r"\bvisionos\b", r"\bwatchos\b",
     ],
     "android": [
-        r"\bjetpack compose\b", r"\bcompose\b(?!\s*multiplatform)",
+        r"\bjetpack compose\b", r"\bcompose\b(?!\s*[- ]?multiplatform)",
         r"\bmaterial 3\b", r"\bmaterial you\b", r"\bm3 expressive\b",
         r"\bmaterial 3 expressive\b", r"\bm3e\b",
         r"\bandroid\b", r"\bpixel\b(?!\s*art)", r"\bplay store\b",
@@ -55,7 +55,7 @@ SIGNALS: dict[str, list[str]] = {
     "cross-platform": [
         r"\btauri\b", r"\belectron\b", r"\bflutter\b",
         r"\breact native\b", r"\brn\b", r"\bexpo\b",
-        r"\bcompose multiplatform\b", r"\bcmp\b",
+        r"\bcompose[- ]multiplatform\b", r"\bcmp\b",
         r"\buno platform\b", r"\bavalonia\b", r"\bmaui\b",
         r"\bcross[\s-]?platform\b", r"\ball platforms\b",
         r"\bone codebase\b",

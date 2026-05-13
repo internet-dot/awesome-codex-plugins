@@ -8,7 +8,7 @@
 Anti-slop UI/UX design plugin for AI coding agents.
 It routes UI and UX requests to focused skills, asks the right product-flow / platform / track / direction questions first, then helps agents ship usable interfaces instead of template clones.
 
-This repo ships both Claude Code and Codex plugin manifests so the same Stark skillset can work across more than one agent environment.
+Stark keeps compatibility notes for multiple agent environments, while Codex installs use the Codex manifest and shared skill folders.
 
 ## Why this exists
 
@@ -33,7 +33,7 @@ That is wrong for native apps, and it is boring on the web.
 ## Install In Codex
 
 Use this repository as a Codex plugin source.
-The Codex manifest lives at:
+In this source repo, the Codex manifest lives at:
 
 ```text
 .codex-plugin/plugin.json
@@ -41,6 +41,7 @@ The Codex manifest lives at:
 
 For local testing, point Codex at this folder or install it through the Codex plugin flow once it is pushed to a GitHub repository.
 After installation, restart or reload Codex so the skills are indexed.
+Marketplace mirrors may place the same manifest under their bundled plugin folder, such as `plugins/f0d010c/stark/.codex-plugin/plugin.json`.
 
 ## Use
 
@@ -72,7 +73,7 @@ Codex uses skills and natural-language routing instead.
 | `/stark web <brief>` | `Use stark web-design for <brief>` or simply ask for a web UI |
 | `/stark windows <brief>` | Ask for a Windows / WinUI / Fluent UI |
 | `/stark apple <brief>` | Ask for an iOS / macOS / SwiftUI UI |
-| `/stark android <brief>` | Ask for an Android / Compose UI |
+| `/stark android <brief>` | Ask for Android UI; Stark should ask which Android track to use |
 | `/stark auto <brief>` | Ask normally; `design-router` decides or asks one question |
 | `/stark-audit <file>` | `Audit <file> with stark for UX problems and AI design slop` |
 | `/stark-assets <brief>` | `Use stark assets to plan the visual assets before building` |
@@ -84,7 +85,6 @@ Codex uses skills and natural-language routing instead.
 ```text
 stark/
   .codex-plugin/plugin.json      Codex plugin manifest
-  .claude-plugin/                Claude Code manifest kept for compatibility
   skills/
     design-router/               UX and platform dispatcher
     ux-design/                   flows, states, IA, forms, onboarding, dashboards
@@ -100,7 +100,6 @@ stark/
   assets/                        token bundles, font pairs, screenshot gallery
   scripts/                       platform detection and token export helpers
   commands/                      legacy Claude slash-command docs
-  evals/                         trigger evaluation prompts
 ```
 
 ## Web Directions
@@ -155,6 +154,8 @@ npx agent-skillforge lint . --format text
 npx agent-skillforge smoke .
 ```
 
+These commands use `npx`; no repo-local package install is required.
+
 Manual smoke prompts:
 
 ```text
@@ -166,10 +167,10 @@ Translate this Apple settings screen to Windows using stark.
 
 ## Compatibility
 
-This repo is intentionally dual-shaped:
+This repo is intentionally multi-agent shaped:
 
 - Codex reads `.codex-plugin/plugin.json` and `skills/*/SKILL.md`.
-- Claude Code can still use `.claude-plugin/` and `commands/`.
+- Other agent environments can reuse the same skill text and command notes from source.
 
 The skill content is shared so fixes improve both surfaces.
 

@@ -87,6 +87,49 @@ def camel(s: str) -> str:
     return parts[0] + "".join(part[:1].upper() + part[1:] for part in parts[1:])
 
 
+def numeric_token_value(value: Any, default: float) -> float:
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        match = re.search(r"-?\d+(?:\.\d+)?", value)
+        if match:
+            return float(match.group(0))
+    return default
+
+
+def swift_weight(value: Any) -> str:
+    if isinstance(value, (int, float)):
+        if value >= 800:
+            return ".heavy"
+        if value >= 700:
+            return ".bold"
+        if value >= 600:
+            return ".semibold"
+        if value >= 500:
+            return ".medium"
+        if value <= 300:
+            return ".light"
+        return ".regular"
+
+    normalized = str(value).strip().lower().replace(" ", "")
+    mapping = {
+        "thin": ".thin",
+        "extralight": ".ultraLight",
+        "ultralight": ".ultraLight",
+        "light": ".light",
+        "regular": ".regular",
+        "normal": ".regular",
+        "medium": ".medium",
+        "semibold": ".semibold",
+        "demibold": ".semibold",
+        "bold": ".bold",
+        "extrabold": ".heavy",
+        "black": ".black",
+        "heavy": ".heavy",
+    }
+    return mapping.get(normalized, ".regular")
+
+
 # ---- Tailwind v4 ----------------------------------------------------------
 
 def export_tailwind(tokens: dict[str, dict[str, Any]]) -> str:
@@ -136,6 +179,16 @@ def hex_to_swift_color(h: str) -> str:
     return f"/* unparsed: {h} */ Color.gray"
 
 
+def swift_font_expr(value: dict[str, Any]) -> str:
+    family = value.get("fontFamily")
+    size = numeric_token_value(value.get("fontSize"), 16)
+    weight = swift_weight(value.get("fontWeight", "regular"))
+
+    if family:
+        return f'Font.custom("{family}", size: {size:g}).weight({weight})'
+    return f"Font.system(size: {size:g}, weight: {weight})"
+
+
 def export_swiftui(tokens: dict[str, dict[str, Any]]) -> str:
     lines = ["import SwiftUI", "", "extension Color {"]
     for path, tok in tokens.items():
@@ -150,6 +203,21 @@ def export_swiftui(tokens: dict[str, dict[str, Any]]) -> str:
         else:
             lines.append(f"    // unhandled: {path} = {v}")
     lines.append("}")
+
+    typography_lines = ["", "extension Font {"]
+    typography_count = 0
+    for path, tok in tokens.items():
+        if tok.get("$type") != "typography":
+            continue
+        v = resolve(tok["$value"], tokens)
+        if not isinstance(v, dict):
+            continue
+        typography_count += 1
+        typography_lines.append(f"    static let {camel(path)} = {swift_font_expr(v)}")
+
+    if typography_count:
+        typography_lines.append("}")
+        lines.extend(typography_lines)
     return "\n".join(lines) + "\n"
 
 
@@ -162,6 +230,15 @@ def hex_to_compose(h: str) -> str:
     if len(h) == 8:
         return f"Color(0x{h[6:8].upper()}{h[0:6].upper()})"
     return f"/* unparsed: {h} */ Color.Gray"
+
+
+def css_hex_to_xaml(h: str) -> str:
+    h = h.strip()
+    if re.fullmatch(r"#[0-9A-Fa-f]{8}", h):
+        return f"#{h[7:9]}{h[1:7]}".upper()
+    if re.fullmatch(r"#[0-9A-Fa-f]{6}", h):
+        return h.upper()
+    return h
 
 
 def export_compose(tokens: dict[str, dict[str, Any]]) -> str:
@@ -207,7 +284,7 @@ def export_winui(tokens: dict[str, dict[str, Any]]) -> str:
         key = path.replace(".", "_").replace("-", "_")
         v_str = str(v)
         if t == "color" and v_str.startswith("#"):
-            lines.append(f'    <Color x:Key="{key}Color">{v_str}</Color>')
+            lines.append(f'    <Color x:Key="{key}Color">{css_hex_to_xaml(v_str)}</Color>')
             lines.append(f'    <SolidColorBrush x:Key="{key}Brush" Color="{{StaticResource {key}Color}}" />')
         elif t == "dimension":
             num = v_str.replace("px", "").replace("dp", "")
