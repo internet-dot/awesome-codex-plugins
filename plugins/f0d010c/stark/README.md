@@ -5,7 +5,7 @@
 [![Platforms](https://img.shields.io/badge/platforms-Web%20%7C%20Windows%20%7C%20Apple%20%7C%20Android-14b8a6?style=for-the-badge&labelColor=111111)](README.md)
 [![Made for Agents](https://img.shields.io/badge/made%20for-AI%20coding%20agents-0ea5e9?style=for-the-badge&labelColor=111111)](README.md)
 
-Anti-slop UI/UX design plugin for AI coding agents.
+UI/UX design plugin for AI coding agents.
 It routes UI and UX requests to focused skills, asks the right product-flow / platform / track / direction questions first, then helps agents ship usable interfaces instead of template clones.
 
 Stark keeps compatibility notes for multiple agent environments, while Codex installs use the Codex manifest and shared skill folders.
@@ -21,6 +21,7 @@ That is wrong for native apps, and it is boring on the web.
 - UX produces a compact decision brief that platform skills must preserve during implementation.
 - Contextual UX briefs cover agent runs, operational dashboards, activation onboarding, checkout/upgrade, and editor/canvas tools.
 - UI produces a visual decision brief for surface type, hierarchy, density, component grammar, motion budget, and state visuals.
+- Product quality checks force specific jobs, proof surfaces, complete states, scan speed, and one memorable anchor before code.
 - Asset planning chooses icons, screenshots, references, typography, generated UI mocks, and optional GPT/Codex image generation before implementation.
 - Reference analysis extracts structure from shipped products, Mobbin/Figma screens, docs, and screenshots without copying visual identity.
 - Web asks for an aesthetic direction first.
@@ -88,7 +89,7 @@ stark/
   skills/
     design-router/               UX and platform dispatcher
     ux-design/                   flows, states, IA, forms, onboarding, dashboards
-  references/ui-patterns/         surface taxonomy, visual hierarchy, responsive containment, asset selection, reference analysis, motion budget, UI audit rubric
+  references/ui-patterns/         surface taxonomy, visual hierarchy, responsive containment, asset selection, reference analysis, motion budget, UI audit rubric, product quality bar
   references/ux-patterns/         contextual product-flow briefs
     web-design/                  6 web aesthetic directions
     windows-design/              WinUI / branded WinUI / Tauri / Electron
@@ -114,6 +115,18 @@ stark/
 6. Active bento
 
 Each direction has its own typography, palette, layout grammar, motion language, copy voice, reference apps, and ban list.
+
+## Product Quality Bar
+
+For "make this better" work, Stark now pushes agents to answer five practical questions before code:
+
+- What specific job does this surface serve?
+- What proof does the UI show instead of only claiming value?
+- Which empty/loading/error/permission/success states exist?
+- How fast can a returning user scan status, owner, risk, and next action?
+- What is the one memorable visual anchor?
+
+That keeps generated output closer to a real product and farther from generic demo furniture.
 
 ## Screenshot Gallery
 

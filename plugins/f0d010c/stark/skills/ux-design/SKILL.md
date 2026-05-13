@@ -67,6 +67,8 @@ Every production UI needs these states:
 
 Do not ship only the happy path.
 
+For public demos and generated proof projects, include at least one non-happy state in the visible UI: an empty state, blocked permission, failed sync, queued job, retry panel, stale data banner, or partial result. This makes the output feel like a real product instead of a polished poster.
+
 ## Step 4 - Reduce cognitive load
 
 Apply these rules:
@@ -136,6 +138,7 @@ Pick one pattern and name it before visual design:
 | Checkout/signup | Short form + transparent cost/risk + recovery |
 | Collaboration | Activity timeline + comments + ownership |
 | AI/tool execution | Plan preview + progress + artifacts + retry |
+| Public demo/proof project | Product-specific job + proof surface + one non-happy state |
 
 If two patterns fit, pick the one that reduces the riskiest failure mode. For example, choose a wizard over a single dense form when errors are costly, but choose command surface + saved views for repeated internal operations.
 

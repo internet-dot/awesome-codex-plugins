@@ -5,7 +5,7 @@ description: Use when the user asks for a web app, webpage, landing page, market
 
 # web-design — pick the direction first, then execute precisely
 
-Goal: every output indistinguishable from an Awwwards SOTD. The competitor (Anthropic's `frontend-design`) is web-only and stops at "use bold typography." This skill goes deeper: explicit direction commitment, full pattern library, copy voice guide, motion technique inventory, anti-slop discipline.
+Goal: build web surfaces that feel specific, useful, and visually deliberate. Marketing pages can chase an Awwwards-level ceiling; dashboards, editors, docs, checkout, and agent-run UIs should prioritize product proof, scan speed, state coverage, and stable interaction before spectacle.
 
 ## Step 0 (MANDATORY) — Choose surface type, then direction
 
@@ -20,7 +20,7 @@ Before aesthetic direction, classify the surface using `../../references/ui-patt
 
 Then write the `UI decision brief` from `../../references/ui-patterns/ui-decision-brief.md`. For dashboards, editors, checkouts, and agent-run UIs, preserve the UX decision brief if one exists and bias toward usable density over Awwwards spectacle.
 
-Do not force an expressive landing-page composition onto a repeated-use web app. For operational surfaces, read `../../references/ui-patterns/visual-hierarchy.md`, `../../references/ui-patterns/responsive-containment.md`, `../../references/ui-patterns/motion-budget.md`, and `../../references/ui-patterns/ui-audit-rubric.md` before coding.
+Do not force an expressive landing-page composition onto a repeated-use web app. For operational surfaces, read `../../references/ui-patterns/product-quality-bar.md`, `../../references/ui-patterns/visual-hierarchy.md`, `../../references/ui-patterns/responsive-containment.md`, `../../references/ui-patterns/motion-budget.md`, and `../../references/ui-patterns/ui-audit-rubric.md` before coding.
 
 When the site needs imagery, proof visuals, icons, screenshots, typography, or references, also read `../../references/ui-patterns/asset-selection.md` and include an asset plan before code. If the user is using GPT/Codex and image generation is available, generated bitmap assets are allowed for fictional product visuals, editorial hero imagery, textures, and empty states when they support the product job.
 
@@ -66,7 +66,7 @@ State stack pick at top of response in one sentence.
 
 The model has access to all of these. **Don't deploy all of them on every site** — over-motion is its own tell. Awwwards SOTY sites typically have 2-4 signature motion moments + restrained baseline.
 
-Read `../../references/web-patterns/*.md` for full implementation. List below:
+Read `../../references/web-patterns/README.md` first to choose the right pattern family, then read the specific `../../references/web-patterns/*.md` files you will use. List below:
 
 ### Motion / Interaction
 - **Letter-stagger reveal** — hero text drops in word-by-word w/ spring physics
@@ -135,6 +135,7 @@ Every web output, regardless of direction:
 - **Performance discipline** — lazy-load below-fold, no layout thrashing in scroll motion, font-display: swap.
 - **Surface-fit baseline** — marketing pages may be spacious and expressive; dashboards, editors, checkouts, and agent-run UIs must preserve task density, stable controls, and state visibility.
 - **Responsive containment** — nav rows, dense tables, toolbars, inspectors, and long labels must wrap, collapse, or scroll inside their own region; never leave mobile/tablet page-level horizontal overflow.
+- **Quality bar note** — for public-facing or "make it better" work, state the specific job, proof surface, required states, scan-speed decision, and memorable anchor before implementation.
 
 ## Step 3 — Deploy 2-4 signature motion moments
 
@@ -193,6 +194,7 @@ Ask before delivering output:
 10. Layout breaks the wrong template for this surface type?
 11. Dark mode (if applicable) has warmth/coolness, not just inversion?
 12. Mobile/tablet has no page-level horizontal overflow?
+13. Does the design show product proof instead of only making claims?
 
 If any "no" — restart that choice, don't ship near-misses.
 
