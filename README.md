@@ -65,11 +65,16 @@ codex plugin install <plugin-name> --source awesome-codex-plugins
 ```
 
 **Desktop App / IDE Extension:**
-1. Open Codex settings → Plugins → Marketplace Sources
+1. Open Codex settings → Plugins → Next to search plugins input click on menu and select → `+Add More...` 
+<img width="1462" height="466" alt="image" src="https://github.com/user-attachments/assets/ae15f505-58a8-4199-bb7b-56a07b670b10" />
+
+
 2. Add this URL:
    ```
-   https://raw.githubusercontent.com/hashgraph-online/awesome-codex-plugins/main/.agents/plugins/marketplace.json
+   https://github.com/hashgraph-online/awesome-codex-plugins.git
    ```
+   <img width="1974" height="1064" alt="image" src="https://github.com/user-attachments/assets/ffbae59f-41ae-4ee3-9d52-864273ecdcb3" />
+
 3. The curated plugin list appears as an available marketplace source.
 
 Each plugin entry includes a `source.path` pointing at a mirrored bundle under `./plugins/` in this repo, so installations are fast and reproducible without hitting upstream repos at install time.
