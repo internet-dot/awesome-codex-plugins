@@ -45,7 +45,14 @@ OPTIONAL_PLUGIN_FILES = (
 
 
 def normalize_relative_path(value: str) -> str:
-    return value.replace("\\", "/").lstrip("./")
+    # Normalize backslashes to forward slashes
+    value = value.replace("\\", "/")
+    # Strip only a leading '/' or './' prefix, preserving dot-prefixed filenames like ".mcp.json"
+    if value.startswith('/'):
+        value = value[1:]
+    if value.startswith('./'):
+        value = value[2:]
+    return value
 
 
 def parse_plugins(readme_path: Path) -> list[dict[str, str]]:
@@ -181,7 +188,7 @@ def collect_selected_paths(
         if candidate in all_names:
             selected.add(optional_name)
 
-    for key in ("skills", "mcpServers", "apps", "app", "appConfig"):
+    for key in ("skills", "mcpServers", "apps", "app", "appConfig", "hooks"):
         value = manifest.get(key)
         if isinstance(value, str):
             add_recursive_selection(selected, all_names, plugin_root, value)
@@ -285,7 +292,12 @@ def main() -> None:
                 # Thread 1 fix: reject placeholder values like "[TODO: ./assets/icon.png]"
                 stripped = composer_icon.strip()
                 if not (stripped.startswith('[') and ('TODO' in stripped or 'PLACEHOLDER' in stripped)):
-                    rel = composer_icon.lstrip("./")
+                    # Properly strip leading "./" or "/" only, preserving dot-prefixed filenames like ".mcp.json"
+                    rel = composer_icon
+                    if rel.startswith('./'):
+                        rel = rel[2:]
+                    elif rel.startswith('/'):
+                        rel = rel[1:]
                     candidate = f"{marketplace_path}/{rel}"
                     # Verify the file exists in the mirrored plugin directory
                     abs_path = PLUGINS_ROOT / plugin["owner"] / plugin["repo"] / rel
