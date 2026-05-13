@@ -232,8 +232,25 @@ def build_marketplace_entry(
     marketplace_path: str,
 ) -> dict[str, object]:
     manifest_name = str(manifest.get("name") or "").strip() or plugin["repo"]
-    return {
+    interface = manifest.get("interface", {})
+    display_name = plugin["name"]  # from README, human-readable
+    description = plugin.get("description", "").strip()
+    if not description:
+        description = str(interface.get("shortDescription") or interface.get("longDescription") or "").strip()
+
+    # Build icon path: composerIcon or logo from manifest's interface, relative to plugin root
+    icon_path = None
+    if isinstance(interface, dict):
+        composer_icon = interface.get("composerIcon") or interface.get("logo")
+        if isinstance(composer_icon, str) and composer_icon.strip():
+            # composerIcon is relative to plugin root (e.g., "./assets/icon.svg")
+            # Convert to path relative to repo root: marketplace_path already is "./plugins/owner/repo"
+            rel = composer_icon.lstrip("./")
+            icon_path = f"{marketplace_path}/{rel}" if not rel.startswith(marketplace_path) else f"./{rel}"
+
+    entry: dict[str, object] = {
         "name": manifest_name,
+        "displayName": display_name,
         "source": {
             "source": "local",
             "path": marketplace_path,
@@ -244,6 +261,12 @@ def build_marketplace_entry(
         },
         "category": plugin["category"],
     }
+    if description:
+        entry["description"] = description
+    if icon_path:
+        entry["icon"] = icon_path
+
+    return entry
 
 
 def write_json(path: Path, data: dict[str, object]) -> None:
