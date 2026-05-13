@@ -1,0 +1,7 @@
+interface:
+  display_name: "Stark"
+  short_description: "Opinionated anti-slop UI/UX design routing"
+  default_prompt: "Use Stark to design, improve, or audit this UI/UX so it does not feel generic or hard to use."
+
+policy:
+  allow_implicit_invocation: true

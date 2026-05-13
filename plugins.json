@@ -3,7 +3,7 @@
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
   "last_updated": "2026-05-13",
-  "total": 68,
+  "total": 69,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -228,6 +228,16 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/Habib0x0/spec-driven-plugin/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Stark",
+      "url": "https://github.com/f0d010c/stark",
+      "owner": "f0d010c",
+      "repo": "stark",
+      "description": "UI/UX design plugin for AI coding agents with product-flow routing, platform-native interface guidance, asset planning, and shipped-reference analysis before code.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/f0d010c/stark/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "tailtest",

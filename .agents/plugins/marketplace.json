@@ -322,6 +322,20 @@
       "description": "Three-phase Requirements → Design → Tasks workflow for Claude Code and Codex — EARS notation acceptance criteria, autonomous execution loop, cross-spec dependencies, and post-implementation acceptance testing."
     },
     {
+      "name": "stark",
+      "displayName": "Stark",
+      "source": {
+        "source": "local",
+        "path": "./plugins/f0d010c/stark"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow",
+      "description": "UI/UX design plugin for AI coding agents with product-flow routing, platform-native interface guidance, asset planning, and shipped-reference analysis before code."
+    },
+    {
       "name": "tailtest",
       "displayName": "tailtest",
       "source": {

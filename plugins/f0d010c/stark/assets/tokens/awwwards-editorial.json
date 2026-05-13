@@ -1,0 +1,47 @@
+{
+  "$description": "Bespoke 'Editorial Swiss Revival' direction — example token bundle for a distinctive web project. Use as a starting point, not a copy.",
+  "color": {
+    "ink":         { "$value": "#0A0908",  "$type": "color", "$description": "Near-black with warmth — never pure #000" },
+    "paper":       { "$value": "#FAF8F3",  "$type": "color", "$description": "Warm off-white — never pure #FFF" },
+    "rule":        { "$value": "#0A09084D", "$type": "color", "$description": "30% ink — for hairline rules" },
+    "accent":      { "$value": "#B91C1C",  "$type": "color", "$description": "Editorial red — single sharp accent" },
+    "muted":       { "$value": "#6B6760",  "$type": "color", "$description": "Caption / metadata text" }
+  },
+  "color-dark": {
+    "ink":         { "$value": "#FAF8F3",  "$type": "color" },
+    "paper":       { "$value": "#0A0908",  "$type": "color" },
+    "rule":        { "$value": "#FAF8F333","$type": "color" },
+    "accent":      { "$value": "#F87171",  "$type": "color" },
+    "muted":       { "$value": "#A8A29E",  "$type": "color" }
+  },
+  "typography": {
+    "display":     { "$value": { "fontFamily": "PP Editorial New", "fontSize": "clamp(48px, 9vw, 144px)", "fontWeight": 400, "lineHeight": 0.95, "letterSpacing": "-0.02em" }, "$type": "typography" },
+    "headline":    { "$value": { "fontFamily": "PP Editorial New", "fontSize": "clamp(32px, 5vw, 72px)",  "fontWeight": 400, "lineHeight": 1.05, "letterSpacing": "-0.015em" }, "$type": "typography" },
+    "title":       { "$value": { "fontFamily": "PP Editorial New", "fontSize": "32px", "fontWeight": 500, "lineHeight": 1.15 }, "$type": "typography" },
+    "body":        { "$value": { "fontFamily": "PP Neue Montreal", "fontSize": "18px", "fontWeight": 400, "lineHeight": 1.55 }, "$type": "typography" },
+    "small":       { "$value": { "fontFamily": "PP Neue Montreal", "fontSize": "14px", "fontWeight": 400, "lineHeight": 1.45 }, "$type": "typography" },
+    "metadata":    { "$value": { "fontFamily": "PP Neue Montreal Mono", "fontSize": "12px", "fontWeight": 400, "letterSpacing": "0.06em", "textTransform": "uppercase" }, "$type": "typography" }
+  },
+  "spacing": {
+    "$description": "Asymmetric — varied rhythm, not uniform py-20",
+    "tight":  { "$value": "16px", "$type": "dimension" },
+    "snug":   { "$value": "32px", "$type": "dimension" },
+    "rest":   { "$value": "64px", "$type": "dimension" },
+    "breath": { "$value": "120px","$type": "dimension" },
+    "room":   { "$value": "200px","$type": "dimension" }
+  },
+  "radius": {
+    "$description": "Editorial direction: 0 radius is a feature",
+    "none":   { "$value": "0",  "$type": "dimension" },
+    "subtle": { "$value": "2px","$type": "dimension" }
+  },
+  "motion": {
+    "spring-default": { "$value": "spring(stiffness: 300, damping: 30)", "$type": "string" },
+    "stagger":        { "$value": "50ms", "$type": "duration" }
+  },
+  "noise": {
+    "$description": "Subtle grain overlay — adds tactility",
+    "url": { "$value": "url('/noise.svg')", "$type": "string" },
+    "opacity": { "$value": "0.04", "$type": "number" }
+  }
+}

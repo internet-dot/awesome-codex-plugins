@@ -1,0 +1,44 @@
+{
+  "$description": "Bespoke 'Tactile Brutalist' direction — example token bundle. Visible grid lines, harsh type, color clashes.",
+  "color": {
+    "ink":     { "$value": "#000000", "$type": "color", "$description": "Brutalist allows pure black — context-dependent" },
+    "paper":   { "$value": "#F0F0EB", "$type": "color" },
+    "rule":    { "$value": "#000000", "$type": "color" },
+    "accent":  { "$value": "#FF3B00", "$type": "color", "$description": "Aggressive orange — clash intentional" },
+    "warn":    { "$value": "#FFE600", "$type": "color", "$description": "Hi-vis yellow accent" },
+    "muted":   { "$value": "#888888", "$type": "color" }
+  },
+  "typography": {
+    "$description": "Mono-driven brutalist — Söhne Mono / Neue Haas Grotesk Mono",
+    "display":  { "$value": { "fontFamily": "Söhne Mono", "fontSize": "clamp(40px, 7vw, 96px)", "fontWeight": 700, "lineHeight": 0.95, "letterSpacing": "-0.04em", "textTransform": "uppercase" }, "$type": "typography" },
+    "headline": { "$value": { "fontFamily": "Neue Haas Grotesk Display", "fontSize": "clamp(28px, 4vw, 56px)", "fontWeight": 700, "lineHeight": 1.0, "letterSpacing": "-0.02em" }, "$type": "typography" },
+    "body":     { "$value": { "fontFamily": "Neue Haas Grotesk Text", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.45 }, "$type": "typography" },
+    "mono":     { "$value": { "fontFamily": "Söhne Mono", "fontSize": "13px", "fontWeight": 400, "lineHeight": 1.4 }, "$type": "typography" }
+  },
+  "spacing": {
+    "$description": "Strict 8px grid — visible, not hidden",
+    "0":  { "$value": "0",    "$type": "dimension" },
+    "1":  { "$value": "8px",  "$type": "dimension" },
+    "2":  { "$value": "16px", "$type": "dimension" },
+    "3":  { "$value": "24px", "$type": "dimension" },
+    "4":  { "$value": "32px", "$type": "dimension" },
+    "8":  { "$value": "64px", "$type": "dimension" },
+    "16": { "$value": "128px","$type": "dimension" }
+  },
+  "radius": {
+    "none": { "$value": "0", "$type": "dimension", "$description": "Brutalist = sharp corners" }
+  },
+  "border": {
+    "thin":     { "$value": "1px solid #000", "$type": "string" },
+    "thick":    { "$value": "2px solid #000", "$type": "string" },
+    "very-thick": { "$value": "4px solid #000", "$type": "string", "$description": "For hero blocks" }
+  },
+  "motion": {
+    "$description": "Snappy, mechanical — no soft springs",
+    "snap": { "$value": "cubic-bezier(0.85, 0, 0.15, 1) 200ms", "$type": "string" }
+  },
+  "grain": {
+    "$description": "Visible grain texture — tactility is the point",
+    "opacity": { "$value": "0.08", "$type": "number" }
+  }
+}
