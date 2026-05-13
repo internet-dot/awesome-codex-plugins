@@ -3,7 +3,7 @@
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
   "last_updated": "2026-05-13",
-  "total": 68,
+  "total": 69,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -238,6 +238,16 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/avansaber/tailtest-codex/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Tandem Workflow Architect",
+      "url": "https://github.com/frumu-ai/tandem-codex-plugin",
+      "owner": "frumu-ai",
+      "repo": "tandem-codex-plugin",
+      "description": "Plan Tandem workflows in Codex, then validate, preview, and run them through the governed Tandem engine.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/frumu-ai/tandem-codex-plugin/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "Tartiner Labs",

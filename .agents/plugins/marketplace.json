@@ -336,6 +336,21 @@
       "description": "Hook-powered test generation -- detects files changed during an agent turn and instructs Codex to write and run tests automatically. Zero config, 8 languages."
     },
     {
+      "name": "tandem-codex-plugin",
+      "displayName": "Tandem Workflow Architect",
+      "source": {
+        "source": "local",
+        "path": "./plugins/frumu-ai/tandem-codex-plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow",
+      "description": "Plan Tandem workflows in Codex, then validate, preview, and run them through the governed Tandem engine.",
+      "icon": "./plugins/frumu-ai/tandem-codex-plugin/assets/icon.png"
+    },
+    {
       "name": "tartinerlabs",
       "displayName": "Tartiner Labs",
       "source": {
