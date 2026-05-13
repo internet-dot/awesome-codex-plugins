@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "agent-vision": {
+      "command": "./dist/agent-vision-mcp",
+      "args": [],
+      "cwd": "."
+    }
+  }
+}
