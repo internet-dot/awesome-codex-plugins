@@ -17,6 +17,7 @@ import datetime
 import io
 import json
 import re
+import shutil
 import urllib.request
 import zipfile
 from pathlib import Path, PurePosixPath
@@ -215,6 +216,9 @@ def mirror_plugin_bundle(plugin: dict[str, str]) -> tuple[dict[str, object], str
     selected_paths = collect_selected_paths(manifest, names, plugin_root)
 
     destination_root = PLUGINS_ROOT / plugin["owner"] / plugin["repo"]
+    # Clear destination to avoid stale files from previous runs (Thread 2 fix)
+    if destination_root.exists():
+        shutil.rmtree(destination_root)
     destination_root.mkdir(parents=True, exist_ok=True)
 
     for relative_path in sorted(selected_paths):
@@ -278,12 +282,15 @@ def main() -> None:
         if isinstance(interface, dict):
             composer_icon = interface.get("composerIcon") or interface.get("logo")
             if isinstance(composer_icon, str) and composer_icon.strip():
-                rel = composer_icon.lstrip("./")
-                candidate = f"{marketplace_path}/{rel}"
-                # Verify the file exists in the mirrored plugin directory
-                abs_path = PLUGINS_ROOT / plugin["owner"] / plugin["repo"] / rel
-                if abs_path.exists():
-                    icon_path = candidate
+                # Thread 1 fix: reject placeholder values like "[TODO: ./assets/icon.png]"
+                stripped = composer_icon.strip()
+                if not (stripped.startswith('[') and ('TODO' in stripped or 'PLACEHOLDER' in stripped)):
+                    rel = composer_icon.lstrip("./")
+                    candidate = f"{marketplace_path}/{rel}"
+                    # Verify the file exists in the mirrored plugin directory
+                    abs_path = PLUGINS_ROOT / plugin["owner"] / plugin["repo"] / rel
+                    if abs_path.exists():
+                        icon_path = candidate
 
         mirrored_entries.append(build_marketplace_entry(plugin, manifest, marketplace_path, icon_path))
 
