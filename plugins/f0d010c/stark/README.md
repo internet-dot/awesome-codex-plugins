@@ -22,6 +22,7 @@ That is wrong for native apps, and it is boring on the web.
 - Contextual UX briefs cover agent runs, operational dashboards, activation onboarding, checkout/upgrade, and editor/canvas tools.
 - UI produces a visual decision brief for surface type, hierarchy, density, component grammar, motion budget, and state visuals.
 - Product quality checks force specific jobs, proof surfaces, complete states, scan speed, and one memorable anchor before code.
+- Frontend technique selection maps animation, scrolling, transitions, command palettes, split panes, and state patterns to the right product surface.
 - Asset planning chooses icons, screenshots, references, typography, generated UI mocks, and optional GPT/Codex image generation before implementation.
 - Reference analysis extracts structure from shipped products, Mobbin/Figma screens, docs, and screenshots without copying visual identity.
 - Web asks for an aesthetic direction first.
@@ -89,7 +90,7 @@ stark/
   skills/
     design-router/               UX and platform dispatcher
     ux-design/                   flows, states, IA, forms, onboarding, dashboards
-  references/ui-patterns/         surface taxonomy, visual hierarchy, responsive containment, asset selection, reference analysis, motion budget, UI audit rubric, product quality bar
+  references/ui-patterns/         surface taxonomy, visual hierarchy, responsive containment, asset selection, reference analysis, motion budget, UI audit rubric, product quality bar, frontend technique roadmap
   references/ux-patterns/         contextual product-flow briefs
     web-design/                  6 web aesthetic directions
     windows-design/              WinUI / branded WinUI / Tauri / Electron
@@ -127,6 +128,21 @@ For "make this better" work, Stark now pushes agents to answer five practical qu
 - What is the one memorable visual anchor?
 
 That keeps generated output closer to a real product and farther from generic demo furniture.
+
+## Frontend Technique Roadmap
+
+Stark includes a developer-facing roadmap for learning the frontend moves that make modern interfaces feel good:
+
+- layout fundamentals: flex, grid, sticky, responsive containment
+- CSS transitions, transforms, keyframes, and reduced-motion
+- product states: loading, empty, error, permission, optimistic update
+- Motion for React for product motion and layout transitions
+- GSAP ScrollTrigger for expressive pinned/scroll storytelling
+- native CSS scroll-driven animation for lightweight scroll effects
+- Lenis only where smooth scroll supports the brand surface
+- pattern vocabulary: command palette, split pane, before/after slider, timeline replay, shortcut overlay
+
+See `references/ui-patterns/frontend-technique-roadmap.md` and `references/ui-patterns/frontend-technique-selector.md`.
 
 ## Screenshot Gallery
 
