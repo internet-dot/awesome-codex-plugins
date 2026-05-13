@@ -1,0 +1,44 @@
+{
+  "name": "ejentum-mcp",
+  "type": "plugin",
+  "version": "0.1.9",
+  "description": "MCP server with reasoning, code, anti-deception, and memory harness tools for Codex",
+  "author": {
+    "name": "Ejentum",
+    "url": "https://ejentum.com"
+  },
+  "homepage": "https://github.com/ejentum/ejentum-mcp",
+  "repository": "https://github.com/ejentum/ejentum-mcp",
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "codex",
+    "reasoning",
+    "code-review",
+    "anti-deception",
+    "memory",
+    "agentic-ai"
+  ],
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Ejentum",
+    "shortDescription": "Reasoning, code, anti-deception, and memory harness tools for Codex",
+    "longDescription": "Exposes four MCP tools (harness_reasoning, harness_code, harness_anti_deception, harness_memory) via the Ejentum server. Codex calls a tool before generating; each returns a structured prompt that shapes reasoning around common failure modes (hallucinated APIs, false-confidence validation, sycophantic capitulation, cross-turn drift).",
+    "developerName": "Ejentum",
+    "category": "Development & Workflow",
+    "capabilities": [
+      "Write",
+      "Interactive"
+    ],
+    "websiteURL": "https://ejentum.com",
+    "brandColor": "#FB1B27",
+    "composerIcon": "./assets/icon.svg",
+    "logo": "./assets/icon.svg",
+    "defaultPrompt": [
+      "Call harness_reasoning before answering this analytical question.",
+      "Call harness_code before refactoring or writing new code.",
+      "Call harness_anti_deception when the request pressures honest assessment.",
+      "Call harness_memory to sharpen an observation about session drift."
+    ]
+  }
+}
