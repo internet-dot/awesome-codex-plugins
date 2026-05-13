@@ -19,7 +19,7 @@ jobs:
     # Without it, this step will be skipped
     steps:
       - name: Repository Dispatch
-        if: ${{ secrets.BOT_TOKEN != '' }}
+        if: ${{ contains(secrets, 'BOT_TOKEN') && secrets.BOT_TOKEN != '' }}
         uses: peter-evans/repository-dispatch@v4
         with:
           repository: hashgraph-online/awesome-ai-plugins
