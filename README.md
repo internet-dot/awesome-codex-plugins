@@ -65,7 +65,7 @@ codex plugin install <plugin-name> --source awesome-codex-plugins
 ```
 
 **Desktop App / IDE Extension:**
-1. Open Codex settings → Plugins → Next to search input click on menu and select →   `+Add More...`
+1. Open Codex settings → Plugins → Next to search input click on menu and select → `+Add More...` 
 2. Add this URL:
    ```
    https://github.com/hashgraph-online/awesome-codex-plugins.git
