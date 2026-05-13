@@ -57,7 +57,19 @@ If the input is a Spec Brief, keep the plan scoped to the pinned
 what/why/acceptance and do not expand into a formal design unless new
 architecture, contract, migration, or cross-module uncertainty appears.
 
-If the spec covers multiple independent subsystems, suggest breaking into separate plans. Before writing tasks, check: fact/assumption/unknown, baseline docs, compatibility boundary, whether dual-track (repair + retirement) applies.
+Compact output contract before writing the plan: `Plan Basis`, `Files`,
+`Compatibility`, `Tasks`, `Risks`, and `Retirement`. Expand only where the
+approved scope, risk, or verification surface requires it.
+
+If the spec covers multiple independent subsystems, suggest breaking into
+separate plans. Before writing tasks, check: fact/assumption/unknown, baseline
+docs, compatibility boundary, whether dual-track (repair + retirement) applies.
+
+If task decomposition would encode a new owner, duplicate owner, fallback,
+adapter, compat-only carrier, delete-first question, unverified assumption, or
+long-term stability claim that the spec did not already settle, use
+`first-principles-review` and its `Decision Hygiene Review` before task
+decomposition.
 
 ## Aegis Project Workspace
 
@@ -105,7 +117,13 @@ Never write: "TBD", "TODO", "implement later", "fill in details", "Add appropria
 
 ## Self-Review
 
-Check plan against spec: 1) Spec coverage — can you point to a task for each requirement? 2) Placeholder scan — any TBD/TODO/vague instructions? 3) Type consistency — do signatures match across tasks? 4) Compatibility — invariants, non-goals, stable interfaces marked? 5) Verification — every major task has exact verification steps? 6) Dual-track — old logic addressed?
+Check plan against spec: 1) Spec coverage — can you point to a task for each
+requirement? 2) Placeholder scan — any TBD/TODO/vague instructions? 3) Type
+consistency — do signatures match across tasks? 4) Compatibility — invariants,
+non-goals, stable interfaces marked? 5) Verification — every major task has
+exact verification steps? 6) Dual-track — old logic addressed? 7) Decision
+hygiene — if `first-principles-review` was needed, did the plan preserve its
+owner / retirement / falsification findings?
 
 Fix issues inline. Re-review is not needed — just fix and move on.
 

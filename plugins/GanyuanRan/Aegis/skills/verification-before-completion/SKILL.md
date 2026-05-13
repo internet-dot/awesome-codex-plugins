@@ -36,6 +36,18 @@ Before ANY success/completion claim, expression of satisfaction, commit, PR, tas
 
 ## QA Closure
 
+Use this compact evidence shape before any success claim:
+
+```text
+Evidence Card:
+- Command / Check:
+- Exit Status:
+- Covered:
+- Not Covered:
+- Residual Risk:
+- Confidence: A | B | C
+```
+
 1. **Remove/Restore**: side effects? temp instrumentation restored?
 2. **Evidence Bundle**: exact command, scope, exit status, key output. State what's covered and what's not. Include target test and related regression evidence. When automation is blocked, provide reproducible manual verification steps.
 3. **Prompt Hygiene**: when external output shaped judgment → state whether summaries or raw excerpts were used. Name large payloads not loaded. If summary insufficient → read back excerpt or lower claim. Include Evidence Used / Not Loaded / Next Evidence boundary when relevant.

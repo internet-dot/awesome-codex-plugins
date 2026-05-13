@@ -1,16 +1,16 @@
 # Claude Code Skills & Plugins — Agent Skills for Every Coding Tool
 
-**246 production-ready Claude Code skills, plugins, and agent skills for 12 AI coding tools.**
+**268 production-ready Claude Code skills, plugins, and agent skills for 12 AI coding tools.**
 
-The most comprehensive open-source library of Claude Code skills and agent plugins — also works with OpenAI Codex, Gemini CLI, Cursor, and 7 more coding agents. Reusable expertise packages covering engineering, DevOps, marketing, compliance, C-level advisory, and more.
+The most comprehensive open-source library of Claude Code skills and agent plugins — also works with OpenAI Codex, Gemini CLI, Cursor, and 7 more coding agents. Reusable expertise packages covering engineering, DevOps, marketing, compliance, C-level advisory (incl. founder-mode CFO/CMO/CRO/CPO/COO/CHRO/CISO/GC/CDO/CAIO/CCO/VPE personas + 21 /cs:* slash commands), and more.
 
 **Works with:** Claude Code · OpenAI Codex · Gemini CLI · OpenClaw · Hermes Agent · Cursor · Aider · Windsurf · Kilo Code · OpenCode · Augment · Antigravity
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](https://opensource.org/licenses/MIT)
-[![Skills](https://img.shields.io/badge/Skills-246-brightgreen?style=for-the-badge)](#skills-overview)
-[![Agents](https://img.shields.io/badge/Agents-20-blue?style=for-the-badge)](#agents)
+[![Skills](https://img.shields.io/badge/Skills-268-brightgreen?style=for-the-badge)](#skills-overview)
+[![Agents](https://img.shields.io/badge/Agents-33-blue?style=for-the-badge)](#agents)
 [![Personas](https://img.shields.io/badge/Personas-7-purple?style=for-the-badge)](#personas)
-[![Commands](https://img.shields.io/badge/Commands-33-orange?style=for-the-badge)](#commands)
+[![Commands](https://img.shields.io/badge/Commands-54-orange?style=for-the-badge)](#commands)
 [![Stars](https://img.shields.io/github/stars/alirezarezvani/claude-skills?style=for-the-badge)](https://github.com/alirezarezvani/claude-skills/stargazers)
 [![SkillCheck Validated](https://img.shields.io/badge/SkillCheck-Validated-4c1?style=for-the-badge)](https://getskillcheck.com)
 
@@ -23,10 +23,10 @@ The most comprehensive open-source library of Claude Code skills and agent plugi
 Claude Code skills (also called agent skills or coding agent plugins) are modular instruction packages that give AI coding agents domain expertise they don't have out of the box. Each skill includes:
 
 - **SKILL.md** — structured instructions, workflows, and decision frameworks
-- **Python tools** — 359 CLI scripts (all stdlib-only, zero pip installs)
+- **Python tools** — 373 CLI scripts (all stdlib-only, zero pip installs)
 - **Reference docs** — templates, checklists, and domain-specific knowledge
 
-**One repo, eleven platforms.** Works natively as Claude Code plugins, Codex agent skills, Gemini CLI skills, and converts to 8 more tools via `scripts/convert.sh`. All 359 Python tools run anywhere Python runs.
+**One repo, eleven platforms.** Works natively as Claude Code plugins, Codex agent skills, Gemini CLI skills, and converts to 8 more tools via `scripts/convert.sh`. All 373 Python tools run anywhere Python runs.
 
 ### Skills vs Agents vs Personas
 
@@ -146,7 +146,7 @@ Run `./scripts/convert.sh --tool all` to generate tool-specific outputs locally.
 
 ## Skills Overview
 
-**246 skills across 9 domains:**
+**268 skills across 9 domains:**
 
 | Domain | Skills | Highlights | Details |
 |--------|--------|------------|---------|

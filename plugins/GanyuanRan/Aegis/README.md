@@ -34,7 +34,7 @@
 If you are using an AI coding agent, you can ask it to install Aegis for you:
 
 ```text
-Please read the installation instructions in https://github.com/GanyuanRan/Aegis carefully, identify the correct path for my AI coding host, install Aegis globally, restart or reload the host if needed, and verify that Aegis is fully available, including skill discovery and project workspace support.
+Please read the installation instructions in https://github.com/GanyuanRan/Aegis carefully, identify the correct path for my AI coding host, install Aegis globally, restart or reload the host if needed, then run complete-install verification from the Aegis method-pack root with `python scripts/aegis-doctor.py --write-config --json`. Treat the install as complete only if the JSON output includes `"ok": true`, `"workspaceSupport": "available"`, and `"configStatus": "configured"`; if the host uses a separate skill discovery directory, also verify it with `--discovery-root <path>`.
 ```
 
 ## Updating Aegis
@@ -42,7 +42,7 @@ Please read the installation instructions in https://github.com/GanyuanRan/Aegis
 If Aegis is already installed, you can ask your AI coding agent to update it for you:
 
 ```text
-Please update my installed Aegis to the latest main branch version from https://github.com/GanyuanRan/Aegis, using the correct update path for my current AI coding host, then restart or reload the host if needed and verify that Aegis is fully available, including skill discovery and project workspace support.
+Please update my installed Aegis to the latest main branch version from https://github.com/GanyuanRan/Aegis, using the correct update path for my current AI coding host, then restart or reload the host if needed and run complete-install verification from the Aegis method-pack root with `python scripts/aegis-doctor.py --write-config --json`. Treat the update as complete only if the JSON output includes `"ok": true`, `"workspaceSupport": "available"`, and `"configStatus": "configured"`; if the host uses a separate skill discovery directory, also verify it with `--discovery-root <path>`.
 ```
 
 ## Optional Lite Global Rules
@@ -458,6 +458,11 @@ Aegis routes work by complexity before implementation:
 - Medium-complexity tasks require a baseline read set, a Spec Brief or stable requirements, a plan, and atomic tasks before TDD.
 - High-complexity tasks require a Design Spec and plan first, with user review where the workflow calls for it.
 
+Workflow Quality guardrails keep that routing practical: simple tasks stay on
+the fast path, medium/high-risk tasks get the right evidence and artifacts, and
+outputs use compact contracts before expanding into full workflow structure.
+Read [docs/current/AEGIS_WORKFLOW_QUALITY_BASELINE.md](docs/current/AEGIS_WORKFLOW_QUALITY_BASELINE.md).
+
 When a project needs persistent Aegis records, Aegis creates a lightweight
 project workspace lazily. The default workspace includes `README.md`,
 `INDEX.md`, `BASELINE-GOVERNANCE.md`, and standard `adr/`, `baseline/`,
@@ -472,11 +477,15 @@ repository itself does not ship a precreated live `docs/aegis/` workspace.
 Workspace structure checks do not judge evidence sufficiency or grant
 completion authority.
 
-Maintainers can verify a complete install with:
+Maintainers can verify a complete install and write the durable local helper
+paths with:
 
 ```bash
-python scripts/aegis-doctor.py --json
+python scripts/aegis-doctor.py --write-config --json
 ```
+
+Complete-install verification must report `"ok": true`,
+`"workspaceSupport": "available"`, and `"configStatus": "configured"`.
 
 When a host exposes a separate skill discovery directory, pass it as
 `--discovery-root <path>` to confirm it resolves to the current method-pack
@@ -546,6 +555,7 @@ Focused checks:
 ```bash
 bash tests/e2e/boundary-compliance-check.sh
 bash tests/e2e/artifact-schema-check.sh
+bash tests/e2e/workflow-quality-check.sh
 bash tests/opencode/run-tests.sh
 bash tests/codex-plugin-sync/test-sync-to-codex-plugin.sh
 ```

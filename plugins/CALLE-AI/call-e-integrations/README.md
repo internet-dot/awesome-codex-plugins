@@ -58,6 +58,28 @@ missing or expired, it runs blocking `calle auth login`, shows the brokered
 authorization link, and continues automatically after browser authorization
 completes.
 
+## ChatGPT App Boundary
+
+This Codex plugin is intentionally CLI-based. If you also publish or install a
+same-name CALL-E ChatGPT App, keep it disabled in Codex when you want `$calle`
+to use the plugin path:
+
+```toml
+[apps.<app-id>]
+enabled = false
+```
+
+You can also disable all ChatGPT Apps/connectors for a Codex profile:
+
+```toml
+[features]
+apps = false
+```
+
+The bundled `$calle` skill tells Codex not to call ChatGPT App/connector tool
+namespaces while the plugin skill is active, but disabling the App in Codex
+configuration is the hard isolation boundary.
+
 ## Safety
 
 CALL-E can place real phone calls. The skill plans first, uses returned

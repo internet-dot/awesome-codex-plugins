@@ -61,7 +61,20 @@ You MUST create a task for each of these items and complete them in order:
 
 **Working artifacts:** Keep three drafts: `TaskIntentDraft` (outcome, scope, risks), `BaselineReadSetHint` (candidate docs, authority gaps), `ImpactStatementDraft` (affected layers, owners, invariants, compat, non-goals). Refresh when scope changes.
 
-**Exploring approaches:** Propose 2-3 approaches with trade-offs and recommendation. Make scope boundary explicit: what's in, what's deferred, what belongs elsewhere.
+**Compact output contract:** `TaskIntentDraft`, `BaselineReadSetHint`,
+`ImpactStatementDraft`, `Options`, and `Decision Needed`. Use this compact
+shape before expanding into a full design structure.
+
+**Exploring approaches:** Propose 2-3 approaches with trade-offs and
+recommendation. Make scope boundary explicit: what's in, what's deferred, what
+belongs elsewhere.
+
+Before approach selection, use `first-principles-review` and its
+`Decision Hygiene Review` when the candidate direction introduces a new owner,
+duplicate owner, fallback, adapter, compat-only carrier, delete-first question,
+unverified assumption, or "long-term stable" / `长期稳定` claim. Do not make it a
+universal design ceremony; return to this workflow once the decision surface is
+clean.
 
 **Presenting the design:** Scale sections to complexity. Cover only the surfaces that matter: architecture, components, data flow, error handling, testing, compatibility boundary. Get approval for the design before implementation when behavior, contract, architecture, or user-facing flow is being decided.
 
@@ -118,7 +131,10 @@ After writing the spec document, look at it with fresh eyes:
 2. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions?
 3. **Scope check:** Is this focused enough for a single implementation plan, or does it need decomposition?
 4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit.
-5. **Boundary check:** Did you clearly mark invariants, compatibility boundaries, owners, and non-goals?
+5. **Boundary check:** Did you clearly mark invariants, compatibility
+   boundaries, owners, and non-goals? If the spec endorses a risky approach,
+   confirm the `first-principles-review` `Decision Hygiene Review` result is
+   reflected or explicitly marked unnecessary.
 
 Fix any issues inline. No need to re-review — just fix and move on.
 

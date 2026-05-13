@@ -8,6 +8,14 @@ GrayMatter is an installable and immediately usable OpenClaw skill for:
 GrayMatter lets an OpenClaw instance move beyond file memory and isolated chat context.
 When properly authenticated, the agent can persist durable memory, inspect the live business schema, and operate inside the organization's RBAC-scoped data environment.
 
+## Ready-to-rock release surfaces
+
+GrayMatter ships as three related but independently usable surfaces:
+
+- **MCP service**: `mcp-server/` runs as an HTTP/SSE service for Claude.ai, Claude Code, Cursor, ChatGPT Apps SDK, and any MCP-compatible host, and also supports `node mcp-server/index.js --stdio` for plugin-managed MCP launch.
+- **Codex plugin**: `.codex-plugin/plugin.json` exposes this repo as the `graymatter` plugin with the standalone skill plus `.mcp.json`, so Codex can discover both the instructions and the MCP server.
+- **Standalone OpenClaw skill**: `graymatter.skill` packages `SKILL.md` and the required scripts for OpenClaw install, activation, hosted api-0 use, and GrayMatter Light local mode.
+
 ## What GrayMatter is for
 
 GrayMatter is the memory and context layer for business-native agent systems.
@@ -130,11 +138,21 @@ Rule:
 - `scripts/gm-entity` — generic helper for listing, reading, and writing arbitrary schema entities
 - `scripts/gm-register-agent` — register or refresh the OpenClaw server as an Agent in api-0
 - `scripts/gm-mcp-contract` — emit the portable MCP memory-tool contract schema used by agent/IDE adapters
+- `scripts/gm-light-bootstrap` — generate the local GrayMatter app bundle and server source scaffold
+- `scripts/gm-light-up` — generate and start the local ThorAPI-backed GrayMatter Light instance
+- `scripts/gm-light-env` — print the environment exports that point skill scripts at the running Light instance
+- `scripts/gm-light-json-smoke` — JSON-file fallback smoke test for Light payload shape without ThorAPI
+- `scripts/package-local-server` — package the standalone downloadable GrayMatter Local Server archive
 - `scripts/package_graymatter.py` — deterministic validation and packaging
+- `mcp-server/` — standalone HTTP/SSE and Apps SDK `/mcp` server for GrayMatter memory, graph, entity, schema, and overview tools
 - `docs/architecture.md` — architecture and operating model
+- `docs/openai-app-directory-submission.md` — Apps SDK submission checklist and copy
+- `docs/privacy-policy.md` — GrayMatter-specific public privacy policy source
+- `docs/reviewer-test-credentials.md` — review demo-account setup and secure credential handoff runbook
 - `docs/prd-context-compaction-reset.md` — PRD for bounded chat compaction and reset flows
 - `docs/thorapi-integration.md` — ThorAPI relationship and bundle direction
 - `docs/graymatter-light.md` — local/offline notes
+- `openai-app/submission-manifest.json` — non-secret app metadata for OpenAI dashboard submission
 - `examples/*` — example payloads and Light-mode starter assets
 - `references/*` — release and multi-agent guidance, including concurrency conventions
 - `references/mcp/memory-tool-contract.v1.json` — stable v1 portable tool contract for memory and graph operations
@@ -247,6 +265,20 @@ That startup model is now part of the GrayMatter launch plan.
 scripts/gm-write decision "GrayMatter is primary memory for this instance"
 scripts/gm-query "GrayMatter" 10
 ```
+
+### Scoped memory
+
+Use `sourceChannel` as the retrieval scope key for chat-, workspace-, and automation-specific memory. `gm-write` can derive that key from explicit scope fields or from a local path, then writes a compact `[graymatter-scope]` header into `MemoryEntry.text` so the hierarchy remains auditable even when tags are unavailable.
+
+```bash
+scripts/gm-write context "Research complete; publish blocked" \
+  --scope-path "$HOME/.codex/automations/mcp-and-skill-hunter/memory.md"
+
+scripts/gm-query "publish blocked" 5 context \
+  --scope-path "$HOME/.codex/automations/mcp-and-skill-hunter/memory.md"
+```
+
+For that path, GrayMatter derives `sourceChannel=codex:automation:mcp-and-skill-hunter`. For Codex project folders under `Documents/Codex/<date>/<slug>`, it derives `sourceChannel=codex:workspace:<date>/<slug>`. Use `--chat-key`, `--session-key`, `--workspace-key`, or `--automation-id` when a host can provide stronger identifiers than a file path.
 
 ### Tagged write with automatic fallback
 
@@ -424,6 +456,46 @@ Rebuild the packaged skill with:
 ```bash
 python3 scripts/package_graymatter.py
 ```
+
+Run an actual local ThorAPI-backed Light instance with:
+
+```bash
+scripts/gm-light-up
+source .graymatter-light/.graymatter-light-env
+scripts/gm-write context "GrayMatter Light is running" local-light
+scripts/gm-query "GrayMatter Light"
+```
+
+`gm-light-up` generates the api.hbs.yaml template at `.graymatter-light/api.hbs.yaml`, rendered api.yaml at `.graymatter-light/api.yaml`, the Docker Compose file, and the Light control panel, then starts the ThorAPI image with `THORAPI_TEMPLATE=/app/api.hbs.yaml` and `THORAPI_SPEC=/app/api.yaml`. The default image is `ghcr.io/valkyrlabs/thorapi:latest`; use `--image` or `THORAPI_IMAGE` when running a private, pinned, or locally built ThorAPI image. The rendered spec explicitly includes the MCP backing paths for `memory_write`, `memory_read`, `memory_query`, `graph_get`, entity tools, and `schema_summary`. The env file sets `VALKYR_API_BASE=http://localhost:8080` and `GRAYMATTER_LIGHT_MODE=true`, so the normal GrayMatter skill scripts and the standalone MCP server can connect to the running local instance without requiring hosted api-0 auth.
+
+Build the standalone downloadable local server with:
+
+```bash
+scripts/package-local-server
+```
+
+That creates `dist/graymatter-local-server-latest.tar.gz`. The archive contains:
+- `application-bundle/` with the ValkyrAI app-factory template, ThorAPI FEBE OpenAPI contract, custom dashboard/workbench/promotion/swarm components, and built-in `rbac-core` / `data-workbooks` component references
+- `source/` with the generated Spring Boot local server
+- `bin/graymatter-local-server` launcher
+- `lib/graymatter-local-server.jar` when Maven is available during packaging
+
+The embedded dashboard includes Valkyr Labs branding, hides the local login panel after successful login, exposes `Promote / Synchronize` for the valkyrlabs.com mothership bridge, and reports the local `graymatter-swarm-v0.1` light-node status.
+
+## awesome-codex-plugins listing kit
+
+GrayMatter ships a ready-to-submit listing packet for `awesome-codex-plugins`.
+
+- Listing markdown block: `docs/awesome-codex-plugins.md`
+- Source metadata: `.codex-plugin/plugin.json`
+
+Quick copy flow:
+
+```bash
+cat docs/awesome-codex-plugins.md
+```
+
+Then open a PR against `hashgraph-online/awesome-codex-plugins` and paste the generated block into `README.md` using that repository's contribution format.
 
 ## Launch position
 

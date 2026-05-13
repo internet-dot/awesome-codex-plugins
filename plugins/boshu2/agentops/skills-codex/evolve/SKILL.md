@@ -197,7 +197,7 @@ evolve_state = {
 }
 ```
 
-Persist `evolve_state` to `.agents/evolve/session-state.json` at each cycle boundary, after work claims, after release/finalize, and during teardown. `cycle-history.jsonl` remains the canonical cycle ledger; `session-state.json` carries resume-only state that has not yet earned a committed cycle entry.
+Persist `evolve_state` to `.agents/evolve/session-state.json` at each cycle boundary, after work claims, after release/finalize, and during teardown. `cycle-history.jsonl` remains the canonical cycle ledger; `session-state.json` carries resume-only state that has not yet earned a committed cycle entry. Both files are **local-only** (the nested `.agents/.gitignore` denies all paths) — record durable milestones in commit messages too. See `references/cycle-history.md` for full local-only semantics.
 
 ### Step 0.2: Compile Warmup (--compile only)
 

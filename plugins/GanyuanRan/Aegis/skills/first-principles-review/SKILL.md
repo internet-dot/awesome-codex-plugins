@@ -47,14 +47,59 @@ Smallest Sufficient Path: What is the least complex path that satisfies the firs
 Escalation Signal: What finding would require spec/design/architecture review?
 ```
 
+## Decision Hygiene Review
+
+Use this escalation only when a design, fix, or plan needs endorsement before it
+is written into a spec or implementation plan.
+
+Escalate from the five-line review when any of these risk signals appear:
+
+- multiple plausible paths and no clear selection criteria
+- a new owner, duplicate owner, fallback, adapter, or compat-only carrier
+- an old path that may need delete-first handling or a retirement trigger
+- an unverified assumption that the proposal depends on
+- user language such as "more elegant", "long-term stable", "长期稳定",
+  "first principles", "Occam", or "奥卡姆"
+- a plan could encode the wrong owner, abstraction, compatibility boundary, or
+  retirement schedule
+
+Use this compact shape:
+
+```text
+First-principles invariants:
+- Non-negotiable goal:
+- Non-negotiable constraints:
+- Historical assumptions to delete:
+
+Owner / retirement matrix:
+- New canonical owner:
+- Old owner:
+- Compat-only carrier:
+- Delete-first / retirement trigger:
+
+Falsification matrix:
+- Dependency-removal test:
+- Counterexample scenario:
+- Must fail / degrade / remain correct cases:
+
+Verdict:
+- Adopt / revise / reject / needs evidence:
+- Blocking gaps:
+- Next evidence:
+```
+
 ## Composition
 
 - With `brainstorming`: run before approach selection when the request is broad,
-  ambiguous, or likely to inherit a poor product shape.
+  ambiguous, likely to inherit a poor product shape, or involves owner /
+  retirement / fallback / adapter risk. Use `Decision Hygiene Review` before
+  recommending or selecting an approach when those signals appear.
 - With `systematic-debugging`: run after evidence shows repeated fixes, fallback
   growth, duplicate owners, or consumer-side patching.
 - With `writing-plans`: run before task decomposition when the plan could encode
-  the wrong owner, abstraction, or compatibility boundary.
+  the wrong owner, abstraction, compatibility boundary, fallback, adapter, or
+  retirement schedule. If the approved spec did not already cover this, use
+  `Decision Hygiene Review` before writing tasks.
 - With `requesting-code-review`: run when review should check direction and
   owner integrity, not just code quality.
 - With `verification-before-completion`: use only to name residual directional
