@@ -15,6 +15,8 @@ Every screen needs one dominant visual anchor:
 
 If everything is equally styled, nothing is important.
 
+For cinematic landing pages, the primary visual is usually key art: a dominant object, scene, product proof, specimen, machine, device, place, or metaphor. It must carry the first viewport and return later as a motif. Do not make a cool hero image and then abandon its visual language for unrelated cards.
+
 ## Action hierarchy
 
 - One primary action per surface.
@@ -29,6 +31,8 @@ If everything is equally styled, nothing is important.
 - Align text, controls, and data to a deliberate grid.
 - Stable dimensions matter for tables, toolbars, boards, cards, and navigation.
 - On narrow screens, preserve the hierarchy by containing dense regions or changing their presentation; do not let the whole page become the scroll container for one oversized element.
+- Campaign pages need a composed sequence, not interchangeable sections: hero/key art, context, craft/proof, collection, trust/place, final close.
+- Huge display typography must be deliberately line-broken and tested against narrow widths; accidental clipping is a layout failure, not an aesthetic.
 
 ## State hierarchy
 

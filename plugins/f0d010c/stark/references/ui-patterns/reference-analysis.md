@@ -22,6 +22,15 @@ For every reference, capture:
 - Asset usage: icons, product screenshots, generated visuals, diagrams, photography, data viz, typography, texture.
 - Trust signals: source, timestamp, permissions, audit trail, cost, ownership, and irreversible action warnings.
 
+For cinematic landing references, also capture:
+
+- First viewport composition: title placement, key art placement, nav weight, CTA placement.
+- Key art system: subject, material, crop, lighting, depth, and how it repeats.
+- Typography composition: display face, line breaks, scale jumps, metadata treatment.
+- Section rhythm: full-bleed, contained, pinned, gallery, index, quiet sections.
+- Motion pacing: title reveal, parallax, mask, pinned sequence, carousel, video scrub, final close.
+- Mobile simplification: what gets removed, stacked, or reframed.
+
 ## Do not copy
 
 - Brand identity, exact layout, proprietary screenshots, distinctive illustrations, copy, or trade dress.
@@ -63,3 +72,4 @@ Reference extraction brief
 - Error, permission, empty, and settings screens teach more about product maturity than polished marketing screenshots.
 - The more risky the action, the closer cost, permission, undo, and recovery copy should be to the action.
 - Expert tools should expose shortcuts and command surfaces without hiding primary mouse paths.
+- High-craft landing pages usually look clean because assets, type, palette, and section rhythm are constrained together. Motion reveals that system; it does not replace the system.

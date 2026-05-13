@@ -15,6 +15,10 @@ UI decision brief
 - Color/materials: background, surfaces, accent, semantic states
 - Motion budget: none / subtle / signature / expressive, plus reduced-motion behavior
 - Responsive containment: nav, table/list, toolbar, inspector, and long-label behavior
+- Cinematic system: campaign / editorial scroll story / product proof / immersive brand, if applicable
+- Key art: subject, material, framing, depth, and reuse plan
+- Art direction: visual metaphor, typography system, palette, motion language, repeated motif
+- Page rhythm: hero, context, proof/craft, collection, trust/place, final close
 - Asset plan: icons, screenshots, generated UI mock, imagegen, typography, references, attribution
 - Reference extraction: shipped references used, structural lessons, rejected visual/copy elements
 - Assets: real product media, generated illustration, icons, screenshots, data visualizations, none
@@ -31,6 +35,7 @@ This brief prevents the common failure where the agent picks decent components b
 - Dashboards need a product-specific operational thesis before visual polish; avoid generic CRM/admin furniture with interchangeable labels.
 - Assets must prove the product job or strengthen the visual direction; reject decorative filler.
 - Marketing pages need a memorable first viewport and one clear conversion path.
+- Cinematic landing pages need one key-art system and page rhythm before motion decisions.
 - Native apps need platform materials, type, icons, spacing, and controls before custom flair.
 - Editor tools need canvas dominance and control stability.
 - If UX and UI conflict, preserve the user's job and recovery path first.

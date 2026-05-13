@@ -12,6 +12,10 @@ Goal: build web surfaces that feel specific, useful, and visually deliberate. Ma
 Before aesthetic direction, classify the surface using `../../references/ui-patterns/surface-taxonomy.md`:
 
 - Marketing page
+- Cinematic campaign page
+- Editorial scroll story
+- Product proof landing page
+- Immersive brand page
 - SaaS dashboard
 - Editor/canvas
 - Checkout/upgrade
@@ -20,11 +24,15 @@ Before aesthetic direction, classify the surface using `../../references/ui-patt
 
 Then write the `UI decision brief` from `../../references/ui-patterns/ui-decision-brief.md`. For dashboards, editors, checkouts, and agent-run UIs, preserve the UX decision brief if one exists and bias toward usable density over Awwwards spectacle.
 
+For cinematic campaign, editorial scroll story, product proof, or immersive brand pages, read `../../references/ui-patterns/cinematic-landing-system.md` before choosing motion. Define key art, art direction, typography discipline, section rhythm, and page choreography first. Motion should reveal the system, not compensate for weak composition.
+
 Do not force an expressive landing-page composition onto a repeated-use web app. For operational surfaces, read `../../references/ui-patterns/product-quality-bar.md`, `../../references/ui-patterns/visual-hierarchy.md`, `../../references/ui-patterns/responsive-containment.md`, `../../references/ui-patterns/motion-budget.md`, `../../references/ui-patterns/interaction-techniques.md`, and `../../references/ui-patterns/ui-audit-rubric.md` before coding.
 
 When the site needs imagery, proof visuals, icons, screenshots, typography, or references, also read `../../references/ui-patterns/asset-selection.md` and include an asset plan before code. If the user is using GPT/Codex and image generation is available, generated bitmap assets are allowed for fictional product visuals, editorial hero imagery, textures, and empty states when they support the product job.
 
 When using shipped products, Mobbin/Figma screens, docs, or screenshots as references, read `../../references/ui-patterns/reference-analysis.md` and produce a reference extraction brief. Borrow structure, interaction, state, and responsive decisions; never copy visual identity.
+
+When using high-craft landing pages as references, extract first-viewport composition, key-art framing, type scale, section sequence, asset reuse, and motion pacing. Do not copy the subject, exact layout, assets, copy, or trade dress.
 
 ## Step 0a (MANDATORY) — Ask the user which direction
 
@@ -137,6 +145,7 @@ Every web output, regardless of direction:
 - **Responsive containment** — nav rows, dense tables, toolbars, inspectors, and long labels must wrap, collapse, or scroll inside their own region; never leave mobile/tablet page-level horizontal overflow.
 - **Quality bar note** — for public-facing or "make it better" work, state the specific job, proof surface, required states, scan-speed decision, and memorable anchor before implementation.
 - **Interaction decision** — when motion/scrolling is non-trivial, state budget, techniques, library choice, why it fits, reduced-motion behavior, and rejected techniques.
+- **Cinematic system** — for campaign-style pages, state the mode, key art, art direction, typography system, page rhythm, and repeated motif before implementation.
 
 ## Step 3 — Deploy 2-4 signature motion moments
 
@@ -148,6 +157,7 @@ Pick from technique inventory above. Examples per direction:
 - **Glow + grain**: page-load curtain + mesh atmosphere + scroll-driven glow shift + magnetic CTAs
 - **Industrial mono**: terminal-style typewriter intro + log-stream marquee + monospace number tickers + cursor swap
 - **Active bento**: layoutId connected animations + tile-expand on hover + scroll-snap sections + custom cursor "VIEW"
+- **Cinematic campaign**: giant composed title + key-art parallax + one pinned craft/proof moment + collection/gallery transition
 
 Don't deploy all 17 techniques. Pick 2-4 that reinforce the direction.
 
@@ -199,6 +209,7 @@ Ask before delivering output:
 12. Mobile/tablet has no page-level horizontal overflow?
 13. Does the design show product proof instead of only making claims?
 14. Did I choose an interaction budget and reject the wrong motion libraries for this surface?
+15. For cinematic pages, did I define key art, section rhythm, typography discipline, and repeated motifs before motion?
 
 If any "no" — restart that choice, don't ship near-misses.
 
@@ -223,6 +234,7 @@ Default to fitting alongside one of these. Read `../../references/awwwards-ceili
 - `../../references/web-patterns/*.md` — copy-paste pattern library
 - `../../references/ui-patterns/reference-analysis.md` — structure extraction from shipped references
 - `../../references/ui-patterns/interaction-techniques.md` — motion, scroll, and interaction decision system
+- `../../references/ui-patterns/cinematic-landing-system.md` — campaign page/key art/page rhythm system
 - `../../references/web-direction-*.md` — per-direction full implementation
 - `../../references/web-fonts.md` — type pairings
 - `../../references/web-bans.md` — anti-slop list
