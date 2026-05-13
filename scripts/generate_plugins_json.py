@@ -193,6 +193,14 @@ def collect_selected_paths(
         if isinstance(value, str):
             add_recursive_selection(selected, all_names, plugin_root, value)
 
+    include = manifest.get("include")
+    if isinstance(include, str):
+        add_recursive_selection(selected, all_names, plugin_root, include)
+    elif isinstance(include, list):
+        for value in include:
+            if isinstance(value, str):
+                add_recursive_selection(selected, all_names, plugin_root, value)
+
     interface = manifest.get("interface")
     if isinstance(interface, dict):
         for key in ("composerIcon", "logo"):

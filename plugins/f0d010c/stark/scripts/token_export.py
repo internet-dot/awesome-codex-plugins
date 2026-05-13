@@ -50,22 +50,41 @@ def flatten(node: Any, prefix: str = "") -> dict[str, dict[str, Any]]:
     return out
 
 
-def resolve(value: Any, all_tokens: dict[str, dict[str, Any]]) -> Any:
+def resolve(value: Any, all_tokens: dict[str, dict[str, Any]], visited: set[str] | None = None) -> Any:
     if not isinstance(value, str):
         return value
-    while True:
-        m = REF.search(value)
-        if not m:
-            return value
-        ref_path = m.group(1)
+
+    visited = visited or set()
+    full_ref = REF.fullmatch(value)
+    if full_ref:
+        ref_path = full_ref.group(1)
         if ref_path not in all_tokens:
-            return value  # unresolvable, leave as-is
-        replacement = str(all_tokens[ref_path]["$value"])
-        value = value[: m.start()] + replacement + value[m.end():]
+            return value
+        if ref_path in visited:
+            raise ValueError(f"Circular token reference detected: {' -> '.join([*visited, ref_path])}")
+        return resolve(all_tokens[ref_path]["$value"], all_tokens, visited | {ref_path})
+
+    def replace_reference(match: re.Match[str]) -> str:
+        ref_path = match.group(1)
+        if ref_path not in all_tokens:
+            return match.group(0)
+        if ref_path in visited:
+            raise ValueError(f"Circular token reference detected: {' -> '.join([*visited, ref_path])}")
+        resolved = resolve(all_tokens[ref_path]["$value"], all_tokens, visited | {ref_path})
+        return str(resolved)
+
+    return REF.sub(replace_reference, value)
 
 
 def kebab(s: str) -> str:
     return s.replace(".", "-").replace("_", "-")
+
+
+def camel(s: str) -> str:
+    parts = [part for part in re.split(r"[._-]+", s) if part]
+    if not parts:
+        return ""
+    return parts[0] + "".join(part[:1].upper() + part[1:] for part in parts[1:])
 
 
 # ---- Tailwind v4 ----------------------------------------------------------
@@ -123,7 +142,7 @@ def export_swiftui(tokens: dict[str, dict[str, Any]]) -> str:
         if tok.get("$type") != "color":
             continue
         v = str(resolve(tok["$value"], tokens))
-        var = path.replace(".", "_").replace("-", "_")
+        var = camel(path)
         if v.startswith("#"):
             lines.append(f"    static let {var} = {hex_to_swift_color(v)}")
         elif v.startswith("Color"):
@@ -158,8 +177,7 @@ def export_compose(tokens: dict[str, dict[str, Any]]) -> str:
     for path, tok in tokens.items():
         t = tok.get("$type")
         v = resolve(tok["$value"], tokens)
-        var = "".join(part.capitalize() for part in path.replace("-", "_").split(".") if part)
-        var = var[0].lower() + var[1:] if var else var
+        var = camel(path)
         if t == "color":
             v_str = str(v)
             if v_str.startswith("#"):

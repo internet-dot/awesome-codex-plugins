@@ -100,7 +100,7 @@ stark/
   assets/                        token bundles, font pairs, screenshots
   scripts/                       platform detection and token export helpers
   commands/                      legacy Claude slash-command docs
-  examples/                      Apple, Windows, Tauri, Electron examples
+  examples/                      source-repo proof projects, not bundled in marketplace installs
   evals/                         trigger evaluation prompts
 ```
 
@@ -119,7 +119,7 @@ Each direction has its own typography, palette, layout grammar, motion language,
 
 ## Examples
 
-The `examples/` folder includes generated proof projects that exercise Stark's guidance:
+The source repo's `examples/` folder includes generated proof projects that exercise Stark's guidance. Marketplace plugin bundles may omit examples to keep installs lean.
 
 | Example | Surface | What it demonstrates |
 |---|---|---|
@@ -161,7 +161,7 @@ Manual smoke prompts:
 Design a developer-tool landing page in the industrial monospace direction.
 Improve the trial onboarding UX for a B2B analytics dashboard.
 Audit src/components/Hero.tsx for UX and web anti-slop issues.
-Translate examples/apple-music-settings/SettingsView.swift to Windows.
+Translate this Apple settings screen to Windows using stark.
 ```
 
 ## Compatibility
