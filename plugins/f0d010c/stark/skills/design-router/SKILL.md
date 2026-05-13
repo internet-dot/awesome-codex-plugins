@@ -31,7 +31,8 @@ Scan for explicit signals (in priority order):
 | `.swift` `.swiftui`, "SwiftUI", "iOS app", "iPadOS", "macOS", "Liquid Glass", "HIG", "SF Symbols", "App Store", "Tahoe" | `apple-design` |
 | `.kt` `.kts`, "Compose", "Jetpack Compose", "Material 3", "Material You", "Pixel app", "Android app" | `android-design` |
 | "Tauri", "Electron", "Flutter", "React Native", "Expo", "Compose Multiplatform", "CMP", "Uno Platform", "Avalonia", "MAUI" | `cross-platform-design` |
-| "design tokens", "export tokens", "DTCG", "translate this design from X to Y" | `design-tokens` |
+| "translate this UI", "translate this screen", "translate this design", "port this UI", "convert this screen", "from iOS to Windows", "from Apple to Android" | `cross-platform-design` first, then the target platform skill |
+| "design tokens", "export tokens", "DTCG", "token JSON", "ColorScheme", "Typography tokens" | `design-tokens` |
 
 ## Step 2 — When signals are absent
 

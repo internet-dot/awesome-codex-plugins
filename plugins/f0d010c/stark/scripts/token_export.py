@@ -218,6 +218,21 @@ def export_swiftui(tokens: dict[str, dict[str, Any]]) -> str:
     if typography_count:
         typography_lines.append("}")
         lines.extend(typography_lines)
+
+        line_height_lines = ["", "extension CGFloat {"]
+        line_height_count = 0
+        for path, tok in tokens.items():
+            if tok.get("$type") != "typography":
+                continue
+            v = resolve(tok["$value"], tokens)
+            if not isinstance(v, dict) or "lineHeight" not in v:
+                continue
+            line_height_count += 1
+            line_height = numeric_token_value(v.get("lineHeight"), numeric_token_value(v.get("fontSize"), 16))
+            line_height_lines.append(f"    static let {camel(path)}LineHeight: CGFloat = {line_height:g}")
+        if line_height_count:
+            line_height_lines.append("}")
+            lines.extend(line_height_lines)
     return "\n".join(lines) + "\n"
 
 
@@ -241,11 +256,63 @@ def css_hex_to_xaml(h: str) -> str:
     return h
 
 
+def compose_font_weight(value: Any) -> str:
+    if isinstance(value, (int, float)):
+        return f"FontWeight.W{int(value)}"
+    normalized = str(value).strip().lower().replace(" ", "")
+    mapping = {
+        "thin": "FontWeight.Thin",
+        "extralight": "FontWeight.ExtraLight",
+        "light": "FontWeight.Light",
+        "regular": "FontWeight.Normal",
+        "normal": "FontWeight.Normal",
+        "medium": "FontWeight.Medium",
+        "semibold": "FontWeight.SemiBold",
+        "demibold": "FontWeight.SemiBold",
+        "bold": "FontWeight.Bold",
+        "extrabold": "FontWeight.ExtraBold",
+        "black": "FontWeight.Black",
+    }
+    return mapping.get(normalized, "FontWeight.Normal")
+
+
+def compose_text_style_expr(value: dict[str, Any]) -> str:
+    size = numeric_token_value(value.get("fontSize"), 16)
+    line_height = numeric_token_value(value.get("lineHeight"), size)
+    weight = compose_font_weight(value.get("fontWeight", "regular"))
+    return f"TextStyle(fontSize = {size:g}.sp, lineHeight = {line_height:g}.sp, fontWeight = {weight})"
+
+
+def compose_typography_slot(path: str) -> str | None:
+    name = path.split(".")[-1]
+    mapping = {
+        "display-large": "displayLarge",
+        "display-medium": "displayMedium",
+        "display-small": "displaySmall",
+        "headline-large": "headlineLarge",
+        "headline-medium": "headlineMedium",
+        "headline-small": "headlineSmall",
+        "title-large": "titleLarge",
+        "title-medium": "titleMedium",
+        "title-small": "titleSmall",
+        "body-large": "bodyLarge",
+        "body-medium": "bodyMedium",
+        "body-small": "bodySmall",
+        "label-large": "labelLarge",
+        "label-medium": "labelMedium",
+        "label-small": "labelSmall",
+    }
+    return mapping.get(name)
+
+
 def export_compose(tokens: dict[str, dict[str, Any]]) -> str:
     lines = [
         "package design.tokens",
         "",
+        "import androidx.compose.material3.Typography",
         "import androidx.compose.ui.graphics.Color",
+        "import androidx.compose.ui.text.TextStyle",
+        "import androidx.compose.ui.text.font.FontWeight",
         "import androidx.compose.ui.unit.dp",
         "import androidx.compose.ui.unit.sp",
         "",
@@ -266,6 +333,21 @@ def export_compose(tokens: dict[str, dict[str, Any]]) -> str:
                 lines.append(f"    val {var} = {v_str}.dp")
             except ValueError:
                 pass
+        elif t == "typography" and isinstance(v, dict):
+            lines.append(f"    val {var} = {compose_text_style_expr(v)}")
+
+    typography_assignments: list[str] = []
+    for path, tok in tokens.items():
+        if tok.get("$type") != "typography":
+            continue
+        slot = compose_typography_slot(path)
+        if slot:
+            typography_assignments.append(f"        {slot} = {camel(path)}")
+    if typography_assignments:
+        lines.append("")
+        lines.append("    val typography = Typography(")
+        lines.append(",\n".join(typography_assignments))
+        lines.append("    )")
     lines.append("}")
     return "\n".join(lines) + "\n"
 
