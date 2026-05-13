@@ -230,6 +230,7 @@ def build_marketplace_entry(
     plugin: dict[str, str],
     manifest: dict[str, object],
     marketplace_path: str,
+    icon_path: str | None = None,
 ) -> dict[str, object]:
     manifest_name = str(manifest.get("name") or "").strip() or plugin["repo"]
     interface = manifest.get("interface", {})
@@ -237,16 +238,6 @@ def build_marketplace_entry(
     description = plugin.get("description", "").strip()
     if not description:
         description = str(interface.get("shortDescription") or interface.get("longDescription") or "").strip()
-
-    # Build icon path: composerIcon or logo from manifest's interface, relative to plugin root
-    icon_path = None
-    if isinstance(interface, dict):
-        composer_icon = interface.get("composerIcon") or interface.get("logo")
-        if isinstance(composer_icon, str) and composer_icon.strip():
-            # composerIcon is relative to plugin root (e.g., "./assets/icon.svg")
-            # Convert to path relative to repo root: marketplace_path already is "./plugins/owner/repo"
-            rel = composer_icon.lstrip("./")
-            icon_path = f"{marketplace_path}/{rel}" if not rel.startswith(marketplace_path) else f"./{rel}"
 
     entry: dict[str, object] = {
         "name": manifest_name,
@@ -280,7 +271,21 @@ def main() -> None:
     for plugin in plugins:
         manifest, marketplace_path, plugin_root_relative = mirror_plugin_bundle(plugin)
         plugin["install_url"] = build_raw_manifest_url(plugin, plugin_root_relative)
-        mirrored_entries.append(build_marketplace_entry(plugin, manifest, marketplace_path))
+
+        # Determine icon path if available and actually mirrored
+        icon_path: str | None = None
+        interface = manifest.get("interface", {})
+        if isinstance(interface, dict):
+            composer_icon = interface.get("composerIcon") or interface.get("logo")
+            if isinstance(composer_icon, str) and composer_icon.strip():
+                rel = composer_icon.lstrip("./")
+                candidate = f"{marketplace_path}/{rel}"
+                # Verify the file exists in the mirrored plugin directory
+                abs_path = PLUGINS_ROOT / plugin["owner"] / plugin["repo"] / rel
+                if abs_path.exists():
+                    icon_path = f"./{candidate}"
+
+        mirrored_entries.append(build_marketplace_entry(plugin, manifest, marketplace_path, icon_path))
 
     marketplace = {
         "name": "awesome-codex-plugins",
