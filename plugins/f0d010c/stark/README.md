@@ -22,7 +22,9 @@ That is wrong for native apps, and it is boring on the web.
 - Contextual UX briefs cover agent runs, operational dashboards, activation onboarding, checkout/upgrade, and editor/canvas tools.
 - UI produces a visual decision brief for surface type, hierarchy, density, component grammar, motion budget, and state visuals.
 - Product quality checks force specific jobs, proof surfaces, complete states, scan speed, and one memorable anchor before code.
+- Creative direction turns "make it creative" into a concrete world, metaphor, material language, repeated motif, forbidden defaults, and one tasteful risk.
 - Interaction guidance chooses CSS, Motion, GSAP, native scroll CSS, Lenis, command palettes, split panes, timelines, or no motion by surface and product job.
+- Web implementation tracks choose static HTML/CSS/JS, Vite React, Next, Astro, or the existing stack by interaction needs and dependency risk.
 - Cinematic landing guidance separates key art from page design, then defines typography, art direction, section rhythm, and motion choreography before code.
 - Asset planning chooses icons, screenshots, references, typography, generated UI mocks, and optional GPT/Codex image generation before implementation.
 - Reference analysis extracts structure from shipped products, Mobbin/Figma screens, docs, and screenshots without copying visual identity.
@@ -91,7 +93,7 @@ stark/
   skills/
     design-router/               UX and platform dispatcher
     ux-design/                   flows, states, IA, forms, onboarding, dashboards
-  references/ui-patterns/         surface taxonomy, visual hierarchy, responsive containment, asset selection, reference analysis, motion budget, interaction techniques, cinematic landing system, UI audit rubric, product quality bar
+  references/ui-patterns/         surface taxonomy, creative direction, implementation tracks, visual hierarchy, responsive containment, asset selection, reference analysis, motion budget, interaction techniques, cinematic landing system, UI audit rubric, product quality bar
   references/ux-patterns/         contextual product-flow briefs
     web-design/                  6 web aesthetic directions
     windows-design/              WinUI / branded WinUI / Tauri / Electron
@@ -155,6 +157,34 @@ The agent should define:
 - restraint: fewer sections, fewer type choices, no unrelated card grids, and no motion added to hide weak composition
 
 This is the difference between a good-looking hero screenshot and a page that stays coherent after the first scroll.
+
+## Creative Direction
+
+For high-craft work, Stark asks agents to define a world before code:
+
+- visual metaphor
+- material language
+- typography personality
+- layout grammar
+- repeated motif
+- forbidden defaults
+- one tasteful risk
+- restraints that keep the risk coherent
+
+This pushes agents away from random decoration and toward a specific art direction that can survive across the full page or app.
+
+## Web Implementation Tracks
+
+React is supported as a first-class path, especially for stateful, componentized, animated, or app-like web surfaces.
+
+Stark still asks whether React is actually needed:
+
+- static HTML/CSS/JS for simple pages and lightweight effects
+- Vite + React for advanced interactive sites, product demos, dashboards, command palettes, inspectors, and reusable components
+- Next for app/marketing hybrids, SEO, routing, server data, and auth
+- Astro for content-heavy or editorial sites with islands of interactivity
+
+The stack brief includes dependency risk notes so agents do not add npm packages just for decoration, especially during active supply-chain incidents.
 
 ## Screenshot Gallery
 

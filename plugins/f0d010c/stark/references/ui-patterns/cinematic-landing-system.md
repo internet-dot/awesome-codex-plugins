@@ -29,7 +29,7 @@ First define the key art:
 - Depth: foreground, midground, background, atmospheric layer.
 - Reuse: how the same visual language returns later without repeating the hero.
 
-Then define the page system:
+Then define the page system. If the request asks for something original, memorable, high-craft, or unusual, pair this with `creative-direction.md` and define the broader world, metaphor, tasteful risk, and restraints.
 
 - Grid: centered, asymmetric, hero+rail, editorial spread, pinned stage, gallery, index.
 - Section rhythm: which sections are full-bleed, contained, narrow, split, or pinned.

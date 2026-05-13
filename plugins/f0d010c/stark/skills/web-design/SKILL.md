@@ -24,6 +24,8 @@ Before aesthetic direction, classify the surface using `../../references/ui-patt
 
 Then write the `UI decision brief` from `../../references/ui-patterns/ui-decision-brief.md`. For dashboards, editors, checkouts, and agent-run UIs, preserve the UX decision brief if one exists and bias toward usable density over Awwwards spectacle.
 
+For polished, original, memorable, high-craft, campaign, or "best-looking" requests, read `../../references/ui-patterns/creative-direction.md` before visual styling. Define a creative direction brief with world, metaphor, material language, typography personality, layout grammar, repeated motif, forbidden defaults, one tasteful risk, and restraints.
+
 For cinematic campaign, editorial scroll story, product proof, or immersive brand pages, read `../../references/ui-patterns/cinematic-landing-system.md` before choosing motion. Define key art, art direction, typography discipline, section rhythm, and page choreography first. Motion should reveal the system, not compensate for weak composition.
 
 Do not force an expressive landing-page composition onto a repeated-use web app. For operational surfaces, read `../../references/ui-patterns/product-quality-bar.md`, `../../references/ui-patterns/visual-hierarchy.md`, `../../references/ui-patterns/responsive-containment.md`, `../../references/ui-patterns/motion-budget.md`, `../../references/ui-patterns/interaction-techniques.md`, and `../../references/ui-patterns/ui-audit-rubric.md` before coding.
@@ -62,8 +64,10 @@ For operational dashboards, admin tools, and editors, ask direction in a restrai
 
 ## Step 0b — Stack questions (after surface and direction picked)
 
+Before choosing a framework, read `../../references/ui-patterns/web-implementation-tracks.md` and produce the implementation track brief. React is a first-class option for advanced interactive work, but it is not the automatic default.
+
 Ask in one batch:
-- **Framework**: Next 15 (apps + marketing), Astro 5 (content/editorial), SvelteKit 2 (craft), Solid, Qwik, plain Vite + React?
+- **Framework**: static HTML/CSS/JS, Vite + React, Next, Astro, SvelteKit, Solid, Qwik, or existing project stack?
 - **CSS**: Tailwind v4 default. Vanilla CSS w/ `@scope`/`@layer` if user prefers no utility classes.
 - **Motion library**: choose from `../../references/ui-patterns/interaction-techniques.md`. CSS first for simple transitions, Motion for React product motion, GSAP only for timeline/pinned storytelling, Lenis only for brand scroll feel.
 - **Smooth scroll**: default off. Only add if direction and surface type justify it; never add to dashboards, docs, forms, checkout, editors, or admin tools.
@@ -144,6 +148,8 @@ Every web output, regardless of direction:
 - **Surface-fit baseline** — marketing pages may be spacious and expressive; dashboards, editors, checkouts, and agent-run UIs must preserve task density, stable controls, and state visibility.
 - **Responsive containment** — nav rows, dense tables, toolbars, inspectors, and long labels must wrap, collapse, or scroll inside their own region; never leave mobile/tablet page-level horizontal overflow.
 - **Quality bar note** — for public-facing or "make it better" work, state the specific job, proof surface, required states, scan-speed decision, and memorable anchor before implementation.
+- **Creative direction** — for original/high-craft work, state the world, metaphor, material language, repeated motif, forbidden defaults, tasteful risk, and restraints.
+- **Implementation track** — choose static, Vite React, Next, Astro, or existing stack by actual interaction needs and dependency risk.
 - **Interaction decision** — when motion/scrolling is non-trivial, state budget, techniques, library choice, why it fits, reduced-motion behavior, and rejected techniques.
 - **Cinematic system** — for campaign-style pages, state the mode, key art, art direction, typography system, page rhythm, and repeated motif before implementation.
 
@@ -210,6 +216,8 @@ Ask before delivering output:
 13. Does the design show product proof instead of only making claims?
 14. Did I choose an interaction budget and reject the wrong motion libraries for this surface?
 15. For cinematic pages, did I define key art, section rhythm, typography discipline, and repeated motifs before motion?
+16. Did the implementation track fit the interaction model, and did I avoid adding React/dependencies when static code would be enough?
+17. Did the design include one tasteful risk plus restraints, instead of random creativity?
 
 If any "no" — restart that choice, don't ship near-misses.
 
@@ -233,8 +241,10 @@ Default to fitting alongside one of these. Read `../../references/awwwards-ceili
 - `../../references/design-philosophy.md` — core thesis
 - `../../references/web-patterns/*.md` — copy-paste pattern library
 - `../../references/ui-patterns/reference-analysis.md` — structure extraction from shipped references
+- `../../references/ui-patterns/creative-direction.md` — original art direction, tasteful risk, and constraints
 - `../../references/ui-patterns/interaction-techniques.md` — motion, scroll, and interaction decision system
 - `../../references/ui-patterns/cinematic-landing-system.md` — campaign page/key art/page rhythm system
+- `../../references/ui-patterns/web-implementation-tracks.md` — static/React/Next/Astro stack decisions and dependency safety
 - `../../references/web-direction-*.md` — per-direction full implementation
 - `../../references/web-fonts.md` — type pairings
 - `../../references/web-bans.md` — anti-slop list

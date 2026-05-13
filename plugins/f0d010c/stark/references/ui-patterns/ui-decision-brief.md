@@ -8,12 +8,14 @@ UI decision brief
 - Platform idiom: web / Windows / Apple / Android / cross-platform translation
 - Product thesis: the specific job, risk, queue, artifact, or decision this surface exists for
 - Visual direction: ...
+- Creative direction: world, visual metaphor, material language, repeated motif, tasteful risk
 - Density: sparse / balanced / dense / operational
 - Hierarchy: primary visual, primary action, secondary surfaces
 - Component grammar: cards, tables, panes, toolbars, sheets, tabs, forms, command surface
 - Typography: system/native or chosen custom pair, scale, emphasis rule
 - Color/materials: background, surfaces, accent, semantic states
 - Motion budget: none / subtle / signature / expressive, plus reduced-motion behavior
+- Implementation track: static / Vite React / Next / Astro / other, plus dependency risk notes
 - Responsive containment: nav, table/list, toolbar, inspector, and long-label behavior
 - Cinematic system: campaign / editorial scroll story / product proof / immersive brand, if applicable
 - Key art: subject, material, framing, depth, and reuse plan
@@ -23,6 +25,7 @@ UI decision brief
 - Reference extraction: shipped references used, structural lessons, rejected visual/copy elements
 - Assets: real product media, generated illustration, icons, screenshots, data visualizations, none
 - State visuals: empty, loading, error, permission, success, long-running
+- Tasteful risk: one deliberate unusual choice and the restraints that keep it coherent
 - Bans: ...
 ```
 
@@ -35,7 +38,9 @@ This brief prevents the common failure where the agent picks decent components b
 - Dashboards need a product-specific operational thesis before visual polish; avoid generic CRM/admin furniture with interchangeable labels.
 - Assets must prove the product job or strengthen the visual direction; reject decorative filler.
 - Marketing pages need a memorable first viewport and one clear conversion path.
+- Creative pages need one concrete world and one tasteful risk, not many unrelated effects.
 - Cinematic landing pages need one key-art system and page rhythm before motion decisions.
+- Web stacks must match the product surface: React is useful for stateful, componentized, animated work, but static pages should stay simpler when possible.
 - Native apps need platform materials, type, icons, spacing, and controls before custom flair.
 - Editor tools need canvas dominance and control stability.
 - If UX and UI conflict, preserve the user's job and recovery path first.
