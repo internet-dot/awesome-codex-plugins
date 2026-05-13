@@ -24,4 +24,3 @@ jobs:
           token: ${{ secrets.BOT_TOKEN }}
           repository: hashgraph-online/awesome-ai-plugins
           event-type: sync-to-ai-plugins
-          token: ${{ secrets.BOT_TOKEN }}
