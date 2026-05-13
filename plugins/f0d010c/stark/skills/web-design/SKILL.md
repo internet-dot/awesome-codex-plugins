@@ -20,7 +20,7 @@ Before aesthetic direction, classify the surface using `../../references/ui-patt
 
 Then write the `UI decision brief` from `../../references/ui-patterns/ui-decision-brief.md`. For dashboards, editors, checkouts, and agent-run UIs, preserve the UX decision brief if one exists and bias toward usable density over Awwwards spectacle.
 
-Do not force an expressive landing-page composition onto a repeated-use web app. For operational surfaces, read `../../references/ui-patterns/product-quality-bar.md`, `../../references/ui-patterns/visual-hierarchy.md`, `../../references/ui-patterns/responsive-containment.md`, `../../references/ui-patterns/motion-budget.md`, `../../references/ui-patterns/frontend-technique-selector.md`, and `../../references/ui-patterns/ui-audit-rubric.md` before coding.
+Do not force an expressive landing-page composition onto a repeated-use web app. For operational surfaces, read `../../references/ui-patterns/product-quality-bar.md`, `../../references/ui-patterns/visual-hierarchy.md`, `../../references/ui-patterns/responsive-containment.md`, `../../references/ui-patterns/motion-budget.md`, and `../../references/ui-patterns/ui-audit-rubric.md` before coding.
 
 When the site needs imagery, proof visuals, icons, screenshots, typography, or references, also read `../../references/ui-patterns/asset-selection.md` and include an asset plan before code. If the user is using GPT/Codex and image generation is available, generated bitmap assets are allowed for fictional product visuals, editorial hero imagery, textures, and empty states when they support the product job.
 
@@ -57,7 +57,7 @@ For operational dashboards, admin tools, and editors, ask direction in a restrai
 Ask in one batch:
 - **Framework**: Next 15 (apps + marketing), Astro 5 (content/editorial), SvelteKit 2 (craft), Solid, Qwik, plain Vite + React?
 - **CSS**: Tailwind v4 default. Vanilla CSS w/ `@scope`/`@layer` if user prefers no utility classes.
-- **Motion library**: CSS transitions first for simple interaction, Motion for React product motion, GSAP only for heavy timeline/pinned storytelling. Read `../../references/ui-patterns/frontend-technique-selector.md`.
+- **Motion library**: Motion (motion.dev) default. GSAP if heavy timeline work. Both if needed.
 - **Smooth scroll**: Lenis default off. Only add if direction calls for it (editorial, type-as-hero, glow+grain).
 
 State stack pick at top of response in one sentence.
@@ -136,7 +136,6 @@ Every web output, regardless of direction:
 - **Surface-fit baseline** — marketing pages may be spacious and expressive; dashboards, editors, checkouts, and agent-run UIs must preserve task density, stable controls, and state visibility.
 - **Responsive containment** — nav rows, dense tables, toolbars, inspectors, and long labels must wrap, collapse, or scroll inside their own region; never leave mobile/tablet page-level horizontal overflow.
 - **Quality bar note** — for public-facing or "make it better" work, state the specific job, proof surface, required states, scan-speed decision, and memorable anchor before implementation.
-- **Technique choice** — name the animation/scroll/interaction technique and why it fits the surface. Do not add GSAP, Lenis, or scroll hijacking without a product reason.
 
 ## Step 3 — Deploy 2-4 signature motion moments
 
@@ -219,8 +218,6 @@ Default to fitting alongside one of these. Read `../../references/awwwards-ceili
 - `../../references/design-philosophy.md` — core thesis
 - `../../references/web-patterns/*.md` — copy-paste pattern library
 - `../../references/ui-patterns/reference-analysis.md` — structure extraction from shipped references
-- `../../references/ui-patterns/frontend-technique-roadmap.md` — learning path and technique vocabulary
-- `../../references/ui-patterns/frontend-technique-selector.md` — choose animation/scroll/interaction tools by surface
 - `../../references/web-direction-*.md` — per-direction full implementation
 - `../../references/web-fonts.md` — type pairings
 - `../../references/web-bans.md` — anti-slop list
