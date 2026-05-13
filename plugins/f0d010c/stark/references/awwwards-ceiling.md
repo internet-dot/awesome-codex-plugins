@@ -22,7 +22,7 @@ Reference points the web-design skill targets. **Group references by direction.*
 - the-pudding.cool — long-form data editorial
 - shauninman.com — paragraph-driven blog
 - editorialnew.com (Pangram Pangram type foundry showcase)
-- Hayes & Co (`stark/examples/web-resonance-fm`) — our sample
+- Artifact Labs (`assets/screenshots/artifact-labs-site/`) — our editorial sample
 
 ### Tactile brutalism
 - werkstatt.fyi — brutalist editorial

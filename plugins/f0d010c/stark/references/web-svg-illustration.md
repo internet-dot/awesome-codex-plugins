@@ -7,7 +7,7 @@ The model must NEVER write `<img src="placeholder.png">` or `via.placeholder.com
 For products / objects (watches, devices, abstract forms):
 
 ```tsx
-// See examples/web-resonance-fm/src/components/WatchFace.tsx
+// Build bespoke SVG/CSS product visuals inline instead of linking placeholder images.
 <svg viewBox="0 0 200 200">
   <circle cx="100" cy="100" r="98" fill="..." />
   {/* layered shapes */}
@@ -120,4 +120,4 @@ But default = generate the visual yourself.
 
 ## Reference example
 
-The `examples/web-resonance-fm/src/components/WatchFace.tsx` is a full no-image illustration: layered SVG circles, hour markers, hands, sub-dial, gradients, noise filter. ~200 lines, no external images, fully designed product visual.
+Good generated product visuals are full no-image illustrations: layered SVG/CSS shapes, meaningful labels, gradients or texture when needed, and no external placeholder images.

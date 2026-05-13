@@ -2,7 +2,7 @@
 
 ## Scope
 
-`stark` is a documentation + reference plugin. It does not execute untrusted code or accept user data. The primary attack surface is the `scripts/` directory (Python utilities) and the `examples/` directory (demonstration apps).
+`stark` is a documentation + reference plugin. It does not execute untrusted code or accept user data. The primary attack surface is the `scripts/` directory, which contains small Python helper utilities for platform detection and token export.
 
 ## Supported versions
 
@@ -22,4 +22,4 @@ You should expect an initial response within 14 days.
 
 - Vulnerabilities in third-party dependencies (file with the dependency upstream)
 - Issues in user-generated output (the plugin guides design choices; it does not validate generated code for security)
-- Issues in the `examples/` apps (they are demos, not production)
+- Issues in local visual QA projects that are not part of this repository

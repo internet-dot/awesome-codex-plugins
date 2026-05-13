@@ -7,7 +7,7 @@ Reading-room vibe. Considered restraint. Magazine spread digital. Generous white
 - rauchg.com — tech blog ceiling, restraint as the work
 - are.na — editorial network, monospace metadata, generous whitespace
 - robinrendle.com — letterforms, words.are.fluid
-- Hayes & Co (`stark/examples/web-resonance-fm`) — our sample
+- Artifact Labs (`assets/screenshots/artifact-labs-site/`) — our sample
 - the-pudding.cool — long-form editorial w/ data
 - editorialnew.com (Pangram Pangram) — reference for the typeface itself
 - shauninman.com — paragraph-driven blog

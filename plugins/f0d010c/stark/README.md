@@ -97,10 +97,9 @@ stark/
     cross-platform-design/       idiom translation and fidelity warnings
     design-tokens/               DTCG token generation and export
   references/                    design philosophy, platform docs, web patterns
-  assets/                        token bundles, font pairs, screenshots
+  assets/                        token bundles, font pairs, screenshot gallery
   scripts/                       platform detection and token export helpers
   commands/                      legacy Claude slash-command docs
-  examples/                      source-repo proof projects, not bundled in marketplace installs
   evals/                         trigger evaluation prompts
 ```
 
@@ -117,18 +116,19 @@ stark/
 
 Each direction has its own typography, palette, layout grammar, motion language, copy voice, reference apps, and ban list.
 
-## Examples
+## Screenshot Gallery
 
-The source repo's `examples/` folder includes generated proof projects that exercise Stark's guidance. Marketplace plugin bundles may omit examples to keep installs lean.
+The repo keeps proof as screenshots instead of full generated app folders, so the plugin stays small and installable.
 
-| Example | Surface | What it demonstrates |
+| Project | Desktop | Mobile |
 |---|---|---|
-| `operator-console` | Vite/React marketing site | Industrial devtool landing page with believable local-agent product proof |
-| `builddesk` | Electron desktop app | Daily indie-builder command center with project sidebar, attention queue, and inspector |
-| `apple-music-settings` | Apple settings surface | Apple-platform settings translation and preview |
-| `windows-music-settings` | Windows settings surface | Fluent/WinUI-style settings translation and preview |
+| Operator Console | <img src="assets/screenshots/operator-console/desktop.png" alt="Operator Console desktop screenshot" width="360"> | <img src="assets/screenshots/operator-console/mobile.png" alt="Operator Console mobile screenshot" width="180"> |
+| BuildDesk | <img src="assets/screenshots/builddesk/desktop.png" alt="BuildDesk desktop screenshot" width="360"> | <img src="assets/screenshots/builddesk/mobile.png" alt="BuildDesk mobile screenshot" width="180"> |
+| Artifact Labs | <img src="assets/screenshots/artifact-labs-site/desktop.png" alt="Artifact Labs desktop screenshot" width="360"> | <img src="assets/screenshots/artifact-labs-site/mobile.png" alt="Artifact Labs mobile screenshot" width="180"> |
+| Ops Dashboard | <img src="assets/screenshots/ops-dashboard/desktop.png" alt="Ops Dashboard desktop screenshot" width="360"> | <img src="assets/screenshots/ops-dashboard/mobile.png" alt="Ops Dashboard mobile screenshot" width="180"> |
+| CRM v2 | <img src="assets/screenshots/crm-v2/desktop.png" alt="CRM v2 desktop screenshot" width="360"> | <img src="assets/screenshots/crm-v2/mobile.png" alt="CRM v2 mobile screenshot" width="180"> |
 
-Each new example should keep its Stark UX/UI/asset decision notes in its own README so future changes can be judged against the original design intent.
+Screenshot folders live under `assets/screenshots/<project>/`.
 
 ## Native Tracks
 
