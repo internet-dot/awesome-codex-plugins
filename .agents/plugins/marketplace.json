@@ -17,7 +17,7 @@
       },
       "category": "Development & Workflow",
       "description": "An agentic skills framework & software development methodology that works: planning, TDD, debugging, and collaboration workflows.",
-      "icon": "././plugins/GanyuanRan/Aegis/assets/aegis-small.svg"
+      "icon": "./plugins/GanyuanRan/Aegis/assets/aegis-small.svg"
     },
     {
       "name": "codiris-agentizer",
@@ -32,7 +32,7 @@
       },
       "category": "Development & Workflow",
       "description": "Turn any website into an AI-powered agentfront with split-pane",
-      "icon": "././plugins/Humiris/wwa-transform/assets/logo-256.png"
+      "icon": "./plugins/Humiris/wwa-transform/assets/logo-256.png"
     },
     {
       "name": "agentops",
@@ -103,7 +103,7 @@
       },
       "category": "Development & Workflow",
       "description": "Reverse of OpenAI's official Claude-hosted plugin: use Claude Code from Codex for reviews, rescue tasks, tracked background jobs, and hook-powered review gates.",
-      "icon": "././plugins/sendbird/cc-plugin-codex/assets/cc-small.svg"
+      "icon": "./plugins/sendbird/cc-plugin-codex/assets/cc-small.svg"
     },
     {
       "name": "claude-code-harness",
@@ -118,7 +118,7 @@
       },
       "category": "Development & Workflow",
       "description": "Harness blueprint skill for turning vague agent ideas into concrete designs for request assembly, control loops, memory, permissions, recovery, and extension planes.",
-      "icon": "././plugins/dadwadw233/claude-code-harness/assets/icon.svg"
+      "icon": "./plugins/dadwadw233/claude-code-harness/assets/icon.svg"
     },
     {
       "name": "claude-code-skills",
@@ -175,7 +175,7 @@
       },
       "category": "Development & Workflow",
       "description": "Specialist AI agents (researcher, PM, architect, developer, QA, reviewer) orchestrated as a configurable team pipeline.",
-      "icon": "././plugins/yimwoo/codex-agenteam/assets/agenteam-icon.png"
+      "icon": "./plugins/yimwoo/codex-agenteam/assets/agenteam-icon.png"
     },
     {
       "name": "codex-multi-auth",
@@ -246,7 +246,7 @@
       },
       "category": "Development & Workflow",
       "description": "Durable memory and shared graph state for Codex and OpenClaw agents, with live ValkyrAI schema awareness.",
-      "icon": "././plugins/ValkyrLabs/GrayMatter/assets/composer-icon.svg"
+      "icon": "./plugins/ValkyrLabs/GrayMatter/assets/composer-icon.svg"
     },
     {
       "name": "hotl",
@@ -261,7 +261,7 @@
       },
       "category": "Development & Workflow",
       "description": "Human-on-the-Loop AI coding workflow plugin for Codex, Claude Code, and Cline with structured planning, review, and verification guardrails.",
-      "icon": "././plugins/yimwoo/hotl-plugin/docs/assets/codex/hotl-icon.png"
+      "icon": "./plugins/yimwoo/hotl-plugin/docs/assets/codex/hotl-icon.png"
     },
     {
       "name": "codex-project-autopilot",
@@ -276,7 +276,7 @@
       },
       "category": "Development & Workflow",
       "description": "Turn an idea into a structured project workflow with planning, execution, verification, and handoff.",
-      "icon": "././plugins/AlexMi64/codex-project-autopilot/assets/autonomous-project-agent.svg"
+      "icon": "./plugins/AlexMi64/codex-project-autopilot/assets/autonomous-project-agent.svg"
     },
     {
       "name": "registry-broker-codex-plugin",
@@ -291,7 +291,7 @@
       },
       "category": "Development & Workflow",
       "description": "Delegate tasks to specialist AI agents via the HOL Registry, plan, find, summon, and recover sessions.",
-      "icon": "././plugins/hashgraph-online/registry-broker-codex-plugin/assets/icon.svg"
+      "icon": "./plugins/hashgraph-online/registry-broker-codex-plugin/assets/icon.svg"
     },
     {
       "name": "session-orchestrator",
@@ -446,7 +446,7 @@
       },
       "category": "Tools & Integrations",
       "description": "macOS-only local camera plugin for explicit snapshots, streaming controls, and file-backed image input.",
-      "icon": "././plugins/zfifteen/agent-vision/assets/composer-icon.png"
+      "icon": "./plugins/zfifteen/agent-vision/assets/composer-icon.png"
     },
     {
       "name": "apple-calendar",
@@ -531,7 +531,7 @@
       },
       "category": "Tools & Integrations",
       "description": "One-click Codex plugin wrapper for chrome-devtools-mcp.",
-      "icon": "././plugins/win4r/chrome-devtools-codex-plugin/assets/chrome-devtools-small.svg"
+      "icon": "./plugins/win4r/chrome-devtools-codex-plugin/assets/chrome-devtools-small.svg"
     },
     {
       "name": "be-serious",
@@ -546,7 +546,7 @@
       },
       "category": "Tools & Integrations",
       "description": "Enforce formal, textbook-grade written register across all agent output.",
-      "icon": "././plugins/lulucatdev/codex-be-serious/assets/icon.png"
+      "icon": "./plugins/lulucatdev/codex-be-serious/assets/icon.png"
     },
     {
       "name": "codex-mem",
@@ -575,7 +575,7 @@
       },
       "category": "Tools & Integrations",
       "description": "Local Obsidian note and vault workflows through the official desktop `obsidian` CLI.",
-      "icon": "././plugins/greg-asher/codex-obsidian/assets/icon.svg"
+      "icon": "./plugins/greg-asher/codex-obsidian/assets/icon.svg"
     },
     {
       "name": "codex-seo",
@@ -590,7 +590,7 @@
       },
       "category": "Tools & Integrations",
       "description": "Full-stack SEO audits, Google API workflows, backlinks analysis, reporting, and optional MCP extensions for Codex.",
-      "icon": "././plugins/BestLemoon/codex-seo/assets/icon.svg"
+      "icon": "./plugins/BestLemoon/codex-seo/assets/icon.svg"
     },
     {
       "name": "context-pack",
@@ -605,7 +605,7 @@
       },
       "category": "Tools & Integrations",
       "description": "Generate compact first-pass repository briefings for coding agents before deeper exploration.",
-      "icon": "././plugins/Rothschildiuk/context-pack/skills/context-pack/assets/context-pack-small.svg"
+      "icon": "./plugins/Rothschildiuk/context-pack/skills/context-pack/assets/context-pack-small.svg"
     },
     {
       "name": "dodopayments",
@@ -718,7 +718,7 @@
       },
       "category": "Tools & Integrations",
       "description": "Official Launch Fast plugin adapter for rapid SaaS deployment.",
-      "icon": "././plugins/BlockchainHB/launchfast_codex_plugin/assets/icon.png"
+      "icon": "./plugins/BlockchainHB/launchfast_codex_plugin/assets/icon.png"
     },
     {
       "name": "mobazha",
@@ -775,7 +775,7 @@
       },
       "category": "Tools & Integrations",
       "description": "Team collaboration via OpenProject integration.",
-      "icon": "././plugins/varaprasadreddy9676/team-codex-plugins/assets/openproject-icon.svg"
+      "icon": "./plugins/varaprasadreddy9676/team-codex-plugins/assets/openproject-icon.svg"
     },
     {
       "name": "orgx-codex-plugin",
@@ -790,7 +790,7 @@
       },
       "category": "Tools & Integrations",
       "description": "MCP access and initiative-aware skills for organizational workflows.",
-      "icon": "././plugins/useorgx/orgx-codex-plugin/assets/icon.png"
+      "icon": "./plugins/useorgx/orgx-codex-plugin/assets/icon.png"
     },
     {
       "name": "panews",
@@ -819,7 +819,7 @@
       },
       "category": "Tools & Integrations",
       "description": "Paper discovery, citation verification, graph exploration, and DeepScan analysis.",
-      "icon": "././plugins/papersflow-ai/papersflow-codex-plugin/assets/plugin-icon.png"
+      "icon": "./plugins/papersflow-ai/papersflow-codex-plugin/assets/plugin-icon.png"
     },
     {
       "name": "prompt-to-asset",
@@ -848,7 +848,7 @@
       },
       "category": "Tools & Integrations",
       "description": "Build parameterized Remotion videos in Codex with the official Remotion docs MCP, composition scaffolding, and a data-driven launch-video workflow.",
-      "icon": "././plugins/tim-osterhus/codex-remotion-plugin/assets/remotion-composer-icon.svg"
+      "icon": "./plugins/tim-osterhus/codex-remotion-plugin/assets/remotion-composer-icon.svg"
     },
     {
       "name": "ru-text",
@@ -905,7 +905,7 @@
       },
       "category": "Tools & Integrations",
       "description": "Build, edit, validate, and self-heal n8n workflows with Synta MCP tools and Codex-ready workflow guidance.",
-      "icon": "././plugins/Synta-ai/n8n-mcp-codex-plugin-synta/assets/icon.png"
+      "icon": "./plugins/Synta-ai/n8n-mcp-codex-plugin-synta/assets/icon.png"
     },
     {
       "name": "task-scheduler",
@@ -920,7 +920,7 @@
       },
       "category": "Tools & Integrations",
       "description": "OpenAI Codex plugin and local MCP server for turning task lists into realistic schedules with blocked dates, capacity overrides, overflow tracking, and markdown planning output.",
-      "icon": "././plugins/6Delta9/task-scheduler-codex-plugin/assets/icon.png"
+      "icon": "./plugins/6Delta9/task-scheduler-codex-plugin/assets/icon.png"
     },
     {
       "name": "tokrepo-search",
@@ -977,7 +977,7 @@
       },
       "category": "Tools & Integrations",
       "description": "GitHub-ready Codex plugin bundle for Yandex Direct, Wordstat, Metrika, and Roistat.",
-      "icon": "././plugins/nebelov/yandex-direct-for-all/assets/icon.png"
+      "icon": "./plugins/nebelov/yandex-direct-for-all/assets/icon.png"
     }
   ]
 }

@@ -283,7 +283,7 @@ def main() -> None:
                 # Verify the file exists in the mirrored plugin directory
                 abs_path = PLUGINS_ROOT / plugin["owner"] / plugin["repo"] / rel
                 if abs_path.exists():
-                    icon_path = f"./{candidate}"
+                    icon_path = candidate
 
         mirrored_entries.append(build_marketplace_entry(plugin, manifest, marketplace_path, icon_path))
 
