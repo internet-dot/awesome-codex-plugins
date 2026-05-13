@@ -22,6 +22,7 @@ That is wrong for native apps, and it is boring on the web.
 - Contextual UX briefs cover agent runs, operational dashboards, activation onboarding, checkout/upgrade, and editor/canvas tools.
 - UI produces a visual decision brief for surface type, hierarchy, density, component grammar, motion budget, and state visuals.
 - Product quality checks force specific jobs, proof surfaces, complete states, scan speed, and one memorable anchor before code.
+- Interaction guidance chooses CSS, Motion, GSAP, native scroll CSS, Lenis, command palettes, split panes, timelines, or no motion by surface and product job.
 - Asset planning chooses icons, screenshots, references, typography, generated UI mocks, and optional GPT/Codex image generation before implementation.
 - Reference analysis extracts structure from shipped products, Mobbin/Figma screens, docs, and screenshots without copying visual identity.
 - Web asks for an aesthetic direction first.
@@ -89,7 +90,7 @@ stark/
   skills/
     design-router/               UX and platform dispatcher
     ux-design/                   flows, states, IA, forms, onboarding, dashboards
-  references/ui-patterns/         surface taxonomy, visual hierarchy, responsive containment, asset selection, reference analysis, motion budget, UI audit rubric, product quality bar
+  references/ui-patterns/         surface taxonomy, visual hierarchy, responsive containment, asset selection, reference analysis, motion budget, interaction techniques, UI audit rubric, product quality bar
   references/ux-patterns/         contextual product-flow briefs
     web-design/                  6 web aesthetic directions
     windows-design/              WinUI / branded WinUI / Tauri / Electron
@@ -127,6 +128,19 @@ For "make this better" work, Stark now pushes agents to answer five practical qu
 - What is the one memorable visual anchor?
 
 That keeps generated output closer to a real product and farther from generic demo furniture.
+
+## Interaction Decisions
+
+Stark includes product-facing motion and interaction guidance:
+
+- CSS transitions for simple hover/focus/disclosure feedback.
+- Motion for React when component state, layout continuity, sheets, modals, or route/detail transitions matter.
+- GSAP ScrollTrigger only for complex timeline or pinned storytelling.
+- Native scroll-driven CSS for lightweight progress and reveal effects.
+- Lenis only when scroll feel is part of a brand/editorial surface.
+- No animation when stability, reading, copying, comparing, or recovery matters more.
+
+The interaction brief also makes agents state the motion budget, reduced-motion behavior, and rejected techniques.
 
 ## Screenshot Gallery
 

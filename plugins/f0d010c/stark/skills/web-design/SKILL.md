@@ -1,6 +1,6 @@
 ---
 name: web-design
-description: Use when the user asks for a web app, webpage, landing page, marketing site, editorial site, brand site, SaaS dashboard, admin dashboard, React dashboard, hero section, React, Next, Astro, SvelteKit, Solid, Qwik, Tailwind, HTML, CSS, JS, JSX, TSX, Svelte, Vue, Astro deliverable, web visual asset plan, image generation for a site, or UI reference planning. Builds web frontends with the right surface type, visual direction, hierarchy, motion, layout, copy, assets, and anti-slop discipline. ALWAYS choose surface type and ask which aesthetic direction first. SKIP when the target is a native desktop/mobile app.
+description: Use for web apps, landing pages, dashboards, React/Next/Vite/Tailwind frontends, web UI reference planning, animation, motion, scrolling, GSAP, Motion, Lenis, command palettes, split panes, and frontend interaction decisions. Builds web surfaces with the right surface type, visual direction, hierarchy, motion, layout, copy, assets, and anti-slop discipline. ALWAYS choose surface type and ask which aesthetic direction first. SKIP when the target is a native desktop/mobile app.
 ---
 
 # web-design — pick the direction first, then execute precisely
@@ -20,7 +20,7 @@ Before aesthetic direction, classify the surface using `../../references/ui-patt
 
 Then write the `UI decision brief` from `../../references/ui-patterns/ui-decision-brief.md`. For dashboards, editors, checkouts, and agent-run UIs, preserve the UX decision brief if one exists and bias toward usable density over Awwwards spectacle.
 
-Do not force an expressive landing-page composition onto a repeated-use web app. For operational surfaces, read `../../references/ui-patterns/product-quality-bar.md`, `../../references/ui-patterns/visual-hierarchy.md`, `../../references/ui-patterns/responsive-containment.md`, `../../references/ui-patterns/motion-budget.md`, and `../../references/ui-patterns/ui-audit-rubric.md` before coding.
+Do not force an expressive landing-page composition onto a repeated-use web app. For operational surfaces, read `../../references/ui-patterns/product-quality-bar.md`, `../../references/ui-patterns/visual-hierarchy.md`, `../../references/ui-patterns/responsive-containment.md`, `../../references/ui-patterns/motion-budget.md`, `../../references/ui-patterns/interaction-techniques.md`, and `../../references/ui-patterns/ui-audit-rubric.md` before coding.
 
 When the site needs imagery, proof visuals, icons, screenshots, typography, or references, also read `../../references/ui-patterns/asset-selection.md` and include an asset plan before code. If the user is using GPT/Codex and image generation is available, generated bitmap assets are allowed for fictional product visuals, editorial hero imagery, textures, and empty states when they support the product job.
 
@@ -57,8 +57,8 @@ For operational dashboards, admin tools, and editors, ask direction in a restrai
 Ask in one batch:
 - **Framework**: Next 15 (apps + marketing), Astro 5 (content/editorial), SvelteKit 2 (craft), Solid, Qwik, plain Vite + React?
 - **CSS**: Tailwind v4 default. Vanilla CSS w/ `@scope`/`@layer` if user prefers no utility classes.
-- **Motion library**: Motion (motion.dev) default. GSAP if heavy timeline work. Both if needed.
-- **Smooth scroll**: Lenis default off. Only add if direction calls for it (editorial, type-as-hero, glow+grain).
+- **Motion library**: choose from `../../references/ui-patterns/interaction-techniques.md`. CSS first for simple transitions, Motion for React product motion, GSAP only for timeline/pinned storytelling, Lenis only for brand scroll feel.
+- **Smooth scroll**: default off. Only add if direction and surface type justify it; never add to dashboards, docs, forms, checkout, editors, or admin tools.
 
 State stack pick at top of response in one sentence.
 
@@ -136,6 +136,7 @@ Every web output, regardless of direction:
 - **Surface-fit baseline** — marketing pages may be spacious and expressive; dashboards, editors, checkouts, and agent-run UIs must preserve task density, stable controls, and state visibility.
 - **Responsive containment** — nav rows, dense tables, toolbars, inspectors, and long labels must wrap, collapse, or scroll inside their own region; never leave mobile/tablet page-level horizontal overflow.
 - **Quality bar note** — for public-facing or "make it better" work, state the specific job, proof surface, required states, scan-speed decision, and memorable anchor before implementation.
+- **Interaction decision** — when motion/scrolling is non-trivial, state budget, techniques, library choice, why it fits, reduced-motion behavior, and rejected techniques.
 
 ## Step 3 — Deploy 2-4 signature motion moments
 
@@ -149,6 +150,8 @@ Pick from technique inventory above. Examples per direction:
 - **Active bento**: layoutId connected animations + tile-expand on hover + scroll-snap sections + custom cursor "VIEW"
 
 Don't deploy all 17 techniques. Pick 2-4 that reinforce the direction.
+
+Before adding GSAP, Lenis, native scroll-driven CSS, custom cursors, pinned scroll, parallax, or view transitions, check `../../references/ui-patterns/interaction-techniques.md`. If the surface is a dashboard, docs, checkout, editor, admin panel, or form-heavy workflow, default back to subtle/functional interaction.
 
 ## Step 4 — Anti-slop ban list (always enforced)
 
@@ -195,6 +198,7 @@ Ask before delivering output:
 11. Dark mode (if applicable) has warmth/coolness, not just inversion?
 12. Mobile/tablet has no page-level horizontal overflow?
 13. Does the design show product proof instead of only making claims?
+14. Did I choose an interaction budget and reject the wrong motion libraries for this surface?
 
 If any "no" — restart that choice, don't ship near-misses.
 
@@ -218,6 +222,7 @@ Default to fitting alongside one of these. Read `../../references/awwwards-ceili
 - `../../references/design-philosophy.md` — core thesis
 - `../../references/web-patterns/*.md` — copy-paste pattern library
 - `../../references/ui-patterns/reference-analysis.md` — structure extraction from shipped references
+- `../../references/ui-patterns/interaction-techniques.md` — motion, scroll, and interaction decision system
 - `../../references/web-direction-*.md` — per-direction full implementation
 - `../../references/web-fonts.md` — type pairings
 - `../../references/web-bans.md` — anti-slop list
