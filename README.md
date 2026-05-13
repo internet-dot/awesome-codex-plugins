@@ -68,7 +68,7 @@ codex plugin install <plugin-name> --source awesome-codex-plugins
 1. Open Codex settings → Plugins → Next to search input click on menu and select →   `+Add More...`
 2. Add this URL:
    ```
-   git@github.com:hashgraph-online/awesome-codex-plugins.git
+   https://github.com/hashgraph-online/awesome-codex-plugins.git
    ```
 3. The curated plugin list appears as an available marketplace source.
 
