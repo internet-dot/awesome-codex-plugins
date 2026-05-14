@@ -411,6 +411,42 @@ Log every non-`pass` result as an event to `.orchestrator/metrics/events.jsonl` 
    - After **Quality**: Full Gate quality checks per quality-gates (typecheck + test + lint, must all pass)
      (Full Gate is NEVER skipped regardless of cache state — this is the close-safety invariant.)
    - After **Finalization**: final git status check
+#### Auto-Commit Checkpoint (Optional, Opt-In)
+
+> Gate conditions — ALL of the following must be true for this step to run:
+> 1. `$CONFIG["auto-commit-per-wave"] === true`
+> 2. `$CONFIG.persistence === true`
+> 3. The Incremental quality check in step 4 returned **PASS** (skip or fail → do not commit)
+> 4. Worktree base-ref freshness check (step 3b) returned **pass** or **warn** for all agents (not **block**)
+> 5. No unresolved merge conflicts in the working tree (`git status --short` shows no `UU`/`AA`/`DD` lines)
+>
+> When any condition is false, skip this step silently. Log "auto-commit-per-wave skipped" in the wave progress update if the gate condition was `auto-commit-per-wave: true` but another condition failed — so the operator knows the flag is set but the checkpoint did not fire.
+
+**Commit message format:**
+
+```
+chore(wave-N): auto-checkpoint — <Role> wave complete
+
+Quality-Lite: PASS | Wave: N / <total-waves> | Session: <session_id>
+Agents: <done>/<total> done, <partial> partial, <failed> failed
+```
+
+**Env-var bypass:** `SO_SKIP_AUTO_COMMIT=1` disables the commit for the current shell invocation regardless of config — useful for CI environments or when a human is reviewing changes mid-session.
+
+**STATE.md deviation logging:** after a successful commit, append one entry to `## Deviations` using `appendDeviation(stateContents, isoTimestamp, message)` from `scripts/lib/state-md.mjs`:
+
+```
+- [<ISO 8601 UTC>] Wave N auto-commit: <sha> (<Role>, Quality-Lite PASS, <N> files staged)
+```
+
+If the commit itself fails (e.g., nothing to commit, pre-commit hook rejects), do NOT append the deviation. Instead, log the failure in the wave progress update as a WARN and continue to the next step without blocking.
+
+**Mission-status transition:** after a successful auto-commit, transition the mission status for all tasks in this wave from `in-dev` → `testing` using `setMissionStatus(stateContent, taskId, 'testing')` from `scripts/lib/state-md.mjs`. This matches the coordinator-level rule in `SKILL.md § Mission-Status Updates`: "in-dev → testing: Quality wave begins and this item's implementation wave completed without failure." The auto-commit checkpoint fires at the same logical moment — after implementation completes and Quality-Lite passes.
+
+**Implementation deferred:** This subsection documents the contract. The procedural body (git add/commit sequence + error handling) will land in V3.6 as `scripts/lib/auto-commit.mjs` (see follow-up issue GitLab #214). Until then, this section is a no-op stub when `auto-commit-per-wave: true` is set; the coordinator MUST warn the user at session-start that auto-commits are not yet active (emit: "auto-commit-per-wave is set but the implementation (scripts/lib/auto-commit.mjs) is not yet available — commits will occur at session-end via /close as normal").
+
+---
+
 5a. **Persona-reviewer dispatch** (opt-in, gated by `wave-reviewers` config):
    - Read `wave-reviewers` from Session Config. If the key is absent or the array is empty → skip this step entirely (no-op).
    - Applicable waves: **Impl-Core** and **Impl-Polish** only. Skip for Discovery, Quality, and Finalization waves.

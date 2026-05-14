@@ -100,17 +100,20 @@ authoritative `GateDecision`, and do not grant completion authority.
 Before long-task execution:
 
 1. State the requested outcome, scope, non-goals, and risk hints.
-2. Identify baseline refs that must be read before changing files.
-3. Create or update the todo map.
-4. Create the first checkpoint:
+2. If goal framing exists, restate goal, success evidence, stop condition, and
+   non-goals. Stop condition must allow done, blocked, needs-verification, and
+   scope-exceeded outcomes.
+3. Identify baseline refs that must be read before changing files.
+4. Create or update the todo map.
+5. Create the first checkpoint:
    - current todo
    - active slice
    - completed todos
    - evidence refs
    - blocked-on items
    - next step
-5. If baseline refs are missing, pause in `needs-baseline-readback`.
-6. If the workspace helper is available, use `aegis-workspace.py new-work` to
+6. If baseline refs are missing, pause in `needs-baseline-readback`.
+7. If the workspace helper is available, use `aegis-workspace.py new-work` to
    create/index the first `docs/aegis/work/` files and run `check --root
    <target-project-root>` before continuing.
 
@@ -155,6 +158,7 @@ Never resume from memory alone.
 Answer these after each slice:
 
 - Does the current work still serve the original task intent?
+- Does the current work still serve the goal and stop condition?
 - Did the slice stay inside the compatibility boundary?
 - Did any new owner, fallback, adapter, or branch appear?
 - Is the retirement track still explicit?

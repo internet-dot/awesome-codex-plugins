@@ -53,8 +53,23 @@ Evidence Card:
 3. **Prompt Hygiene**: when external output shaped judgment → state whether summaries or raw excerpts were used. Name large payloads not loaded. If summary insufficient → read back excerpt or lower claim. Include Evidence Used / Not Loaded / Next Evidence boundary when relevant.
 4. **Confidence**: A (direct + regression, no unknowns) | B (direct, bounded risk) | C (partial only, not closed)
 5. **Authority**: verified evidence ≠ authoritative completion. Keep distinct.
-6. **Long-Task**: re-read checkpoint, confirm every todo has status, no drift check unresolved.
-7. **Workspace Integrity**: if the task created or modified a target project's
+6. **Goal Closure**: when `goal-framing` or optional `TaskIntentDraft` goal
+   fields shaped the work, explicitly check the goal before claiming completion:
+
+   ```text
+   Goal Closure:
+   - Goal status: satisfied | blocked | needs-verification | scope-exceeded
+   - Success evidence:
+   - Stop state: done | blocked | needs-verification | scope-exceeded
+   - Non-goals respected:
+   ```
+
+   Use `done` only when success evidence is satisfied. Use `blocked` when a
+   dependency, permission, or required fact is missing. Use `needs-verification`
+   when implementation exists but evidence is insufficient. Use
+   `scope-exceeded` when continuing would exceed the goal or non-goals.
+7. **Long-Task**: re-read checkpoint, confirm every todo has status, no drift check unresolved.
+8. **Workspace Integrity**: if the task created or modified a target project's
    `docs/aegis/` workspace and configured Aegis workspace support is available,
    run
    `python scripts/aegis-workspace.py bundle --root <target-project-root> --work YYYY-MM-DD-<slug>`
@@ -64,7 +79,7 @@ Evidence Card:
    workspace check validate method-pack structure, index coverage, and
    recognizable JSON artifact sidecars only; they do not judge evidence
    sufficiency and do not grant completion authority.
-8. **Governance Closure**: for governance/cleanup/migration/compatibility/retirement work → final response must include. Do not skip this structure just because the implementation was small. Localize section labels and prose to the user's language; keep internal concepts in English only when they are product terms or file/path identifiers.
+9. **Governance Closure**: for governance/cleanup/migration/compatibility/retirement work → final response must include. Do not skip this structure just because the implementation was small. Localize section labels and prose to the user's language; keep internal concepts in English only when they are product terms or file/path identifiers.
 
    ```
    Repair Track: repaired object | action | impact | verification

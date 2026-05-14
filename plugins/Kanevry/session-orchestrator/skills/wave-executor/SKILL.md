@@ -352,3 +352,10 @@ See `wave-loop.md` § Pre-Dispatch: Frontmatter-Guard Injection for the exact co
 - **NEVER** dispatch more agents than configured in `agents-per-wave`
 - **NEVER** let wave execution run without reporting progress to the user
 - **NEVER** ask the user a decision as inline prose or a numbered markdown list — always use `AskUserQuestion` (see `.claude/rules/ask-via-tool.md`)
+- **NEVER** perform auto-commits from inside a dispatched subagent — the Auto-Commit Checkpoint (see `wave-loop.md § Auto-Commit Checkpoint`) is coordinator-only and fires only after Quality-Lite PASS. Agents report STATUS lines; the coordinator decides whether and when to commit. Subagent commits bypass the quality gate, skip the STATE.md deviation log, and violate parallel-session isolation (PSA-004 in `.claude/rules/parallel-sessions.md`).
+
+**Auto-commit vs. coordinator-snapshot:** these two features are complementary, not competing.
+- `coordinator-snapshot.mjs` (`wave-loop.md § Pre-Dispatch Coordinator Snapshot`) fires **before** agent dispatch as a stash-based working-tree backup — it protects uncommitted coordinator state from worktree merge-back collisions.
+- Auto-Commit Checkpoint fires **after** Quality-Lite PASS as a durable git commit — it provides a permanent recovery point for session crashes or `git stash` incidents (V3.3 RESCUE incident, GitLab #214).
+
+Both are gated on `persistence: true`. Neither replaces the other. The snapshot is pre-dispatch insurance; the auto-commit is post-gate durability.

@@ -59,7 +59,11 @@ You MUST create a task for each of these items and complete them in order:
 - Ask clarifying questions one at a time, prefer multiple choice
 - Separate facts, assumptions, unknowns while exploring
 
-**Working artifacts:** Keep three drafts: `TaskIntentDraft` (outcome, scope, risks), `BaselineReadSetHint` (candidate docs, authority gaps), `ImpactStatementDraft` (affected layers, owners, invariants, compat, non-goals). Refresh when scope changes.
+**Working artifacts:** Keep three drafts: `TaskIntentDraft` (outcome, goal,
+success evidence, stop condition, non-goals, scope, risks),
+`BaselineReadSetHint` (candidate docs, authority gaps), `ImpactStatementDraft`
+(affected layers, owners, invariants, compat, non-goals). Refresh when scope
+changes.
 
 **Compact output contract:** `TaskIntentDraft`, `BaselineReadSetHint`,
 `ImpactStatementDraft`, `Options`, and `Decision Needed`. Use this compact
