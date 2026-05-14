@@ -12,7 +12,7 @@ Do not default every page to React. Do not avoid React when the interaction mode
 | Vite + React | advanced landing page, animated campaign, dashboard, command palette, filters, inspectors, app shell, stateful demo | content-heavy SEO site that needs server/rendering decisions |
 | Next.js | marketing + app hybrid, SEO, routing, server data, auth, docs/product pages at scale | static one-pager or local prototype where framework weight adds little |
 | Astro | content/editorial site, docs, mostly static pages with islands of interactivity | dense app UI, complex client-side state everywhere |
-| SvelteKit/Solid/Qwik | user explicitly asks, existing project uses it, or performance/interaction model fits | when the agent would choose it just to be novel |
+| SvelteKit, Solid, or Qwik | user explicitly asks, existing project uses it, or performance/interaction model fits | when the agent would choose it just to be novel |
 
 ## React is worth it when
 
@@ -37,7 +37,7 @@ Before coding a web surface, state:
 
 ```md
 Implementation track
-- Track: static / Vite React / Next / Astro / other
+- Track: static / Vite + React / Next / Astro / other
 - Why this track fits:
 - Why the simpler track was rejected:
 - Required dependencies:
@@ -61,7 +61,7 @@ When installing dependencies, especially during active npm supply-chain incident
 ## Motion library fit
 
 - Static track: CSS transitions, native scroll-driven CSS, small vanilla JS.
-- Vite React: Motion for component/layout state, GSAP for timeline/pinned storytelling, CSS for simple feedback.
+- Vite + React: Motion for component/layout state, GSAP for timeline/pinned storytelling, CSS for simple feedback.
 - Next: same as React, plus be careful with client/server boundaries.
 - Astro: islands for isolated interactive parts; keep most content static.
 

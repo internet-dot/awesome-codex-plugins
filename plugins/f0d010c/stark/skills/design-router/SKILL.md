@@ -26,13 +26,13 @@ Scan for explicit signals (in priority order):
 | Signal in request | Route to |
 |---|---|
 | "onboarding", "checkout", "signup", "form flow", "empty state", "loading state", "error state", "admin workflow", "CRM", "internal tool", "SaaS dashboard", "user journey" | `ux-design` first, then platform skill |
+| "translate this UI", "translate this screen", "translate this design", "port this UI", "convert this screen", "from iOS to Windows", "from Apple to Android" | `cross-platform-design` first, then the target platform skill |
+| "design tokens", "export tokens", "DTCG", "token JSON", "ColorScheme", "Typography tokens", "Tailwind tokens", "SwiftUI tokens", "Compose tokens" | `design-tokens` |
 | `.tsx` `.jsx` `.html` `.svelte` `.vue`, "Tailwind", "Next.js", "Astro", "shadcn", "landing page", "marketing site", "dashboard in React" | `web-design` |
 | `.xaml` `.cs` (with `WinUI`/`UWP`/`WPF`), "Windows app", "Fluent", "Mica", "WinUI", "Win11", "Microsoft Store app", "PowerToys-style" | `windows-design` |
 | `.swift` `.swiftui`, "SwiftUI", "iOS app", "iPadOS", "macOS", "Liquid Glass", "HIG", "SF Symbols", "App Store", "Tahoe" | `apple-design` |
 | `.kt` `.kts`, "Compose", "Jetpack Compose", "Material 3", "Material You", "Pixel app", "Android app" | `android-design` |
 | "Tauri", "Electron", "Flutter", "React Native", "Expo", "Compose Multiplatform", "CMP", "Uno Platform", "Avalonia", "MAUI" | `cross-platform-design` |
-| "translate this UI", "translate this screen", "translate this design", "port this UI", "convert this screen", "from iOS to Windows", "from Apple to Android" | `cross-platform-design` first, then the target platform skill |
-| "design tokens", "export tokens", "DTCG", "token JSON", "ColorScheme", "Typography tokens" | `design-tokens` |
 
 ## Step 2 — When signals are absent
 

@@ -27,7 +27,7 @@ SIGNALS: dict[str, list[str]] = {
     ],
     "apple": [
         r"\bswiftui\b", r"\buikit\b", r"\bappkit\b", r"\bmacos\b",
-        r"\bipados?\b", r"\bios\s*\d+\b", r"\bios app\b",
+        r"\bipados?\b", r"\bios\b", r"\biphone\b", r"\bipad\b",
         r"\bliquid\s*glass\b", r"\bsf\s*symbols?\b", r"\bsf\s*pro\b",
         r"\b\.swift\b", r"\bnavigationsplitview\b", r"\btabview\b",
         r"\bhig\b", r"\bapp\s*store\b", r"\bxcode\b",
@@ -77,16 +77,24 @@ def detect(text: str) -> str:
     if not nonzero:
         return "ambiguous"
 
-    # Cross-platform wins if it has any score AND another platform also scored
-    if "cross-platform" in nonzero and len(nonzero) > 1:
+    # Cross-platform wins only with an explicit multi-platform signal.
+    if "cross-platform" in nonzero:
+        return "cross-platform"
+
+    named_platforms = [platform for platform in ("windows", "apple", "android") if platform in nonzero]
+    if len(named_platforms) > 1:
         return "cross-platform"
 
     # Otherwise: highest score
     top = max(nonzero.items(), key=lambda kv: kv[1])
     runner_up = sorted(nonzero.values(), reverse=True)
     if len(runner_up) > 1 and runner_up[0] - runner_up[1] < 2:
-        # Close call — multi-platform request
-        return "cross-platform"
+        if len(named_platforms) == 1:
+            return named_platforms[0]
+        top_platforms = [platform for platform, value in nonzero.items() if value == runner_up[0]]
+        if len(top_platforms) == 1:
+            return top_platforms[0]
+        return "ambiguous"
     return top[0]
 
 

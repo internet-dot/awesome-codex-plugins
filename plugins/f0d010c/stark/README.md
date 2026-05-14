@@ -24,7 +24,7 @@ That is wrong for native apps, and it is boring on the web.
 - Product quality checks force specific jobs, proof surfaces, complete states, scan speed, and one memorable anchor before code.
 - Creative direction turns "make it creative" into a concrete world, metaphor, material language, repeated motif, forbidden defaults, and one tasteful risk.
 - Interaction guidance chooses CSS, Motion, GSAP, native scroll CSS, Lenis, command palettes, split panes, timelines, or no motion by surface and product job.
-- Web implementation tracks choose static HTML/CSS/JS, Vite React, Next, Astro, or the existing stack by interaction needs and dependency risk.
+- Web implementation tracks choose static HTML/CSS/JS, Vite + React, Next, Astro, or the existing stack by interaction needs and dependency risk.
 - Cinematic landing guidance separates key art from page design, then defines typography, art direction, section rhythm, and motion choreography before code.
 - Asset planning chooses icons, screenshots, references, typography, generated UI mocks, and optional GPT/Codex image generation before implementation.
 - Reference analysis extracts structure from shipped products, Mobbin/Figma screens, docs, and screenshots without copying visual identity.
@@ -166,6 +166,7 @@ For high-craft work, Stark asks agents to define a world before code:
 - material language
 - typography personality
 - layout grammar
+- motion voice
 - repeated motif
 - forbidden defaults
 - one tasteful risk

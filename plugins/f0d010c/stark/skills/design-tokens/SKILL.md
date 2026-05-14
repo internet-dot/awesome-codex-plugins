@@ -46,7 +46,6 @@ Example:
 | Apple (SwiftUI) | `extension Color { static let brandPrimary = ... }` + `Color` asset catalog JSON |
 | Android (Compose) | `ColorScheme(primary = Color(0xFF...), ...)` + `Typography` |
 | Windows (WinUI 3) | `<ResourceDictionary>` with `<Color>`, `<SolidColorBrush>`, `<x:Double>` |
-| Flutter | `ThemeData(colorScheme: ColorScheme(...))` |
 
 Use `../../scripts/token_export.py` for the translation — never hand-translate. Tokens drift fast.
 

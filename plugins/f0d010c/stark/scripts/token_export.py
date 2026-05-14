@@ -35,22 +35,30 @@ def load_tokens(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def flatten(node: Any, prefix: str = "") -> dict[str, dict[str, Any]]:
+def flatten(node: Any, prefix: str = "", inherited_type: str | None = None) -> dict[str, dict[str, Any]]:
     """Walk DTCG tree, return {dotted.path: {$value, $type, ...}}."""
     out: dict[str, dict[str, Any]] = {}
     if isinstance(node, dict):
+        current_type = node.get("$type", inherited_type)
         if "$value" in node:
-            out[prefix] = node
+            token = dict(node)
+            if current_type and "$type" not in token:
+                token["$type"] = current_type
+            out[prefix] = token
             return out
         for key, child in node.items():
             if key.startswith("$"):
                 continue
             new_prefix = f"{prefix}.{key}" if prefix else key
-            out.update(flatten(child, new_prefix))
+            out.update(flatten(child, new_prefix, current_type))
     return out
 
 
 def resolve(value: Any, all_tokens: dict[str, dict[str, Any]], visited: set[str] | None = None) -> Any:
+    if isinstance(value, dict):
+        return {k: resolve(v, all_tokens, visited) for k, v in value.items()}
+    if isinstance(value, list):
+        return [resolve(v, all_tokens, visited) for v in value]
     if not isinstance(value, str):
         return value
 
@@ -80,6 +88,21 @@ def kebab(s: str) -> str:
     return s.replace(".", "-").replace("_", "-")
 
 
+def strip_category(path: str, category: str) -> str:
+    prefix = f"{category}."
+    if path == category:
+        return path
+    if path.startswith(prefix):
+        return path[len(prefix):]
+    return path
+
+
+def tailwind_color_name(path: str) -> str:
+    if path.startswith("color-dark."):
+        return "dark." + path[len("color-dark."):]
+    return strip_category(path, "color")
+
+
 def camel(s: str) -> str:
     parts = [part for part in re.split(r"[._-]+", s) if part]
     if not parts:
@@ -95,6 +118,21 @@ def numeric_token_value(value: Any, default: float) -> float:
         if match:
             return float(match.group(0))
     return default
+
+
+def line_height_value(value: Any, font_size: float) -> float:
+    if isinstance(value, (int, float)):
+        numeric = float(value)
+        return numeric * font_size if 0 < numeric < 4 else numeric
+    if isinstance(value, str):
+        stripped = value.strip()
+        match = re.search(r"-?\d+(?:\.\d+)?", stripped)
+        if match:
+            numeric = float(match.group(0))
+            if not re.search(r"[a-zA-Z%]", stripped) and 0 < numeric < 4:
+                return numeric * font_size
+            return numeric
+    return font_size
 
 
 def swift_weight(value: Any) -> str:
@@ -138,13 +176,14 @@ def export_tailwind(tokens: dict[str, dict[str, Any]]) -> str:
         t = tok.get("$type")
         v = resolve(tok["$value"], tokens)
         if t == "color":
-            lines.append(f"  --color-{kebab(path)}: {v};")
+            lines.append(f"  --color-{kebab(tailwind_color_name(path))}: {v};")
         elif t == "dimension":
-            lines.append(f"  --spacing-{kebab(path)}: {v};")
+            spacing_path = strip_category(strip_category(path, "spacing"), "space")
+            lines.append(f"  --spacing-{kebab(spacing_path)}: {v};")
         elif t == "duration":
-            lines.append(f"  --duration-{kebab(path)}: {v};")
+            lines.append(f"  --duration-{kebab(strip_category(path, 'duration'))}: {v};")
         elif t == "typography" and isinstance(v, dict):
-            name = kebab(path)
+            name = kebab(strip_category(strip_category(path, "typography"), "type"))
             if "fontFamily" in v:
                 lines.append(f"  --font-{name}: {v['fontFamily']};")
             if "fontSize" in v:
@@ -278,7 +317,7 @@ def compose_font_weight(value: Any) -> str:
 
 def compose_text_style_expr(value: dict[str, Any]) -> str:
     size = numeric_token_value(value.get("fontSize"), 16)
-    line_height = numeric_token_value(value.get("lineHeight"), size)
+    line_height = line_height_value(value.get("lineHeight"), size)
     weight = compose_font_weight(value.get("fontWeight", "regular"))
     return f"TextStyle(fontSize = {size:g}.sp, lineHeight = {line_height:g}.sp, fontWeight = {weight})"
 
@@ -309,7 +348,9 @@ def export_compose(tokens: dict[str, dict[str, Any]]) -> str:
     lines = [
         "package design.tokens",
         "",
+        "import androidx.compose.material3.ColorScheme",
         "import androidx.compose.material3.Typography",
+        "import androidx.compose.material3.lightColorScheme",
         "import androidx.compose.ui.graphics.Color",
         "import androidx.compose.ui.text.TextStyle",
         "import androidx.compose.ui.text.font.FontWeight",
@@ -335,6 +376,29 @@ def export_compose(tokens: dict[str, dict[str, Any]]) -> str:
                 pass
         elif t == "typography" and isinstance(v, dict):
             lines.append(f"    val {var} = {compose_text_style_expr(v)}")
+
+    color_scheme_args: list[str] = []
+    color_scheme_slots = {
+        "primary", "onPrimary", "primaryContainer", "onPrimaryContainer",
+        "inversePrimary", "secondary", "onSecondary", "secondaryContainer",
+        "onSecondaryContainer", "tertiary", "onTertiary", "tertiaryContainer",
+        "onTertiaryContainer", "background", "onBackground", "surface",
+        "onSurface", "surfaceVariant", "onSurfaceVariant", "surfaceTint",
+        "inverseSurface", "inverseOnSurface", "error", "onError",
+        "errorContainer", "onErrorContainer", "outline", "outlineVariant",
+        "scrim",
+    }
+    for path, tok in tokens.items():
+        if tok.get("$type") != "color" or not path.startswith("color."):
+            continue
+        slot = camel(strip_category(path, "color"))
+        if slot in color_scheme_slots:
+            color_scheme_args.append(f"        {slot} = {camel(path)}")
+    if color_scheme_args:
+        lines.append("")
+        lines.append("    val colorScheme: ColorScheme = lightColorScheme(")
+        lines.append(",\n".join(color_scheme_args))
+        lines.append("    )")
 
     typography_assignments: list[str] = []
     for path, tok in tokens.items():

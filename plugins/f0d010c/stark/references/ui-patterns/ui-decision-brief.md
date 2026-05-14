@@ -8,14 +8,14 @@ UI decision brief
 - Platform idiom: web / Windows / Apple / Android / cross-platform translation
 - Product thesis: the specific job, risk, queue, artifact, or decision this surface exists for
 - Visual direction: ...
-- Creative direction: world, visual metaphor, material language, repeated motif, tasteful risk
+- Creative direction: see `creative-direction.md` brief, including world, mood, visual metaphor, material language, typography personality, layout grammar, motion voice, repeated motif, forbidden defaults, tasteful risk, and restraints
 - Density: sparse / balanced / dense / operational
 - Hierarchy: primary visual, primary action, secondary surfaces
 - Component grammar: cards, tables, panes, toolbars, sheets, tabs, forms, command surface
 - Typography: system/native or chosen custom pair, scale, emphasis rule
 - Color/materials: background, surfaces, accent, semantic states
 - Motion budget: none / subtle / signature / expressive, plus reduced-motion behavior
-- Implementation track: static / Vite React / Next / Astro / other, plus dependency risk notes
+- Implementation track: static / Vite + React / Next / Astro / other, plus dependency risk notes
 - Responsive containment: nav, table/list, toolbar, inspector, and long-label behavior
 - Cinematic system: campaign / editorial scroll story / product proof / immersive brand, if applicable
 - Key art: subject, material, framing, depth, and reuse plan
