@@ -1,10 +1,9 @@
 {
   "mcpServers": {
     "ejentum": {
-      "command": "npx",
-      "args": ["-y", "ejentum-mcp"],
-      "env": {
-        "EJENTUM_API_KEY": "${EJENTUM_API_KEY}"
+      "url": "https://api.ejentum.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${EJENTUM_API_KEY}"
       }
     }
   }

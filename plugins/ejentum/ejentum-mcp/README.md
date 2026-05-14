@@ -21,17 +21,20 @@ If you have added this repo as a Codex marketplace source:
 codex plugin install ejentum-mcp --source awesome-codex-plugins
 ```
 
-Codex will prompt for `EJENTUM_API_KEY` on install. Get a key at https://ejentum.com.
+Codex will prompt for `EJENTUM_API_KEY` on install. The plugin connects to the hosted Ejentum MCP endpoint at `https://api.ejentum.com/mcp` over HTTPS with Bearer auth, so there is no local subprocess to manage. Get a key at https://ejentum.com.
 
-## Direct install (no marketplace)
+## Stdio alternative (no hosted endpoint)
 
-The underlying MCP server is published to npm:
+If you would rather run the MCP server as a local subprocess (no hosted dependency, npm package version pinned in your control), the same four harness tools ship as the `ejentum-mcp` npm package. In your Codex config:
 
-```bash
-npx -y ejentum-mcp
+```toml
+[mcp_servers.ejentum]
+command = "npx"
+args = ["-y", "ejentum-mcp"]
+env = { EJENTUM_API_KEY = "<your-key>" }
 ```
 
-With `EJENTUM_API_KEY` set in your environment. Same behavior either way.
+Both install paths use the same `EJENTUM_API_KEY` and expose the same four `harness_*` tools. Pick whichever fits your environment.
 
 ## Resources
 
