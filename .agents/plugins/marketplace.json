@@ -378,6 +378,21 @@
       "description": "Read-only meta-skill that scans your MCP servers, skills, plugins, and CLI tools, then suggests up to three ranked approaches (Methodical / Fast / Deep) with a copy-paste Quick Action table."
     },
     {
+      "name": "unity-agent-workflows",
+      "displayName": "Unity Agent Workflows",
+      "source": {
+        "source": "local",
+        "path": "./plugins/AUN-PN/unity-agent-workflows"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow",
+      "description": "Codex skill and plugin for safer Unity AI agent workflows, runtime-owner proof, validation, and Unity game development automation.",
+      "icon": "./plugins/AUN-PN/unity-agent-workflows/assets/unity-workflows.png"
+    },
+    {
       "name": "universal-design-principles",
       "displayName": "Universal Design Principles",
       "source": {

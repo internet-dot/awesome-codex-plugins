@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
-  "last_updated": "2026-05-13",
+  "last_updated": "2026-05-15",
   "total": 69,
   "categories": [
     "Development & Workflow",
@@ -270,15 +270,15 @@
       "install_url": "https://raw.githubusercontent.com/dragon1086/claude-skills/HEAD/.codex-plugin/plugin.json"
     },
     {
-  "name": "Unity Agent Workflows",
-  "url": "https://github.com/AUN-PN/unity-agent-workflows",
-  "owner": "AUN-PN",
-  "repo": "unity-agent-workflows",
-  "description": "Codex skill and plugin for safer Unity AI agent workflows, runtime-owner proof, validation, and Unity game development automation.",
-  "category": "Development & Workflow",
-  "source": "awesome-codex-plugins",
-  "install_url": "https://raw.githubusercontent.com/AUN-PN/unity-agent-workflows/HEAD/.codex-plugin/plugin.json"
-},
+      "name": "Unity Agent Workflows",
+      "url": "https://github.com/AUN-PN/unity-agent-workflows",
+      "owner": "AUN-PN",
+      "repo": "unity-agent-workflows",
+      "description": "Codex skill and plugin for safer Unity AI agent workflows, runtime-owner proof, validation, and Unity game development automation.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/AUN-PN/unity-agent-workflows/HEAD/.codex-plugin/plugin.json"
+    },
     {
       "name": "Universal Design Principles",
       "url": "https://github.com/HDeibler/universal-design-principles",
