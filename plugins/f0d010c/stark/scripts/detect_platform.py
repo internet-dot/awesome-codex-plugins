@@ -20,7 +20,7 @@ import sys
 SIGNALS: dict[str, list[str]] = {
     "windows": [
         r"\bwinui\b", r"\bxaml\b", r"\bwpf\b", r"\bwinapp\s*sdk\b",
-        r"\bfluent\b", r"\bmica\b", r"\bacrylic\b", r"\bwindows 1[12]\b",
+        r"\bfluent\b", r"\bmica\b", r"\bacrylic\b", r"\bwindows\b",
         r"\bwin11\b", r"\bwin12\b", r"\bsegoe\b", r"\bmicrosoft store\b",
         r"\bpowertoys\b", r"\b\.xaml\b", r"\bcommunitytoolkit\b",
         r"\bnavigationview\b", r"\bsettingscard\b",

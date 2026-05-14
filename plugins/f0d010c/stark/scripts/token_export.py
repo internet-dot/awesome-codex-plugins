@@ -267,7 +267,8 @@ def export_swiftui(tokens: dict[str, dict[str, Any]]) -> str:
             if not isinstance(v, dict) or "lineHeight" not in v:
                 continue
             line_height_count += 1
-            line_height = numeric_token_value(v.get("lineHeight"), numeric_token_value(v.get("fontSize"), 16))
+            font_size = numeric_token_value(v.get("fontSize"), 16)
+            line_height = line_height_value(v.get("lineHeight"), font_size)
             line_height_lines.append(f"    static let {camel(path)}LineHeight: CGFloat = {line_height:g}")
         if line_height_count:
             line_height_lines.append("}")
