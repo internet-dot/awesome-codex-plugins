@@ -21,7 +21,7 @@ Do not default every page to React. Do not avoid React when the interaction mode
 - Animation depends on component state, layout continuity, or route/detail transitions.
 - The page includes interactive product demos or simulated app UI.
 - The work will grow into an app, dashboard, or reusable design system.
-- Libraries such as Motion, GSAP React integration, React Three Fiber, shadcn, or TanStack are central to the plan.
+- Libraries such as Motion/motion.dev, GSAP React integration, React Three Fiber, shadcn, or TanStack are central to the plan.
 
 ## React is not worth it when
 
@@ -61,7 +61,7 @@ When installing dependencies, especially during active npm supply-chain incident
 ## Motion library fit
 
 - Static track: CSS transitions, native scroll-driven CSS, small vanilla JS.
-- Vite + React: Motion for component/layout state, GSAP for timeline/pinned storytelling, CSS for simple feedback.
+- Vite + React: Motion/motion.dev for component/layout state, GSAP for timeline/pinned storytelling, CSS for simple feedback.
 - Next: same as React, plus be careful with client/server boundaries.
 - Astro: islands for isolated interactive parts; keep most content static.
 

@@ -145,6 +145,8 @@ Stark includes product-facing motion and interaction guidance:
 
 The interaction brief also makes agents state the motion budget, reduced-motion behavior, and rejected techniques.
 
+Stark explicitly knows about Motion/motion.dev. It should choose Motion for React component state, layout continuity, sheets, modals, command palettes, and route/detail transitions. It should choose GSAP only for complex timeline or pinned-scroll storytelling, and CSS/native APIs for simpler interactions.
+
 ## Cinematic Landing Pages
 
 For launch pages, editorial scroll stories, immersive brand pages, and campaign-style websites, Stark treats the hero image as only one part of the system.
@@ -217,6 +219,10 @@ python scripts/detect_platform.py --text "Build a Settings screen for Win11 with
 python scripts/token_export.py --input assets/tokens/fluent-2.json --target winui --output Resources.xaml
 ```
 
+## Review Contract
+
+Stark keeps a small tested helper-script surface. Runtime bundle scope, local-only files, token-export guarantees, and change policy are documented in `docs/review-contract.md`.
+
 ## Test
 
 Run SkillForge against the plugin:
@@ -224,6 +230,7 @@ Run SkillForge against the plugin:
 ```bash
 npx agent-skillforge lint . --format text
 npx agent-skillforge smoke .
+python -m unittest discover -s tests
 ```
 
 These commands use `npx`; no repo-local package install is required.

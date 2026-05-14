@@ -19,7 +19,7 @@ If a motion or scrolling idea does not support one of those jobs, do not add it.
 |---|---|---|---|
 | CSS transitions | Simple hover, focus, disclosure, tab, button, or status changes | all surfaces | sequencing multiple dependent elements |
 | CSS keyframes | Small repeating or entrance animations | loaders, subtle ambience, status pulses | high-frequency dashboards with many animated rows |
-| Motion for React | React component motion, layout transitions, modals, sheets, command palettes, route/detail continuity | apps, dashboards, docs, product-led sites | complex pinned scroll stories or SVG choreography |
+| Motion for React / motion.dev | React component motion, layout transitions, modals, sheets, command palettes, route/detail continuity | apps, dashboards, docs, product-led sites | complex pinned scroll stories or SVG choreography |
 | GSAP ScrollTrigger | Complex timeline, pinned scroll, scrubbed hero, character/SVG choreography | launch pages, editorial product stories, portfolios | dashboards, docs, forms, checkout, admin tools |
 | Native scroll-driven CSS | Lightweight scroll progress, reveal-on-view, subtle section effects | editorial pages, docs progress, simple landing pages | critical flows without fallback, nested scroll containers |
 | Lenis smooth scroll | Branded scroll feel as part of an immersive page | editorial, type-led, portfolio, campaign pages | dashboards, docs, forms, editors, admin tools |
@@ -150,7 +150,7 @@ Avoid:
 ## Library selection rules
 
 - Start with CSS for simple transitions.
-- Use Motion for React when component state, layout continuity, or route/sheet/modal animation matters.
+- Use Motion for React (motion.dev) when component state, layout continuity, command palettes, route/detail transitions, sheets, or modal animation matters.
 - Use GSAP only when there is a clear timeline or scroll-story requirement.
 - Use Lenis only when scroll feel is part of the brand surface.
 - Use native scroll-driven CSS only when the effect is progressive enhancement or the target browser support is acceptable.

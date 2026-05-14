@@ -1,6 +1,6 @@
 {
   "name": "stark",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "UI/UX design plugin for AI coding agents. Routes product flows, web, Windows, Apple, Android, cross-platform, and token requests to focused design skills before code.",
   "author": {
     "name": "stark contributors",
@@ -28,6 +28,7 @@
     "./agents/",
     "./assets/",
     "./commands/",
+    "./docs/review-contract.md",
     "./references/",
     "./scripts/detect_platform.py",
     "./scripts/token_export.py"
