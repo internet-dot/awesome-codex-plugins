@@ -1,0 +1,93 @@
+{
+  "$schema": "https://m3.material.io/schemas/tokens.json",
+  "$description": "Material 3 Expressive reference tokens (May 2026). Includes shape-morph, motion-scheme-expressive, wavy-amplitude. Translate to Compose ColorScheme + Typography + MotionScheme via scripts/token_export.py.",
+  "color": {
+    "primary":           { "$value": "#6750A4", "$type": "color" },
+    "on-primary":        { "$value": "#FFFFFF", "$type": "color" },
+    "primary-container": { "$value": "#EADDFF", "$type": "color" },
+    "on-primary-container": { "$value": "#21005D", "$type": "color" },
+    "secondary":         { "$value": "#625B71", "$type": "color" },
+    "on-secondary":      { "$value": "#FFFFFF", "$type": "color" },
+    "tertiary":          { "$value": "#7D5260", "$type": "color" },
+    "error":             { "$value": "#B3261E", "$type": "color" },
+    "background":        { "$value": "#FFFBFE", "$type": "color" },
+    "surface":           { "$value": "#FFFBFE", "$type": "color" },
+    "surface-variant":   { "$value": "#E7E0EC", "$type": "color" },
+    "outline":           { "$value": "#79747E", "$type": "color" },
+    "outline-variant":   { "$value": "#CAC4D0", "$type": "color" }
+  },
+  "color-dark": {
+    "primary":           { "$value": "#D0BCFF", "$type": "color" },
+    "background":        { "$value": "#1C1B1F", "$type": "color" },
+    "surface":           { "$value": "#1C1B1F", "$type": "color" }
+  },
+  "shape": {
+    "none":          { "$value": "0px",  "$type": "dimension" },
+    "extra-small":   { "$value": "4px",  "$type": "dimension" },
+    "small":         { "$value": "8px",  "$type": "dimension" },
+    "medium":        { "$value": "12px", "$type": "dimension" },
+    "large":         { "$value": "16px", "$type": "dimension" },
+    "extra-large":   { "$value": "28px", "$type": "dimension" },
+    "full":          { "$value": "9999px","$type": "dimension" },
+    "morph": {
+      "$description": "M3E shape-morphing — name → MaterialShapes constant",
+      "cookie-4":   { "$value": "MaterialShapes.Cookie4Sided", "$type": "string" },
+      "cookie-6":   { "$value": "MaterialShapes.Cookie6Sided", "$type": "string" },
+      "cookie-9":   { "$value": "MaterialShapes.Cookie9Sided", "$type": "string" },
+      "cookie-12":  { "$value": "MaterialShapes.Cookie12Sided","$type": "string" },
+      "pill":       { "$value": "MaterialShapes.Pill",         "$type": "string" },
+      "boom":       { "$value": "MaterialShapes.Boom",         "$type": "string" },
+      "burst":      { "$value": "MaterialShapes.Burst",        "$type": "string" },
+      "clover-4":   { "$value": "MaterialShapes.Clover4Leaf",  "$type": "string" },
+      "clover-8":   { "$value": "MaterialShapes.Clover8Leaf",  "$type": "string" },
+      "clamshell":  { "$value": "MaterialShapes.Clamshell",    "$type": "string" }
+    }
+  },
+  "spacing": {
+    "$description": "4dp grid",
+    "0":  { "$value": "0",    "$type": "dimension" },
+    "1":  { "$value": "4dp",  "$type": "dimension" },
+    "2":  { "$value": "8dp",  "$type": "dimension" },
+    "3":  { "$value": "12dp", "$type": "dimension" },
+    "4":  { "$value": "16dp", "$type": "dimension" },
+    "5":  { "$value": "20dp", "$type": "dimension" },
+    "6":  { "$value": "24dp", "$type": "dimension" },
+    "8":  { "$value": "32dp", "$type": "dimension" }
+  },
+  "typography": {
+    "display-large":   { "$value": { "fontFamily": "Roboto Flex", "fontSize": "57sp", "lineHeight": "64sp", "fontWeight": 400 }, "$type": "typography" },
+    "display-medium":  { "$value": { "fontFamily": "Roboto Flex", "fontSize": "45sp", "lineHeight": "52sp", "fontWeight": 400 }, "$type": "typography" },
+    "headline-large":  { "$value": { "fontFamily": "Roboto Flex", "fontSize": "32sp", "lineHeight": "40sp", "fontWeight": 600 }, "$type": "typography", "$description": "M3E — emphasized heavier than baseline M3" },
+    "headline-medium": { "$value": { "fontFamily": "Roboto Flex", "fontSize": "28sp", "lineHeight": "36sp", "fontWeight": 600 }, "$type": "typography" },
+    "title-large":     { "$value": { "fontFamily": "Roboto Flex", "fontSize": "22sp", "lineHeight": "28sp", "fontWeight": 600 }, "$type": "typography" },
+    "title-medium":    { "$value": { "fontFamily": "Roboto Flex", "fontSize": "16sp", "lineHeight": "24sp", "fontWeight": 600 }, "$type": "typography" },
+    "body-large":      { "$value": { "fontFamily": "Roboto Flex", "fontSize": "16sp", "lineHeight": "24sp", "fontWeight": 400 }, "$type": "typography" },
+    "body-medium":     { "$value": { "fontFamily": "Roboto Flex", "fontSize": "14sp", "lineHeight": "20sp", "fontWeight": 400 }, "$type": "typography" },
+    "label-large":     { "$value": { "fontFamily": "Roboto Flex", "fontSize": "14sp", "lineHeight": "20sp", "fontWeight": 600 }, "$type": "typography" }
+  },
+  "motion": {
+    "$description": "M3 Expressive — spring physics replace easing curves",
+    "scheme":               { "$value": "MotionScheme.expressive()", "$type": "string" },
+    "spring-fast-spatial":  { "$value": "{ stiffness: 1400, damping: 0.9 }", "$type": "string" },
+    "spring-default-spatial": { "$value": "{ stiffness: 800, damping: 0.8 }", "$type": "string" },
+    "spring-slow-spatial":  { "$value": "{ stiffness: 200, damping: 0.8 }", "$type": "string" },
+    "duration-fast":   { "$value": "150ms", "$type": "duration", "$description": "Use only when a spring isn't appropriate (color/alpha)" },
+    "duration-medium": { "$value": "300ms", "$type": "duration" },
+    "duration-slow":   { "$value": "500ms", "$type": "duration" }
+  },
+  "elevation": {
+    "$description": "M3E — tonal elevation only. Drop shadow is BANNED on M3E surfaces.",
+    "level0": { "$value": "0",   "$type": "dimension", "$description": "No tonal shift" },
+    "level1": { "$value": "1dp", "$type": "dimension", "$description": "Surface +5% primary tone" },
+    "level2": { "$value": "3dp", "$type": "dimension" },
+    "level3": { "$value": "6dp", "$type": "dimension" },
+    "level4": { "$value": "8dp", "$type": "dimension" },
+    "level5": { "$value": "12dp","$type": "dimension" }
+  },
+  "wavy-progress": {
+    "$description": "M3E LinearWavyProgressIndicator amplitude tokens",
+    "default":   { "$value": "8dp", "$type": "dimension" },
+    "tight":     { "$value": "4dp", "$type": "dimension" },
+    "expressive":{ "$value": "12dp","$type": "dimension" }
+  }
+}

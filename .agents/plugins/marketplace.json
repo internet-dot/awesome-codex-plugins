@@ -60,7 +60,7 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Development & Workflow",
-      "description": "Multi-agent codebase knowledge graph generator with context-aware planning and automatic scope management — turns codebases into coherent agent workspaces."
+      "description": "Multi-agent codebase knowledge graph generator with context-aware planning and automatic scope management \u2014 turns codebases into coherent agent workspaces."
     },
     {
       "name": "bringyour-migration-auditor",
@@ -88,7 +88,7 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Development & Workflow",
-      "description": "AI code reviews grounded in six classic engineering books — decay risk diagnostics with book citations, severity labels, and four analysis modes (PR review, architecture audit, tech debt, test quality)."
+      "description": "AI code reviews grounded in six classic engineering books \u2014 decay risk diagnostics with book citations, severity labels, and four analysis modes (PR review, architecture audit, tech debt, test quality)."
     },
     {
       "name": "cc",
@@ -132,7 +132,7 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Development & Workflow",
-      "description": "223 production-ready skills, 23 agents, and 298 Python tools across 9 domains — engineering, marketing, product, compliance, and more."
+      "description": "223 production-ready skills, 23 agents, and 298 Python tools across 9 domains \u2014 engineering, marketing, product, compliance, and more."
     },
     {
       "name": "claude-octopus",
@@ -160,7 +160,7 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Development & Workflow",
-      "description": "Analyze git history to understand a codebase before reading any code — auto-scales by repo size and cross-references hotspots with bug magnets to surface high-risk files, bus factor, and team momentum."
+      "description": "Analyze git history to understand a codebase before reading any code \u2014 auto-scales by repo size and cross-references hotspots with bug magnets to surface high-risk files, bus factor, and team momentum."
     },
     {
       "name": "ateam",
@@ -289,7 +289,7 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Development & Workflow",
-      "description": "Token-lean triage-driven workflow skills for coding agents: design, planning, TDD, debugging, review, worktree, subagents, and release. 10–40× cheaper per skill than comparable frameworks while preserving full workflow discipline."
+      "description": "Token-lean triage-driven workflow skills for coding agents: design, planning, TDD, debugging, review, worktree, subagents, and release. 10\u201340\u00d7 cheaper per skill than comparable frameworks while preserving full workflow discipline."
     },
     {
       "name": "codex-project-autopilot",
@@ -333,7 +333,7 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Development & Workflow",
-      "description": "Session orchestration for Claude Code, Codex, and Cursor IDE — structured planning, wave-based execution, VCS integration (GitLab + GitHub), quality gates, and clean session close-out with issue tracking."
+      "description": "Session orchestration for Claude Code, Codex, and Cursor IDE \u2014 structured planning, wave-based execution, VCS integration (GitLab + GitHub), quality gates, and clean session close-out with issue tracking."
     },
     {
       "name": "spec-driven",
@@ -347,7 +347,21 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Development & Workflow",
-      "description": "Three-phase Requirements → Design → Tasks workflow for Claude Code and Codex — EARS notation acceptance criteria, autonomous execution loop, cross-spec dependencies, and post-implementation acceptance testing."
+      "description": "Three-phase Requirements \u2192 Design \u2192 Tasks workflow for Claude Code and Codex \u2014 EARS notation acceptance criteria, autonomous execution loop, cross-spec dependencies, and post-implementation acceptance testing."
+    },
+    {
+      "name": "stark",
+      "displayName": "Stark",
+      "source": {
+        "source": "local",
+        "path": "./plugins/f0d010c/stark"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow",
+      "description": "UI/UX design plugin for AI coding agents with product-flow routing, platform-native interface guidance, asset planning, and shipped-reference analysis before code."
     },
     {
       "name": "tailtest",
@@ -362,6 +376,21 @@
       },
       "category": "Development & Workflow",
       "description": "Hook-powered test generation -- detects files changed during an agent turn and instructs Codex to write and run tests automatically. Zero config, 8 languages."
+    },
+    {
+      "name": "tandem-codex-plugin",
+      "displayName": "Tandem Workflow Architect",
+      "source": {
+        "source": "local",
+        "path": "./plugins/frumu-ai/tandem-codex-plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow",
+      "description": "Plan Tandem workflows in Codex, then validate, preview, and run them through the governed Tandem engine.",
+      "icon": "./plugins/frumu-ai/tandem-codex-plugin/assets/icon.png"
     },
     {
       "name": "tartinerlabs",
@@ -389,7 +418,7 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Development & Workflow",
-      "description": "Role-based team delivery framework — Tech Lead-orchestrated 8-role system with 195+ skills, 27 specialist agents, 80+ commands, hooks, and ECC harness for Claude Code, Codex, and OpenCode."
+      "description": "Role-based team delivery framework \u2014 Tech Lead-orchestrated 8-role system with 195+ skills, 27 specialist agents, 80+ commands, hooks, and ECC harness for Claude Code, Codex, and OpenCode."
     },
     {
       "name": "tool-advisor",
@@ -446,7 +475,7 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Development & Workflow",
-      "description": "Developer personality portrait generator — analyzes AI conversation history to produce MBTI type (16 color themes), capability radar, developer rating, 3-dimension famous match, and a persona skill that lets any AI \"think like you\"."
+      "description": "Developer personality portrait generator \u2014 analyzes AI conversation history to produce MBTI type (16 color themes), capability radar, developer rating, 3-dimension famous match, and a persona skill that lets any AI \"think like you\"."
     },
     {
       "name": "writers-loop",
@@ -803,7 +832,7 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Tools & Integrations",
-      "description": "Decentralized e-commerce skills — deploy self-hosted stores, import products from Shopify/Amazon, configure custom domains and Telegram bots, set up Tor privacy, and manage your store via MCP."
+      "description": "Decentralized e-commerce skills \u2014 deploy self-hosted stores, import products from Shopify/Amazon, configure custom domains and Telegram bots, set up Tor privacy, and manage your store via MCP."
     },
     {
       "name": "morning-ai",
@@ -933,7 +962,7 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Tools & Integrations",
-      "description": "Russian text quality — ~1,040 rules for typography, info-style, editorial, UX writing, and business correspondence."
+      "description": "Russian text quality \u2014 ~1,040 rules for typography, info-style, editorial, UX writing, and business correspondence."
     },
     {
       "name": "rust-reverse-engineering",
@@ -961,7 +990,7 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Tools & Integrations",
-      "description": "Build websites from Markdown via MCP — 22 tools for creating pages, generating content, validating, running SEO audits, configuring settings, and deploying static sites to Cloudflare Pages."
+      "description": "Build websites from Markdown via MCP \u2014 22 tools for creating pages, generating content, validating, running SEO audits, configuring settings, and deploying static sites to Cloudflare Pages."
     },
     {
       "name": "n8n-mcp-synta-codex",
@@ -1019,7 +1048,7 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Tools & Integrations",
-      "description": "Strip AI writing patterns from text output — removes filler phrases, hedging language, and generic constructs to produce cleaner written content. Install: `npm install -g unslop`."
+      "description": "Strip AI writing patterns from text output \u2014 removes filler phrases, hedging language, and generic constructs to produce cleaner written content. Install: `npm install -g unslop`."
     },
     {
       "name": "upwork-autopilot",

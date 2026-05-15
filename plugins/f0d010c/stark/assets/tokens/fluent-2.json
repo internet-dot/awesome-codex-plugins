@@ -1,0 +1,74 @@
+{
+  "$schema": "https://schemas.microsoft.com/fluent-design/tokens/v1.json",
+  "$description": "Microsoft Fluent 2 reference token bundle — DTCG W3C format. Translate to WinUI 3 ResourceDictionary via scripts/token_export.py.",
+  "color": {
+    "neutral": {
+      "background": {
+        "default":  { "$value": "#F3F3F3", "$type": "color", "$description": "Light theme app background" },
+        "default-dark": { "$value": "#202020", "$type": "color", "$description": "Dark theme app background" },
+        "card":     { "$value": "#FBFBFB", "$type": "color", "$description": "Card surface light" },
+        "card-dark": { "$value": "#2B2B2B", "$type": "color", "$description": "Card surface dark" },
+        "layer":    { "$value": "#FFFFFFB3", "$type": "color", "$description": "Layer fill (Acrylic over content)" }
+      },
+      "stroke": {
+        "default":      { "$value": "#0000000F", "$type": "color" },
+        "default-dark": { "$value": "#FFFFFF14", "$type": "color" },
+        "card-default": { "$value": "#0000000F", "$type": "color" },
+        "divider":      { "$value": "#00000017", "$type": "color" }
+      },
+      "foreground": {
+        "primary":      { "$value": "#000000E4", "$type": "color", "$description": "Light primary text" },
+        "primary-dark": { "$value": "#FFFFFF",   "$type": "color", "$description": "Dark primary text" },
+        "secondary":    { "$value": "#0000009E", "$type": "color" },
+        "tertiary":     { "$value": "#0000007A", "$type": "color" },
+        "disabled":     { "$value": "#00000040", "$type": "color" }
+      }
+    },
+    "accent": {
+      "default":  { "$value": "#0F6CBD", "$type": "color", "$description": "Brand Communication primary" },
+      "hover":    { "$value": "#0E5BAA", "$type": "color" },
+      "pressed":  { "$value": "#0C4A8E", "$type": "color" }
+    },
+    "semantic": {
+      "success": { "$value": "#107C10", "$type": "color" },
+      "warning": { "$value": "#FFB900", "$type": "color" },
+      "danger":  { "$value": "#C42B1C", "$type": "color" },
+      "info":    { "$value": "#0F6CBD", "$type": "color" }
+    }
+  },
+  "spacing": {
+    "none":  { "$value": "0",   "$type": "dimension" },
+    "xxxs":  { "$value": "2px", "$type": "dimension" },
+    "xxs":   { "$value": "4px", "$type": "dimension" },
+    "xs":    { "$value": "8px", "$type": "dimension" },
+    "s":     { "$value": "12px","$type": "dimension" },
+    "m":     { "$value": "16px","$type": "dimension" },
+    "l":     { "$value": "20px","$type": "dimension" },
+    "xl":    { "$value": "24px","$type": "dimension" },
+    "xxl":   { "$value": "32px","$type": "dimension" },
+    "xxxl":  { "$value": "48px","$type": "dimension" }
+  },
+  "radius": {
+    "none":   { "$value": "0",   "$type": "dimension" },
+    "small":  { "$value": "4px", "$type": "dimension", "$description": "Default control radius" },
+    "medium": { "$value": "8px", "$type": "dimension", "$description": "Window radius" },
+    "large":  { "$value": "12px","$type": "dimension" }
+  },
+  "typography": {
+    "caption":      { "$value": { "fontFamily": "Segoe UI Variable", "fontSize": "12px", "lineHeight": "16px", "fontWeight": 400 }, "$type": "typography" },
+    "body":         { "$value": { "fontFamily": "Segoe UI Variable", "fontSize": "14px", "lineHeight": "20px", "fontWeight": 400 }, "$type": "typography" },
+    "body-strong":  { "$value": { "fontFamily": "Segoe UI Variable", "fontSize": "14px", "lineHeight": "20px", "fontWeight": 600 }, "$type": "typography" },
+    "body-large":   { "$value": { "fontFamily": "Segoe UI Variable", "fontSize": "18px", "lineHeight": "24px", "fontWeight": 400 }, "$type": "typography" },
+    "subtitle":     { "$value": { "fontFamily": "Segoe UI Variable", "fontSize": "20px", "lineHeight": "28px", "fontWeight": 600 }, "$type": "typography" },
+    "title":        { "$value": { "fontFamily": "Segoe UI Variable", "fontSize": "28px", "lineHeight": "36px", "fontWeight": 600 }, "$type": "typography" },
+    "title-large":  { "$value": { "fontFamily": "Segoe UI Variable", "fontSize": "40px", "lineHeight": "52px", "fontWeight": 600 }, "$type": "typography" },
+    "display":      { "$value": { "fontFamily": "Segoe UI Variable", "fontSize": "68px", "lineHeight": "92px", "fontWeight": 600 }, "$type": "typography" }
+  },
+  "duration": {
+    "ultra-fast": { "$value": "50ms",  "$type": "duration" },
+    "faster":     { "$value": "100ms", "$type": "duration" },
+    "fast":       { "$value": "150ms", "$type": "duration" },
+    "normal":     { "$value": "250ms", "$type": "duration" },
+    "slow":       { "$value": "400ms", "$type": "duration" }
+  }
+}
