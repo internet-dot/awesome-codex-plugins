@@ -1,7 +1,0 @@
-interface:
-  display_name: "Stark"
-  short_description: "Opinionated UI/UX design routing for agents"
-  default_prompt: "Use Stark to design, improve, or audit this UI/UX so it feels specific, usable, and ready for real product work."
-
-policy:
-  allow_implicit_invocation: true
