@@ -422,6 +422,11 @@ Explicit use:
 - Ask for a skill by name, such as `aegis:brainstorming`,
   `aegis:systematic-debugging`, `aegis:long-task-continuation`,
   or `aegis:verification-before-completion`.
+- Use `/aegis-goal <task>` or portable `Aegis goal: <task>` when you want a
+  thin goal frame before work starts. It sets goal, success evidence, stop
+  condition, and non-goals, then routes onward without creating project files
+  by default.
+  Example: `Aegis goal: Fix the auth refresh bug without rewriting the auth system.`
 - In OpenCode, use the native `skill` tool, for example: `use skill tool to load aegis/brainstorming`.
 - In Claude Code, use the plugin namespace, for example: `/aegis:using-aegis`.
 - In CodeBuddy, ask it to load an Aegis skill such as `systematic-debugging`.
@@ -531,6 +536,7 @@ Current method-pack outputs may include:
 - `ImpactStatementDraft`
 - `EvidenceBundleDraft`
 - `GateInputPack`
+- `SubagentContextPacket`
 - `TodoCheckpointDraft`
 - `ResumeStateHint`
 - `DriftCheckDraft`

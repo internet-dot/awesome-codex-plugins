@@ -89,8 +89,15 @@ Dream owns the knowledge compounding layer; `$evolve` owns the code compounding 
 
 ```bash
 mkdir -p .agents/evolve
-ao lookup --query "autonomous improvement cycle" --limit 5 2>/dev/null || true
+ao corpus inject --query "autonomous improvement cycle" --limit 5 2>/dev/null || true
 ```
+
+`ao corpus inject` routes through the typed BC1 `CorpusReaderPort`
+(`cli/cmd/ao/corpus_reader_adapter.go`, cycle 112 productionCorpusReader),
+emitting one ranked `ports.CorpusItem` JSON record per line from
+`.agents/learnings/` by default. Closes soc-y5vh.1 — Step 0 prior-knowledge
+retrieval is load-bearing on the typed port, not an untyped `ao lookup`
+shell-out.
 
 **Apply retrieved knowledge:** If learnings are returned, check each for applicability to the current improvement cycle. For applicable learnings, cite by filename and record: `ao metrics cite "<path>" --type applied 2>/dev/null || true`
 
@@ -596,7 +603,35 @@ fi
 UNPUSHED=$(git log origin/main..HEAD --oneline 2>/dev/null | wc -l)
 [ "$UNPUSHED" -gt 0 ] && git push
 ```
-4. Report summary:
+4. **Release-context teardown (MANDATORY when branch is release-shaped):**
+
+   When the current branch matches `release/*`, `v*-prep`, `v*-evolve-run`, or `v\d+\.\d+*`, the teardown report MUST NOT recommend `$release` as the next step. Instead, emit the explicit pre-release checklist below — the operator must run these AND confirm green before tagging:
+
+   ```
+   ## Pre-release checklist — REQUIRED before $release
+
+   Per-cycle --fast pre-push and ao goals measure ≠ release readiness.
+   Operator MUST run and confirm green:
+
+     [ ] 1. Regenerate CLI reference if any cobra command/flag changed:
+            bash scripts/generate-cli-reference.sh
+            git diff cli/docs/COMMANDS.md   # commit if non-empty
+
+     [ ] 2. Full pre-push gate (NOT --fast):
+            bash scripts/pre-push-gate.sh
+
+     [ ] 3. Release-readiness gate:
+            bash scripts/ci-local-release.sh
+
+     [ ] 4. (Recommended) Smoke $evolve --quick --max-cycles=1 --dry-run if
+            BC port wire-ups changed.
+
+   Only after [1]–[3] pass: $release <version>
+   ```
+
+   The handoff artifact (e.g., `.agents/runs/<release>/READY-TO-TAG.md`) MUST contain this checklist verbatim, unchecked. "Ready to tag" means the boxes are checked, not that the loop ran cleanly.
+
+5. Report summary:
 
 ```
 ## $evolve Complete

@@ -64,6 +64,10 @@ approved scope, risk, or verification surface requires it.
 If the spec covers multiple independent subsystems, suggest breaking into
 separate plans. Before writing tasks, check: fact/assumption/unknown, baseline
 docs, compatibility boundary, whether dual-track (repair + retirement) applies.
+If approved requirements or the design carried an ADR signal, preserve the ADR
+signal, source refs, real alternatives, compatibility boundary, and expected
+baseline-sync questions for completion so ADR Auto Backfill can run without
+rediscovering the decision from scratch.
 
 If task decomposition would encode a new owner, duplicate owner, fallback,
 adapter, compat-only carrier, delete-first question, unverified assumption, or
@@ -91,6 +95,7 @@ Before you leave this workflow, the written plan must make these items answerabl
 6. **What risks, rollback surface, or unknowns remain**
 7. **What old owner / fallback / patch stays, shrinks, or retires when applicable**
 8. **Whether Ripple Signal Triage expands owner, downstream, contract, source-of-truth, or verification scope**
+9. **What ADR signals, source refs, alternatives, or baseline-sync questions must be preserved for completion when durable architecture decisions are in scope**
 
 ## Bite-Sized Task Granularity
 
@@ -123,7 +128,10 @@ consistency — do signatures match across tasks? 4) Compatibility — invariant
 non-goals, stable interfaces marked? 5) Verification — every major task has
 exact verification steps? 6) Dual-track — old logic addressed? 7) Decision
 hygiene — if `first-principles-review` was needed, did the plan preserve its
-owner / retirement / falsification findings?
+owner / retirement / falsification findings? 8) ADR signal preservation — if
+durable architecture decisions are in scope, did the plan preserve source refs,
+alternatives, compatibility boundary, and baseline-sync questions for
+completion?
 
 Fix issues inline. Re-review is not needed — just fix and move on.
 

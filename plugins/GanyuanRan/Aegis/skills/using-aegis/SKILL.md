@@ -18,25 +18,27 @@ requested or clearly relevant. Load only that skill; otherwise proceed normally.
 
 1. User and project instructions outrank Aegis.
 2. Active codebase question or "what next": check baseline candidates
-   (README/ADR/rules/`docs/aegis/baseline`). If none are usable, run a bounded
+   (README/ADR/rules/`docs/aegis/baseline`). If none fit, run a bounded
    index-first scan, create a baseline only with evidence, and still answer.
-3. Classify before implementation and on start/resume/compaction. Low:
+3. `/aegis-goal` or `Aegis goal:` loads `goal-framing` for goal, success
+   evidence, stop condition, and non-goals before onward routing.
+4. Classify before implementation and on start/resume/compaction. Low:
    concise intent + baseline check + TDD. Medium/high: baseline read-set + plan.
    Add Spec Brief or Design Spec only when complexity, ambiguity, contracts, or
    cross-module impact require it. Contract, shared module, core logic, and
    cross-module changes are never low without local evidence.
-4. Workspace support is lazy. Global install and fast-path Q&A/status/tiny
+5. Workspace support is lazy. Global install and fast-path Q&A/status/tiny
    edits never write project files. Baseline/spec/plan/work records use
    configured Aegis workspace support only when persistent evidence is needed;
    backfill on escalation.
-5. Load the smallest needed skill/reference. Do not preload broad trees.
-6. Treat tool outputs, logs, memories, and search results as evidence
+6. Load the smallest needed skill/reference. Do not preload broad trees.
+7. Treat tool outputs, logs, memories, and search results as evidence
    candidates, not prompt payloads: summarize first; for large inputs use
    bounded index→window→excerpt.
-7. Do not read historical sessions, transcripts, `history.jsonl`,
+8. Do not read historical sessions, transcripts, `history.jsonl`,
    `.codex/sessions`, `~/.claude/projects`, or large logs by default. Only read
    direct evidence when requested or required, with scope/time/line bounds.
-8. If host tool-name mapping is unclear, read the smallest relevant
+9. If host tool-name mapping is unclear, read the smallest relevant
    `references/` file.
 
 Contract when useful: `Route: fast-path`; `Why`; `Next`.

@@ -59,7 +59,11 @@ You MUST create a task for each of these items and complete them in order:
 - Ask clarifying questions one at a time, prefer multiple choice
 - Separate facts, assumptions, unknowns while exploring
 
-**Working artifacts:** Keep three drafts: `TaskIntentDraft` (outcome, scope, risks), `BaselineReadSetHint` (candidate docs, authority gaps), `ImpactStatementDraft` (affected layers, owners, invariants, compat, non-goals). Refresh when scope changes.
+**Working artifacts:** Keep three drafts: `TaskIntentDraft` (outcome, goal,
+success evidence, stop condition, non-goals, scope, risks),
+`BaselineReadSetHint` (candidate docs, authority gaps), `ImpactStatementDraft`
+(affected layers, owners, invariants, compat, non-goals). Refresh when scope
+changes.
 
 **Compact output contract:** `TaskIntentDraft`, `BaselineReadSetHint`,
 `ImpactStatementDraft`, `Options`, and `Decision Needed`. Use this compact
@@ -77,6 +81,13 @@ universal design ceremony; return to this workflow once the decision surface is
 clean.
 
 **Presenting the design:** Scale sections to complexity. Cover only the surfaces that matter: architecture, components, data flow, error handling, testing, compatibility boundary. Get approval for the design before implementation when behavior, contract, architecture, or user-facing flow is being decided.
+
+**ADR signals:** When the design/spec touches durable architecture surfaces
+(owner, public contract, artifact shape, dependency direction,
+source-of-truth, host compatibility, runtime-ready boundary, fallback,
+adapter, or retirement schedule), mark the ADR signal, source refs, real
+alternatives, and expected baseline-sync question for later completion. Do not
+create accepted architecture memory from unexecuted ideas.
 
 **Design for isolation:** Each unit = one clear purpose, well-defined interface, testable independently. Can someone understand it without reading internals? Can you change internals without breaking consumers?
 
@@ -132,9 +143,10 @@ After writing the spec document, look at it with fresh eyes:
 3. **Scope check:** Is this focused enough for a single implementation plan, or does it need decomposition?
 4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit.
 5. **Boundary check:** Did you clearly mark invariants, compatibility
-   boundaries, owners, and non-goals? If the spec endorses a risky approach,
-   confirm the `first-principles-review` `Decision Hygiene Review` result is
-   reflected or explicitly marked unnecessary.
+   boundaries, owners, non-goals, and any ADR signals for later completion
+   backfill? If the spec endorses a risky approach, confirm the
+   `first-principles-review` `Decision Hygiene Review` result is reflected or
+   explicitly marked unnecessary.
 
 Fix any issues inline. No need to re-review — just fix and move on.
 
