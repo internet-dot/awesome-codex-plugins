@@ -220,8 +220,8 @@
       "description": "Budgeted `rg`/`grep` replacement for Codex that narrows broad searches before they waste model context."
     },
     {
-      "name": "ejentum-mcp",
-      "displayName": "Ejentum",
+      "name": "ejentum",
+      "displayName": "ejentum-mcp",
       "source": {
         "source": "local",
         "path": "./plugins/ejentum/ejentum-mcp"
@@ -231,8 +231,7 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Development & Workflow",
-      "description": "MCP server with reasoning, code, anti-deception, and memory harness tools that Codex calls before generating.",
-      "icon": "./plugins/ejentum/ejentum-mcp/assets/icon.svg"
+      "description": "MCP server exposing reasoning, code, anti-deception, and memory harness tools for Codex."
     },
     {
       "name": "frappe-agent",
@@ -277,6 +276,20 @@
       "category": "Development & Workflow",
       "description": "Human-on-the-Loop AI coding workflow plugin for Codex, Claude Code, and Cline with structured planning, review, and verification guardrails.",
       "icon": "./plugins/yimwoo/hotl-plugin/docs/assets/codex/hotl-icon.png"
+    },
+    {
+      "name": "praxis",
+      "displayName": "Praxis",
+      "source": {
+        "source": "local",
+        "path": "./plugins/ouonet/praxis"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow",
+      "description": "Token-lean triage-driven workflow skills for coding agents: design, planning, TDD, debugging, review, worktree, subagents, and release. 10–40× cheaper per skill than comparable frameworks while preserving full workflow discipline."
     },
     {
       "name": "codex-project-autopilot",
@@ -391,6 +404,21 @@
       },
       "category": "Development & Workflow",
       "description": "Read-only meta-skill that scans your MCP servers, skills, plugins, and CLI tools, then suggests up to three ranked approaches (Methodical / Fast / Deep) with a copy-paste Quick Action table."
+    },
+    {
+      "name": "unity-agent-workflows",
+      "displayName": "Unity Agent Workflows",
+      "source": {
+        "source": "local",
+        "path": "./plugins/AUN-PN/unity-agent-workflows"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow",
+      "description": "Codex plugin and skill for Unity 2D agents that enforces \"No proof, no edit\" workflows with runtime-owner proof, Teach structure maps, and validation gates.",
+      "icon": "./plugins/AUN-PN/unity-agent-workflows/assets/unity-workflows.png"
     },
     {
       "name": "universal-design-principles",
@@ -623,6 +651,20 @@
       "icon": "./plugins/Rothschildiuk/context-pack/skills/context-pack/assets/context-pack-small.svg"
     },
     {
+      "name": "dataproduct-builder-dbt",
+      "displayName": "Data Product Builder for dbt",
+      "source": {
+        "source": "local",
+        "path": "./plugins/entropy-data/dataproduct-builder-dbt"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Tools & Integrations",
+      "description": "Full data-product lifecycle on dbt for Entropy Data: scaffold, audit, and integrate projects with ODCS, ODPS, OpenLineage, and GitHub Actions."
+    },
+    {
       "name": "dodopayments",
       "displayName": "Dodo Payments",
       "source": {
@@ -663,6 +705,20 @@
       },
       "category": "Tools & Integrations",
       "description": "Debug, build, and operate Power Automate flows via FlowStudio MCP with action-level inputs and outputs."
+    },
+    {
+      "name": "gh-project-plugin",
+      "displayName": "GH Project",
+      "source": {
+        "source": "local",
+        "path": "./plugins/zfifteen/gh-project-plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Tools & Integrations",
+      "description": "Create GitHub repositories from Codex with inferred defaults, native menus, explicit confirmation, and deterministic local cloning."
     },
     {
       "name": "jk",

@@ -1,44 +1,34 @@
 {
-  "name": "ejentum-mcp",
-  "type": "plugin",
-  "version": "0.1.9",
-  "description": "MCP server with reasoning, code, anti-deception, and memory harness tools for Codex",
+  "name": "ejentum",
+  "version": "0.1.11",
+  "description": "Reasoning Harness for agentic AI. Four MCP tools (reasoning, code, anti-deception, memory) over a library of 679 cognitive operations engineered in two layers: a natural-language procedure plus an executable reasoning topology (graph DAG with gates, parallel branches, and meta-cognitive exits). Injected before an LLM's first token to harden reasoning against decay on complex tasks and long agent loops. Two install paths: stdio via `npx -y ejentum-mcp` or hosted HTTPS at https://api.ejentum.com/mcp.",
   "author": {
     "name": "Ejentum",
+    "email": "info@ejentum.com",
     "url": "https://ejentum.com"
   },
-  "homepage": "https://github.com/ejentum/ejentum-mcp",
+  "homepage": "https://ejentum.com",
   "repository": "https://github.com/ejentum/ejentum-mcp",
   "license": "MIT",
   "keywords": [
+    "reasoning-harness",
+    "agentic-ai",
     "mcp",
-    "codex",
-    "reasoning",
-    "code-review",
     "anti-deception",
-    "memory",
-    "agentic-ai"
+    "cognitive-scaffold",
+    "openai",
+    "codex",
+    "agent-reliability"
   ],
-  "mcpServers": "./.mcp.json",
+  "mcpServers": "../.mcp.json",
+  "skills": "../skills",
   "interface": {
-    "displayName": "Ejentum",
-    "shortDescription": "Reasoning, code, anti-deception, and memory harness tools for Codex",
-    "longDescription": "Exposes four MCP tools (harness_reasoning, harness_code, harness_anti_deception, harness_memory) via the Ejentum server. Codex calls a tool before generating; each returns a structured prompt that shapes reasoning around common failure modes (hallucinated APIs, false-confidence validation, sycophantic capitulation, cross-turn drift).",
+    "displayName": "Ejentum Reasoning Harness",
+    "shortDescription": "Reasoning Harness MCP tools (stdio or hosted HTTPS): cognitive operations engineered as natural-language procedure plus executable reasoning topology DAG",
+    "longDescription": "Library of 679 cognitive operations across four harnesses (reasoning, code, anti-deception, memory), each operation engineered in two layers: a natural-language procedure (named failure pattern, steps, suppression vectors, falsification test) plus an executable reasoning topology (graph DAG with decision gates, parallel branches, and meta-cognitive exits where the model pauses to self-observe and re-enters). Reasoning spans six domains (abstraction, time, causality, simulation, spatial, metacognition); code covers the software-engineering layer; anti-deception spans six sub-layers (sycophancy, hallucination, deception, adversarial framing, judgment, executive control); memory covers the perception layer. The agent ingests both layers and writes from them. Two install paths: stdio (this plugin) via `npx -y ejentum-mcp` for Codex CLI subprocess mode, or hosted HTTPS at https://api.ejentum.com/mcp for HTTP-MCP clients (Bearer auth via EJENTUM_API_KEY). Free tier: 100 calls, no card.",
     "developerName": "Ejentum",
-    "category": "Development & Workflow",
-    "capabilities": [
-      "Write",
-      "Interactive"
-    ],
+    "category": "agent-reliability",
     "websiteURL": "https://ejentum.com",
-    "brandColor": "#FB1B27",
-    "composerIcon": "./assets/icon.svg",
-    "logo": "./assets/icon.svg",
-    "defaultPrompt": [
-      "Call harness_reasoning before answering this analytical question.",
-      "Call harness_code before refactoring or writing new code.",
-      "Call harness_anti_deception when the request pressures honest assessment.",
-      "Call harness_memory to sharpen an observation about session drift."
-    ]
+    "privacyPolicyURL": "https://ejentum.com/legal"
   }
 }

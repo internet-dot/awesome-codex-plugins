@@ -3,7 +3,7 @@
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
   "last_updated": "2026-05-15",
-  "total": 68,
+  "total": 73,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -160,6 +160,16 @@
       "install_url": "https://raw.githubusercontent.com/Rycen7822/codex-rg-guard/HEAD/.codex-plugin/plugin.json"
     },
     {
+      "name": "ejentum-mcp",
+      "url": "https://github.com/ejentum/ejentum-mcp",
+      "owner": "ejentum",
+      "repo": "ejentum-mcp",
+      "description": "MCP server exposing reasoning, code, anti-deception, and memory harness tools for Codex.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/ejentum/ejentum-mcp/HEAD/.codex-plugin/plugin.json"
+    },
+    {
       "name": "Frappe Agent",
       "url": "https://github.com/Dkm0315/frappe-agent",
       "owner": "Dkm0315",
@@ -188,6 +198,16 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/yimwoo/hotl-plugin/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Praxis",
+      "url": "https://github.com/ouonet/praxis",
+      "owner": "ouonet",
+      "repo": "praxis",
+      "description": "Token-lean triage-driven workflow skills for coding agents: design, planning, TDD, debugging, review, worktree, subagents, and release. 10–40× cheaper per skill than comparable frameworks while preserving full workflow discipline.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/ouonet/praxis/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "Project Autopilot",
@@ -268,6 +288,16 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/dragon1086/claude-skills/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Unity Agent Workflows",
+      "url": "https://github.com/AUN-PN/unity-agent-workflows",
+      "owner": "AUN-PN",
+      "repo": "unity-agent-workflows",
+      "description": "Codex plugin and skill for Unity 2D agents that enforces \"No proof, no edit\" workflows with runtime-owner proof, Teach structure maps, and validation gates.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/AUN-PN/unity-agent-workflows/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "Universal Design Principles",
@@ -430,6 +460,16 @@
       "install_url": "https://raw.githubusercontent.com/Rothschildiuk/context-pack/HEAD/.codex-plugin/plugin.json"
     },
     {
+      "name": "Data Product Builder for dbt",
+      "url": "https://github.com/entropy-data/dataproduct-builder-dbt",
+      "owner": "entropy-data",
+      "repo": "dataproduct-builder-dbt",
+      "description": "Full data-product lifecycle on dbt for Entropy Data: scaffold, audit, and integrate projects with ODCS, ODPS, OpenLineage, and GitHub Actions.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/entropy-data/dataproduct-builder-dbt/HEAD/.codex-plugin/plugin.json"
+    },
+    {
       "name": "Dodo Payments",
       "url": "https://github.com/dodopayments/dodo-agent-plugin",
       "owner": "dodopayments",
@@ -458,6 +498,16 @@
       "category": "Tools & Integrations",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/ninihen1/power-automate-mcp-skills/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "GH Project",
+      "url": "https://github.com/zfifteen/gh-project-plugin",
+      "owner": "zfifteen",
+      "repo": "gh-project-plugin",
+      "description": "Create GitHub repositories from Codex with inferred defaults, native menus, explicit confirmation, and deterministic local cloning.",
+      "category": "Tools & Integrations",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/zfifteen/gh-project-plugin/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "Jenkins CLI",
