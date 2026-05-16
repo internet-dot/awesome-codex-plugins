@@ -214,7 +214,7 @@
       "url": "https://github.com/ouonet/praxis",
       "owner": "ouonet",
       "repo": "praxis",
-      "description": "Token-lean triage-driven workflow skills for coding agents: design, planning, TDD, debugging, review, worktree, subagents, and release. 10–40× cheaper per skill than comparable frameworks while preserving full workflow discipline.",
+      "description": "Intent-driven workflow skills for coding agents: describe what done looks like, not the steps. Triage-first design keeps token costs low across design, TDD, debug, review, and release.",
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/ouonet/praxis/HEAD/.codex-plugin/plugin.json"

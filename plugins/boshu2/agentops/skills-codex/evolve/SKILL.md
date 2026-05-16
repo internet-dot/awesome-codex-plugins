@@ -592,6 +592,21 @@ while true; do
 done
 ```
 
+**Convergence STOP.** Before re-entering the loop, evaluate the terminal
+predicate through the typed BC3 `ConvergenceCheckPort` (soc-y5vh.8):
+
+```bash
+ao loop converged --green-streak "$STREAK" --unconsumed-high-medium "$HM" --fitness-baseline
+# emits {converged, ci_green_streak, unconsumed_high_medium, fitness_baseline_captured, reasons}
+```
+
+Branch on `.converged` instead of hand-parsing `.agents/evolve/session-convergence.json`.
+When `converged` is true (default criteria: CI green streak ≥ 3, unconsumed
+HIGH+MEDIUM ≤ 1, fitness baseline captured), break the loop and run Teardown.
+When a cycle edits an evolve `SKILL.md`, record the falsifiable claim through
+`ao loop hypothesis append` (read it back with `ao loop hypothesis list`).
+See `references/convergence-mechanics.md` for all four compounding mechanisms.
+
 Push only when productive work has accumulated:
 ```bash
 if [ $((PRODUCTIVE_THIS_SESSION % 5)) -eq 0 ] && [ "$PRODUCTIVE_THIS_SESSION" -gt 0 ]; then
@@ -715,6 +730,7 @@ See `references/cycle-history.md` for advanced troubleshooting.
 
 - [references/artifacts.md](references/artifacts.md)
 - [references/compounding.md](references/compounding.md)
+- [references/convergence-mechanics.md](references/convergence-mechanics.md)
 - [references/cycle-history.md](references/cycle-history.md)
 - [references/examples.md](references/examples.md)
 - [references/goals-schema.md](references/goals-schema.md)
@@ -729,6 +745,7 @@ See `references/cycle-history.md` for advanced troubleshooting.
 
 - [references/artifacts.md](references/artifacts.md)
 - [references/compounding.md](references/compounding.md)
+- [references/convergence-mechanics.md](references/convergence-mechanics.md)
 - [references/cycle-history.md](references/cycle-history.md)
 - [references/examples.md](references/examples.md)
 - [references/goals-schema.md](references/goals-schema.md)
