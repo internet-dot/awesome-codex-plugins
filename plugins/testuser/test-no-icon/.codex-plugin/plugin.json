@@ -1,0 +1,11 @@
+{
+  "name": "test-no-icon",
+  "version": "1.0.0",
+  "description": "A test plugin without an icon",
+  "repository": "https://github.com/testuser/test-no-icon",
+  "license": "MIT",
+  "interface": {
+    "displayName": "Test No Icon",
+    "shortDescription": "Missing icon on purpose"
+  }
+}
