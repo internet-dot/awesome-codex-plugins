@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-3.6.0-blue.svg)](CHANGELOG.md)
-[![Tests](https://img.shields.io/badge/tests-5001%20passing-brightgreen.svg)](#development)
+[![Tests](https://img.shields.io/badge/tests-5285%20passing-brightgreen.svg)](#development)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-blueviolet.svg)](https://docs.anthropic.com/en/docs/claude-code)
 [![Codex](https://img.shields.io/badge/Codex-Compatible-green.svg)](https://developers.openai.com/codex/)
 [![Cursor IDE](https://img.shields.io/badge/Cursor_IDE-Compatible-blue.svg)](https://cursor.com)
@@ -227,15 +227,15 @@ Active Cursor hooks: 2 events (`afterFileEdit`, `beforeShellExecution`) routed t
 
 ## Components
 
-- **32 Skills**: bootstrap, session-start, session-plan, wave-executor, session-end, claude-md-drift-check, ecosystem-health, gitlab-ops, quality-gates, discovery, plan, evolve, vault-sync, vault-mirror, daily, docs-orchestrator, skill-creator, mcp-builder, hook-development, architecture, domain-model, ubiquitous-language, autopilot, mode-selector, repo-audit, convergence-monitoring, using-orchestrator, frontmatter-guard, test-runner, playwright-driver, peekaboo-driver (session-start sub-files: `phase-2-5-docs-planning.md`, `phase-4-5-resource-health.md`, `phase-7-5-mode-selector.md`, `phase-8-5-express-path.md`)
-- **12 Commands**: `/session`, `/go`, `/close`, `/discovery`, `/plan`, `/evolve`, `/bootstrap`, `/harness-audit`, `/autopilot`, `/repo-audit`, `/test`
+- **37 Skills**: bootstrap, session-start, session-plan, wave-executor, session-end, claude-md-drift-check, ecosystem-health, gitlab-ops, quality-gates, discovery, plan, evolve, vault-sync, vault-mirror, daily, docs-orchestrator, skill-creator, mcp-builder, hook-development, architecture, domain-model, ubiquitous-language, autopilot, mode-selector, repo-audit, convergence-monitoring, using-orchestrator, frontmatter-guard, test-runner, playwright-driver, peekaboo-driver, memory-cleanup, gitlab-portfolio, brainstorm, debug, write-executable-plan (session-start sub-files: `phase-2-5-docs-planning.md`, `phase-4-5-resource-health.md`, `phase-7-5-mode-selector.md`, `phase-8-5-express-path.md`)
+- **16 Commands**: `/session`, `/go`, `/close`, `/discovery`, `/plan`, `/evolve`, `/bootstrap`, `/harness-audit`, `/autopilot`, `/repo-audit`, `/test`, `/memory-cleanup`, `/portfolio`, `/brainstorm`, `/debug`
 - **11 Agents**: code-implementer, test-writer, ui-developer, db-specialist, security-reviewer, session-reviewer, docs-writer, architect-reviewer, qa-strategist, analyst, ux-evaluator
 - **10 hook event matchers / 10 handlers**: SessionStart (banner + init), PreToolUse/Edit\|Write (scope enforcement), PreToolUse/Bash (destructive-command guard + enforce-commands), PostToolUse (edit validation), Stop (session events), SubagentStop (telemetry), PostToolUseFailure (corrective context), PostToolBatch (wave signal), SubagentStart (telemetry), CwdChanged (cwd-change record). Plus the Clank Event Bus integration in `hooks/_lib/events.mjs`.
 - **Output Styles**: 3 (session-report, wave-summary, finding-report) for consistent reporting
 - **`.orchestrator/policy/`**: runtime policy files, e.g. `blocked-commands.json` with 13 rules consumed by the destructive-command guard
 - **`.claude/rules/`**: always-on contributor rules, e.g. `parallel-sessions.md` (PSA-001 through PSA-004)
 - **`.codex-plugin/`**: Codex plugin manifest (`plugin.json`), compatibility config, 3 agent role definitions
-- **`scripts/`**: deterministic scripts (parse-config, run-quality-gate, validate-wave-scope, validate-plugin, token-audit, autopilot) plus shared lib (`scripts/lib/*.mjs`) plus a vitest suite of 5001 tests
+- **`scripts/`**: deterministic scripts (parse-config, run-quality-gate, validate-wave-scope, validate-plugin, token-audit, autopilot) plus shared lib (`scripts/lib/*.mjs`) plus a vitest suite of 5285 tests
 
 ## Comparison
 
@@ -253,6 +253,20 @@ Active Cursor hooks: 2 events (`afterFileEdit`, `beforeShellExecution`) routed t
 | Session close with carryover | Verified, with issue creation | Manual | Partial |
 
 The design goal is engineering quality. Every wave exits verified, every unfinished issue gets a carryover ticket, every session closes with a clean commit.
+
+### vs. maestro-orchestrate
+
+Both [`maestro-orchestrate`](https://github.com/josstei/maestro-orchestrate) and session-orchestrator coordinate multi-agent work in long-running AI coding sessions. They differ in scope and execution model:
+
+| Axis | session-orchestrator | maestro-orchestrate |
+|---|---|---|
+| Execution model | 5 typed waves (Discovery → Impl-Core → Impl-Polish → Quality → Finalization) with inter-wave quality gates and confidence-scored session-reviewer | 4-phase sequential model with parallel subagents |
+| Runtime coverage | Claude Code + Codex CLI + Cursor IDE (3) | Gemini CLI + Claude Code + Codex + Qwen Code (4) |
+| VCS integration | GitLab-first with GitHub mirror (auto-detected); 11 hook handlers + 16 commands wire to both | Runtime-agnostic; VCS work delegated to user |
+| Cross-session learning | Confidence-scored entries in `.orchestrator/metrics/learnings.jsonl`; surfaced at session-start; opt-in `/evolve` review | Session archival to `docs/maestro/` without explicit learning extraction |
+| Specialist agents | 11 typed agents (code-implementer, security-reviewer, test-writer, qa-strategist, etc.) | 39 specialist agents across design/impl/review/debugging/security/compliance |
+
+We see the two plugins as complementary rather than competing: session-orchestrator focuses on a single wave-based lifecycle with VCS+learning integration, while maestro-orchestrate optimises for multi-runtime parallel specialist delivery.
 
 ## VCS auto-detection
 

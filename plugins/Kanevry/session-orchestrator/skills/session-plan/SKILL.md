@@ -432,6 +432,8 @@ Before presenting the plan:
 
 ## Step 6: Present Plan for Approval
 
+If a `/write-executable-plan` artifact exists at `docs/plans/<feature>.md` for any task in this session (see `skills/write-executable-plan/SKILL.md`), include its path in the agent prompts for those tasks and set the "Bite-sized plan" field in the Execution Config accordingly.
+
 Present the plan in this format:
 
 ```
@@ -479,6 +481,7 @@ Present the plan in this format:
 - Waves: [N] | Agents-per-wave cap: [M] | Isolation: [worktree|none|auto]
 - Enforcement: [strict|warn|off] | Max turns: [N per session type]
 - Persistence: [true|false] | Pencil: [path|none]
+- Bite-sized plan: [path if exists, e.g. `docs/plans/2026-05-16-superpowers-cluster.md` | none]
 - Parallel dispatch: All agents within each wave execute simultaneously via Agent() tool
 - Total agents planned: [sum across all waves]
 

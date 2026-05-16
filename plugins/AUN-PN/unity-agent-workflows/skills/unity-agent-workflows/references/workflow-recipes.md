@@ -79,13 +79,14 @@ Use when a UI/HUD/focus/highlight/marker/camera/world-to-UI fix already failed, 
 
 Use when a main agent coordinates worker agents for Unity visible-output, tutorial/state, equipment, shop, reward, navigation, or runtime UI work.
 
-1. Main agent owns scope before workers patch: load required references, fill the Routing Card, name the visible target or state flow, and list `Files allowed to touch` plus `Files explicitly not touched`.
-2. Main agent assigns disjoint ownership: each worker gets a separate file set, owner chain, runtime target, state step, or validation slice. No overlapping writes unless main agent explicitly merges ownership first.
-3. Workers stay inside the assigned write set. If a worker discovers a new owner, missing reference, or broader dependency, it reports back instead of patching outside scope.
-4. Visible-output workers must provide runtime numeric proof when required: source bounds, destination bounds/root, converted rect, final drawn rect, and runtime writer.
-5. State-flow workers must provide state-step proof: shown, clicked, opened, selected, equipped, claimed, completed, persisted, plus old-save/default/reset paths when relevant.
-6. Checker fails the run if the Routing Card is missing, write ownership overlaps, runtime numeric proof is missing for visible-output work, or state-step proof treats screen open/click/analytics as domain completion.
-7. Main agent does final integration, validation, and closeout; workers do not broaden public rules, mirrors, package metadata, or repo instructions unless those files are in the allowed write set.
+1. Run the Sub-Agent Decision And Permission Gate from `references/ai-workflows.md`; do not spawn until the user approves in the same turn, unless the user already explicitly requested sub-agents.
+2. Main agent owns scope before workers patch: load required references, fill the Routing Card, name the visible target or state flow, and list `Files allowed to touch` plus `Files explicitly not touched`.
+3. Main agent assigns disjoint ownership: each worker gets a separate file set, owner chain, runtime target, state step, or validation slice. No overlapping writes unless main agent explicitly merges ownership first.
+4. Workers stay inside the assigned write set. If a worker discovers a new owner, missing reference, or broader dependency, it reports back instead of patching outside scope.
+5. Visible-output workers must provide runtime numeric proof when required: source bounds, destination bounds/root, converted rect, final drawn rect, and runtime writer.
+6. State-flow workers must provide state-step proof: shown, clicked, opened, selected, equipped, claimed, completed, persisted, plus old-save/default/reset paths when relevant.
+7. Checker fails the run if the Routing Card is missing, write ownership overlaps, runtime numeric proof is missing for visible-output work, or state-step proof treats screen open/click/analytics as domain completion.
+8. Main agent does final integration, validation, and closeout; workers do not broaden public rules, mirrors, package metadata, or repo instructions unless those files are in the allowed write set.
 
 ## WF-7 Visual Source Asset
 

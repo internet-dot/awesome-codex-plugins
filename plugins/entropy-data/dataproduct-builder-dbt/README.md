@@ -2,6 +2,8 @@
 
 Skills for your favorite coding agent that helps you implement data products with [dbt](https://www.getdbt.com/), compliant to your organization's conventions, and fully integrated with [Entropy Data](https://entropy-data.com).
 
+<img width="1076" height="627" alt="Screenshot 2026-05-16 at 10 59 52" src="https://github.com/user-attachments/assets/026899ee-2a67-4b02-86e0-0e372be9b648" />
+
 It also supports a contract-driven approach: specify your requirements as a [data contract](https://datacontract.com), and the builder implements the data product in minutes.
 
 ## Skills

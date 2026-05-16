@@ -58,6 +58,8 @@ If no `## Session Config` section exists at all, stop and report: "Error: No Ses
 
 ## Phase 2: Mode Router
 
+> **Ambiguous scope?** If the feature's UX/scope is still ambiguous before starting, run `/brainstorm` first (see `skills/brainstorm/SKILL.md`) to produce a design spec, then return here with the spec as input. `/brainstorm` outputs `docs/specs/YYYY-MM-DD-<slug>-design.md`.
+
 Parse `$ARGUMENTS` to determine the planning mode:
 
 - **`new`** — Read `mode-new.md` in this skill directory for mode-specific instructions. This mode handles full project kickoff: requirement gathering, PRD generation, repo scaffolding, and issue creation.

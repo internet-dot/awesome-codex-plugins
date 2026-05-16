@@ -1,6 +1,6 @@
 {
   "name": "unity-agent-workflows",
-  "version": "0.3.4",
+  "version": "0.4.0",
   "description": "Codex skill and npx installer for safer Unity AI agent workflows, runtime owner proof, and Unity game development automation.",
   "bin": {
     "unity-agent-workflows": "bin/unity-agent-workflows.js"

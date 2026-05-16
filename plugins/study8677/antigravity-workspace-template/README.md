@@ -284,7 +284,7 @@ antigravity-workspace-template/
 
 **CLI** (`pip install .../cli`) — Zero LLM deps. Injects templates, logs reports & decisions offline.
 
-**Engine** (`pip install .../engine`) — Multi-agent runtime. Powers `ag-ask`, `ag-refresh`, `ag-mcp`. Supports Gemini, OpenAI, Ollama, or any OpenAI-compatible API.
+**Engine** (`pip install .../engine`) — Repository knowledge runtime. Powers `ag-ask`, `ag-refresh`, `ag-mcp`. Uses the OpenAI-compatible endpoint written by `ag-setup` (OpenAI, DeepSeek, Groq, DashScope, NVIDIA NIM, Ollama, or custom).
 
 **New skill packaging updates:**
 - `engine/antigravity_engine/skills/graph-retrieval/` — graph-oriented retrieval tools for structure and call-path reasoning.
@@ -438,7 +438,7 @@ ag report "Auth module needs refactoring"
 ag log-decision "Use PostgreSQL" "Team has deep expertise"
 ```
 
-Works with Gemini, OpenAI, Ollama, or any OpenAI-compatible endpoint. Powered by OpenAI Agent SDK + LiteLLM.
+Works with the provider selected by `ag-setup` through an OpenAI-compatible endpoint. Powered by OpenAI Agent SDK + LiteLLM.
 </details>
 
 <details>
@@ -461,7 +461,10 @@ Works with Gemini, OpenAI, Ollama, or any OpenAI-compatible endpoint. Powered by
 }
 ```
 
-Set `MCP_ENABLED=true` in `.env`.
+Set `MCP_ENABLED=true` in `.env` to make configured servers available, and set
+`AG_ALLOW_MCP=true` only when you want `ag-ask` to auto-connect those external
+servers. Stdio MCP servers inherit process environment plus configured `env`
+values, so treat enabled servers as local-permission code.
 </details>
 
 <details>
@@ -516,8 +519,12 @@ ag-ask "Who calls the send method in gateway adapters?"
 |:---------|:--------|:--------|
 | `SANDBOX_TYPE` | `local` | `local` · `microsandbox` |
 | `SANDBOX_TIMEOUT_SEC` | `30` | seconds |
+| `AG_RETRIEVAL_MODE` | `compact` | `off` · `compact` · `full` |
 
-See [Sandbox docs](docs/en/SANDBOX.md).
+The default sandbox is for trusted local workspaces, not untrusted code
+isolation. Retrieval graph files redact common secrets before writing to disk,
+but `full` mode can still preserve source snippets. See
+[Sandbox docs](docs/en/SANDBOX.md).
 </details>
 
 ---

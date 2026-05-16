@@ -571,6 +571,16 @@ bash scripts/evolve-log-cycle.sh \
 # No git add, no git commit, no fitness snapshot write
 ```
 
+**Record the XP/BDD/TDD trace.** When a cycle worked a product or goal-backed
+gap, pass `--trace-json <path|inline|->` to `evolve-log-cycle.sh` (or
+`ao loop append --trace-json`) so the cycle records the continuous-evolution
+kernel — goal hypothesis → selected gap → Gherkin scenario → first failing
+proof → red/green evidence → refactor note → validation evidence → ratchet
+action → goal reshape — and a reviewer can reconstruct the cycle without the
+transcript. A trivial one-shot cycle records a `trace.exemption_reason`
+instead of carrying false BDD/TDD ceremony. Trace completeness is advisory,
+never a gate. See `references/cycle-history.md` ("XP/BDD/TDD Evidence Trace").
+
 ### Step 7: Loop or Stop
 
 ```bash

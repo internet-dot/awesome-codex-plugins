@@ -172,8 +172,9 @@ If the user says the result is still wrong, unchanged, in the wrong place, or pr
 4. Re-classify `markerRect`, `visualRect`, `interactiveRect`, `logicRect`, and selected output rect.
 5. Re-check source canvas/root, destination canvas/root, camera, scale factor, layout timing, safe area, animation, pooling, and refresh writers.
 6. Collect the Runtime Numeric Target Report.
-7. Patch only after the converted output rect and final drawn rect are proven with runtime values.
+7. Also prove the active runtime caller and active asset/sprite/model name when the patch affects factories, selectors, visual layers, animation frames, generated assets, or shared preview/gameplay paths.
+8. Patch only after the converted output rect, final drawn rect, active caller, and active source asset are proven with runtime values where relevant.
 
-Do not infer the fix from the previous patch, nearby object names, or a visually similar control.
+Do not infer the fix from the previous patch, nearby object names, compile success, asset file location, or a visually similar control.
 
 Checker rule: return FAIL when runtime numeric proof is absent for a repeated visible-output patch, or when the patch uses overlay/dim/mask/blocker output rects as source bounds without an explicit marker proof.

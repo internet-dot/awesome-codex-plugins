@@ -8,6 +8,7 @@
 - Bench-aware inspection before app installs, migrations, or environment changes
 - Frappe-native SQL and ORM guidance
 - Customization-layer routing for `Custom Field`, `Property Setter`, `Client Script`, `Server Script`, `Workspace`, `Web Page`, `Report`, `Dashboard`, and related surfaces
+- DocType form UX guidance for useful fields, tabs, sections, columns, and required-field discipline
 - ERPNext-aware guidance for deciding between configuration, metadata, workflow, and code changes
 - Frontend guidance for Vue, React, `frappe-ui`, desk pages, `www`, and external SPA patterns
 
@@ -19,6 +20,7 @@
 - `frappe-bench`
 - `frappe-sql`
 - `frappe-customization`
+- `frappe-doctype-design`
 - `frappe-search`
 - `frappe-erpnext`
 
@@ -175,6 +177,25 @@ ln -s /path/to/frappe-agent/AGENTS.md /path/to/your-frappe-project/AGENTS.md
 
 Copilot does not use the same plugin marketplace flow here, so the practical local installation path is repository instructions.
 
+## Releases
+
+GitHub Releases are built by `.github/workflows/release.yml`.
+
+Create a release from a tag:
+
+```bash
+git tag v0.1.0
+git push upstream v0.1.0
+```
+
+Or run the `Release` workflow manually from GitHub Actions and provide a version such as `0.1.0`.
+
+Each release uploads:
+
+- `frappe-agent-{version}.zip`
+- `frappe-agent-{version}.tar.gz`
+- `frappe-agent-{version}.sha256`
+
 ## Usage Examples
 
 Ask Codex to use the plugin naturally in the prompt:
@@ -185,6 +206,10 @@ Use Frappe Agent to inspect this bench before changing anything.
 
 ```text
 Use Frappe Agent to choose the right Frappe customization layer for adding fields to Sales Order.
+```
+
+```text
+Use Frappe Agent to design a clean DocType layout for a service request workflow.
 ```
 
 ```text
@@ -207,6 +232,7 @@ frappe-agent/
 │   │   ├── frappe-backend.md
 │   │   ├── frappe-bench.md
 │   │   ├── frappe-customization.md
+│   │   ├── frappe-doctype-design.md
 │   │   ├── frappe-erpnext.md
 │   │   ├── frappe-frontend.md
 │   │   ├── frappe-fullstack.md
@@ -220,13 +246,16 @@ frappe-agent/
 ├── .codex-plugin/
 │   └── plugin.json
 ├── .github/
-│   └── copilot-instructions.md
+│   ├── copilot-instructions.md
+│   └── workflows/
+│       └── release.yml
 ├── AGENTS.md
 ├── CLAUDE.md
 ├── commands/
 │   ├── frappe-backend.md
 │   ├── frappe-bench.md
 │   ├── frappe-customization.md
+│   ├── frappe-doctype-design.md
 │   ├── frappe-erpnext.md
 │   ├── frappe-frontend.md
 │   ├── frappe-fullstack.md
@@ -236,6 +265,7 @@ frappe-agent/
 │   ├── frappe-backend/
 │   ├── frappe-bench/
 │   ├── frappe-customization/
+│   ├── frappe-doctype-design/
 │   ├── frappe-erpnext/
 │   ├── frappe-frontend/
 │   ├── frappe-fullstack/

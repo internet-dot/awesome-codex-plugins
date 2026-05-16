@@ -35,6 +35,8 @@ This plugin gives the agent a stricter workflow for Unity 2D projects:
 - prove runtime-visible owner chains before UI, HUD, scene, prefab, or gameplay edits
 - route new C# responsibility to existing project owners instead of broad folders
 - keep UI/safe-area/TMP/coordinate-space work tied to the real runtime hierarchy
+- load deep reference files only when the current task needs them
+- ask before spawning sub-agents unless the user already requested them in the same turn
 - validate with the smallest useful check and report residual risk honestly
 - require reference proof before cleanup or deletion
 
@@ -74,12 +76,12 @@ flowchart TD
 Step details:
 
 1. **User input**: a Unity task, screenshot, stack trace, feature request, cleanup request, or validation request enters the agent.
-2. **Skill trigger**: the skill runs from an explicit `$unity-agent-workflows` prompt or an implicit Unity 2D workflow match.
-3. **Read context**: the agent reads project rules, dirty state, structure maps, and only relevant docs.
+2. **Skill trigger**: the skill runs from an explicit `$unity-agent-workflows` prompt or an implicit Unity 2D repo task that needs editing, validation, routing, runtime proof, state proof, asmdef/module safety, cleanup, or multi-agent coordination.
+3. **Read context**: the agent reads `AGENTS.md` if present, `git status --short`, existing `UNITY_STRUCTURE.md` plus only the focused map that matches the task, and only relevant docs.
 4. **Classify task**: the request is routed as visible output, state flow, content, architecture, cleanup, or validation.
-5. **Load references**: `SKILL.md` selects the required reference files instead of loading every rule.
+5. **Load references**: `SKILL.md` selects the required reference files instead of loading every rule. `unity-validation.md` and `workflow-recipes.md` are deferred until validation/recipe context needs them.
 6. **Proof loop**: if owner chain, overlay/dim source-bound proof, runtime numeric proof, or guided state-flow proof is missing, the agent loops back to inspect or probe runtime data.
-7. **Lock scope**: the main agent names `Files allowed to touch`, `Files explicitly not touched`, and multi-agent ownership before workers patch.
+7. **Lock scope**: the main agent names `Files allowed to touch`, `Files explicitly not touched`, and multi-agent ownership before workers patch. Sub-agents are not spawned until the user approves, unless the user already asked for them in the same turn.
 8. **Patch**: edit the smallest safe file set only after proof is complete.
 9. **Validation loop**: failed validation returns to proof/patch; missing runtime proof returns a probe plan instead of another guess.
 10. **Close out**: report changed files, proof, validation, and residual risk.
@@ -177,7 +179,7 @@ Inside a Unity 2D repo, invoke the skill:
 $unity-agent-workflows. Teach
 ```
 
-`Teach` is a Codex skill instruction, not an npm CLI command. When the agent follows it, it creates or refreshes a short structure index and focused maps only where useful:
+`Teach` is a Codex skill instruction, not an npm CLI command. Use it when onboarding a new Unity project, when `UNITY_STRUCTURE*` maps are missing or stale, or when the user explicitly requests a structure refresh. When the agent follows it, it creates or refreshes a short structure index and focused maps only where useful:
 
 ```text
 UNITY_STRUCTURE.md
@@ -195,7 +197,7 @@ Use $unity-agent-workflows.
 Do not edit yet. Inspect the project structure and report the proposed UNITY_STRUCTURE map plan.
 ```
 
-Later tasks should read only `UNITY_STRUCTURE.md` plus the focused map that matches the work.
+Later tasks should read only `UNITY_STRUCTURE.md` plus the focused map that matches the work. They should not run `Teach` again unless a needed map is missing or stale.
 
 | Task                                                                 | Read                                                  |
 | -------------------------------------------------------------------- | ----------------------------------------------------- |
@@ -224,6 +226,7 @@ The visible bug was a repeated FTUE Stage 5 Sentinel install focus mismatch. A n
 What the plugin changed:
 
 - Treat the issue as a repeated visible-output failure.
+- Ask before spawning sub-agents unless the user already requested them in the same turn.
 - Keep sub-agents read-only until the main agent locks scope.
 - Require runtime numeric proof before another focus/position patch.
 - Check that the final focus target is the visible `ADD` button, not the ship area.
@@ -275,7 +278,7 @@ If that chain is incomplete, the agent should inspect deeper or ask one focused 
 | Overlay/dim source bounds | reject overlay, mask, blocker, or spotlight surfaces as source bounds unless an explicit marker proves target |
 | Coordinate conversion     | keep world, local, screen, viewport, canvas, camera, and safe-area spaces explicit                            |
 | Guided state flows        | separate shown/clicked/opened/selected/equipped/claimed/completed/persisted before marking completion        |
-| Multi-agent work          | lock Routing Card, file ownership, runtime proof, and checker gates before parallel worker patches            |
+| Multi-agent work          | ask before spawning, then lock Routing Card, file ownership, runtime proof, and checker gates before patches  |
 | C# routing                | derive folders, namespaces, `.asmdef` files, dependency direction, and owner modules                          |
 | Content changes           | prefer existing data/config surfaces when the project has them                                                |
 | Validation                | use the smallest useful check and report exact command output                                                 |
@@ -283,7 +286,7 @@ If that chain is incomplete, the agent should inspect deeper or ask one focused 
 
 ## Reference Files
 
-The main [SKILL.md](SKILL.md) stays short. Deeper workflow rules live in `references/` and are loaded only when the task needs them.
+The main [SKILL.md](SKILL.md) stays short. Deeper workflow rules live in `references/` and are loaded only when the task needs them. This table is a catalog, not a preload list; agents should follow `SKILL.md` Required References and each reference file's own `Read` / `Load Extra Detail` guidance.
 
 | File                                                                                   | Purpose                                                                      |
 | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
@@ -306,12 +309,10 @@ The main [SKILL.md](SKILL.md) stays short. Deeper workflow rules live in `refere
 For this repository:
 
 ```bash
-npm run validate
 npm run sync:mcpmarket
+npm run validate
 npm run pack:dry-run
 ```
-
-`npm run validate` checks package metadata, plugin manifests, mirrored skill payloads, README workflow coverage, reference links, JavaScript syntax, runtime numeric proof triggers, overlay/dim source-bound gates, guided state-flow gates, and multi-agent scope triggers.
 
 `npm run sync:mcpmarket` mirrors `SKILL.md`, `references/`, and `agents/` into:
 
@@ -320,6 +321,8 @@ npm run pack:dry-run
 skills/unity-agent-workflows/
 plugins/unity-agent-workflows/skills/unity-agent-workflows/
 ```
+
+`npm run validate` checks package metadata, plugin manifests, mirrored skill payloads, README workflow coverage, reference links, JavaScript syntax, runtime numeric proof triggers, overlay/dim source-bound gates, guided state-flow gates, and multi-agent scope triggers.
 
 For Unity projects using the skill, Unity Editor, Play Mode, Game view, device tests, batchmode builds, and project logs remain the authoritative validation path. Bee `.rsp` or direct Unity-bundled Roslyn checks are best-effort local compile smoke tests and can be stale after Unity regenerates project artifacts.
 

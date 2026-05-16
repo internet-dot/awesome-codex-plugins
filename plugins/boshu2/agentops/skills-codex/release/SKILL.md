@@ -4,9 +4,9 @@ description: 'Run release validation.'
 ---
 # Release Skill
 
-> **Purpose:** Take a project from "code is ready" to "tagged and ready to push."
+> **Purpose:** Take a project from "code is ready" to "tagged, pushed by the operator, and verified green on the exact tagged SHA."
 
-Pre-flight validation, changelog from git history, version bumps across package files, release commit, annotated tag, and curated release notes. Everything is local and reversible. Publishing (including the GitHub Release page) is CI's job.
+Pre-flight validation, changelog from git history, version bumps across package files, release commit, annotated tag, curated release notes, and post-push exact-SHA CI verification. Local preparation is reversible. Publishing (including the GitHub Release page) is CI's job.
 
 ---
 
@@ -37,7 +37,7 @@ $release                       # suggest version from commit analysis
 
 | Mode | Invocation | Behavior |
 |---|---|---|
-| **Full Release** | `$release [version]` | Pre-flight → changelog → release notes → version bump → user review → write → release commit → tag → guidance. |
+| **Full Release** | `$release [version]` | Pre-flight → changelog → release notes → version bump → user review → write → release commit → tag → push guidance → exact-SHA CI verification. |
 | **Check** | `$release --check` | Pre-flight checks only; reports GO/NO-GO. Composable with `$vibe`. No writes. |
 | **Changelog Only** | `$release X.Y.Z --changelog-only` | Updates `CHANGELOG.md` only — no version bumps, no commit, no tag. |
 
@@ -61,8 +61,9 @@ $release                       # suggest version from commit analysis
 12. **Release commit** — `git commit -m "Release v<version>"` with all release artifacts staged.
 13. **Tag** — annotated `git tag -a v<version> -m "Release v<version>"`.
 14. **GitHub Release (CI handles this)** — do NOT `gh release create` locally; GoReleaser is sole creator.
-15. **Post-release guidance** — show push commands; do NOT push.
-16. **Audit trail format** — see workflow-detail for the markdown template.
+15. **Post-push exact-SHA CI verification** — after the operator pushes, run `scripts/verify-release-ci.sh v<version>` and do not declare the release complete until it prints `GO release-ci`.
+16. **Post-release guidance** — show push commands and the verification command; do NOT push.
+17. **Audit trail format** — see workflow-detail for the markdown template.
 
 ---
 
@@ -77,7 +78,7 @@ $release                       # suggest version from commit analysis
 - Release commit + annotated tag
 - Release notes (highlights + changelog) for GitHub Release page
 - Curated release notes for CI to publish on GitHub Release page
-- Post-release guidance
+- Post-release guidance plus exact-SHA CI verification instructions
 - Audit trail
 
 ### What this skill does NOT do
@@ -105,6 +106,7 @@ Everything this skill does is local and reversible:
 - **Adapt, don't impose** — match the project's existing style rather than forcing a particular format
 - **User confirms** — never write without showing the draft first
 - **Local only** — never push, publish, or trigger remote actions
+- **Not done at tag** — after the user pushes, verify a green `validate.yml` run for the exact tagged SHA and record the run id plus conclusion in the handoff or release audit notes.
 - **Two audiences** — CHANGELOG.md is for contributors (file paths, issue IDs, implementation detail). Release notes are for feed readers (plain English, user-visible impact, no insider jargon). Never copy-paste the changelog into the release notes.
 
 ---
@@ -112,7 +114,7 @@ Everything this skill does is local and reversible:
 ## Examples
 
 **User says:** `$release 1.7.0`
-Agent runs pre-flight → reads `v1.6.0..HEAD` git history → classifies commits → drafts CHANGELOG.md entry + curated release notes → detects version files (package.json, version.go, plugin manifests) → presents draft for review → on approval, writes files, creates release commit, creates annotated tag, prints post-release push guidance.
+Agent runs pre-flight → reads `v1.6.0..HEAD` git history → classifies commits → drafts CHANGELOG.md entry + curated release notes → detects version files (package.json, version.go, plugin manifests) → presents draft for review → on approval, writes files, creates release commit, creates annotated tag, prints push guidance, then after the user pushes verifies `scripts/verify-release-ci.sh v1.7.0` and records the run id/conclusion.
 
 **User says:** `$release --check`
 Agent runs all pre-flight checks and outputs a GO/NO-GO summary table. No writes.

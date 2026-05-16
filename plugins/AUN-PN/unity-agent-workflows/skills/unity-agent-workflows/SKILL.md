@@ -12,7 +12,7 @@ AI contract for Unity work. Keep answers compact, but never remove exact paths, 
 
 0. No proof, no edit.
 1. Treat this injected `SKILL.md` as authoritative; do not search for its own path unless missing or asked for diagnostics.
-2. Read live project instructions: `AGENTS.md`, `README.md`, architecture docs, repo-local agent files.
+2. Read live project instructions narrowly: `AGENTS.md` if present, `git status --short`, and existing `UNITY_STRUCTURE.md` plus only the focused map that matches the task when available. Read `README.md`, architecture docs, `.agents/*`, or repo-local agent files only when the task cites them, needs architecture/new-file/asmdef/routing decisions, or maps are missing/stale.
 3. Run `git status --short`; preserve unrelated dirty files.
 4. If user says only `$unity-agent-workflows. Teach`, run Teach.
 5. Derive only relevant live structure before architecture claims: folders, namespaces, `.asmdef`, scenes/prefabs, bootstraps, graphs, docs, `UNITY_STRUCTURE*`.
@@ -29,10 +29,11 @@ AI contract for Unity work. Keep answers compact, but never remove exact paths, 
 | Runtime/visible bug | Prove owner chain before editing. |
 | Runtime-visible output, target alignment, focus/highlight/marker/HUD, overlay, input blocker, modal dimming, duplicate names, hardcoded layout, "do not guess" | Runtime Visible Output Hard Stop. |
 | Screenshot or visible UI text fix | Screenshot Text Owner Gate; search exact visible text/localization key and prove creator plus refresh writer before editing. |
-| Shared factory/helper/style candidate for visible UI | Treat as dependency only until the visible callsite proves it uses that helper. |
+| Visual/model/sprite/asset integration where feature name, source asset, factory, or visible surface may disagree | Visible Object Identity Lock and Single-Agent Anti-Anchoring Guard before editing. |
+| Shared factory/helper/style/global method candidate for a scoped visible surface | Shared Caller Blast Radius Gate: prove allowed runtime caller(s), all other callers, and whether the patch is surface-local before editing. |
 | Overlay/dim source-bound mistakes | Prove source target bounds; overlay/dim/mask/blocker rects are destination output unless explicit marker proof exists. |
 | Repeated visible-output mismatch after patch | Runtime numeric proof before another coordinate/layout/fallback patch. |
-| Multi-agent visible-output or state work | Main-agent scope lock before workers patch; checker must review. |
+| Multi-agent visible-output or state work | Sub-agent decision and permission gate first; main-agent scope lock before workers patch; checker must review. |
 | New/moved files, expanded C# responsibility, asmdef/module routing, hub deflation | Project-derived routing, no fixed structure, hub stop gate. |
 | UI, screenshot, HUD, menu, safe area, TMP, spotlight | UI workflow plus runtime-owner proof and validation. |
 | Visual source asset | Source asset/generator gate before Unity integration code. |
@@ -48,12 +49,14 @@ Load only matching files; resolve relative to this skill directory. If a require
 
 | Task trigger | References before editing |
 |---|---|
-| UI, screenshot, HUD, menu, safe area, TMP, visible target, focus, highlight, spotlight, modal dimming | `references/ui-and-visual-assets.md`, `references/runtime-owner-proof.md`, `references/unity-validation.md` |
-| Screenshot text, visible UI label, localized UI text, runtime text styling, shared factory/helper candidate | `references/runtime-owner-proof.md`, `references/ai-workflows.md`, `references/unity-validation.md` |
-| Runtime-visible bug, repeated "still wrong", duplicate object names, real object/position request | `references/runtime-owner-proof.md`, `references/unity-validation.md` |
-| Overlay/dim source-bound mismatch, wrong source bounds, focus hole follows wrong target | `references/runtime-owner-proof.md`, `references/runtime-visible-targets.md`, `references/coordinate-space-conversion.md`, `references/unity-validation.md` |
-| Repeated visible-output failure, wrong focus/highlight/marker/HUD/camera position, cross-root/cross-canvas mismatch | `references/runtime-owner-proof.md`, `references/runtime-visible-targets.md`, `references/coordinate-space-conversion.md`, `references/unity-validation.md` |
-| Multi-agent Unity visible-output/state-transition work, parallel workers, checker review | `references/ai-workflows.md`, `references/workflow-recipes.md`, `references/runtime-owner-proof.md`, `references/content-and-systems.md`, `references/unity-validation.md` |
+| UI, screenshot, HUD, menu, safe area, TMP, visible target, focus, highlight, spotlight, modal dimming | `references/ui-and-visual-assets.md`, `references/runtime-owner-proof.md` |
+| Screenshot text, visible UI label, localized UI text, runtime text styling, shared factory/helper candidate | `references/runtime-owner-proof.md`, `references/ai-workflows.md` |
+| Visual/model/sprite/asset integration where feature name, source asset, factory, or visible surface may disagree | `references/runtime-owner-proof.md`, `references/ui-and-visual-assets.md` |
+| Shared factory/helper/style/global method candidate for a scoped visible surface | `references/runtime-owner-proof.md`, `references/ai-workflows.md` |
+| Runtime-visible bug, repeated "still wrong", duplicate object names, real object/position request | `references/runtime-owner-proof.md` |
+| Overlay/dim source-bound mismatch, wrong source bounds, focus hole follows wrong target | `references/runtime-owner-proof.md`, `references/runtime-visible-targets.md`, `references/coordinate-space-conversion.md` |
+| Repeated visible-output failure, wrong focus/highlight/marker/HUD/camera position, cross-root/cross-canvas mismatch | `references/runtime-owner-proof.md`, then only needed target/conversion details |
+| Multi-agent Unity visible-output/state-transition work, parallel workers, checker review | `references/ai-workflows.md` plus only the references for the actual visible surface or state flow |
 | New files/classes, moved scripts, asmdef/module routing, dependency direction, hub deflation/refactor | `references/project-structure-discovery.md`, `references/modular-architecture.md`, `references/ai-workflows.md` |
 | New runtime feature, content, progression, levels, economy, objective/data-first work | `references/project-structure-discovery.md`, `references/content-and-systems.md`, `references/ai-workflows.md` |
 | Tutorial, onboarding, mission step, unlock, equipment, reward, shop, navigation gate, state transition | `references/project-structure-discovery.md`, `references/content-and-systems.md`, `references/ai-workflows.md`, `references/unity-validation.md` |
@@ -63,11 +66,11 @@ Load only matching files; resolve relative to this skill directory. If a require
 
 Reference map: `references/ai-workflows.md` = Routing Card/workflow/closeout; `references/workflow-recipes.md` = named recipes; `references/project-structure-discovery.md` = Teach and `UNITY_STRUCTURE*`; `references/modular-architecture.md` = layering/asmdef/hub gates; `references/runtime-owner-proof.md` = owner chain/numeric gate; `references/runtime-visible-targets.md` = focus/click/overlay/fallback target rules; `references/target-bounds-catalog.md` = `markerRect`/`visualRect`/`interactiveRect` choices; `references/coordinate-space-conversion.md` = world/screen/canvas/camera/safe-area conversions; `references/unity-validation.md` = validation ladder/checker failures; `references/ui-and-visual-assets.md` = UI/safe area/visual asset gate; `references/content-and-systems.md` = data-first systems/state steps; `references/cleanup-and-git.md` = deletion/git hygiene; `references/session-mining.md` = durable rules.
 
-After loading a reference, follow its own `Read` / `Load Extra Detail` table instead of preloading every linked file.
+Load `references/unity-validation.md` only for edit intent, validation requests, compile/runtime doubt, Play Mode proof, or closeout validation planning. Load `references/workflow-recipes.md` only for named `WF-*` requests, recipe requests, or when `references/ai-workflows.md` is not specific enough. After loading a reference, follow its own `Read` / `Load Extra Detail` table instead of preloading every linked file.
 
 ## Teach
 
-For only `$unity-agent-workflows. Teach`, create/refresh a short `UNITY_STRUCTURE.md` plus only focused maps that exist or are needed:
+For only `$unity-agent-workflows. Teach`, or when onboarding a new Unity project whose structure maps are missing/stale, create/refresh a short `UNITY_STRUCTURE.md` plus only focused maps that exist or are needed:
 
 ```text
 UNITY_STRUCTURE.ui.md
@@ -77,7 +80,7 @@ UNITY_STRUCTURE.assemblies.md
 UNITY_STRUCTURE.cleanup.md
 ```
 
-Read `references/project-structure-discovery.md`. Do not make one huge all-project doc. Later tasks read `UNITY_STRUCTURE.md` plus only the matching focused map; refresh only missing needed maps.
+Read `references/project-structure-discovery.md`. Do not make one huge all-project doc. Later tasks read existing `UNITY_STRUCTURE.md` plus only the matching focused map; refresh only missing/stale maps that the current task actually needs.
 
 ## Proof Gates
 
@@ -125,9 +128,32 @@ Missing source bounds, converted rect, or final drawn rect is FAIL; return a run
 
 State-step proof: screen open, click, analytics, or prompt shown is not completion. Prove relevant steps separately: shown, clicked, opened, selected, equipped, claimed, completed, persisted, old-save path, reset path.
 
-Multi-agent guard: main agent owns Routing Card, scope, allowed files, and not-touched files before workers patch. Workers use disjoint ownership and stop if a different owner or out-of-scope file appears. Checker fails missing runtime numeric proof or state-step proof.
+Sub-agent permission guard: default to one main agent. Before spawning any sub-agent, decide that the work needs independent proof tracks, explain why, list each sub-agent task, state read-only vs edit permission, allowed files/surfaces, forbidden files/surfaces, and checker need, then ask the user. Do not spawn until the user explicitly approves in the same turn, except when the user already explicitly requested sub-agents in that turn.
 
-For screenshot, visible UI, or runtime text fixes, the scope lock must include exact text/key searched, owner file, creator method, refresh/update writer, allowed files, explicitly not touched files, and nearby candidates rejected. Shared factories/helpers/styles are not owners unless the visible callsite proves their use.
+Multi-agent guard: main agent owns Routing Card, scope, allowed files, not-touched files, allowed runtime caller(s), and forbidden callers/surfaces before workers patch. Workers use disjoint ownership and stop if a different owner, shared caller blast radius, or out-of-scope file appears. Checker fails missing runtime numeric proof, state-step proof, or caller blast-radius proof for shared changes.
+
+For screenshot, visible UI, runtime text, or single-surface fixes, the scope lock must include exact text/key/object searched, owner file, creator method, refresh/update writer, allowed files, explicitly not touched files, allowed runtime caller(s), forbidden callers/surfaces, and nearby candidates rejected. Shared factories/helpers/styles/global methods are not owners unless the visible callsite proves their use and caller search proves no non-target surface will change.
+
+For Unity visual/model/sprite/asset integration, the visible runtime object identity must be proven before editing. If the user-visible target and semantic feature name disagree, or if the first owner candidate is a factory/helper/registry/bridge/global selector, list competing owners and reject them with file-backed proof. If competing owners cannot be rejected, stay read-only and ask whether to continue single-agent investigation or use read-only sub-agent discovery.
+
+Asset/source ID lock: when the user provides a generator ID, asset ID, sprite sheet, prefab, scene, surface, or object name, use only that source and surface. Do not substitute another asset/source or broaden to gameplay/global behavior without asking first.
+
+Shared Caller Blast Radius Gate:
+
+```text
+target surface/object:
+allowed runtime caller(s):
+shared method/helper/factory:
+all callers searched:
+callers outside target:
+surface-local API/branch exists or will be added:
+non-target behavior unchanged:
+validation:
+```
+
+If a shared factory/helper/global method has callers outside the requested surface, do not change its existing behavior for the single visible target. Add a surface-local API/adapter, patch the proven owner callsite, or stop and ask for approval.
+
+After a visible patch is challenged as unchanged/wrong, static source reasoning is not enough. Capture runtime object/asset/sprite name, active caller, converted/final drawn values where relevant, and the writer that overwrites them before another patch.
 
 ## Architecture Rules
 
@@ -154,7 +180,11 @@ Placement layer/category from repo:
 Module/system name:
 Data/definition source:
 Runtime source-of-truth values:
+Allowed runtime caller(s):
+Forbidden callers/surfaces:
 Coordinate/rendering space checked: yes/no
+Shared helper/factory/global method touched: yes/no + caller proof
+Asset/source ID lock: yes/no + exact ID/path/name
 New responsibility added? yes/no
 Cross-module communication needed? yes/no
 Hub risk: low / medium / stop

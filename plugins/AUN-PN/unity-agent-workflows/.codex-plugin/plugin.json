@@ -1,6 +1,6 @@
 {
   "name": "unity-agent-workflows",
-  "version": "0.3.4",
+  "version": "0.4.0",
   "description": "Codex skill for safer Unity AI agent workflows, runtime-owner proof, runtime numeric proof, multi-agent scope ownership, and Unity game development automation.",
   "author": {
     "name": "AUN-PN"
@@ -24,7 +24,7 @@
   "interface": {
     "displayName": "Unity Workflows",
     "shortDescription": "Safer AI workflows for Unity 2D projects",
-    "longDescription": "Use Teach first. Teach creates or refreshes UNITY_STRUCTURE.md for the current Unity 2D project, then agents use disciplined repo discovery, runtime-owner proof, runtime numeric proof for repeated visible-output failures, overlay/dim source-bound checks, guided state-step guards, multi-agent scope ownership, project-derived routing, UI and scene safety, validation, and cleanup proof before editing.",
+    "longDescription": "Use Teach first when onboarding a new Unity 2D project or when UNITY_STRUCTURE maps are missing or stale. For normal tasks, agents read existing structure maps only when relevant, then use disciplined repo discovery, runtime-owner proof, runtime numeric proof for repeated visible-output failures, overlay/dim source-bound checks, guided state-step guards, multi-agent scope ownership, project-derived routing, UI and scene safety, validation, and cleanup proof before editing.",
     "developerName": "AUN-PN",
     "category": "Coding",
     "capabilities": ["Read", "Write"],

@@ -33,6 +33,19 @@ skills with direct agent spawns, or skip `$validation`. Read
 [../shared/references/strict-delegation-contract.md](../shared/references/strict-delegation-contract.md)
 for the full anti-compression contract.
 
+When the runtime supports phase isolation, keep `$rpi` visible in the main
+session and run each phase contract through isolated transport: phase skill
+name in, bounded handoff artifact in, phase artifact/verdict/next action out.
+The transport may be a daemon job, process runner, or subagent wrapper, but it
+must execute the declared phase skill contract rather than doing phase work
+directly. See [references/isolation-contract.md](references/isolation-contract.md).
+
+## Context Density Rule
+
+At every phase boundary, preserve only context that carries intent, boundary,
+evidence, decision, constraint, or next action. Omit or link anything else.
+The domain entry is `../domain/references/context-density-rule.md`.
+
 RPI owns one lifecycle objective across all phases. Preserve the discovered
 `epic_id` when present; otherwise preserve the original goal and execution
 packet objective. A child bead or one ready slice is context, not a replacement
@@ -73,25 +86,29 @@ rpi_state = {
 
 Enter at the routed phase and run every phase after it.
 
-1. **Discovery:** invoke `$discovery <goal> [--interactive] --complexity=<level>`.
+1. **Discovery:** invoke `$discovery <goal> [--interactive] --complexity=<level>`
+   directly or through phase-isolated skill transport.
    On DONE, read `.agents/rpi/execution-packet.json` or the run archive and
    preserve its objective spine. On BLOCKED, stop with the discovery verdict.
 2. **Implementation:** invoke `$crank <epic-id>` when the packet has `epic_id`;
-   otherwise invoke `$crank .agents/rpi/execution-packet.json`. Pass
-   `--test-first` or `--no-test-first` through. On DONE, record
-   `ao ratchet record implement 2>/dev/null || true` and continue. On PARTIAL
-   or BLOCKED, retry the same objective up to 3 total attempts.
+   otherwise invoke `$crank .agents/rpi/execution-packet.json`, directly or
+   through phase-isolated skill transport. Pass `--test-first` or
+   `--no-test-first` through. On DONE, record `ao ratchet record implement
+   2>/dev/null || true` and continue. On PARTIAL or BLOCKED, retry the same
+   objective up to 3 total attempts.
 3. **Validation:** invoke `$validation <epic-id> --complexity=<level>` when an
-   epic exists; otherwise invoke `$validation --complexity=<level>`. Add
-   `--strict-surfaces` when `--quality` is set. On FAIL, extract findings,
-   re-run `$crank` on the same objective, then re-run `$validation`, up to 3
-   total validation attempts. On DONE, record
-   `ao ratchet record vibe 2>/dev/null || true`.
+   epic exists; otherwise invoke `$validation --complexity=<level>`, directly
+   or through phase-isolated skill transport. Add `--strict-surfaces` when
+   `--quality` is set. On FAIL, extract findings, re-run `$crank` on the same
+   objective, then re-run `$validation`, up to 3 total validation attempts. On
+   DONE, record `ao ratchet record vibe 2>/dev/null || true`.
 4. **Report:** summarize phase verdicts and epic status using
    [references/report-template.md](references/report-template.md). With
    `--loop`, restart from discovery on FAIL while `cycle < max_cycles`. With
    `--spawn-next`, read `.agents/rpi/next-work.jsonl` and suggest the next
-   command without invoking it.
+   command without invoking it. Before emitting the report, apply the Context
+   Density Rule: every line should carry intent, boundary, evidence, decision,
+   constraint, or next action.
 
 ## Phase Data Contract
 
@@ -165,6 +182,7 @@ interactive, and loop examples.
 - [references/examples.md](references/examples.md)
 - [references/gate-retry-logic.md](references/gate-retry-logic.md)
 - [references/gate4-loop-and-spawn.md](references/gate4-loop-and-spawn.md)
+- [references/isolation-contract.md](references/isolation-contract.md)
 - [references/phase-budgets.md](references/phase-budgets.md)
 - [references/phase-data-contracts.md](references/phase-data-contracts.md)
 - [references/report-template.md](references/report-template.md)

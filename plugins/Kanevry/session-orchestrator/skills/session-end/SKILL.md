@@ -154,6 +154,35 @@ Rules:
 
 Run ALL checks listed in the verification checklist. If any check fails: fix if quick (<2 min), otherwise create a `priority:high` issue. Do NOT commit broken code.
 
+### Phase 2.0a: Echo-Stub Detection (GH #42)
+
+`gate-full.mjs` emits a top-level `stubbed: {}` map in its JSON result, keyed by check name (`typecheck`, `test`, `lint`); value is `{ kind: 'echo'|'noop' }`. When any check was short-circuited as a stub, `runCheck()` already returned `status: 'pass'` — so the overall gate verdict is green, but the result is meaningless.
+
+**Detection:** immediately after parsing the `gate-full` JSON result, evaluate:
+
+```js
+const stubbedEntries = Object.entries(result.stubbed ?? {});
+```
+
+**If `stubbedEntries.length > 0`**, surface a HIGH WARN block in the close summary:
+
+```
+⚠ QUALITY GATE STUBBED — <N> command(s) are echo/noop stubs, not real checks:
+  - <check-name>: <kind> stub  (configured: "<command string>")
+Re-configure with a real test command in CLAUDE.md Session Config before /close,
+OR document this exception in /close --reason.
+```
+
+**Behavior by `enforcement` mode:**
+
+- `enforcement: strict` — **block /close**. Treat as a Phase 2 failure. Present the WARN block and exit without committing.
+- `enforcement: warn` (default) — continue, but write `quality-gate-stubbed: true` to STATE.md Deviations so the metrics writer captures it.
+- `enforcement: off` — silent. Emit a single-line `stderr` log only (`echo-stub detected: <check-name>`).
+
+**Recipe:** for container-based test runners (e.g. EspoCRM PHPUnit) where an echo-stub was the historical workaround, see [`docs/recipes/quality-gate-container-pattern.md`](../../docs/recipes/quality-gate-container-pattern.md).
+
+**Source issue:** GH #42 (root cause: aiat-pmo-module #251 V0.15.7-close incident — silent false-positive close-verdicts from echo-stub test commands).
+
 ### 2.1 Vault Validation (if configured)
 
 Read `skills/session-end/vault-operations.md` for validator bash contract and reporting matrix.

@@ -86,11 +86,13 @@ Do not use the gate for:
 
 1. Define exact asset type and purpose.
 2. Generate/obtain the source asset with the approved project tool.
-3. For UI assets, require no baked text unless explicitly requested.
-4. For resizable UI, require 9-slice-friendly corners, straight edges, and quiet center.
-5. For pixel art, check grid intent, crisp silhouette, palette, transparent background, and import settings.
-6. Integrate actual source output, not a mood-board reference.
-7. Pause before C# integration and rerun architecture routing.
+3. If the user provides a generator ID, source asset ID, sprite sheet, prefab, scene, or runtime object name, treat it as a hard source lock. Do not substitute another ID/source or apply it to global factories without caller blast-radius proof.
+4. For UI assets, require no baked text unless explicitly requested.
+5. For resizable UI, require 9-slice-friendly corners, straight edges, and quiet center.
+6. For pixel art, check grid intent, crisp silhouette, palette, transparent background, and import settings.
+7. Integrate actual source output, not a mood-board reference.
+8. Before wiring the asset into code, prove the requested surface callsite and avoid changing shared selectors/factories used by non-target surfaces.
+9. Pause before broader C# integration and rerun architecture routing.
 
 ## Diegetic Screen Pattern
 

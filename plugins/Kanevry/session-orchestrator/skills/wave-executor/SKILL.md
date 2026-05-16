@@ -226,12 +226,13 @@ Applies to every interaction point in `wave-loop.md` that currently says "inform
 Each agent prompt MUST include:
 
 1. **Clear scope boundary**: "You are working on [X]. Do NOT modify files outside [paths]."
-2. **Full context**: file paths, current code structure, issue description
+2. **Full context**: file paths, current code structure, issue description. If a bite-sized executable plan exists at `docs/plans/<feature>.md` for the wave's tasks (see `skills/write-executable-plan/SKILL.md`), include the path in each agent's prompt and instruct the agent to follow the plan's 5-step structure verbatim.
 3. **Acceptance criteria**: measurable definition of done
 4. **Rule references**: "Follow patterns in <state-dir>/rules/[relevant].md"
 5. **Testing expectation**: "Write tests for your changes" or "Run existing tests"
 6. **Commit instruction**: "Do NOT commit. The coordinator handles commits."
 7. **Turn limit**: Include the maxTurns instruction from `circuit-breaker.md`
+8. **Verification before completion**: Before claiming any task done, run the verification command and quote the evidence inline. See `.claude/rules/verification-before-completion.md`.
 
 Each agent prompt MUST NOT include:
 - References to other agents' tasks (isolation)
@@ -277,6 +278,7 @@ End with a single commit summarizing all housekeeping work.
 | TypeScript errors introduced | Track count, run Full Gate per quality-gates by Quality wave |
 | New critical issue discovered | Inform user, add to Impl-Polish+ roles if fits scope |
 | Agent edits wrong files | Revert via git, re-dispatch with stricter scope |
+| New critical issue discovered with broken behavior | Apply `skills/debug/SKILL.md` Iron Law 4-phase investigation before proposing a fix |
 
 ## Return Shape Contract (Autopilot Integration, #300)
 

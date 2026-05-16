@@ -286,7 +286,34 @@ CI also publishes security artifacts to the GitHub Release assets:
 - `sbom-cyclonedx-go-mod.json`
 - `security-gate-summary.json`
 
-## Step 15: Post-release guidance
+## Step 15: Post-push exact-SHA CI verification
+
+The annotated tag is not the release finish line. After the operator pushes the
+release commit and tag, verify that the exact tagged SHA has a green Validate
+run:
+
+```bash
+scripts/verify-release-ci.sh v<version>
+```
+
+The helper resolves `v<version>` to a local commit, polls GitHub Actions for a
+matching `validate.yml` run, watches it when still in progress, and exits
+non-zero unless the run completes with `conclusion=success`.
+
+Record the verifier output in the release handoff or append it to the internal
+audit notes after the push. The record must include at least:
+
+- workflow name
+- tag
+- full tagged SHA
+- GitHub Actions run id
+- conclusion
+- run URL
+
+Do not describe the release as complete until the verifier prints `GO
+release-ci`.
+
+## Step 16: Post-release guidance
 
 Show the user what to do next:
 
@@ -295,10 +322,12 @@ Release v1.7.0 prepared locally.
 
 Next steps:
   git push origin main --tags     # push commit + tag
+  scripts/verify-release-ci.sh v1.7.0
 
 CI publisher will handle: release publish, GitHub Release page, SBOM/security assets, provenance
   (detected: .github/workflows/release.yml, .goreleaser.yml)
   Curated release notes: docs/releases/YYYY-MM-DD-v1.7.0-notes.md
+Release is complete only after verify-release-ci prints GO release-ci.
 ```
 
 If no CI detected:
@@ -310,7 +339,7 @@ Next steps:
 No release CI detected. Consider adding a workflow for automated publishing.
 ```
 
-## Step 16: Audit trail format
+## Step 17: Audit trail format
 
 The audit record (written in Step 11, committed in Step 12) uses this format:
 
@@ -335,6 +364,13 @@ Write to `docs/releases/YYYY-MM-DD-v<version>-audit.md`:
 ## Pre-flight Results
 
 <check summary table>
+
+## Remote CI Verdict
+
+Pending until the operator pushes. After push, record the exact-SHA verifier
+output, for example:
+
+GO release-ci: workflow=validate.yml target=v<version> sha=<full-sha> run_id=<id> status=completed conclusion=success url=<url>
 ```
 
 This is an **internal** record for the knowledge flywheel. It does NOT go on the GitHub Release page — that's the `-notes.md` file from Step 12.
@@ -379,9 +415,10 @@ Then proceed with the normal workflow to populate the first versioned entry.
 7. User approves. Agent writes CHANGELOG.md, updates version files
 8. Agent creates release commit and annotated tag (v1.7.0)
 9. Agent generates curated release notes (CI uses them for GitHub Release page)
-10. Agent displays post-release guidance (push commands)
+10. Agent displays push guidance plus `scripts/verify-release-ci.sh v1.7.0`
+11. After the user pushes, agent records the exact-SHA CI run id and conclusion
 
-**Result:** Local release fully prepared: changelog updated, versions bumped, tag created, draft release ready.
+**Result:** Release is complete only after the exact tagged SHA has a green Validate run.
 
 ### Readiness Check Only
 

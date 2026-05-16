@@ -121,21 +121,15 @@ defeat the cross-vendor validation intent. The only acceptable degradation is
 explicit operator action (dropping `--mixed`). This rule is strict by design.
 
 Once Codex is confirmed available, spawn Codex judges alongside runtime-native
-judges. **Always set `AGENTOPS_INTENT_ECHO_DISABLED=1` in the spawn env** —
-otherwise the `intent-echo.sh` UserPromptSubmit hook (in `~/.codex/hooks.json`
-on agentops-codex installs) detects high-stakes keywords in council packets
-("every", "all", "extract", scope-limiters) and forces an Intent/Confirm
-preamble that becomes the assistant message captured by `-o`. Council judges
-then never produce real output. See
-`.agents/learnings/2026-05-02-codex-intent-echo-hook-blocks-mixed-council.md`.
+judges.
 
 ```bash
 # With structured output (preferred)
-AGENTOPS_INTENT_ECHO_DISABLED=1 codex exec -s read-only -C "$(pwd)" --output-schema skills/council/schemas/verdict.json -o .agents/council/codex-{N}.json "{PACKET}"
+codex exec -s read-only -C "$(pwd)" --output-schema skills/council/schemas/verdict.json -o .agents/council/codex-{N}.json "{PACKET}"
 
 # Fallback (if --output-schema unsupported — this is an output-format fallback,
 # NOT a vendor fallback; Codex is still required)
-AGENTOPS_INTENT_ECHO_DISABLED=1 codex exec --full-auto -C "$(pwd)" -o .agents/council/codex-{N}.md "{PACKET}"
+codex exec --full-auto -C "$(pwd)" -o .agents/council/codex-{N}.md "{PACKET}"
 ```
 
 Uses the user's default Codex model. Only pass `-m` if `COUNCIL_CODEX_MODEL` is explicitly set.

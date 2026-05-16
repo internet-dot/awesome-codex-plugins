@@ -469,6 +469,7 @@ If the commit itself fails (e.g., nothing to commit, pre-commit hook rejects), d
    - Supported reviewer names (plugin-provided): `architect-reviewer`, `qa-strategist`, `analyst`. Custom reviewer agents in `agents/` are also valid if their `name` frontmatter matches.
 
 5. **Session-reviewer dispatch** (after Impl-Core, Impl-Polish, and Quality waves only):
+   - When integrating reviewer findings, follow the receiving-review protocol — see `.claude/rules/receiving-review.md` for the 6-step pattern (READ → UNDERSTAND → VERIFY → EVALUATE → RESPOND → IMPLEMENT) and the forbidden-phrase list.
    - After **Impl-Core** and **Impl-Polish** waves, dispatch the session-reviewer agent to verify wave output:
      ```
      Agent({
