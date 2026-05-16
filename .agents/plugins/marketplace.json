@@ -245,7 +245,8 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Development & Workflow",
-      "description": "Frappe and ERPNext coding, customization, bench, and review intelligence for Codex."
+      "description": "Frappe and ERPNext coding, customization, bench, and review intelligence for Codex.",
+      "icon": "./plugins/Dkm0315/frappe-agent/assets/frappe-agent-icon.svg"
     },
     {
       "name": "graymatter",
