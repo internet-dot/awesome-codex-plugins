@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "awesome-codex-plugins",
   "version": "1.0.0",
-  "last_updated": "2026-05-15",
-  "total": 75,
+  "last_updated": "2026-05-16",
+  "total": 76,
   "categories": [
     "Development & Workflow",
     "Tools & Integrations"
@@ -198,6 +198,16 @@
       "category": "Development & Workflow",
       "source": "awesome-codex-plugins",
       "install_url": "https://raw.githubusercontent.com/yimwoo/hotl-plugin/HEAD/.codex-plugin/plugin.json"
+    },
+    {
+      "name": "Personal Data Protection",
+      "url": "https://github.com/AltByteSG/personal-data-protection-skill",
+      "owner": "AltByteSG",
+      "repo": "personal-data-protection-skill",
+      "description": "Engineer-facing personal-data-protection compliance reference — Singapore PDPA, Thailand PDPA, Indonesia UU PDP, Malaysia PDPA (Act 709 + 2024 Amendments), Philippines DPA — organised by where in the stack each obligation lands, with checklists, breach-response runbook, and a developer-view divergence table across all five.",
+      "category": "Development & Workflow",
+      "source": "awesome-codex-plugins",
+      "install_url": "https://raw.githubusercontent.com/AltByteSG/personal-data-protection-skill/HEAD/.codex-plugin/plugin.json"
     },
     {
       "name": "Praxis",
