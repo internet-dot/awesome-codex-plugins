@@ -26,6 +26,7 @@
     "displayName": "Personal Data Protection",
     "shortDescription": "PDP compliance checks for SEA apps.",
     "longDescription": "Engineer-facing personal-data-protection guidance for Singapore PDPA, Thailand PDPA, Indonesia UU PDP, Malaysia PDPA, and Philippines Data Privacy Act.",
+    "composerIcon": "./assets/icon.svg",
     "developerName": "AltByte",
     "category": "Developer Tools",
     "capabilities": [
